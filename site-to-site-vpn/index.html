@@ -263,7 +263,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
 
 <nav aria-label="주요 메뉴">
   <div class="wrap">
-    <a class="brand" href="#top">Site-to-Site <span>VPN</span></a>
+    <a class="brand" href="#top">AWS <span>Site-to-Site VPN</span></a>
     <div class="navlinks">
       <a href="../">전체 서비스</a>
       <a href="#how">터널 구성</a>
@@ -393,12 +393,12 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
       <p class="tag">Features</p>
       <h2 id="features-h">주요 기능</h2>
       <div class="features">
-        <article class="feature"><p class="ft">Acceleration</p><h3>Accelerated VPN</h3><p>AWS Global Accelerator로 고객 게이트웨이에서 가장 가까운 엣지 로케이션에 트래픽을 받아 AWS 글로벌 네트워크로 전달합니다. Transit Gateway나 Cloud WAN 연결에서 사용하며(VGW 미지원), 연결을 만들 때만 켤 수 있습니다.</p></article>
+        <article class="feature"><p class="ft">Acceleration</p><h3>Accelerated VPN</h3><p>AWS Global Accelerator로 고객 게이트웨이에서 가장 가까운 엣지 로케이션에 트래픽을 받아 AWS 글로벌 네트워크로 전달합니다. Transit Gateway 연결에서 사용하며(VGW 미지원), 연결을 만들 때만 켤 수 있습니다.</p></article>
         <article class="feature"><p class="ft">Over Direct Connect</p><h3>Private IP VPN</h3><p>Transit VIF와 DX Gateway 위에서 사설 IP로 IPsec 터널을 맺습니다. 공인 IP 없이 전용 회선 트래픽을 암호화합니다.</p></article>
-        <article class="feature"><p class="ft">Bandwidth</p><h3>Large Bandwidth Tunnel</h3><p>Transit Gateway나 Cloud WAN 연결에서 터널당 최대 5 Gbps를 씁니다. 두 터널은 같은 대역폭으로 맞추며, Accelerated VPN과 함께 쓸 수 없습니다.</p></article>
+        <article class="feature"><p class="ft">Bandwidth</p><h3>Large Bandwidth Tunnel</h3><p>Transit Gateway나 Cloud WAN 연결에서 터널당 최대 5 Gbps를 씁니다. 두 터널은 같은 대역폭으로 맞추며, Accelerated VPN과 함께 쓸 수 없습니다. 기존 연결도 터널 IP와 설정을 유지한 채 표준과 Large 사이에서 바꿀 수 있습니다.</p></article>
         <article class="feature"><p class="ft">Observability</p><h3>터널 로그</h3><p>IKE·IPsec·DPD 활동 로그와 BGP 상태·경로 변경 로그를 Amazon CloudWatch Logs로 보냅니다. 협상 실패 원인을 장비 로그 없이도 확인할 수 있습니다.</p></article>
         <article class="feature"><p class="ft">Dual stack</p><h3>IPv6 터널</h3><p>Transit Gateway와 Cloud WAN에서 외부 터널과 내부 트래픽을 IPv4, IPv6 조합으로 구성합니다. Virtual Private Gateway는 IPv4만 지원합니다.</p></article>
-        <article class="feature"><p class="ft">Many sites</p><h3>VPN Concentrator</h3><p>최대 100 Mbps의 소규모 거점을 Concentrator 하나로 최대 100개까지 Transit Gateway나 Cloud WAN에 연결합니다. BGP 라우팅만 지원하며, 거점마다 어태치먼트를 따로 만들지 않아도 됩니다.</p></article>
+        <article class="feature"><p class="ft">Many sites</p><h3>VPN Concentrator</h3><p>최대 100 Mbps의 소규모 거점을 Concentrator 하나로 최대 100개까지 Transit Gateway에 연결합니다. Concentrator는 Transit Gateway 어태치먼트 하나로 보이며 총 5 Gbps를 거점들이 나눠 씁니다. BGP 라우팅만 지원합니다.</p></article>
       </div>
     </div>
   </section>
@@ -431,7 +431,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
               <td class="row-h">AWS Cloud WAN<br><span class="mono" style="font-size:12px;font-weight:400;color:var(--ink-3)">Core network</span></td>
               <td data-k="연결 범위">여러 리전에 걸친 코어 네트워크 세그먼트 (BGP 라우팅만 지원)</td>
               <td data-k="터널 대역폭"><span class="num">1.25 · 5</span> Gbps</td>
-              <td data-k="IPv6 · 가속">IPv4 · IPv6 · Accelerated VPN 지원</td>
+              <td data-k="IPv6 · 가속">IPv4 · IPv6 지원</td>
               <td data-k="어떤 경우에 맞나">정책 기반으로 관리하는 글로벌 네트워크에 거점을 붙이는 경우</td>
             </tr>
           </tbody>

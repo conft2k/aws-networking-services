@@ -270,7 +270,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
 
 <nav aria-label="주요 메뉴">
   <div class="wrap">
-    <a class="brand" href="#top">Network <span>Manager</span></a>
+    <a class="brand" href="#top">AWS <span>Network Manager</span></a>
     <div class="navlinks">
       <a href="../">전체 서비스</a>
       <a href="#model">구성 요소</a>
@@ -525,7 +525,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
           <tr><td class="row-h">CloudWatch</td><td data-k="과금 기준">Logs 수집·보관 GB, 지표 수, 알람 수</td><td data-k="참고">이벤트 로그 그룹(us-west-2)과 Infrastructure Performance 구독 지표가 해당합니다. 구독한 리전·AZ 쌍마다 지표가 하나씩 생깁니다.</td></tr>
           <tr><td class="row-h">EventBridge · 알림 대상</td><td data-k="과금 기준">규칙 대상으로 쓰는 서비스의 사용량</td><td data-k="참고">SNS, Lambda, Step Functions 같은 대상 서비스 요금이 각각 붙습니다.</td></tr>
           <tr><td class="row-h">VPN · Direct Connect 회선</td><td data-k="과금 기준">연결 시간, 포트 시간, 데이터 전송</td><td data-k="참고"><a href="../site-to-site-vpn/">Site-to-Site VPN</a>과 <a href="../direct-connect/">Direct Connect</a> 요금으로 청구됩니다.</td></tr>
-          <tr><td class="row-h">AWS PrivateLink</td><td data-k="과금 기준">interface endpoint 시간과 처리 GB</td><td data-k="참고">VPC에서 Network Manager API를 사설로 호출할 때만 해당합니다.</td></tr>
+          <tr><td class="row-h">AWS PrivateLink</td><td data-k="과금 기준">interface endpoint 시간과 처리 GB</td><td data-k="참고">VPC에서 Network Manager API를 사설로 호출할 때만 해당합니다. 현재 us-west-2와 us-gov-west-1에서 듀얼스택 엔드포인트로만 지원합니다.</td></tr>
           </tbody>
         </table>
       </div>

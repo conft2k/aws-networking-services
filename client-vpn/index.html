@@ -283,7 +283,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
 
 <nav aria-label="주요 메뉴">
   <div class="wrap">
-    <a class="brand" href="#top">Client <span>VPN</span></a>
+    <a class="brand" href="#top">AWS <span>Client VPN</span></a>
     <div class="navlinks">
       <a href="../">전체 서비스</a>
       <a href="#auth">인증</a>
@@ -409,8 +409,8 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
         <article class="feature"><p class="ft">Routing</p><h3>Split tunnel</h3><p>켜면 엔드포인트 라우팅 테이블의 경로만 클라이언트에 푸시되어 해당 트래픽만 터널로 보냅니다. 기본값은 꺼짐으로, 모든 트래픽이 터널을 지납니다.</p></article>
         <article class="feature"><p class="ft">Visibility</p><h3>연결 로그</h3><p>접속 시도와 연결, 종료 기록을 Amazon CloudWatch Logs로 보냅니다. 사용량 분석과 사고 조사에 씁니다.</p></article>
         <article class="feature"><p class="ft">Custom logic</p><h3>클라이언트 연결 핸들러</h3><p>인증 뒤, 권한 규칙 평가 전에 Lambda 함수로 접속을 허용하거나 거부합니다. 함수 이름은 AWSClientVPN- 으로 시작해야 하고 제한 시간은 30초입니다.</p></article>
-        <article class="feature"><p class="ft">Device posture</p><h3>기기 상태 확인</h3><p>CrowdStrike, Jamf, JumpCloud 같은 기기 신뢰 공급자의 정보로 Cedar 기반 정책을 평가합니다. 접속할 때와 세션 중 5분마다 다시 평가합니다.</p></article>
-        <article class="feature"><p class="ft">Distribution</p><h3>셀프 서비스 포털</h3><p>사용자가 포털에서 AWS 제공 클라이언트와 엔드포인트 구성 파일을 직접 내려받습니다. 구성 파일을 따로 배포하지 않아도 됩니다.</p></article>
+        <article class="feature"><p class="ft">Device posture</p><h3>기기 상태 확인</h3><p>CrowdStrike, Jamf, JumpCloud 기기 신뢰 공급자의 정보로 Cedar 기반 정책을 평가합니다. 접속할 때와 세션 중 5분마다 다시 평가하며, 차단 없이 기록만 하는 shadow mode로 먼저 검증할 수 있습니다. AWS 제공 클라이언트 6.2.0 이상이 필요합니다.</p></article>
+        <article class="feature"><p class="ft">Distribution</p><h3>셀프 서비스 포털</h3><p>사용자가 포털에서 AWS 제공 클라이언트와 엔드포인트 구성 파일을 직접 내려받습니다. 구성 파일을 따로 배포하지 않아도 됩니다. 클라이언트 6.x는 CLI와 관리자용 프로필 제어도 지원합니다.</p></article>
         <article class="feature"><p class="ft">Session</p><h3>세션 제어 · 로그인 배너</h3><p>최대 세션 시간(8·10·12·24시간, 기본 24시간)과 만료 시 재접속 방식을 정하고, 접속 시 보여줄 배너(최대 1,400자)를 설정합니다.</p></article>
       </div>
     </div>
@@ -537,7 +537,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
           <tr><td class="row-h">엔드포인트 연결</td><td data-k="과금 기준">대상 네트워크 연결(association)마다 시간당</td><td data-k="참고">IPv6·듀얼 스택 엔드포인트도 IPv4와 같은 단가입니다.</td></tr>
           <tr><td class="row-h">클라이언트 연결</td><td data-k="과금 기준">활성 VPN 연결마다 시간당</td><td data-k="참고">접속한 사용자 수에 비례합니다.</td></tr>
           <tr><td class="row-h">데이터 전송</td><td data-k="과금 기준">EC2에서 인터넷으로 나가는 데이터 전송(DTO)</td><td data-k="참고">Full tunnel로 인터넷 트래픽까지 보내면 이 비용이 늘어납니다.</td></tr>
-          <tr><td class="row-h">퍼블릭 IPv4 주소</td><td data-k="과금 기준">인터넷 게이트웨이가 있는 VPC 서브넷에 연결할 때 엔드포인트 ENI에 붙는 Elastic IP</td><td data-k="참고">사용 중인 퍼블릭 IPv4 주소로 VPC 요금에서 청구됩니다.</td></tr>
+          <tr><td class="row-h">퍼블릭 IPv4 주소</td><td data-k="과금 기준">클라이언트 연결의 터널에 쓰이는 퍼블릭 IPv4 주소</td><td data-k="참고">표준 퍼블릭 IPv4 주소 요금(VPC 요금 페이지)이 적용됩니다.</td></tr>
           <tr><td class="row-h">연결 로그</td><td data-k="과금 기준">CloudWatch Logs 로그 그룹 사용량</td><td data-k="참고">CloudWatch 요금으로 청구됩니다.</td></tr>
           <tr><td class="row-h">클라이언트 연결 핸들러</td><td data-k="과금 기준">Lambda 함수 호출</td><td data-k="참고">AWS Lambda 요금으로 청구됩니다.</td></tr>
           <tr><td class="row-h">Transit Gateway 연결</td><td data-k="과금 기준">Transit Gateway 표준 요금</td><td data-k="참고">Transit Gateway 통합 자체에는 추가 요금이 없습니다.</td></tr>

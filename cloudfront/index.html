@@ -264,7 +264,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
 
 <nav aria-label="주요 메뉴">
   <div class="wrap">
-    <a class="brand" href="#top">Cloud<span>Front</span></a>
+    <a class="brand" href="#top">Amazon <span>CloudFront</span></a>
     <div class="navlinks">
       <a href="../">전체 서비스</a>
       <a href="#path">요청 경로</a>
@@ -347,7 +347,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
         <div class="layer">
           <span class="lv">03<small>Origin</small></span>
           <div><h3>Origin Shield · 오리진</h3><p>Origin Shield를 켜면 모든 캐시 계층의 오리진 요청이 지정한 리전 한 곳으로 모여, 같은 객체에 대한 요청이 오리진에 한 번만 가도록 합칠 수 있습니다.</p></div>
-          <div class="specs"><code>Origin Shield</code><code>Origin group</code><code>OAC</code><code>VPC origin</code><code>Origin request / response</code></div>
+          <div class="specs"><code>Origin Shield</code><code>Origin group</code><code>OAC</code><code>VPC origin</code><code>Origin mTLS</code><code>Origin request / response</code></div>
         </div>
       </div>
     </div>
@@ -359,11 +359,11 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
       <h2 id="features-h">주요 기능</h2>
       <div class="features">
         <article class="feature"><p class="ft">S3 origin</p><h3>Origin Access Control</h3><p>S3 버킷을 공개하지 않고 CloudFront에서만 읽게 합니다. SSE-KMS 암호화 객체와 PUT·DELETE 요청도 지원하며, 레거시 OAI를 대체하는 권장 방식입니다.</p></article>
-        <article class="feature"><p class="ft">Private origin</p><h3>VPC origins</h3><p>사설 서브넷의 ALB, NLB, EC2 인스턴스를 오리진으로 씁니다. CloudFront가 서비스 관리형 ENI로 접근하므로 오리진에 공인 IP가 필요 없습니다. VPC에는 인터넷 게이트웨이가 연결되어 있어야 합니다.</p></article>
+        <article class="feature"><p class="ft">Private origin</p><h3>VPC origins</h3><p>사설 서브넷의 ALB, NLB, EC2 인스턴스를 오리진으로 씁니다. CloudFront가 서비스 관리형 ENI로 접근하므로 오리진에 공인 IP가 필요 없습니다. VPC에는 인터넷 게이트웨이가 연결되어 있어야 하며, AWS RAM으로 다른 계정의 VPC origin을 공유받아 쓸 수도 있습니다.</p></article>
         <article class="feature"><p class="ft">Availability</p><h3>Origin failover</h3><p>Primary와 Secondary 오리진을 origin group으로 묶습니다. 지정한 상태 코드나 연결 실패, 타임아웃이 나면 GET, HEAD, OPTIONS 요청을 Secondary로 다시 보냅니다.</p></article>
         <article class="feature"><p class="ft">Edge security</p><h3>AWS WAF · Shield</h3><p>배포에 web ACL을 연결해 L7 요청을 검사합니다. Shield Standard는 별도 요금 없이 모든 배포에 적용되고, Shield Advanced로 확장할 수 있습니다.</p></article>
-        <article class="feature"><p class="ft">Client identity</p><h3>Viewer mTLS</h3><p>엣지에서 클라이언트의 X.509 인증서를 검증해, 신뢰하지 않는 클라이언트를 애플리케이션 앞에서 차단합니다. 추가 요금 없이 사용할 수 있습니다.</p></article>
-        <article class="feature"><p class="ft">Pricing</p><h3>Flat-rate 요금제</h3><p>CDN, AWS WAF, DDoS 보호, Route 53 DNS, S3 스토리지 크레딧을 월 정액으로 묶은 요금제입니다. Free, Pro, Business, Premium 등급이 있고 초과 요금이 없습니다.</p></article>
+        <article class="feature"><p class="ft">Client identity</p><h3>Viewer mTLS</h3><p>엣지에서 클라이언트의 X.509 인증서를 trust store로 검증해, 신뢰하지 않는 클라이언트를 애플리케이션 앞에서 차단합니다. Connection Function으로 검증 로직을 더하고 OCSP 폐기 확인, 인증서를 오리진에 넘기는 passthrough 모드도 쓸 수 있습니다. 추가 요금은 없습니다.</p></article>
+        <article class="feature"><p class="ft">Pricing</p><h3>Flat-rate 요금제</h3><p>CDN, AWS WAF·DDoS 보호, 봇 관리, Route 53 DNS, CloudWatch Logs 수집, 엣지 컴퓨팅, S3 스토리지 크레딧을 배포 하나 단위의 월 정액으로 묶은 요금제입니다. Free, Pro, Business, Premium 네 등급이 있고 초과 요금이 없습니다.</p></article>
       </div>
     </div>
   </section>
@@ -379,9 +379,9 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
           <thead><tr><th scope="col">항목</th><th scope="col">CloudFront Functions</th><th scope="col">Lambda@Edge</th></tr></thead>
           <tbody>
             <tr><td class="row-h">런타임</td><td data-k="CloudFront Functions">JavaScript</td><td data-k="Lambda@Edge">Node.js, Python</td></tr>
-            <tr><td class="row-h">트리거 이벤트</td><td data-k="CloudFront Functions">Viewer request, Viewer response</td><td data-k="Lambda@Edge">Viewer request·response, Origin request·response</td></tr>
+            <tr><td class="row-h">트리거 이벤트</td><td data-k="CloudFront Functions">Viewer request, Viewer response (mTLS 연결 단계는 Connection Function)</td><td data-k="Lambda@Edge">Viewer request·response, Origin request·response</td></tr>
             <tr><td class="row-h">실행 시간</td><td data-k="CloudFront Functions"><span class="num">1 ms</span> 미만</td><td data-k="Lambda@Edge">viewer · origin 이벤트 모두 최대 <span class="num">30</span> 초</td></tr>
-            <tr><td class="row-h">최대 메모리</td><td data-k="CloudFront Functions"><span class="num">2</span> MB</td><td data-k="Lambda@Edge"><span class="num">128</span> MB (viewer) · <span class="num">10,240</span> MB (origin)</td></tr>
+            <tr><td class="row-h">최대 메모리</td><td data-k="CloudFront Functions"><span class="num">2</span> MB</td><td data-k="Lambda@Edge">Lambda 할당량과 동일, 최대 <span class="num">10,240</span> MB</td></tr>
             <tr><td class="row-h">코드 크기</td><td data-k="CloudFront Functions"><span class="num">10</span> KB</td><td data-k="Lambda@Edge">viewer · origin 모두 <span class="num">50</span> MB</td></tr>
             <tr><td class="row-h">네트워크 · 본문 접근</td><td data-k="CloudFront Functions">불가</td><td data-k="Lambda@Edge">가능</td></tr>
             <tr><td class="row-h">규모</td><td data-k="CloudFront Functions">초당 수백만 요청</td><td data-k="Lambda@Edge">리전당 초당 최대 <span class="num">10,000</span> 요청</td></tr>
@@ -473,7 +473,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
     <div class="wrap">
       <p class="tag">Pricing</p>
       <h2 id="pricing-h">비용 항목</h2>
-      <p class="lede">종량제에서는 인터넷으로 나가는 데이터 전송량과 요청 수가 비용의 대부분을 차지합니다. CDN, AWS WAF, DDoS 보호, Route 53을 월 정액으로 묶은 flat-rate 요금제를 대신 고를 수도 있습니다.</p>
+      <p class="lede">종량제에서는 인터넷으로 나가는 데이터 전송량과 요청 수가 비용의 대부분을 차지합니다. CDN, AWS WAF, DDoS 보호, Route 53 DNS 등을 월 정액으로 묶은 flat-rate 요금제를 대신 고를 수도 있습니다.</p>
       <div class="tbl-wrap">
         <table>
           <caption class="sr-only">CloudFront 과금 항목</caption>
@@ -484,7 +484,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
           <tr><td class="row-h">HTTP · HTTPS 요청</td><td data-k="과금 기준">요청 1만 건당, HTTP와 HTTPS 단가 구분</td><td data-k="참고">프리 티어로 매월 1,000만 건이 무료입니다.</td></tr>
           <tr><td class="row-h">Origin Shield</td><td data-k="과금 기준">Origin Shield를 지나는 요청 1만 건당, 지정한 리전 기준</td><td data-k="참고">캐시 미스로 Origin Shield까지 온 요청에만 붙습니다.</td></tr>
           <tr><td class="row-h">무효화</td><td data-k="과금 기준">요청한 경로 또는 태그당</td><td data-k="참고">매월 처음 1,000개 경로·태그는 무료입니다.</td></tr>
-          <tr><td class="row-h">엣지 함수</td><td data-k="과금 기준">CloudFront Functions 호출당, KeyValueStore 읽기 100만 건당. Lambda@Edge 요청 100만 건당과 GB-초 단위 실행 시간</td><td data-k="참고">Functions는 프리 티어로 월 200만 호출이 무료이고, Lambda@Edge에는 프리 티어가 없습니다.</td></tr>
+          <tr><td class="row-h">엣지 함수</td><td data-k="과금 기준">CloudFront Functions 호출 100만 건당, KeyValueStore 읽기 100만 건당. Lambda@Edge 요청 100만 건당과 GB-초 단위 실행 시간</td><td data-k="참고">Functions는 프리 티어로 월 200만 호출과 KeyValueStore 읽기 200만 건이 무료이고, Lambda@Edge에는 프리 티어가 없습니다.</td></tr>
           <tr><td class="row-h">부가 기능</td><td data-k="과금 기준">실시간 로그 100만 줄당, 필드 수준 암호화 요청 1만 건당, 전용 IP 사용자 지정 SSL 인증서당 월, Anycast static IP의 IPv4 주소당 시간</td><td data-k="참고">Anycast static IP 목록의 IPv6 주소에는 요금이 없습니다.</td></tr>
           <tr><td class="row-h">연관 서비스</td><td data-k="과금 기준">AWS WAF web ACL·규칙·요청, Shield Advanced, Route 53</td><td data-k="참고">각 서비스에서 따로 과금합니다. Shield Standard는 무료입니다.</td></tr>
           </tbody>

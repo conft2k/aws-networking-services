@@ -377,7 +377,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
     <div class="wrap">
       <p class="tag">Listener rules</p>
       <h2 id="rules-h">ALB는 요청 내용을 보고 경로를 정합니다</h2>
-      <p class="lede">리스너 규칙은 우선순위가 낮은 번호부터 평가하고, 처음 일치한 규칙의 액션을 실행합니다. 조건은 host-header, path-pattern, http-header, http-request-method, query-string, source-ip 여섯 가지입니다.</p>
+      <p class="lede">리스너 규칙은 우선순위가 낮은 번호부터 평가하고, 처음 일치한 규칙의 액션을 실행합니다. 조건은 host-header, path-pattern, http-header, http-request-method, query-string, source-ip 여섯 가지이고, host-header · path-pattern · http-header는 와일드카드 대신 정규식으로도 매칭할 수 있습니다.</p>
       <div class="rules" role="table" aria-label="HTTPS:443 리스너 규칙 예시">
         <div class="rules-head" role="row"><span role="columnheader">Priority · Condition · Action</span><span>listener HTTPS:443</span></div>
         <div class="rule" role="row">
@@ -406,7 +406,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
           <div class="act" role="cell"><b>forward</b> tg-web</div>
         </div>
       </div>
-      <p class="rule-note">규칙마다 forward, redirect, fixed-response 중 하나의 라우팅 액션이 마지막에 있어야 합니다. HTTPS 리스너에서는 authenticate-cognito, authenticate-oidc, jwt-validation 액션을 그 앞에 둘 수 있습니다.</p>
+      <p class="rule-note">규칙마다 forward, redirect, fixed-response 중 하나의 라우팅 액션이 마지막에 있어야 합니다. HTTPS 리스너에서는 authenticate-cognito, authenticate-oidc, jwt-validation 액션을 그 앞에 둘 수 있습니다. 기본 규칙이 아닌 규칙에는 대상에 보내기 전 요청을 고쳐 쓰는 transform(host-header-rewrite, url-rewrite)을 하나씩 붙일 수 있습니다.</p>
     </div>
   </section>
 
@@ -419,8 +419,11 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
         <article class="feature"><p class="ft">ALB · mTLS</p><h3>상호 TLS 인증</h3><p>verify 모드는 트러스트 스토어의 CA로 클라이언트 인증서를 검증합니다. passthrough 모드는 인증서 체인을 대상에 그대로 넘깁니다.</p></article>
         <article class="feature"><p class="ft">TLS</p><h3>TLS 종료와 보안 정책</h3><p>ALB HTTPS 리스너와 NLB TLS 리스너에 인증서를 두고, 보안 정책으로 프로토콜과 암호 스위트를 정합니다. NLB는 ALPN 정책도 지원합니다.</p></article>
         <article class="feature"><p class="ft">NLB · Static IP</p><h3>고정 IP와 Elastic IP</h3><p>NLB 노드는 가용 영역마다 고정 IP를 가집니다. 인터넷 연결 NLB는 서브넷마다 Elastic IP 하나를 붙일 수 있고, ALB를 대상으로 등록해 ALB 앞에 고정 IP를 둘 수 있습니다.</p></article>
-        <article class="feature"><p class="ft">NLB · Source IP</p><h3>클라이언트 IP 보존</h3><p>대상이 원래 클라이언트 IP를 그대로 받습니다. instance 대상은 기본으로 켜져 있고, UDP · QUIC 대상 그룹에서는 끌 수 없습니다.</p></article>
+        <article class="feature"><p class="ft">NLB · Source IP</p><h3>클라이언트 IP 보존</h3><p>대상이 원래 클라이언트 IP를 그대로 받습니다. instance 대상은 기본으로 켜져 있고, UDP · TCP_UDP · QUIC · TCP_QUIC 대상 그룹에서는 끌 수 없습니다.</p></article>
         <article class="feature"><p class="ft">GWLB · Inspection</p><h3>Gateway Load Balancer endpoint</h3><p>VPC 라우팅 테이블에서 GWLB endpoint를 다음 홉으로 지정하면, 트래픽이 PrivateLink로 보안 VPC의 어플라이언스를 거쳐 돌아옵니다.</p></article>
+        <article class="feature"><p class="ft">ALB · Transforms</p><h3>URL · 호스트 헤더 재작성</h3><p>리스너 규칙의 transform이 정규식으로 경로, 쿼리 문자열, Host 헤더를 바꿔 대상에 보냅니다. 애플리케이션 코드나 별도 프록시 없이 URL 체계를 옮길 수 있습니다.</p></article>
+        <article class="feature"><p class="ft">NLB · Weighted TG</p><h3>가중치 대상 그룹</h3><p>NLB 리스너 하나가 여러 대상 그룹에 0~999 가중치로 트래픽을 나눕니다. instance · ip · alb 대상 그룹 모두 쓸 수 있어 블루/그린, 카나리 배포에 맞습니다.</p></article>
+        <article class="feature"><p class="ft">NLB · QUIC</p><h3>QUIC 패스스루</h3><p>QUIC · TCP_QUIC 리스너가 QUIC v1 트래픽을 복호화 없이 대상에 넘깁니다. Connection ID의 Server ID로 대상을 고정해 모바일 클라이언트의 연결 이전을 유지합니다.</p></article>
       </div>
     </div>
   </section>

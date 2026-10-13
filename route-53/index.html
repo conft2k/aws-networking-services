@@ -157,6 +157,18 @@ svg .dot{fill:var(--fiber)}
 .legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--fiber)}
 .legend i.p{border-top:2px solid var(--trace)}
 .legend i.s{border-top:2px dashed var(--fiber-ink)}
+.legend i.o{border-top:2px solid var(--fiber-ink)}
+.legend i.a{border-top:2px dotted var(--ink-3)}
+.legend i.l{border-top:6px solid var(--line-2)}
+.legend i.dir{position:relative;width:26px}
+.legend i.dir::after{content:"";position:absolute;right:-3px;top:-6px;border-left:8px solid var(--trace);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.legend i.o.dir::after{border-left-color:var(--fiber-ink)}
+svg .q-in{stroke:var(--trace);stroke-width:2.5;fill:none}
+svg .q-out{stroke:var(--fiber-ink);stroke-width:2.5;fill:none}
+svg .ah-in{fill:var(--trace)}
+svg .ah-out{fill:var(--fiber-ink)}
+svg .assoc{stroke:var(--ink-3);stroke-width:2;fill:none;stroke-dasharray:1 5;stroke-linecap:round}
+svg .link{stroke:var(--line-2);stroke-width:8;fill:none;stroke-linecap:round}
 
 /* steps */
 .steps{list-style:none;padding:0;margin:40px 0 0;display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:4px solid var(--fiber)}
@@ -268,7 +280,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
 
 <nav aria-label="주요 메뉴">
   <div class="wrap">
-    <a class="brand" href="#top">Route <span>53</span></a>
+    <a class="brand" href="#top">Amazon <span>Route 53</span></a>
     <div class="navlinks">
       <a href="../">전체 서비스</a>
       <a href="#scope">해석 범위</a>
@@ -325,7 +337,7 @@ app.example.com.	60	IN	A	<span class="v">198.51.100.20</span></pre>
         <p class="lede">이름 해석이 실패하면 네트워크가 정상이어도 서비스는 멈춥니다. 권한 DNS의 가용성, 응답에 반영되는 상태 정보, VPC와 온프레미스를 잇는 해석 경로를 함께 설계해야 합니다.</p>
       </div>
       <div class="pillars">
-        <div class="pillar"><span class="k">Available</span><div><h3>가용성 중심 권한 DNS</h3><p>호스팅 영역별 월간 가용성 100%를 SLA로 약정합니다.</p></div></div>
+        <div class="pillar"><span class="k">Available</span><div><h3>가용성 중심 권한 DNS</h3><p>호스팅 영역별 월간 가용성 100%를 SLA로 약정합니다. accelerated recovery를 켜면 us-east-1 장애 때도 1시간 안에 퍼블릭 레코드를 다시 바꿀 수 있습니다.</p></div></div>
         <div class="pillar"><span class="k">Aware</span><div><h3>상태를 아는 응답</h3><p>헬스 체크와 라우팅 정책을 묶어, 정상인 엔드포인트만 응답에 담습니다.</p></div></div>
         <div class="pillar"><span class="k">Hybrid</span><div><h3>하나의 해석 경로</h3><p>Resolver 엔드포인트와 규칙으로 VPC와 온프레미스 DNS가 서로의 도메인을 해석합니다.</p></div></div>
       </div>
@@ -387,11 +399,11 @@ app.example.com.	60	IN	A	<span class="v">198.51.100.20</span></pre>
       <h2 id="features-h">주요 기능</h2>
       <div class="features">
         <article class="feature"><p class="ft">Health checks</p><h3>헬스 체크</h3><p>엔드포인트를 HTTP, HTTPS, TCP로 확인하거나, 다른 헬스 체크를 묶은 계산형 체크, CloudWatch 경보 기반 체크를 만듭니다. HTTP 응답 본문의 문자열 일치도 확인할 수 있습니다.</p></article>
-        <article class="feature"><p class="ft">Hybrid DNS</p><h3>Resolver 엔드포인트</h3><p>VPC 서브넷에 ENI로 만들어지며 IP 주소가 최소 2개 필요합니다. 두 개 이상의 가용 영역에 두는 구성을 권장합니다. Inbound는 Do53, DoH, DoH-FIPS를 지원합니다.</p></article>
-        <article class="feature"><p class="ft">Forwarding</p><h3>Resolver 규칙</h3><p>도메인 단위로 질의를 어느 DNS 서버로 보낼지 정합니다. 규칙을 VPC에 연결하고, AWS RAM으로 다른 계정과 공유할 수 있습니다.</p></article>
-        <article class="feature"><p class="ft">DNS security</p><h3>DNS Firewall</h3><p>VPC Resolver를 지나는 아웃바운드 질의를 도메인 목록으로 ALLOW, ALERT, BLOCK 합니다. DNS Firewall Advanced는 DNS 터널링과 DGA 도메인을 탐지합니다.</p></article>
-        <article class="feature"><p class="ft">Multi-account</p><h3>Route 53 Profiles</h3><p>사설 호스팅 영역, Resolver 규칙, DNS Firewall 규칙 그룹, 인터페이스 VPC 엔드포인트를 하나의 Profile로 묶어 여러 VPC와 계정에 적용합니다.</p></article>
-        <article class="feature"><p class="ft">Anycast resolver</p><h3>Route 53 Global Resolver</h3><p>인증된 클라이언트가 위치와 무관하게 퍼블릭 도메인과 사설 호스팅 영역을 해석하는 인터넷 접근형 anycast 리졸버입니다. 질의 필터링과 로깅을 함께 제공합니다.</p></article>
+        <article class="feature"><p class="ft">Hybrid DNS</p><h3>Resolver 엔드포인트</h3><p>VPC 서브넷에 ENI로 만들어지며 IP 주소가 최소 2개 필요합니다. 두 개 이상의 가용 영역에 두는 구성을 권장합니다. Inbound는 Do53, DoH, DoH-FIPS를, Outbound는 Do53과 DoH를 지원하며, 하위 도메인을 NS 레코드로 위임받는 delegation 엔드포인트도 만들 수 있습니다.</p></article>
+        <article class="feature"><p class="ft">Forwarding</p><h3>Resolver 규칙</h3><p>도메인 단위로 질의를 어느 DNS 서버로 보낼지 정합니다. 전달 규칙 외에 하위 도메인을 사내 DNS로 넘기는 delegation 규칙도 있습니다. 규칙을 VPC에 연결하고, AWS RAM으로 다른 계정과 공유할 수 있습니다.</p></article>
+        <article class="feature"><p class="ft">DNS security</p><h3>DNS Firewall</h3><p>VPC Resolver를 지나는 아웃바운드 질의를 도메인 목록으로 ALLOW, ALERT, BLOCK 합니다. DNS Firewall Advanced는 DNS 터널링과 DGA 도메인을 탐지하고, Palo Alto Networks Advanced DNS Security 규칙도 추가할 수 있습니다.</p></article>
+        <article class="feature"><p class="ft">Multi-account</p><h3>Route 53 Profiles</h3><p>사설 호스팅 영역, Resolver 규칙, DNS Firewall 규칙 그룹, 인터페이스 VPC 엔드포인트, 질의 로깅 구성을 하나의 Profile로 묶어 여러 VPC와 계정에 적용합니다.</p></article>
+        <article class="feature"><p class="ft">Anycast resolver</p><h3>Route 53 Global Resolver</h3><p>인증된 클라이언트가 위치와 무관하게 퍼블릭 도메인과 사설 호스팅 영역을 해석하는 인터넷 접근형 anycast 리졸버입니다. 2026년 3월 GA로 IPv4·IPv6 질의를 받고, 질의 필터링과 중앙 로깅을 함께 제공합니다.</p></article>
       </div>
     </div>
   </section>
@@ -400,71 +412,92 @@ app.example.com.	60	IN	A	<span class="v">198.51.100.20</span></pre>
     <div class="wrap">
       <p class="tag">Reference architecture</p>
       <h2 id="arch-h">공유 서비스 VPC로 묶는 하이브리드 DNS</h2>
-      <p class="lede">Resolver 엔드포인트를 공유 서비스 VPC에 두고, 규칙과 사설 호스팅 영역은 Profile로 워크로드 VPC에 배포합니다. 온프레미스는 aws.corp.internal을 Inbound로, AWS는 corp.internal을 Outbound로 전달합니다.</p>
+      <p class="lede">Resolver 엔드포인트를 공유 서비스 VPC에 두고, 규칙과 사설 호스팅 영역은 Profile로 워크로드 VPC에 배포합니다. 핵심은 질의 방향입니다. Inbound는 온프레미스 → AWS 방향으로 aws.corp.internal 질의를 받고, Outbound는 AWS → 온프레미스 방향으로 corp.internal 질의를 사내 DNS에 넘깁니다. Inbound로 들어온 질의는 엔드포인트가 있는 VPC 기준으로 해석되므로, 사설 호스팅 영역을 공유 서비스 VPC에도 연결해야 합니다.</p>
       <figure class="arch">
         <div class="arch-scroll">
-          <svg viewBox="0 0 980 460" role="img" aria-labelledby="arch-title arch-desc">
+          <svg viewBox="0 0 980 470" role="img" aria-labelledby="arch-title arch-desc">
             <title id="arch-title">Route 53 하이브리드 DNS 레퍼런스 아키텍처</title>
-            <desc id="arch-desc">온프레미스 사내 DNS 서버는 aws.corp.internal 질의를 공유 서비스 VPC의 Inbound 엔드포인트로 조건부 전달합니다. Inbound 엔드포인트는 VPC Resolver로 질의를 넘기고, VPC Resolver는 사설 호스팅 영역으로 답합니다. 워크로드 VPC A와 B는 VPC+2 주소로 VPC Resolver에 질의하며, corp.internal 질의는 전달 규칙에 따라 Outbound 엔드포인트를 거쳐 사내 DNS로 갑니다. Route 53 Profile이 사설 호스팅 영역과 DNS Firewall 규칙 그룹을 워크로드 VPC에 연결합니다. 온프레미스와 AWS는 Direct Connect 또는 VPN으로 연결됩니다.</desc>
+            <desc id="arch-desc">두 방향의 DNS 질의 흐름을 보여 줍니다. Inbound 방향(온프레미스에서 AWS로): 사내 클라이언트가 사내 DNS 서버에 aws.corp.internal을 묻고, 사내 DNS 서버는 Direct Connect 또는 VPN을 거쳐 공유 서비스 VPC의 Inbound 엔드포인트 ENI로 조건부 전달합니다. Inbound 엔드포인트는 VPC Resolver로 질의를 넘기고, VPC Resolver는 사설 호스팅 영역 aws.corp.internal에서 답을 찾습니다. Outbound 방향(AWS에서 온프레미스로): 워크로드 VPC의 EC2가 VPC+2 주소의 VPC Resolver에 corp.internal을 묻고, 전달 규칙과 일치하면 VPC Resolver가 공유 서비스 VPC의 Outbound 엔드포인트 ENI를 통해 DX 또는 VPN 너머의 사내 DNS 서버로 질의를 보냅니다. 응답은 같은 경로를 거꾸로 돌아옵니다. Route 53 Profile이 전달 규칙, 사설 호스팅 영역, DNS Firewall 규칙 그룹을 워크로드 VPC에 연결합니다.</desc>
+            <defs>
+              <marker id="ah-in" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-in" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ah-out" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path class="ah-out" d="M0 0 L10 5 L0 10 L3.5 5 z"/></marker>
+            </defs>
             <!-- zones -->
-            <rect class="zone" x="10" y="40" width="190" height="400" rx="6"/>
+            <rect class="zone" x="10" y="40" width="180" height="400" rx="6"/>
             <text class="z" x="24" y="62">ON-PREMISES</text>
-            <rect class="zone" x="230" y="40" width="740" height="400" rx="6"/>
-            <text class="z" x="244" y="62">AWS REGION</text>
-            <rect class="zone" x="250" y="80" width="350" height="340" rx="6"/>
-            <text class="z" x="264" y="100">SHARED SERVICES VPC</text>
-            <rect class="zone" x="620" y="80" width="340" height="340" rx="6"/>
-            <text class="z" x="634" y="100">WORKLOAD VPCs</text>
+            <rect class="zone" x="250" y="40" width="720" height="400" rx="6"/>
+            <text class="z" x="264" y="62">AWS REGION</text>
+            <rect class="zone" x="268" y="80" width="204" height="344" rx="6"/>
+            <text class="z" x="282" y="100">SHARED SERVICES VPC</text>
+            <rect class="zone" x="670" y="80" width="286" height="344" rx="6"/>
+            <text class="z" x="684" y="100">WORKLOAD VPCs</text>
+
+            <!-- DX / VPN link -->
+            <path class="link" d="M220 70 V420"/>
+            <text class="z" x="220" y="458" text-anchor="middle">DX / VPN</text>
 
             <!-- on-prem -->
-            <rect class="box" x="30" y="110" width="150" height="64" rx="4"/>
-            <text class="t" x="44" y="138">사내 DNS</text><text class="s" x="44" y="158">corp.internal</text>
-            <rect class="box" x="30" y="340" width="150" height="64" rx="4"/>
-            <text class="t" x="44" y="368">사내 클라이언트</text><text class="s" x="44" y="388">DX / VPN 경유</text>
-            <path class="path" d="M160 340 V174"/>
-            <text class="lbl" x="24" y="250">Forwarding rule</text>
-            <text class="lbl" x="24" y="266">corp.internal</text>
+            <rect class="box" x="26" y="80" width="148" height="60" rx="4"/>
+            <text class="t" x="40" y="106">사내 클라이언트</text><text class="s" x="40" y="126">aws.corp.internal?</text>
+            <rect class="box" x="26" y="200" width="148" height="80" rx="4"/>
+            <text class="t" x="40" y="226">사내 DNS 서버</text><text class="s" x="40" y="246">corp.internal 권한</text><text class="s" x="40" y="264">aws.* 조건부 전달</text>
 
-            <!-- shared services -->
-            <rect class="box" x="270" y="116" width="170" height="64" rx="4"/>
-            <text class="t" x="284" y="144">Inbound 엔드포인트</text><text class="s" x="284" y="164">ENI × 2 AZ</text>
-            <rect class="box" x="410" y="226" width="170" height="64" rx="4"/>
-            <text class="t" x="424" y="254">VPC Resolver</text><text class="s" x="424" y="274">VPC+2</text>
-            <rect class="box" x="270" y="336" width="170" height="64" rx="4"/>
-            <text class="t" x="284" y="364">Outbound 엔드포인트</text><text class="s" x="284" y="384">ENI × 2 AZ</text>
+            <!-- shared services VPC -->
+            <text class="lbl" x="285" y="122">inbound: 온프레미스 → AWS</text>
+            <rect class="box" x="285" y="130" width="170" height="64" rx="4"/>
+            <text class="t" x="299" y="158">Inbound 엔드포인트</text><text class="s" x="299" y="178">ENI × 2 AZ</text>
+            <rect class="box" x="285" y="320" width="170" height="64" rx="4"/>
+            <text class="t" x="299" y="348">Outbound 엔드포인트</text><text class="s" x="299" y="368">ENI × 2 AZ</text>
+            <text class="lbl2" x="285" y="406">outbound: AWS → 온프레미스</text>
+
+            <!-- regional resolver column -->
+            <rect class="box" x="495" y="100" width="150" height="64" rx="4"/>
+            <text class="t" x="509" y="128">Private zone</text><text class="s" x="509" y="148">aws.corp.internal</text>
+            <rect class="box" x="495" y="200" width="150" height="80" rx="4"/>
+            <text class="t" x="509" y="226">VPC Resolver</text><text class="s" x="509" y="246">각 VPC의 .2 주소</text><text class="s" x="509" y="264">리전 서비스</text>
+            <rect class="box" x="495" y="320" width="150" height="64" rx="4"/>
+            <text class="t" x="509" y="348">Forwarding rule</text><text class="s" x="509" y="368">corp.internal</text>
 
             <!-- workload -->
-            <rect class="box" x="640" y="116" width="145" height="64" rx="4"/>
-            <text class="t" x="652" y="144">VPC A</text><text class="s" x="652" y="164">10.1.0.0/16</text>
-            <rect class="box" x="805" y="116" width="145" height="64" rx="4"/>
-            <text class="t" x="817" y="144">VPC B</text><text class="s" x="817" y="164">10.2.0.0/16</text>
-            <rect class="box" x="640" y="226" width="310" height="64" rx="4"/>
-            <text class="t" x="654" y="254">Route 53 Profile</text><text class="s" x="654" y="274">AWS RAM으로 계정 간 공유</text>
-            <rect class="box" x="640" y="336" width="145" height="64" rx="4"/>
-            <text class="t" x="652" y="364">Private zone</text><text class="s" x="652" y="384">aws.corp.internal</text>
-            <rect class="box" x="805" y="336" width="145" height="64" rx="4"/>
-            <text class="t" x="817" y="364">DNS Firewall</text><text class="s" x="817" y="384">Rule group</text>
-
-            <!-- query paths -->
-            <path class="path" d="M180 148 H270"/>
-            <text class="lbl" x="186" y="140">Conditional</text>
-            <path class="path" d="M355 180 C355 210 495 200 495 226"/>
-            <path class="path" d="M495 290 C495 316 355 306 355 336"/>
-            <path class="path" d="M270 368 C220 368 225 166 180 166"/>
-            <path class="path" d="M640 158 C600 158 620 250 580 250"/>
-            <text class="lbl" x="648" y="208">VPC+2</text>
-            <path class="path" d="M580 270 C615 270 610 368 640 368"/>
+            <rect class="box" x="690" y="110" width="245" height="56" rx="4"/>
+            <text class="t" x="704" y="134">DNS Firewall</text><text class="s" x="704" y="152">Rule group · 질의 필터</text>
+            <rect class="box" x="690" y="200" width="245" height="80" rx="4"/>
+            <text class="t" x="704" y="226">워크로드 VPC A · B</text><text class="s" x="704" y="246">EC2 → VPC+2 질의</text><text class="s" x="704" y="264">10.1.0.0/16 · 10.2.0.0/16</text>
+            <rect class="box" x="690" y="320" width="245" height="64" rx="4"/>
+            <text class="t" x="704" y="348">Route 53 Profile</text><text class="s" x="704" y="368">규칙·PHZ·Firewall 일괄 연결</text>
 
             <!-- profile associations -->
-            <path class="site" d="M712 226 V180"/>
-            <path class="site" d="M877 226 V180"/>
-            <path class="site" d="M712 290 V336"/>
-            <path class="site" d="M877 290 V336"/>
+            <path class="assoc" d="M812 320 V280"/>
+            <path class="assoc" d="M812 166 V200"/>
+            <path class="assoc" d="M690 352 H645"/>
+
+            <!-- inbound query path: on-prem -> AWS -->
+            <path class="q-in" d="M100 140 V199" marker-end="url(#ah-in)"/>
+            <text class="lbl" x="108" y="176">① 질의</text>
+            <path class="q-in" d="M174 222 C228 222 232 162 284 162" marker-end="url(#ah-in)"/>
+            <text class="lbl" x="282" y="214">② 조건부 전달</text>
+            <path class="q-in" d="M455 162 C478 162 472 225 494 225" marker-end="url(#ah-in)"/>
+            <text class="lbl" x="484" y="184">③</text>
+            <path class="q-in" d="M570 200 V165" marker-end="url(#ah-in)"/>
+            <text class="lbl" x="578" y="188">④ 조회</text>
+
+            <!-- outbound query path: AWS -> on-prem -->
+            <path class="q-out" d="M690 255 H646" marker-end="url(#ah-out)"/>
+            <text class="lbl2" x="655" y="246">❶</text>
+            <path class="q-out" d="M570 280 V319" marker-end="url(#ah-out)"/>
+            <text class="lbl2" x="578" y="304">❷ 규칙 일치</text>
+            <path class="q-out" d="M495 352 H456" marker-end="url(#ah-out)"/>
+            <text class="lbl2" x="464" y="344">❸</text>
+            <path class="q-out" d="M285 362 C232 362 228 262 175 262" marker-end="url(#ah-out)"/>
+            <text class="lbl2" x="282" y="300">❹ 사내 DNS로 전달</text>
           </svg>
         </div>
         <figcaption class="legend">
-          <span><i class="p"></i>DNS 질의 경로</span>
-          <span><i class="s"></i>Profile 연결</span>
+          <span><i class="p dir"></i>DNS 질의 방향 · inbound (온프레미스 → AWS)</span>
+          <span><i class="o dir"></i>DNS 질의 방향 · outbound (AWS → 온프레미스)</span>
+          <span><i class="a"></i>Profile 연결</span>
+          <span><i class="l"></i>Direct Connect / VPN</span>
+          <span>응답은 같은 경로를 거꾸로 돌아옵니다.</span>
         </figcaption>
         <p class="arch-hint">좁은 화면에서는 다이어그램을 좌우로 밀어서 보세요.</p>
       </figure>
@@ -496,14 +529,14 @@ app.example.com.	60	IN	A	<span class="v">198.51.100.20</span></pre>
           <thead><tr><th scope="col">과금 항목</th><th scope="col">과금 기준</th><th scope="col">참고</th></tr></thead>
           <tbody>
           <tr><td class="row-h">호스팅 영역</td><td data-k="과금 기준">호스팅 영역당 월 요금. 영역당 레코드 10,000개를 넘으면 초과 레코드당 월 요금</td><td data-k="참고">생성 후 12시간 안에 삭제한 호스팅 영역은 청구하지 않습니다.</td></tr>
-          <tr><td class="row-h">표준 질의</td><td data-k="과금 기준">퍼블릭 호스팅 영역 질의 100만 건당</td><td data-k="참고">사설 호스팅 영역 질의는 무료입니다. ELB, CloudFront, API Gateway, VPC 엔드포인트, S3 웹사이트 엔드포인트 등 지원되는 AWS 대상을 가리키는 alias 질의도 무료입니다.</td></tr>
+          <tr><td class="row-h">표준 질의</td><td data-k="과금 기준">퍼블릭 호스팅 영역 질의 100만 건당</td><td data-k="참고">사설 호스팅 영역 질의는 무료입니다. ELB, CloudFront, API Gateway, VPC 엔드포인트, Global Accelerator, S3 웹사이트 엔드포인트 등 지원되는 AWS 대상을 가리키는 alias 질의도 무료입니다.</td></tr>
           <tr><td class="row-h">정책 기반 질의</td><td data-k="과금 기준">Latency, Geolocation·Geoproximity, IP-based 질의를 유형별로 100만 건당</td><td data-k="참고">IP-based 라우팅의 CIDR 블록은 1,000개를 넘는 블록부터 블록당 월 요금이 붙습니다.</td></tr>
           <tr><td class="row-h">Traffic Flow</td><td data-k="과금 기준">정책 레코드당 월 요금</td><td data-k="참고">트래픽 정책을 도메인 이름에 적용해 만든 정책 레코드에 붙습니다.</td></tr>
-          <tr><td class="row-h">헬스 체크</td><td data-k="과금 기준">헬스 체크당 월 요금. AWS 엔드포인트와 그 외 엔드포인트의 단가가 다릅니다.</td><td data-k="참고">HTTPS, 문자열 일치, Fast 간격, 지연 측정은 옵션마다 월 요금이 추가됩니다.</td></tr>
+          <tr><td class="row-h">헬스 체크</td><td data-k="과금 기준">헬스 체크당 월 요금. AWS 엔드포인트와 그 외 엔드포인트의 단가가 다릅니다.</td><td data-k="참고">AWS 엔드포인트 헬스 체크 50개까지는 무료입니다. HTTPS, 문자열 일치, Fast 간격, 지연 측정은 옵션마다 월 요금이 추가됩니다.</td></tr>
           <tr><td class="row-h">Resolver 엔드포인트</td><td data-k="과금 기준">엔드포인트 ENI당 시간 요금, 엔드포인트를 지나는 질의 100만 건당</td><td data-k="참고">엔드포인트를 거치지 않고 VPC 안에서 해석되는 재귀 질의는 무료입니다.</td></tr>
           <tr><td class="row-h">DNS Firewall</td><td data-k="과금 기준">규칙 그룹이 연결된 VPC의 질의 100만 건당, 사용자 지정 도메인 목록의 도메인당 월 요금</td><td data-k="참고">AWS 관리형 도메인 목록에는 도메인 요금이 없습니다. Advanced 규칙을 쓰면 규칙 그룹의 VPC 연결당 시간 요금이 붙습니다.</td></tr>
           <tr><td class="row-h">Route 53 Profiles</td><td data-k="과금 기준">계정·리전당 시간 요금(Profile-VPC 연결 100개 포함), 초과 연결당 시간 요금</td><td data-k="참고">Profile-VPC 연결이 100개를 넘으면 연결당 요금이 더해집니다.</td></tr>
-          <tr><td class="row-h">Global Resolver</td><td data-k="과금 기준">리전 시간 요금, 배포당 월 10억 건을 넘는 질의 100만 건당</td><td data-k="참고">DNS 필터링 사용 여부에 따라 시간 단가가 다릅니다.</td></tr>
+          <tr><td class="row-h">Global Resolver</td><td data-k="과금 기준">배포당 시간 요금(첫 두 리전 포함, 추가 리전은 리전당), 배포당 월 10억 건을 넘는 질의 100만 건당</td><td data-k="참고">DNS 필터링 사용 여부에 따라 시간 단가가 다릅니다. 신규 고객은 30일 무료 체험을 쓸 수 있습니다.</td></tr>
           <tr><td class="row-h">연관 비용</td><td data-k="과금 기준">도메인 등록(TLD별 연간 요금), DNSSEC 서명 키, 질의 로그 저장</td><td data-k="참고">DNSSEC 서명과 질의 로그 자체는 Route 53 요금이 없고, AWS KMS와 CloudWatch Logs·S3·Data Firehose에서 과금합니다.</td></tr>
           </tbody>
         </table>

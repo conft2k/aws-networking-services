@@ -262,7 +262,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
 
 <nav aria-label="주요 메뉴">
   <div class="wrap">
-    <a class="brand" href="#top">Global <span>Accelerator</span></a>
+    <a class="brand" href="#top">AWS <span>Global Accelerator</span></a>
     <div class="navlinks">
       <a href="../">전체 서비스</a>
       <a href="#how">트래픽 제어</a>
@@ -350,7 +350,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
         <div class="layer">
           <span class="lv">02<small>Endpoint group</small></span>
           <div><h3>엔드포인트 그룹</h3><p>리전마다 하나씩 둡니다. 트래픽 다이얼로 그 리전이 받을 비율을 조정하고, 0%로 두면 해당 리전으로 가는 트래픽을 끊습니다.</p></div>
-          <div class="specs"><code>1 group per Region</code><code>traffic dial %</code><code>health check 10–30s</code><code>port override</code></div>
+          <div class="specs"><code>1 group per Region</code><code>traffic dial %</code><code>health check 10s · 30s</code><code>port override</code></div>
         </div>
         <div class="layer">
           <span class="lv">03<small>Endpoint</small></span>
@@ -367,9 +367,9 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
       <h2 id="features-h">주요 기능</h2>
       <div class="features">
         <article class="feature"><p class="ft">Failover</p><h3>헬스 체크와 장애 조치</h3><p>새 연결은 즉시 정상 엔드포인트로 갑니다. 기존 연결은 유휴 시간 제한(TCP 340초, UDP 30초)까지 원래 엔드포인트에 남습니다.</p></article>
-        <article class="feature"><p class="ft">Source IP</p><h3>클라이언트 IP 보존</h3><p>지원 리전에서 ALB, EC2, 보안 그룹이 있는 NLB 엔드포인트가 원본 클라이언트 IP를 받습니다. ALB는 기본으로 켜져 있고, Elastic IP와 TLS 리스너를 쓰는 NLB에서는 쓸 수 없습니다.</p></article>
+        <article class="feature"><p class="ft">Source IP</p><h3>클라이언트 IP 보존</h3><p>ALB, EC2, 보안 그룹이 있는 NLB 엔드포인트가 원본 클라이언트 IP를 받습니다. ALB는 기본으로 켜져 있고, Elastic IP와 TLS 리스너를 쓰는 NLB에서는 쓸 수 없습니다. Custom routing 가속기는 항상 보존합니다.</p></article>
         <article class="feature"><p class="ft">Stateful apps</p><h3>클라이언트 어피니티</h3><p>원본 IP 기준으로 같은 사용자를 같은 엔드포인트에 연결합니다. 세션 상태를 서버에 두는 애플리케이션에 씁니다.</p></article>
-        <article class="feature"><p class="ft">Dual stack</p><h3>IPv6 지원</h3><p>듀얼 스택 가속기는 IPv4 2개와 IPv6 2개, 모두 4개의 고정 주소를 받습니다. 엔드포인트도 듀얼 스택을 지원해야 합니다.</p></article>
+        <article class="feature"><p class="ft">Dual stack</p><h3>IPv6 지원</h3><p>듀얼 스택 가속기는 IPv4 2개와 IPv6 2개, 모두 4개의 고정 주소를 받습니다. 엔드포인트는 클라이언트 IP 보존을 켠 ALB, 보안 그룹이 있는 NLB, EC2여야 하고 Elastic IP는 쓸 수 없습니다.</p></article>
         <article class="feature"><p class="ft">Your addresses</p><h3>BYOIP</h3><p>보유한 IPv4 주소 풀을 가져와 가속기의 고정 IP로 씁니다. 기존 허용 목록에 등록된 주소를 그대로 유지할 수 있습니다.</p></article>
         <article class="feature"><p class="ft">Protection</p><h3>AWS Shield 연동</h3><p>엣지에서 트래픽을 받기 때문에 AWS Shield의 DDoS 보호와 함께 동작합니다. 엔드포인트의 보안 그룹과 AWS WAF 규칙도 그대로 유지됩니다.</p></article>
       </div>

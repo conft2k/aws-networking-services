@@ -290,7 +290,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
 
 <nav aria-label="주요 메뉴">
   <div class="wrap">
-    <a class="brand" href="#top">Transit <span>Gateway</span></a>
+    <a class="brand" href="#top">AWS <span>Transit Gateway</span></a>
     <div class="navlinks">
       <a href="../">전체 서비스</a>
       <a href="#routing">라우팅 모델</a>
@@ -412,7 +412,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
         <article class="feature"><p class="ft">Native firewall</p><h3>Network Firewall 연결</h3><p>AWS Network Firewall을 Transit Gateway attachment로 직접 붙입니다. 방화벽 엔드포인트를 둘 VPC와 서브넷을 따로 구성하지 않아도 됩니다.</p></article>
         <article class="feature"><p class="ft">Multi-region</p><h3>Inter-Region peering</h3><p>다른 리전이나 다른 계정의 Transit Gateway와 피어링합니다. 리전 간 트래픽은 AWS 백본에서 AES-256으로 암호화되어 이동합니다.</p></article>
         <article class="feature"><p class="ft">SD-WAN</p><h3>Transit Gateway Connect</h3><p>VPC나 Direct Connect를 전송 경로로 삼아 GRE 터널과 BGP로 SD-WAN 장비를 연결합니다. GRE 피어당 최대 5 Gbps입니다.</p></article>
-        <article class="feature"><p class="ft">Many sites</p><h3>VPN Concentrator</h3><p>attachment 하나에 최대 100개 지사의 Site-to-Site VPN을 수용합니다. 사이트당 100 Mbps 이하, BGP 라우팅 지사에 맞습니다.</p></article>
+        <article class="feature"><p class="ft">Many sites</p><h3>VPN Concentrator</h3><p>attachment 하나에 최대 100개 지사의 Site-to-Site VPN을 수용합니다. 사이트당 최대 100 Mbps, 합계 5 Gbps이며 BGP 라우팅만 지원합니다.</p></article>
         <article class="feature"><p class="ft">One to many</p><h3>Multicast</h3><p>IGMPv2 또는 정적 그룹 멤버십으로 VPC 사이 멀티캐스트를 라우팅합니다. 멀티캐스트 도메인 단위로 서브넷을 묶고, 새 Transit Gateway에서 활성화합니다.</p></article>
       </div>
     </div>
@@ -442,7 +442,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             </tr>
             <tr>
               <td class="row-h">Site-to-Site VPN</td>
-              <td data-k="최대 대역폭">터널당 <span class="num">1.25</span> Gbps, Large bandwidth 터널 <span class="num">5</span> Gbps, VPN Concentrator 사이트당 <span class="num">100</span> Mbps</td>
+              <td data-k="최대 대역폭">터널당 <span class="num">1.25</span> Gbps, Large bandwidth 터널 <span class="num">5</span> Gbps (Accelerated VPN 제외), VPN Concentrator 사이트당 <span class="num">100</span> Mbps</td>
               <td data-k="MTU">IPsec 터널 MTU <span class="num">1446</span> bytes</td>
               <td data-k="경로 교환">BGP 또는 정적. BGP를 쓰면 ECMP로 여러 터널을 묶습니다. Accelerated VPN은 Global Accelerator를 거쳐 AWS 엣지로 들어옵니다.</td>
             </tr>
@@ -557,7 +557,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
           <thead><tr><th scope="col">과금 항목</th><th scope="col">과금 기준</th><th scope="col">참고</th></tr></thead>
           <tbody>
           <tr><td class="row-h">Attachment 시간</td><td data-k="과금 기준">attachment마다 연결된 시간. 부분 시간은 1시간으로 계산합니다.</td><td data-k="참고">VPC는 VPC 소유자, DX는 DX gateway 소유자, Network Firewall은 방화벽 소유자, VPN · Connect · 피어링은 Transit Gateway 소유자에게 청구됩니다.</td></tr>
-          <tr><td class="row-h">데이터 처리</td><td data-k="과금 기준">VPC, Direct Connect, VPN, Network Firewall에서 Transit Gateway로 보낸 GB</td><td data-k="참고">피어링 attachment에서 들어온 데이터, Connect, Private IP VPN attachment에는 추가 처리 요금이 없습니다. AZ 간 내부 라우팅에도 Transit Gateway 추가 요금이 없습니다.</td></tr>
+          <tr><td class="row-h">데이터 처리</td><td data-k="과금 기준">VPC, Direct Connect, VPN, Network Firewall에서 Transit Gateway로 보낸 GB</td><td data-k="참고">기본은 보낸 쪽(소스 attachment) 소유자에게 청구되며, Flexible Cost Allocation 정책으로 목적지나 중앙 계정에 배분할 수도 있습니다. 피어링 attachment에서 들어온 데이터에는 처리 요금이 없고, Connect와 Private IP VPN attachment는 기반 VPC · DX attachment 요금 외에 추가 처리 요금이 없습니다.</td></tr>
           <tr><td class="row-h">Multicast 데이터 처리</td><td data-k="과금 기준">멀티캐스트 수신 인스턴스가 받은 GB</td><td data-k="참고">수신자마다 계산합니다.</td></tr>
           <tr><td class="row-h">리전 간 데이터 전송</td><td data-k="과금 기준">피어링으로 다른 리전에 보낸 아웃바운드 GB</td><td data-k="참고">보내는 쪽에 EC2 데이터 전송 요금으로 청구되며, 인바운드는 무료입니다.</td></tr>
           <tr><td class="row-h">Site-to-Site VPN</td><td data-k="과금 기준">VPN 연결 시간, VPN Concentrator 시간</td><td data-k="참고">Site-to-Site VPN 요금으로 따로 청구됩니다. Accelerated VPN은 연결당 Global Accelerator 2개의 시간 요금과 Data Transfer Premium이 붙습니다.</td></tr>

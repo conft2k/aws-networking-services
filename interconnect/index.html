@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Interconnect 소개</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+body{margin:0}img{max-width:100%}[hidden]{display:none!important}
+
+/* Layout: a cross-connect work order. Cool steel paper, navy ink, Amazon orange as the one accent; section tags read like fiber labels. */
+:root{
+  --bg:#EEF1F4; --surface:#FFFFFF; --sunken:#E3E8ED;
+  --ink:#14202E; --ink-2:#44515F; --ink-3:#5A6672;
+  --line:#CDD5DD; --line-2:#B4BFCA;
+  --fiber:#FF9900;          /* Amazon orange — fills only */
+  --fiber-ink:#B35C00;      /* orange-derived, AA on light surfaces */
+  --fiber-soft:#FFF0D9;
+  --on-fiber:#14202E;
+  --trace:#2E7D9A;          /* secondary line color for diagram paths */
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --maxw:1120px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--fiber-ink);outline-offset:3px;border-radius:2px}
+.skip-link{position:absolute;left:16px;top:-60px;background:var(--fiber);color:var(--on-fiber);padding:8px 14px;font-weight:700;z-index:50;text-decoration:none}
+.skip-link:focus{top:12px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.wrap{max-width:var(--maxw);margin:0 auto;padding-inline:24px}
+section{padding-block:88px;border-top:1px solid var(--line)}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.25}
+h2{font-size:clamp(26px,3.4vw,36px);font-weight:700;letter-spacing:-.01em}
+h3{font-size:18px;font-weight:700}
+p{margin:0}
+.lede{color:var(--ink-2);max-width:62ch;margin-top:14px}
+.num{font-family:var(--display);font-variant-numeric:tabular-nums lining-nums}
+.mono{font-family:var(--mono)}
+
+/* fiber label: the section tag */
+.tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-bottom:14px}
+.tag::before{content:"";width:22px;height:8px;background:var(--fiber);border-radius:1px}
+
+/* nav */
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:60px}
+.brand{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.02em;text-decoration:none;text-transform:uppercase}
+.brand span{color:var(--fiber-ink)}
+.navlinks{display:flex;gap:22px;font-size:14px;align-items:center}
+.navlinks a{text-decoration:none;color:var(--ink-2)}
+.navlinks a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;font-weight:700;font-size:15px;text-decoration:none;border-radius:4px;border:1px solid transparent;transition:transform .15s ease,background .15s ease}
+.btn-primary{background:var(--fiber);color:var(--on-fiber)}
+.btn-primary:hover{transform:translateY(-1px)}
+.btn-ghost{border-color:var(--line-2);color:var(--ink)}
+.btn-ghost:hover{background:var(--sunken)}
+.navlinks .btn{min-height:38px;padding:0 14px;font-size:14px;color:var(--on-fiber)}
+
+/* hero */
+.hero{padding-block:72px 64px;border-top:0}
+.hero-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:56px;align-items:center}
+.eyebrow{font-family:var(--mono);font-size:13px;color:var(--fiber-ink);letter-spacing:.04em}
+.hero h1{font-size:clamp(34px,5vw,56px);font-weight:700;letter-spacing:-.02em;margin-top:16px}
+.hero h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--fiber) 62%,var(--fiber) 90%,transparent 90%);padding-inline:2px}
+.hero .lede{font-size:18px}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+
+/* hero visual: port faceplate */
+.faceplate{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px}
+.faceplate-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.ports{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+.port{border:1px solid var(--line);border-radius:4px;padding:14px 14px 12px;background:var(--sunken);display:flex;flex-direction:column;gap:2px}
+.port .num{font-size:40px;font-weight:600;line-height:1}
+.port .num small{font-size:18px;color:var(--ink-2);margin-left:2px}
+.port .optic{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+.port .led{width:8px;height:8px;border-radius:50%;background:var(--fiber);align-self:flex-end;margin-top:-6px;animation:blink 2.4s ease-in-out infinite}
+.port:nth-child(2) .led{animation-delay:.6s}.port:nth-child(3) .led{animation-delay:1.2s}.port:nth-child(4) .led{animation-delay:1.8s}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.faceplate-foot{margin-top:14px;font-size:13px;color:var(--ink-2)}
+
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:56px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.chip{padding:18px 20px;border-left:1px solid var(--line);min-width:0}
+.chip:first-child{border-left:0}
+.chip .num{font-size:34px;font-weight:600;line-height:1.1}
+.chip p{font-size:13.5px;color:var(--ink-2);margin-top:4px}
+
+/* value */
+.split{display:grid;grid-template-columns:1fr 1.4fr;gap:56px}
+.pillars{display:grid;gap:0;border-top:1px solid var(--line-2)}
+.pillar{display:grid;grid-template-columns:120px 1fr;gap:20px;padding-block:22px;border-bottom:1px solid var(--line)}
+.pillar .k{font-family:var(--display);font-size:22px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--fiber-ink)}
+.pillar p{color:var(--ink-2);margin-top:6px}
+
+/* stack (L1/L2/L3) */
+.stack{margin-top:40px;display:grid;gap:10px}
+.layer{display:grid;grid-template-columns:96px 1fr 1.2fr;gap:24px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px 24px}
+.layer .lv{font-family:var(--display);font-size:44px;font-weight:700;line-height:.9}
+.layer .lv small{display:block;font-family:var(--mono);font-size:11px;font-weight:400;color:var(--ink-3);letter-spacing:.06em;margin-top:8px;text-transform:uppercase}
+.layer p{color:var(--ink-2);margin-top:6px;font-size:15px}
+.specs{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+.specs code{font-family:var(--mono);font-size:12.5px;background:var(--sunken);border:1px solid var(--line);padding:3px 8px;border-radius:3px;color:var(--ink)}
+
+/* features */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:40px}
+.feature{background:var(--surface);padding:26px 24px;min-width:0}
+.feature .ft{font-family:var(--mono);font-size:11.5px;color:var(--fiber-ink);letter-spacing:.06em;text-transform:uppercase}
+.feature h3{margin-top:8px}
+.feature p{color:var(--ink-2);font-size:15px;margin-top:8px}
+
+/* table */
+.tbl-wrap{margin-top:36px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:14px 18px;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--sunken)}
+tbody tr:last-child td{border-bottom:0}
+td.row-h{font-weight:700;width:22%}
+td .num{font-size:18px;font-weight:600}
+
+/* architecture */
+.arch{margin-top:36px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px}
+.arch-scroll{overflow-x:auto}
+.arch svg{display:block;width:100%;min-width:860px;height:auto}
+.arch-hint{display:none;font-size:13px;color:var(--ink-3);margin-top:10px}
+svg .box{fill:var(--sunken);stroke:var(--line-2)}
+svg .zone{fill:none;stroke:var(--line-2);stroke-dasharray:4 4}
+svg .t{fill:var(--ink);font-family:var(--sans);font-size:14px;font-weight:700}
+svg .s{fill:var(--ink-3);font-family:var(--mono);font-size:11px}
+svg .z{fill:var(--ink-2);font-family:var(--mono);font-size:11px;letter-spacing:.08em}
+svg .fiber{stroke:var(--fiber);stroke-width:5;fill:none;stroke-linecap:round}
+svg .path{stroke:var(--trace);stroke-width:2;fill:none}
+svg .site{stroke:var(--fiber-ink);stroke-width:2;fill:none;stroke-dasharray:6 5}
+svg .lbl{fill:var(--trace);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .lbl2{fill:var(--fiber-ink);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .dot{fill:var(--fiber)}
+.legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--ink-2)}
+.legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--fiber)}
+.legend i.p{border-top:2px solid var(--trace)}
+.legend i.s{border-top:2px dashed var(--fiber-ink)}
+
+/* steps */
+.steps{list-style:none;padding:0;margin:40px 0 0;display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:4px solid var(--fiber)}
+.steps li{padding:20px 18px 0 0;min-width:0}
+.steps .num{font-size:15px;font-weight:600;color:var(--fiber-ink);letter-spacing:.06em}
+.steps h3{font-size:16px;margin-top:6px}
+.steps p{font-size:14px;color:var(--ink-2);margin-top:6px}
+
+/* resiliency */
+.res{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:36px}
+.res-card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:26px}
+.res-card .num{font-size:52px;font-weight:700;line-height:1}
+.res-card .num small{font-size:20px;color:var(--ink-2)}
+.res-card h3{margin-top:10px}
+.res-card p{color:var(--ink-2);font-size:15px;margin-top:6px}
+.res-card.max{border-color:var(--fiber);box-shadow:inset 0 4px 0 var(--fiber)}
+
+/* cta */
+.cta{text-align:center}
+.cta h2{max-width:22ch;margin:0 auto}
+.cta .lede{margin:14px auto 0}
+.cta .cta-row{justify-content:center}
+footer{border-top:1px solid var(--line);padding-block:28px;font-size:13px;color:var(--ink-3)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+
+@media (max-width:1024px){
+  .hero-grid,.split{grid-template-columns:1fr;gap:40px}
+  .features{grid-template-columns:repeat(2,1fr)}
+  .steps{grid-template-columns:repeat(2,1fr);border-top:0;gap:0 24px}
+  .steps li{border-top:4px solid var(--fiber);padding-bottom:24px}
+  .layer{grid-template-columns:80px 1fr}
+  .layer .specs{grid-column:2}
+  .chips{grid-template-columns:repeat(2,1fr)}
+  .chip:nth-child(3){border-left:0}
+  .chip:nth-child(n+3){border-top:1px solid var(--line)}
+}
+@media (max-width:640px){
+  .wrap{padding-inline:18px}
+  section{padding-block:60px}
+  .navlinks a:not(.btn){display:none}
+  .features,.res{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr}
+  .pillar{grid-template-columns:1fr;gap:0}
+  .layer{grid-template-columns:1fr;gap:12px}
+  .layer .specs{grid-column:auto}
+  .cta-row .btn{width:100%}
+  .arch-hint{display:block}
+  table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  table,tbody,tr,td{display:block;width:100%}
+  tr{border-bottom:1px solid var(--line);padding:14px 16px}
+  tbody tr:last-child{border-bottom:0}
+  td{border:0;padding:3px 0}
+  td.row-h{width:100%;font-size:16px;padding-bottom:6px}
+  td[data-k]::before{content:attr(data-k);display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+
+/* ---- service-specific ---- */
+.hero-grid>*{min-width:0}
+/* hero visual: one logical interconnect, four MACsec links underneath */
+.ixo{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px;min-width:0}
+.ixo-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.ixo-obj{margin-top:16px;border:1px dashed var(--line-2);border-radius:4px;padding:12px 14px;display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.ixo-obj .num{font-size:24px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;line-height:1.1}
+.ixo-obj .mono{font-size:11.5px;color:var(--ink-3)}
+.facs{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}
+.fac{background:var(--sunken);border:1px solid var(--line);border-radius:4px;padding:12px 12px 10px;min-width:0}
+.fac .fn{font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.link{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;margin-top:10px;font-family:var(--mono);font-size:11px;color:var(--ink-2)}
+.link .bar{height:4px;background:var(--fiber);border-radius:2px;position:relative}
+.link .bar::after{content:"";position:absolute;left:50%;top:-3px;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:var(--surface);border:2px solid var(--fiber-ink);animation:blink 2.4s ease-in-out infinite}
+.fac:nth-child(2) .link .bar::after{animation-delay:.6s}
+.link + .link .bar::after{animation-delay:1.2s}
+.partners{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.partners code{font-family:var(--mono);font-size:11.5px;border:1px solid var(--line-2);padding:2px 7px;border-radius:3px;color:var(--ink-2);background:var(--surface)}
+.partners code b{font-weight:500;color:var(--fiber-ink)}
+.ixo-foot{margin-top:12px;font-size:13px;color:var(--ink-2)}
+
+/* status badges */
+.st{display:inline-block;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:3px;border:1px solid var(--line-2);color:var(--ink-2);white-space:nowrap}
+.st.ga{background:var(--fiber);border-color:var(--fiber);color:var(--on-fiber)}
+.st.pv{background:var(--fiber-soft);border-color:var(--fiber-ink);color:var(--fiber-ink)}
+.note{font-size:14px;color:var(--ink-3);margin-top:14px;max-width:80ch}
+.nw{white-space:nowrap}
+td .sub{display:block;font-family:var(--mono);font-size:12px;font-weight:400;color:var(--ink-3)}
+@media (min-width:641px){.cmp td:first-child{width:16%}}
+
+@media (max-width:640px){
+  .ixo{padding:16px}
+  .facs{gap:8px}
+  .fac{padding:10px 8px 8px}
+  .link{font-size:10px;gap:5px}
+}
+
+/* nav: seven items need room; show only CTA below 1100px */
+.brand,.navlinks a{white-space:nowrap}
+@media (max-width:1100px){.navlinks a:not(.btn){display:none}}
+
+/* Korean line breaking: never split a word mid-syllable */
+h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
+</style>
+</head>
+<body>
+
+<a class="skip-link" href="#main">본문으로 건너뛰기</a>
+
+<nav aria-label="주요 메뉴">
+  <div class="wrap">
+    <a class="brand" href="#top">AWS <span>Interconnect</span></a>
+    <div class="navlinks">
+      <a href="../">전체 서비스</a>
+      <a href="#how">동작 방식</a>
+      <a href="#partners">지원 범위</a>
+      <a href="#features">주요 기능</a>
+      <a href="#compare">비교</a>
+      <a href="#arch">아키텍처</a>
+      <a href="#pricing">비용</a>
+      <a class="btn btn-primary" href="#start">시작하기</a>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+  <header class="hero" id="top">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">AWS Interconnect · 관리형 사설 연결</p>
+          <h1>라우터도, 크로스커넥트도 없이 <em>다른 클라우드와 지사</em>를 AWS에 잇습니다</h1>
+          <p class="lede">리전, 대역폭, 상대 사업자만 고르면 AWS와 파트너가 미리 깔아 둔 용량 위에 전용 대역폭 사설 연결을 만들어 줍니다. VLAN, BGP, ASN 설정은 서비스가 맡고, 사용자에게는 <span class="mono">interconnect</span> 객체 하나만 보입니다.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="#start">생성 절차 보기</a>
+            <a class="btn btn-ghost" href="#arch">아키텍처 보기</a>
+          </div>
+        </div>
+
+        <div class="ixo" aria-label="Interconnect 객체와 하위 물리 연결 구조">
+          <div class="ixo-head"><span>Interconnect 객체</span><span>MACsec · IEEE 802.1AE</span></div>
+          <div class="ixo-obj"><span class="num">1 Interconnect</span><span class="mono">attach point = DX Gateway</span></div>
+          <div class="facs">
+            <div class="fac">
+              <span class="fn">시설 A</span>
+              <div class="link"><span>AWS</span><span class="bar" aria-hidden="true"></span><span>파트너</span></div>
+              <div class="link"><span>AWS</span><span class="bar" aria-hidden="true"></span><span>파트너</span></div>
+            </div>
+            <div class="fac">
+              <span class="fn">시설 B</span>
+              <div class="link"><span>AWS</span><span class="bar" aria-hidden="true"></span><span>파트너</span></div>
+              <div class="link"><span>AWS</span><span class="bar" aria-hidden="true"></span><span>파트너</span></div>
+            </div>
+          </div>
+          <div class="partners" aria-label="연결 상대와 상태">
+            <code>Google Cloud <b>GA</b></code><code>OCI <b>GA</b></code><code>Azure <b>Preview</b></code><code>Lumen <b>GA</b></code><code>AT&amp;T <b>Gated preview</b></code>
+          </div>
+          <p class="ixo-foot">물리적으로 분리된 두 개 이상의 시설에 연결 4개를 두고 ECMP로 부하를 나눕니다. 사용자가 이중화를 따로 설계하지 않아도 됩니다.</p>
+        </div>
+      </div>
+
+      <div class="chips" role="list">
+        <div class="chip" role="listitem"><span class="num">4</span><p>시설 2곳 이상에 걸친 연결 수 (ECMP)</p></div>
+        <div class="chip" role="listitem"><span class="num">MACsec</span><p>AWS–파트너 장비 구간 기본 암호화</p></div>
+        <div class="chip" role="listitem"><span class="num">1–100</span><p>last mile 대역폭 단계 (Gbps)</p></div>
+        <div class="chip" role="listitem"><span class="num">500 Mbps</span><p>multicloud Free Tier (리전·CSP당 1개)</p></div>
+      </div>
+    </div>
+  </header>
+
+  <section id="why" aria-labelledby="why-h">
+    <div class="wrap split">
+      <div>
+        <p class="tag">Why Interconnect</p>
+        <h2 id="why-h">클라우드 간 연결을 직접 짜 맞추지 않아도 됩니다</h2>
+        <p class="lede">지금까지 AWS와 다른 클라우드를 사설로 잇으려면 코로케이션, 크로스커넥트, 양쪽 VLAN·BGP를 직접 조율해야 했습니다. Interconnect는 이 과정을 생성 요청과 수락 두 동작으로 줄입니다.</p>
+      </div>
+      <div class="pillars">
+        <div class="pillar"><span class="k">Managed</span><div><h3>물리·라우팅 설정은 서비스가</h3><p>장비 프로비저닝, VLAN, BGP 세션, ASN 할당, 유지보수까지 AWS와 상대 사업자가 맡습니다. 보통 몇 분 안에 연결이 올라옵니다.</p></div></div>
+        <div class="pillar"><span class="k">Resilient</span><div><h3>이중화는 기본값</h3><p>독립 전원·네트워크를 갖춘 시설 두 곳 이상에서 장비, 크로스커넥트, 시설 단위의 단일 장애점을 없앤 구성으로 프로비저닝됩니다.</p></div></div>
+        <div class="pillar"><span class="k">Elastic</span><div><h3>대역폭은 속성 하나</h3><p>연결을 다시 만들거나 지원 케이스를 열지 않고 콘솔이나 CLI에서 대역폭을 올리고 내립니다.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how" aria-labelledby="how-h">
+    <div class="wrap">
+      <p class="tag">How it works</p>
+      <h2 id="how-h">양쪽 attach point 사이에 놓인 객체 하나</h2>
+      <p class="lede">AWS와 파트너는 지원 리전과 로케이션에 용량을 미리 깔아 둡니다. 사용자가 요청하면 그 위에 논리 연결을 잘라 양쪽 attach point를 잇고, 결과를 <span class="mono">interconnect</span> 객체 하나로 보여 줍니다.</p>
+      <div class="stack">
+        <div class="layer">
+          <span class="lv">AWS<small>Attach point</small></span>
+          <div><h3>Direct Connect Gateway</h3><p>AWS 쪽 attach point는 항상 DX Gateway입니다. 여기에 Virtual Private Gateway, Transit Gateway, Cloud WAN 코어 네트워크를 연결해 VPC까지 경로를 전달합니다. 기존 Private·Transit VIF가 붙어 있는 DX Gateway도 쓸 수 있습니다.</p></div>
+          <div class="specs"><code>DX Gateway</code><code>VGW</code><code>Transit Gateway</code><code>Cloud WAN</code></div>
+        </div>
+        <div class="layer">
+          <span class="lv">IXC<small>Interconnect</small></span>
+          <div><h3>관리형 연결</h3><p>라우터 쌍 4개 사이의 연결 4개가 시설 두 곳 이상에 나뉘어 놓이고 ECMP로 트래픽을 나눕니다. AWS와 파트너 장비 사이 모든 물리 연결은 MACsec으로 암호화되며, 암호화 세션이 살아 있을 때만 트래픽을 보냅니다.</p></div>
+          <div class="specs"><code>4 connections</code><code>ECMP</code><code>MACsec</code><code>BGP (자동)</code></div>
+        </div>
+        <div class="layer">
+          <span class="lv">PEER<small>Remote side</small></span>
+          <div><h3>상대 클라우드 또는 회선 사업자</h3><p>multicloud에서는 상대 CSP의 라우터가, last mile에서는 파트너 쪽 네트워크 식별자가 attach point입니다. 생성 시 상대 측 소유 ID(예: Google Cloud 프로젝트 ID, OCI Tenancy OCID)를 입력합니다.</p></div>
+          <div class="specs"><code>CSP router</code><code>Partner network ID</code><code>Activation key</code></div>
+        </div>
+      </div>
+      <p class="note">MACsec이 보호하는 범위는 AWS 장비와 파트너 장비 사이 L2 구간입니다. VPC에서 상대 서브넷까지 종단 간 기밀성이 필요하면 IPsec이나 애플리케이션 계층 암호화를 더하세요.</p>
+    </div>
+  </section>
+
+  <section id="partners" aria-labelledby="partners-h">
+    <div class="wrap">
+      <p class="tag">Offerings &amp; availability</p>
+      <h2 id="partners-h">두 가지 제공 형태, 상대별 상태</h2>
+      <p class="lede">multicloud는 AWS VPC를 다른 퍼블릭 클라우드의 VPC와, last mile은 지사·데이터센터를 파트너의 기존 회선망을 통해 AWS와 잇습니다. 2026년 10월 기준 상태입니다.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">AWS Interconnect 제공 형태와 상대별 상태, 지원 리전</caption>
+          <thead><tr><th scope="col">상대</th><th scope="col">상태</th><th scope="col">AWS 리전 · 로케이션</th><th scope="col">참고</th></tr></thead>
+          <tbody>
+            <tr><td class="row-h">Google Cloud<span class="sub">multicloud</span></td><td data-k="상태"><span class="st ga">GA</span></td><td data-k="AWS 리전 · 로케이션"><span class="nw">us-east-1</span>, <span class="nw">us-west-1</span>, <span class="nw">us-west-2</span>, <span class="nw">eu-west-2</span>, <span class="nw">eu-central-1</span>, <span class="nw">eu-north-1</span>, <span class="nw">ap-southeast-1</span>, <span class="nw">ap-southeast-2</span></td><td data-k="참고">첫 출시 파트너(2026년 4월 GA). 리전마다 Google Cloud 리전이 짝지어집니다(예: <span class="nw">us-east-1</span> – <span class="nw">us-east4</span>).</td></tr>
+            <tr><td class="row-h">Oracle Cloud Infrastructure<span class="sub">multicloud</span></td><td data-k="상태"><span class="st ga">GA</span></td><td data-k="AWS 리전 · 로케이션"><span class="nw">us-east-1</span> (OCI <span class="nw">us-ashburn-1</span>)</td><td data-k="참고">2026년 7월 GA. 생성 시 Tenancy OCID를 입력합니다.</td></tr>
+            <tr><td class="row-h">Microsoft Azure<span class="sub">multicloud</span></td><td data-k="상태"><span class="st pv">Preview</span></td><td data-k="AWS 리전 · 로케이션"><span class="nw">us-east-1</span>, <span class="nw">us-west-1</span>, <span class="nw">eu-central-1</span>, <span class="nw">ap-southeast-2</span></td><td data-k="참고">2026년 8월 공개 프리뷰. 프리뷰 동안 지원 리전당 1개, 1 Gbps로 제한되며 무료입니다. GA 전환 시 프리뷰 연결은 제거됩니다.</td></tr>
+            <tr><td class="row-h">Lumen<span class="sub">last mile</span></td><td data-k="상태"><span class="st ga">GA</span></td><td data-k="AWS 리전 · 로케이션">뉴욕/뉴저지 메트로 → <span class="nw">us-east-1</span></td><td data-k="참고">미국 본토 어디서든 Lumen 회선망으로 접속할 수 있고, Cloud WAN을 쓰면 다른 리전 워크로드에도 닿습니다.</td></tr>
+            <tr><td class="row-h">AT&amp;T<span class="sub">last mile</span></td><td data-k="상태"><span class="st pv">Gated preview</span></td><td data-k="AWS 리전 · 로케이션">미국</td><td data-k="참고">2026년 6월 30일부터 제한 프리뷰로 제공됩니다.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">지원 속도는 상대와 리전 조합마다 다릅니다. last mile은 1·2·5·10·25·50·100 Gbps 단계를 지원하고, multicloud는 조합별 지원 목록(예: Google Cloud 10 Gbps)에서 고릅니다. 최신 목록은 <a href="https://docs.aws.amazon.com/interconnect/latest/userguide/region-availability.html" target="_blank" rel="noopener">리전 가용성 문서</a>를 확인하세요.</p>
+    </div>
+  </section>
+
+  <section id="features" aria-labelledby="features-h">
+    <div class="wrap">
+      <p class="tag">Features</p>
+      <h2 id="features-h">주요 기능</h2>
+      <div class="features">
+        <article class="feature"><p class="ft">Multicloud</p><h3>CSP 간 사설 연결</h3><p>트래픽은 AWS 글로벌 백본을 타고 가다 상대 CSP에 바로 넘겨집니다. 온프레미스 장비나 가상 라우터를 거칠 필요가 없습니다.</p></article>
+        <article class="feature"><p class="ft">Last mile</p><h3>기존 회선 사업자로 온보딩</h3><p>이미 쓰는 사업자(예: Lumen)의 Ethernet·MPLS 회선망에서 바로 AWS로 들어옵니다. IPv4·IPv6를 지원하고, MTU는 8500(점보 프레임)으로 자동 설정됩니다.</p></article>
+        <article class="feature"><p class="ft">Global reach</p><h3>Cloud WAN 연동</h3><p>같은 DX Gateway에 붙은 Interconnect는 어느 리전의 Cloud WAN CNE에서도 최단 경로로 닿습니다. VGW·TGW는 Interconnect의 로컬 리전 것만 연결됩니다.</p></article>
+        <article class="feature"><p class="ft">Elastic</p><h3>무중단 대역폭 변경</h3><p>대역폭은 연결의 속성일 뿐입니다. 콘솔이나 CLI에서 바꾸면 재생성 없이 반영되므로 피크에 늘리고 평소에 줄일 수 있습니다.</p></article>
+        <article class="feature"><p class="ft">Observability</p><h3>CloudWatch 모니터링 포함</h3><p>Interconnect마다 Network Synthetic Monitor 하나가 추가 비용 없이 붙어 왕복 지연과 패킷 손실을 측정합니다. 대역폭 사용률(%) 지표로 경보도 걸 수 있습니다.</p></article>
+        <article class="feature"><p class="ft">Open spec</p><h3>공개 API 사양</h3><p>연동 사양을 GitHub에 공개해 Google Cloud, OCI, Azure, Lumen 등이 같은 방식으로 붙습니다. 상대가 늘어도 운영 모델과 도구는 그대로입니다.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="compare" aria-labelledby="compare-h">
+    <div class="wrap">
+      <p class="tag">Comparison</p>
+      <h2 id="compare-h">Direct Connect, VPN과 무엇이 다른가</h2>
+      <p class="lede">Interconnect는 Direct Connect 인프라와 DX Gateway 위에서 동작하는 관리형 계층입니다. 포트·VIF·BGP를 직접 다루는 Direct Connect와 달리, 파트너와 미리 맞춰 둔 용량을 객체 단위로 빌려 씁니다.</p>
+      <div class="tbl-wrap">
+        <table class="cmp">
+          <caption class="sr-only">AWS Interconnect, Direct Connect, 인터넷 경유 Site-to-Site VPN 비교</caption>
+          <thead><tr><th scope="col">항목</th><th scope="col">AWS Interconnect</th><th scope="col">Direct Connect</th><th scope="col">Site-to-Site VPN (인터넷)</th></tr></thead>
+          <tbody>
+            <tr><td class="row-h">연결 대상</td><td data-k="Interconnect">다른 CSP(multicloud), 파트너 회선망 속 지사·데이터센터(last mile)</td><td data-k="Direct Connect">DX 로케이션까지 끌어온 고객·파트너 회선</td><td data-k="Site-to-Site VPN">인터넷에 닿는 고객 게이트웨이</td></tr>
+            <tr><td class="row-h">구축 작업</td><td data-k="Interconnect">생성 요청 + activation key 수락. 물리 주문 없음</td><td data-k="Direct Connect">포트 요청, LOA-CFA, 크로스커넥트, VIF 생성</td><td data-k="Site-to-Site VPN">VPN 연결 생성 후 고객 장비에 IPsec 설정</td></tr>
+            <tr><td class="row-h">라우팅</td><td data-k="Interconnect">BGP·VLAN·ASN 자동 구성</td><td data-k="Direct Connect">VIF마다 eBGP를 직접 설정</td><td data-k="Site-to-Site VPN">정적 경로 또는 BGP를 직접 설정</td></tr>
+            <tr><td class="row-h">이중화</td><td data-k="Interconnect">기본 내장: 시설 2곳 이상, 연결 4개, ECMP</td><td data-k="Direct Connect">사용자가 설계 (Resiliency Toolkit 권장 구성)</td><td data-k="Site-to-Site VPN">연결당 터널 2개, 장비 이중화는 사용자 몫</td></tr>
+            <tr><td class="row-h">암호화</td><td data-k="Interconnect">AWS–파트너 구간 MACsec 기본 적용</td><td data-k="Direct Connect">지원 전용 연결에서 MACsec 선택</td><td data-k="Site-to-Site VPN">IPsec 종단 간</td></tr>
+            <tr><td class="row-h">대역폭</td><td data-k="Interconnect">상대·리전별 단계에서 선택, 무중단 변경</td><td data-k="Direct Connect">전용 1–400 Gbps, 호스팅 50 Mbps–25 Gbps</td><td data-k="Site-to-Site VPN">터널당 상한이 있고 인터넷 품질에 좌우</td></tr>
+            <tr><td class="row-h">AWS 측 연결점</td><td data-k="Interconnect">DX Gateway → VGW · TGW · Cloud WAN</td><td data-k="Direct Connect">VIF → VGW · DX Gateway · Public 서비스</td><td data-k="Site-to-Site VPN">VGW · TGW · Cloud WAN</td></tr>
+            <tr><td class="row-h">과금 구조</td><td data-k="Interconnect">대역폭 × Tier 시간 요금, GB당 전송 요금 없음</td><td data-k="Direct Connect">포트 시간 + GB당 DTO (또는 정액제)</td><td data-k="Site-to-Site VPN">연결 시간 + 인터넷 DTO</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">last mile과 Direct Connect 호스팅 연결의 차이: 호스팅 연결은 파트너 탐색, 회선 조달, VIF·BGP 설정을 사용자가 하고 기본적으로 이중화되지 않습니다. last mile은 이 과정을 자동화하고 이중화를 강제하며, Direct Connect 포트까지 99.99% 가용성 SLA를 제공합니다.</p>
+    </div>
+  </section>
+
+  <section id="arch" aria-labelledby="arch-h">
+    <div class="wrap">
+      <p class="tag">Reference architecture</p>
+      <h2 id="arch-h">DX Gateway 하나에 multicloud와 last mile을 함께</h2>
+      <p class="lede">us-east-1을 로컬 리전으로 Google Cloud용 multicloud Interconnect와 Lumen last mile Interconnect를 같은 DX Gateway에 붙인 예입니다. 로컬 리전의 Transit Gateway는 DX Gateway association으로, 다른 리전은 Cloud WAN CNE를 통해 두 Interconnect에 닿습니다.</p>
+      <figure class="arch">
+        <div class="arch-scroll">
+          <svg viewBox="0 0 980 460" role="img" aria-labelledby="arch-title arch-desc">
+            <title id="arch-title">AWS Interconnect 레퍼런스 아키텍처</title>
+            <desc id="arch-desc">us-east-1 리전의 VPC 두 개가 Transit Gateway에 붙고, Transit Gateway는 Direct Connect Gateway와 연결됩니다. 서울 리전의 Cloud WAN CNE도 DX attachment로 같은 DX Gateway에 연결됩니다. DX Gateway에는 multicloud Interconnect와 last mile Interconnect가 붙습니다. multicloud Interconnect는 시설 A와 B의 링크 4개로 Google Cloud에, last mile Interconnect는 시설 C와 D의 링크 4개로 Lumen 회선망에 이어지고, Lumen 회선망은 퍼스트 마일 회선으로 데이터센터와 지사에 연결됩니다. 파트너 구간의 모든 물리 링크는 MACsec으로 암호화됩니다.</desc>
+            <!-- zones -->
+            <rect class="zone" x="10" y="40" width="450" height="400" rx="6"/>
+            <text class="z" x="24" y="62">AWS</text>
+            <rect class="zone" x="480" y="40" width="220" height="400" rx="6"/>
+            <text class="z" x="494" y="62">INTERCONNECT</text>
+            <rect class="zone" x="720" y="40" width="250" height="400" rx="6"/>
+            <text class="z" x="734" y="62">PARTNER</text>
+
+            <!-- local region -->
+            <rect class="zone" x="26" y="76" width="232" height="198" rx="4"/>
+            <text class="z" x="40" y="96">US-EAST-1 · LOCAL</text>
+            <rect class="box" x="40" y="110" width="96" height="50" rx="4"/>
+            <text class="t" x="52" y="132">VPC A</text><text class="s" x="52" y="150">워크로드</text>
+            <rect class="box" x="148" y="110" width="96" height="50" rx="4"/>
+            <text class="t" x="160" y="132">VPC B</text><text class="s" x="160" y="150">워크로드</text>
+            <rect class="box" x="40" y="200" width="204" height="56" rx="4"/>
+            <text class="t" x="54" y="224">Transit Gateway</text><text class="s" x="54" y="243">로컬 리전만 association</text>
+            <path class="path" d="M88 160 V200"/>
+            <path class="path" d="M196 160 V200"/>
+
+            <!-- remote region -->
+            <rect class="zone" x="26" y="298" width="232" height="126" rx="4"/>
+            <text class="z" x="40" y="318">AP-NORTHEAST-2 · REMOTE</text>
+            <rect class="box" x="40" y="334" width="204" height="56" rx="4"/>
+            <text class="t" x="54" y="358">Cloud WAN CNE</text><text class="s" x="54" y="377">원격 리전에서도 도달</text>
+
+            <!-- DXGW -->
+            <rect class="box" x="296" y="206" width="150" height="64" rx="4"/>
+            <text class="t" x="310" y="234">DX Gateway</text><text class="s" x="310" y="254">AWS attach point</text>
+            <path class="path" d="M244 228 H296"/>
+            <text class="lbl" x="296" y="194">association</text>
+            <path class="path" d="M244 362 C278 362 268 256 296 256"/>
+            <text class="lbl" x="290" y="300">DX attachment</text>
+
+            <!-- interconnect facilities -->
+            <text class="z" x="494" y="92">MULTICLOUD</text>
+            <rect class="box" x="500" y="102" width="180" height="44" rx="4"/>
+            <text class="t" x="512" y="122">시설 A</text><text class="s" x="512" y="138">라우터 쌍 ×2</text>
+            <rect class="box" x="500" y="156" width="180" height="44" rx="4"/>
+            <text class="t" x="512" y="176">시설 B</text><text class="s" x="512" y="192">라우터 쌍 ×2</text>
+            <text class="z" x="494" y="236">LAST MILE</text>
+            <rect class="box" x="500" y="246" width="180" height="44" rx="4"/>
+            <text class="t" x="512" y="266">시설 C</text><text class="s" x="512" y="282">라우터 쌍 ×2</text>
+            <rect class="box" x="500" y="300" width="180" height="44" rx="4"/>
+            <text class="t" x="512" y="320">시설 D</text><text class="s" x="512" y="336">라우터 쌍 ×2</text>
+            <text class="lbl2" x="494" y="378">링크 4개 · ECMP</text>
+            <text class="lbl2" x="494" y="396">파트너 구간 MACsec</text>
+
+            <!-- DXGW to facilities -->
+            <path class="path" d="M446 222 C474 222 472 124 500 124"/>
+            <path class="path" d="M446 232 C476 232 470 178 500 178"/>
+            <path class="path" d="M446 246 C476 246 470 268 500 268"/>
+            <path class="path" d="M446 258 C474 258 472 322 500 322"/>
+
+            <!-- partners -->
+            <rect class="box" x="740" y="110" width="210" height="80" rx="4"/>
+            <text class="t" x="754" y="140">Google Cloud</text><text class="s" x="754" y="160">VPC · Cloud Router</text><text class="s" x="754" y="176">us-east4</text>
+            <rect class="box" x="740" y="250" width="210" height="76" rx="4"/>
+            <text class="t" x="754" y="280">Lumen 회선망</text><text class="s" x="754" y="300">Ethernet · MPLS</text>
+            <rect class="box" x="740" y="364" width="210" height="56" rx="4"/>
+            <text class="t" x="754" y="388">데이터센터 · 지사</text><text class="s" x="754" y="406">CPE</text>
+
+            <!-- MACsec links -->
+            <path class="fiber" style="stroke-width:3" d="M680 116 C710 116 710 132 740 132"/>
+            <path class="fiber" style="stroke-width:3" d="M680 132 C710 132 710 142 740 142"/>
+            <path class="fiber" style="stroke-width:3" d="M680 170 C710 170 710 158 740 158"/>
+            <path class="fiber" style="stroke-width:3" d="M680 186 C710 186 710 168 740 168"/>
+            <path class="fiber" style="stroke-width:3" d="M680 260 C710 260 710 272 740 272"/>
+            <path class="fiber" style="stroke-width:3" d="M680 276 C710 276 710 282 740 282"/>
+            <path class="fiber" style="stroke-width:3" d="M680 314 C710 314 710 298 740 298"/>
+            <path class="fiber" style="stroke-width:3" d="M680 330 C710 330 710 308 740 308"/>
+
+            <!-- first mile -->
+            <path class="site" d="M845 326 V364"/>
+            <text class="lbl2" x="853" y="350">first mile</text>
+          </svg>
+        </div>
+        <figcaption class="legend">
+          <span><i></i>MACsec 물리 링크 (AWS–파트너)</span>
+          <span><i class="p"></i>논리 연결 · association</span>
+          <span><i class="s"></i>퍼스트 마일 회선</span>
+        </figcaption>
+        <p class="arch-hint">좁은 화면에서는 다이어그램을 좌우로 밀어서 보세요.</p>
+      </figure>
+      <p class="note">원격 리전의 TGW를 같은 DX Gateway에 직접 연결할 수는 없습니다. 원격 리전 TGW는 로컬 리전 TGW와 피어링하면 Interconnect에 닿으며, 이때 리전 간 전송 요금과 TGW 데이터 처리 요금이 붙습니다.</p>
+    </div>
+  </section>
+
+  <section id="start" aria-labelledby="start-h">
+    <div class="wrap">
+      <p class="tag">Getting started</p>
+      <h2 id="start-h">Interconnect를 만드는 순서</h2>
+      <p class="lede">Direct Connect 콘솔의 AWS Interconnect 메뉴, CLI, API, CloudFormation(<span class="mono">AWS::Interconnect::Connection</span>)에서 만들 수 있습니다. 어느 쪽에서든 먼저 생성하고, 다른 쪽이 activation key로 수락합니다.</p>
+      <ol class="steps">
+        <li><span class="num">STEP 1</span><h3>연결 방식 정하기</h3><p>VGW·TGW(로컬 리전)와 Cloud WAN(전역) 중 고르고, IP 대역 충돌을 확인한 뒤 DX Gateway를 준비합니다.</p></li>
+        <li><span class="num">STEP 2</span><h3>생성 요청</h3><p>상대 CSP나 파트너, AWS 리전(또는 메트로), 대역폭, DX Gateway, 상대 측 ID를 입력합니다.</p></li>
+        <li><span class="num">STEP 3</span><h3>activation key 수락</h3><p>AWS가 발급한 키로 상대 쪽 콘솔이나 포털에서 수락합니다. 상대가 먼저 만들었다면 AWS 콘솔의 Accept 메뉴에 키를 넣습니다.</p></li>
+        <li><span class="num">STEP 4</span><h3>자동 프로비저닝</h3><p>연결 4개, VLAN, BGP, ASN, MACsec이 자동 구성됩니다. 이 단계에는 사용자 작업이 없습니다.</p></li>
+        <li><span class="num">STEP 5</span><h3>경로와 지표 확인</h3><p>DX Gateway 연결을 확인하고, Network Synthetic Monitor와 사용률 지표에 CloudWatch 경보를 겁니다.</p></li>
+      </ol>
+      <p class="note">프리뷰 상대는 활성화 단계에서 CLI가 필요할 수 있습니다. multicloud Free Tier는 콘솔의 “AWS Interconnect - multicloud - Free Tier” 흐름으로 만들며, 500 Mbps가 미리 선택되어 있습니다. 상대 CSP 쪽 500 Mbps 쿼터도 먼저 확인하세요.</p>
+    </div>
+  </section>
+
+  <section id="pricing" aria-labelledby="pricing-h">
+    <div class="wrap">
+      <p class="tag">Pricing</p>
+      <h2 id="pricing-h">비용 항목</h2>
+      <p class="lede">AWS 쪽 요금은 선택한 대역폭과 연결의 지리적 범위(Tier)로 정해지는 시간 요금 하나입니다. GB당 데이터 전송 요금은 따로 없습니다. 상대 CSP나 회선 사업자는 자기 쪽 요금을 별도로 청구합니다.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">AWS Interconnect 과금 항목</caption>
+          <thead><tr><th scope="col">과금 항목</th><th scope="col">과금 기준</th><th scope="col">참고</th></tr></thead>
+          <tbody>
+          <tr><td class="row-h">Interconnect 시간</td><td data-k="과금 기준">대역폭 × Tier별 시간당</td><td data-k="참고">생성 시점부터 삭제할 때까지 1시간 단위(올림)로 과금됩니다.</td></tr>
+          <tr><td class="row-h">Tier 1–5</td><td data-k="과금 기준">워크로드 소스 리전과 Interconnect 로컬 리전 사이 경로 거리</td><td data-k="참고">Local, Regional, Continental, Long-haul, Maximum scope 순으로 올라갑니다. 쓰는 경로 중 가장 높은 Tier 하나만 적용되고, Cloud WAN에 CNE를 추가하면 Tier가 다시 계산됩니다.</td></tr>
+          <tr><td class="row-h">데이터 전송</td><td data-k="과금 기준">GB당 요금 없음</td><td data-k="참고">Interconnect 경로의 전송량은 시간 요금에 포함됩니다.</td></tr>
+          <tr><td class="row-h">Free Tier (multicloud)</td><td data-k="과금 기준">로컬(Tier 1) 500 Mbps 1개 (리전마다, CSP마다)</td><td data-k="참고">GA 상태의 CSP에만 적용되며 유료 Interconnect로 전환할 수 없습니다.</td></tr>
+          <tr><td class="row-h">프리뷰</td><td data-k="과금 기준">프리뷰 기간 무료</td><td data-k="참고">지원 리전당 1개, 1 Gbps로 제한됩니다.</td></tr>
+          <tr><td class="row-h">상대 측 요금</td><td data-k="과금 기준">상대 CSP · 파트너가 별도 책정</td><td data-k="참고">생성 전에 상대 쪽 요금표를 확인하세요.</td></tr>
+          <tr><td class="row-h">Transit Gateway · Cloud WAN</td><td data-k="과금 기준">각 서비스 어태치먼트 시간 · 데이터 처리</td><td data-k="참고">각 서비스 요금으로 따로 청구됩니다. TGW 피어링으로 원격 리전에서 들어오면 리전 간 전송 요금도 붙습니다.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">경로별 Tier는 AWS Interconnect Pricing 도구에서 확인할 수 있습니다. 최신 단가는 <a href="https://aws.amazon.com/interconnect/multicloud/pricing/" target="_blank" rel="noopener">Interconnect - multicloud 요금 페이지</a>를 확인하세요.</p>
+    </div>
+  </section>
+
+  <section class="cta" aria-labelledby="cta-h">
+    <div class="wrap">
+      <p class="tag">Next step</p>
+      <h2 id="cta-h">Free Tier 500 Mbps로 클라우드 간 경로부터 검증해 보세요</h2>
+      <p class="lede">연결할 상대, 워크로드가 있는 리전, 필요한 대역폭을 정리해 오시면 DX Gateway 배치와 TGW·Cloud WAN 연동 방식을 함께 검토합니다. 온프레미스 전용 회선이 필요하면 <a href="../direct-connect/">Direct Connect</a>, 허브 설계는 <a href="../transit-gateway/">Transit Gateway</a>와 <a href="../cloud-wan/">Cloud WAN</a>, 빠른 임시 연결은 <a href="../site-to-site-vpn/">Site-to-Site VPN</a>을 참고하세요.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="https://aws.amazon.com/interconnect/" target="_blank" rel="noopener">서비스 페이지 열기</a>
+        <a class="btn btn-ghost" href="https://docs.aws.amazon.com/interconnect/latest/userguide/what-is-interconnect.html" target="_blank" rel="noopener">사용 설명서 읽기</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a href="../">← 전체 AWS 네트워킹 서비스</a>
+    <span>AWS Interconnect 소개 자료 (2026년 10월 기준). 상대별 상태와 지원 리전은 계속 바뀌니 공식 문서를 확인하세요.</span>
+    <a href="https://docs.aws.amazon.com/interconnect/latest/userguide/region-availability.html" target="_blank" rel="noopener">리전 가용성 문서</a>
+  </div>
+</footer>
+
+</body>
+</html>

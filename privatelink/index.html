@@ -282,7 +282,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
 
 <nav aria-label="주요 메뉴">
   <div class="wrap">
-    <a class="brand" href="#top">Private<span>Link</span></a>
+    <a class="brand" href="#top">AWS <span>PrivateLink</span></a>
     <div class="navlinks">
       <a href="../">전체 서비스</a>
       <a href="#roles">연결 모델</a>
@@ -379,7 +379,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
       <p class="tag">Features</p>
       <h2 id="features-h">주요 기능</h2>
       <div class="features">
-        <article class="feature"><p class="ft">Cross-Region</p><h3>리전 간 PrivateLink</h3><p>다른 리전에 있는 endpoint service와 AWS 서비스에 Interface endpoint로 연결합니다. 리전 DNS 이름만 제공되며, 장애 시 AZ 간 전환은 되지만 리전 간 전환은 하지 않습니다.</p></article>
+        <article class="feature"><p class="ft">Cross-Region</p><h3>리전 간 PrivateLink</h3><p>다른 리전에 있는 endpoint service와 일부 AWS 서비스(S3, IAM, ECR 등)에 Interface endpoint로 연결합니다. 공급자와 AZ를 맞출 필요가 없고, AWS 서비스로 연결할 때는 리전 DNS 이름만 쓸 수 있습니다. AZ 간 장애 전환은 PrivateLink가 관리하지만 리전 간 전환은 하지 않습니다.</p></article>
         <article class="feature"><p class="ft">Name resolution</p><h3>Private DNS</h3><p>공급자가 도메인 이름을 검증해 연결해 두면, 소비자는 애플리케이션 설정을 바꾸지 않고 같은 이름으로 엔드포인트에 접속합니다.</p></article>
         <article class="feature"><p class="ft">Access control</p><h3>Endpoint policy</h3><p>엔드포인트에 리소스 정책을 붙여 이 엔드포인트로 호출할 수 있는 주체와 작업, 리소스를 제한합니다.</p></article>
         <article class="feature"><p class="ft">Hybrid</p><h3>온프레미스에서 접근</h3><p>Direct Connect, Site-to-Site VPN, Transit Gateway, Cloud WAN, VPC 피어링을 거쳐 온 트래픽도 엔드포인트에 도달합니다.</p></article>
@@ -427,7 +427,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
               <td class="row-h">Tunnel</td>
               <td data-k="연결 대상">공유받은 네트워크 세그먼트 (CIDR 범위)</td>
               <td data-k="공급자 쪽 구성">CIDR 범위의 resource configuration을 AWS RAM으로 공유</td>
-              <td data-k="트래픽을 보내는 방법">GENEVE로 캡슐화해 보냅니다.</td>
+              <td data-k="트래픽을 보내는 방법">UDP 6081의 GENEVE로 캡슐화해 보냅니다. 안쪽 트래픽은 TCP이고, UDP는 DNS 질의만 지원합니다.</td>
             </tr>
           </tbody>
         </table>

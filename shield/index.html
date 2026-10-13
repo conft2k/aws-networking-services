@@ -303,7 +303,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <span>CloudFront · HTTP request flood · 자동 완화 중</span>
           </div>
           <ul class="prot">
-            <li><span><span class="rn">CloudFront distribution</span><span class="rd">www.example.com · web ACL 연결</span></span><span class="flags"><code class="on">L7 auto</code><code class="on">health</code></span></li>
+            <li><span><span class="rn">CloudFront distribution</span><span class="rd">www.example.com · web ACL 연결</span></span><span class="flags"><code class="on">Anti-DDoS</code><code class="on">health</code></span></li>
             <li><span><span class="rn">Route 53 hosted zone</span><span class="rd">example.com</span></span><span class="flags"><code>L3/L4</code></span></li>
             <li><span><span class="rn">Global Accelerator</span><span class="rd">standard accelerator · UDP 게임 서버</span></span><span class="flags"><code class="on">health</code><code>group: SUM</code></span></li>
             <li><span><span class="rn">Application Load Balancer</span><span class="rd">CloudFront 오리진</span></span><span class="flags"><code>보호 생략</code></span></li>
@@ -349,7 +349,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <tr><td class="row-h">적용 방식</td><td data-k="Standard">모든 고객 자동 적용 · 추가 비용 없음</td><td data-k="Advanced">구독 후 리소스별 보호 추가 · 1년 약정</td></tr>
             <tr><td class="row-h">L3 · L4 감지와 인라인 완화</td><td data-k="Standard" class="y">지원</td><td data-k="Advanced" class="y">지원 + 대규모 공격용 추가 완화 용량</td></tr>
             <tr><td class="row-h">애플리케이션 트래픽 모니터링</td><td data-k="Standard" class="n">—</td><td data-k="Advanced" class="y">리소스별 기준선 · 헬스 기반 감지</td></tr>
-            <tr><td class="row-h">L7 완화</td><td data-k="Standard">AWS WAF 규칙으로 직접 구성</td><td data-k="Advanced">자동 L7 완화(CloudFront · ALB) + SRT 지원</td></tr>
+            <tr><td class="row-h">L7 완화</td><td data-k="Standard">AWS WAF 규칙 · 유료 Anti-DDoS 규칙 그룹으로 직접 구성</td><td data-k="Advanced">Anti-DDoS 관리형 규칙 그룹 구독 포함(기존 자동 L7 완화에서 전환 중) + SRT 지원</td></tr>
             <tr><td class="row-h">이벤트 알림 · 보고</td><td data-k="Standard" class="n">—</td><td data-k="Advanced" class="y">L3 · L4 · L7 이벤트 알림, CloudWatch 지표, 이력 보고</td></tr>
             <tr><td class="row-h">Shield Response Team</td><td data-k="Standard">셀프 서비스 모범 사례</td><td data-k="Advanced">맞춤 완화, 사후 분석, proactive engagement (Business · Enterprise Support)</td></tr>
             <tr><td class="row-h">DDoS 비용 보호</td><td data-k="Standard" class="n">—</td><td data-k="Advanced" class="y">공격으로 늘어난 보호 리소스 사용 요금을 크레딧으로 보전</td></tr>
@@ -365,7 +365,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
       <p class="tag">Shield Advanced features</p>
       <h2 id="features-h">Shield Advanced 주요 기능</h2>
       <div class="features">
-        <article class="feature"><p class="ft">Automatic L7</p><h3>자동 애플리케이션 계층 완화</h3><p>CloudFront 배포와 ALB에 연결된 <a href="../waf/">AWS WAF</a> web ACL에 Shield가 관리하는 규칙 그룹(150 WCU)을 넣고, 공격이 감지되면 규칙을 자동으로 만듭니다. Block 또는 Count 모드를 고릅니다.</p></article>
+        <article class="feature"><p class="ft">L7 DDoS</p><h3>Anti-DDoS 관리형 규칙 그룹</h3><p>L7 보호는 <a href="../waf/">AWS WAF</a> <span class="mono">AWSManagedRulesAntiDDoSRuleSet</span>(50 WCU)으로 옮겨 가고 있습니다. 헬스 체크 없이 수 분 안에 기준선을 잡고, Block · Challenge 민감도를 따로 정합니다. 기존 자동 L7 완화(150 WCU)는 2026년 10월 25일부터 자동 전환되고 2027년 1월 29일에 지원이 끝납니다.</p></article>
         <article class="feature"><p class="ft">Health-based</p><h3>헬스 기반 감지</h3><p>Route 53 헬스 체크를 보호에 연결하면, 헬스 체크가 비정상일 때 더 낮은 임계값에서 더 빨리 감지하고 완화합니다. Route 53 hosted zone을 뺀 모든 유형에 씁니다.</p></article>
         <article class="feature"><p class="ft">SRT</p><h3>Shield Response Team</h3><p><span class="mono">drt.shield.amazonaws.com</span>을 신뢰하는 IAM 역할을 주면, SRT가 WAF 로그를 보고 web ACL 규칙을 대신 만들거나 고칩니다. 명시적으로 승인한 경우에만 조치합니다.</p></article>
         <article class="feature"><p class="ft">Proactive engagement</p><h3>선제 연락</h3><p>감지된 이벤트 중 연결된 헬스 체크가 비정상이 되면 SRT가 등록된 연락처로 먼저 연락합니다. 헬스 체크 연결이 전제 조건입니다.</p></article>
@@ -384,12 +384,12 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
       <div class="stack">
         <div class="layer">
           <span class="lv">Edge<small>Global</small></span>
-          <div><h3><a href="../cloudfront/">CloudFront</a> · <a href="../route-53/">Route 53</a> · <a href="../global-accelerator/">Global Accelerator</a></h3><p>엣지 로케이션에서 트래픽을 받는 리소스입니다. CloudFront는 자동 L7 완화 대상이고, Global Accelerator는 standard accelerator만 보호합니다.</p></div>
+          <div><h3><a href="../cloudfront/">CloudFront</a> · <a href="../route-53/">Route 53</a> · <a href="../global-accelerator/">Global Accelerator</a></h3><p>엣지 로케이션에서 트래픽을 받는 리소스입니다. CloudFront는 web ACL로 L7 보호까지 받고, Global Accelerator는 standard accelerator만 보호합니다.</p></div>
           <div class="specs"><code>CloudFront distribution</code><code>Route 53 hosted zone</code><code>GA standard accelerator</code></div>
         </div>
         <div class="layer">
           <span class="lv">ELB<small>Regional</small></span>
-          <div><h3><a href="../elastic-load-balancing/">Elastic Load Balancing</a></h3><p>ALB와 Classic Load Balancer는 직접 보호하고, NLB는 연결된 Elastic IP를 보호해 함께 보호합니다. ALB는 자동 L7 완화 대상입니다.</p></div>
+          <div><h3><a href="../elastic-load-balancing/">Elastic Load Balancing</a></h3><p>ALB와 Classic Load Balancer는 직접 보호하고, NLB는 연결된 Elastic IP를 보호해 함께 보호합니다. ALB는 web ACL로 L7 보호까지 받습니다.</p></div>
           <div class="specs"><code>ALB</code><code>CLB</code><code>NLB via EIP</code></div>
         </div>
         <div class="layer">
@@ -434,7 +434,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <rect class="edge" x="250" y="190" width="240" height="84" rx="4"/>
             <text class="t" x="264" y="214">CloudFront + AWS WAF</text>
             <text class="s" x="264" y="234">web ACL · rate-based rules</text>
-            <text class="lbl2" x="264" y="258">자동 L7 완화 rule group</text>
+            <text class="lbl2" x="264" y="258">Anti-DDoS rule group</text>
             <rect class="edge" x="250" y="320" width="240" height="70" rx="4"/>
             <text class="t" x="264" y="346">Global Accelerator</text><text class="s" x="264" y="366">standard · TCP/UDP</text>
 
@@ -490,9 +490,9 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
       <ol class="steps">
         <li><span class="num">STEP 1</span><h3>구독</h3><p>보호할 리소스가 있는 계정에서 Shield Advanced를 구독합니다. 1년 약정이며 자동 갱신됩니다.</p></li>
         <li><span class="num">STEP 2</span><h3>보호 추가</h3><p>진입점 리소스를 골라 보호를 추가합니다. 여러 계정이면 Firewall Manager 정책을 씁니다.</p></li>
-        <li><span class="num">STEP 3</span><h3>L7 · 헬스 체크</h3><p>CloudFront · ALB에 web ACL과 자동 L7 완화를 켜고, Route 53 헬스 체크를 연결합니다.</p></li>
+        <li><span class="num">STEP 3</span><h3>L7 · 헬스 체크</h3><p>CloudFront · ALB의 web ACL에 Anti-DDoS 관리형 규칙 그룹을 넣고, Route 53 헬스 체크를 연결합니다.</p></li>
         <li><span class="num">STEP 4</span><h3>SRT 준비</h3><p>SRT 접근 역할을 만들고, proactive engagement 연락처를 등록합니다.</p></li>
-        <li><span class="num">STEP 5</span><h3>그룹과 알람</h3><p>보호 그룹을 만들고, CloudWatch <span class="mono">DDoSDetected</span> 지표에 SNS 알람을 겁니다.</p></li>
+        <li><span class="num">STEP 5</span><h3>그룹과 알람</h3><p>보호 그룹을 만들고, CloudWatch <span class="mono">DDoSDetected</span>(L7은 <span class="mono">DDoSAttackRequests</span>) 지표에 SNS 알람을 겁니다.</p></li>
       </ol>
     </div>
   </section>
@@ -510,13 +510,13 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <tr><td class="row-h">Shield Standard</td><td data-k="과금 기준">없음</td><td data-k="참고">사용 중인 AWS 서비스에 기본 포함됩니다.</td></tr>
             <tr><td class="row-h">Advanced 구독료</td><td data-k="과금 기준">월 고정 요금 · 1년 약정</td><td data-k="참고">조직(payer 계정) 단위로 한 번만 청구됩니다. 같은 통합 결제 아래 계정은 각각 구독해도 추가 구독료가 없습니다.</td></tr>
             <tr><td class="row-h">데이터 전송 사용료</td><td data-k="과금 기준">보호 리소스의 Data Transfer Out GB당</td><td data-k="참고">리소스 유형별 단가가 다릅니다. CloudFront 뒤의 ELB처럼 진입점만 보호하면 중복 과금을 피합니다.</td></tr>
-            <tr><td class="row-h">AWS WAF</td><td data-k="과금 기준">보호 리소스는 표준 요금 포함</td><td data-k="참고">web ACL, 규칙, 요청 요금(기본 1,500 WCU 이내, 월 500억 요청까지)이 포함됩니다. Bot Control, CAPTCHA, Marketplace 규칙 등은 별도입니다.</td></tr>
+            <tr><td class="row-h">AWS WAF</td><td data-k="과금 기준">보호 리소스는 표준 요금 포함</td><td data-k="참고">web ACL, 규칙, 요청 요금(기본 1,500 WCU 이내, payer 기준 월 500억 요청까지)과 Anti-DDoS 관리형 규칙 그룹이 포함됩니다. DDoS로 탐지된 요청은 한도에 세지 않습니다. Bot Control, Fraud Control, Marketplace 규칙 등은 별도입니다.</td></tr>
             <tr><td class="row-h">기반 서비스</td><td data-k="과금 기준">각 서비스 요금</td><td data-k="참고">CloudFront, ELB, Route 53, Global Accelerator, EC2 표준 요금은 따로 청구됩니다.</td></tr>
           </tbody>
         </table>
       </div>
       <p class="lede" style="font-size:14px">요금 단가는 리소스 유형과 사용량에 따라 다릅니다. 구독을 해지하려면 갱신일 30일 전부터 5일 전 사이에 AWS Support에 요청합니다. 최신 단가는 <a href="https://aws.amazon.com/shield/pricing/" target="_blank" rel="noopener">AWS Shield 요금 페이지</a>에서 확인하세요.</p>
-      <p class="note">함께 보기: Shield network security director(프리뷰)는 계정 · 조직의 네트워크 토폴로지를 분석해 WAF, 보안 그룹, NACL의 누락 · 잘못된 구성을 심각도별 결과로 보여 줍니다. 프리뷰 기간에는 추가 비용이 없고, 기능과 지원 리전은 바뀔 수 있습니다.</p>
+      <p class="note">함께 보기: Shield network security director(프리뷰)는 계정 · 조직의 네트워크 토폴로지를 분석해 WAF, 보안 그룹, NACL의 누락 · 잘못된 구성을 심각도별 결과로 보여 줍니다. 위임 관리자 계정으로 조직 전체를 분석하고, 결과를 AWS Security Hub에서도 볼 수 있습니다. Shield Advanced 구독에는 포함되지 않으며, 프리뷰 기간에는 추가 비용이 없고 기능과 지원 리전은 바뀔 수 있습니다.</p>
     </div>
   </section>
 

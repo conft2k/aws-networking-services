@@ -268,7 +268,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
 
 <nav aria-label="주요 메뉴">
   <div class="wrap">
-    <a class="brand" href="#top">VPC <span>Flow Logs</span></a>
+    <a class="brand" href="#top">Amazon VPC <span>Flow Logs</span></a>
     <div class="navlinks">
       <a href="../">전체 서비스</a>
       <a href="#record">레코드 형식</a>
@@ -319,7 +319,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
       </div>
 
       <div class="chips" role="list">
-        <div class="chip" role="listitem"><span class="num">5</span><p>캡처 대상 (VPC · 서브넷 · ENI · TGW · TGW attachment)</p></div>
+        <div class="chip" role="listitem"><span class="num">6</span><p>캡처 대상 (VPC · 서브넷 · ENI · TGW · TGW attachment · regional NAT)</p></div>
         <div class="chip" role="listitem"><span class="num">1 / 10 min</span><p>최대 집계 간격 선택 (Nitro 인스턴스는 항상 1분 이하)</p></div>
         <div class="chip" role="listitem"><span class="num">3</span><p>전송 대상 (CloudWatch Logs · S3 · Firehose)</p></div>
         <div class="chip" role="listitem"><span class="num">Out-of-path</span><p>트래픽 경로 밖 수집, 성능 영향 없음</p></div>
@@ -371,7 +371,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
           <li><h3><code>v3</code> pkt-srcaddr · pkt-dstaddr</h3><p>NAT 게이트웨이나 EKS 파드처럼 중간 계층을 거칠 때 ENI 주소가 아닌 패킷의 원래 출발지 · 목적지를 보여 줍니다. vpc-id, subnet-id, instance-id, tcp-flags도 v3입니다.</p></li>
           <li><h3><code>v4 · v5</code> 위치와 방향</h3><p>region, az-id, sublocation(v4)과 flow-direction(ingress · egress), traffic-path(IGW, 피어링, VGW, 게이트웨이 엔드포인트 등 egress 경로), pkt-src/dst-aws-service(v5)로 흐름의 맥락을 더합니다.</p></li>
           <li><h3><code>v7</code> ecs-* 필드</h3><p>ecs-cluster-name, ecs-service-name, ecs-task-arn 등으로 ECS 태스크 단위 트래픽을 식별합니다. 해당 ECS API 호출 권한이 필요하고, ECS가 아닌 트래픽은 '-'로 남습니다.</p></li>
-          <li><h3><code>v8+</code> 거부 원인과 확장 메타데이터</h3><p>reject-reason은 VPC Block Public Access(BPA)나 암호화 통제(EC)로 거부된 흐름을 구분합니다. 이후 버전에는 encryption-status, 인스턴스 · ENI 태그, next-hop 필드도 추가되었습니다.</p></li>
+          <li><h3><code>v8+</code> 거부 원인과 확장 메타데이터</h3><p>reject-reason(v8)은 VPC Block Public Access(BPA)나 VPC Encryption Controls(EC)로 거부된 흐름을 구분합니다. resource-id(v9)는 regional NAT 게이트웨이, encryption-status(v10)는 전송 중 암호화 여부, v11은 인스턴스 · ENI · ASG 태그, interface-type, next-hop-* 필드를 더합니다.</p></li>
         </ol>
       </div>
 
@@ -379,7 +379,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
         <h3>기록되지 않는 트래픽</h3>
         <p>Flow Logs는 모든 IP 트래픽을 담지 않습니다. 아래 트래픽은 레코드가 생기지 않으므로, DNS 질의 기록이 필요하면 Route 53 Resolver 쿼리 로깅을 함께 씁니다.</p>
         <div class="specs">
-          <code>Amazon DNS 서버 질의</code><code>169.254.169.254 (IMDS)</code><code>169.254.169.123 (Time Sync)</code><code>DHCP</code><code>ARP</code><code>Windows 라이선스 활성화</code><code>기본 VPC 라우터 예약 IP</code><code>Traffic Mirroring 소스 트래픽</code><code>엔드포인트 ENI ↔ NLB ENI</code>
+          <code>Amazon DNS 서버 질의</code><code>169.254.169.254 (IMDS)</code><code>169.254.169.123 (Time Sync)</code><code>DHCP</code><code>ARP</code><code>Windows 라이선스 활성화</code><code>기본 VPC 라우터 예약 IP</code><code>Traffic Mirroring 소스 트래픽</code><code>엔드포인트 ENI ↔ NLB ENI</code><code>생성 직후 삭제된 regional NAT</code>
         </div>
       </div>
     </div>
@@ -390,12 +390,12 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
       <p class="tag">Features</p>
       <h2 id="features-h">주요 기능</h2>
       <div class="features">
-        <article class="feature"><p class="ft">Scope</p><h3>캡처 범위 선택</h3><p>VPC나 서브넷에 만들면 그 안의 모든 ENI가 대상이 되고, 나중에 생긴 ENI도 자동으로 포함됩니다. 특정 ENI 하나만 보거나 Transit Gateway와 attachment 단위로도 만듭니다.</p></article>
+        <article class="feature"><p class="ft">Scope</p><h3>캡처 범위 선택</h3><p>VPC나 서브넷에 만들면 그 안의 모든 ENI가 대상이 되고, 나중에 생긴 ENI도 자동으로 포함됩니다. 특정 ENI 하나만 보거나 Transit Gateway와 attachment, regional NAT 게이트웨이 단위로도 만듭니다.</p></article>
         <article class="feature"><p class="ft">Traffic type</p><h3>ACCEPT · REJECT · ALL</h3><p>허용된 트래픽만, 거부된 트래픽만, 또는 전부를 기록합니다. 보안 그룹 문제 해결용이라면 REJECT만 모아 로그 양과 비용을 줄입니다.</p></article>
         <article class="feature"><p class="ft">Aggregation</p><h3>1분 또는 10분 집계</h3><p>최대 집계 간격 동안 같은 흐름을 한 레코드로 묶습니다. 기본은 10분이며 1분을 고르면 더 세밀하지만 레코드가 늘어납니다. Nitro 인스턴스 ENI는 설정과 무관하게 1분 이하입니다.</p></article>
         <article class="feature"><p class="ft">Query</p><h3>Logs Insights · Athena</h3><p>CloudWatch Logs에서는 Logs Insights 쿼리로 바로 집계하고, S3에서는 Amazon Athena로 SQL을 실행합니다. 콘솔에서 Athena 통합용 CloudFormation 템플릿도 생성할 수 있습니다.</p></article>
         <article class="feature"><p class="ft">Transit Gateway</p><h3>TGW flow logs</h3><p>Transit Gateway 전체나 attachment별로 흐름을 기록합니다. 출발지 · 목적지 VPC와 계정, 그리고 packets-lost-no-route, packets-lost-blackhole 같은 손실 카운터로 라우팅 문제를 찾습니다. <a href="../transit-gateway/">Transit Gateway 소개</a></p></article>
-        <article class="feature"><p class="ft">Cross-account</p><h3>중앙 로그 계정으로 전송</h3><p>버킷 정책이나 교차 계정 IAM 역할로 다른 계정의 S3 버킷, Firehose 스트림에 보냅니다. 비용 배분 태그를 대상 리소스에 붙이면 flow log 요금을 팀별로 나눠 봅니다.</p></article>
+        <article class="feature"><p class="ft">Organization</p><h3>중앙 수집 · 조직 단위 활성화</h3><p>버킷 정책이나 교차 계정 IAM 역할로 다른 계정의 S3 버킷, Firehose 스트림에 보냅니다. CloudWatch telemetry 활성화 규칙을 쓰면 조직 · 계정 · 태그 범위의 기존과 새 VPC에 CloudWatch Logs 대상 flow log가 자동으로 만들어집니다.</p></article>
       </div>
     </div>
   </section>
@@ -513,7 +513,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
       <p class="tag">Getting started</p>
       <h2 id="start-h">첫 flow log를 켜는 순서</h2>
       <ol class="steps">
-        <li><span class="num">STEP 1</span><h3>범위와 traffic type</h3><p>VPC · 서브넷 · ENI · TGW 중 대상을 고르고, ACCEPT · REJECT · ALL을 정합니다. <a href="../vpc/">VPC 소개</a></p></li>
+        <li><span class="num">STEP 1</span><h3>범위와 traffic type</h3><p>VPC · 서브넷 · ENI · TGW · regional NAT 중 대상을 고르고, ACCEPT · REJECT · ALL을 정합니다. <a href="../vpc/">VPC 소개</a></p></li>
         <li><span class="num">STEP 2</span><h3>대상 준비</h3><p>로그 그룹과 IAM 역할, 또는 S3 버킷 정책이나 Firehose 스트림을 준비합니다.</p></li>
         <li><span class="num">STEP 3</span><h3>형식과 집계 간격</h3><p>기본 또는 사용자 지정 형식, 1분 · 10분 간격, S3라면 Parquet와 Hive 파티션을 고릅니다.</p></li>
         <li><span class="num">STEP 4</span><h3>flow log 생성</h3><p>콘솔이나 <span class="mono">aws ec2 create-flow-logs</span>로 만들고 태그를 붙입니다.</p></li>
@@ -536,11 +536,12 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <tr><td class="row-h">S3 전송</td><td data-k="과금 기준">vended logs 전달 GB</td><td data-k="참고">버킷의 S3 저장 · 요청 요금은 별도. 수명 주기 정책으로 보관 비용을 줄입니다</td></tr>
             <tr><td class="row-h">Parquet 변환</td><td data-k="과금 기준">변환한 GB</td><td data-k="참고">S3 대상에서 Parquet 형식을 고른 경우에만. 대신 Athena 스캔량이 줄어듭니다</td></tr>
             <tr><td class="row-h">Firehose 전송</td><td data-k="과금 기준">vended logs 전달 GB</td><td data-k="참고">Firehose 이후 단계와 최종 대상의 요금은 해당 서비스에서 청구됩니다</td></tr>
+            <tr><td class="row-h">조직 단위 자동 활성화</td><td data-k="과금 기준">AWS Config 구성 항목</td><td data-k="참고">CloudWatch telemetry 활성화 규칙은 AWS Config 서비스 연결 레코더로 리소스를 찾으므로 Config 요금이 붙고, 수집은 vended logs 요금입니다</td></tr>
             <tr><td class="row-h">분석</td><td data-k="과금 기준">다른 서비스에서 청구</td><td data-k="참고">Logs Insights는 스캔한 데이터 양, Athena는 쿼리가 스캔한 데이터 양 기준</td></tr>
           </tbody>
         </table>
       </div>
-      <p class="lede" style="font-size:14px">로그 양은 트래픽 양보다 흐름 수와 집계 간격, 고른 필드 수에 비례합니다. REJECT만 기록하거나 필요한 필드만 고르면 비용을 줄일 수 있습니다. 최신 단가는 <a href="https://aws.amazon.com/cloudwatch/pricing/" target="_blank" rel="noopener">Amazon CloudWatch 요금 페이지</a>의 Vended Logs 항목에서 확인하세요.</p>
+      <p class="lede" style="font-size:14px">로그 양은 트래픽 양보다 흐름 수와 집계 간격, 고른 필드 수에 비례합니다. REJECT만 기록하거나 필요한 필드만 고르면 비용을 줄일 수 있습니다. 대상 리소스(로그 그룹, 버킷, Firehose 스트림)에 비용 배분 태그를 붙이면 flow log 요금을 팀별로 나눠 봅니다. 최신 단가는 <a href="https://aws.amazon.com/cloudwatch/pricing/" target="_blank" rel="noopener">Amazon CloudWatch 요금 페이지</a>의 Vended Logs 항목에서 확인하세요.</p>
     </div>
   </section>
 

@@ -331,7 +331,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
       </div>
 
       <div class="chips" role="list">
-        <div class="chip" role="listitem"><span class="num">/16 – /28</span><p>IPv4 CIDR 블록 크기 (IPv6는 /56)</p></div>
+        <div class="chip" role="listitem"><span class="num">/16 – /28</span><p>IPv4 CIDR 블록 크기 (IPv6는 /44 – /60, 기본 /56)</p></div>
         <div class="chip" role="listitem"><span class="num">5</span><p>서브넷마다 AWS가 예약하는 IPv4 주소</p></div>
         <div class="chip" role="listitem"><span class="num">100 Gbps</span><p>NAT 게이트웨이 자동 확장 대역폭</p></div>
         <div class="chip" role="listitem"><span class="num">무료</span><p>VPC · 서브넷 · 라우팅 테이블 자체 요금</p></div>
@@ -389,11 +389,14 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
       <h2 id="features-h">주요 기능</h2>
       <div class="features">
         <article class="feature"><p class="ft">Internet gateway</p><h3>IGW와 egress-only IGW</h3><p>IGW는 VPC당 하나씩 붙는 수평 확장형 게이트웨이로, 공인 IPv4에 대해 1:1 NAT를 수행합니다. egress-only IGW는 IPv6 아웃바운드만 허용하고 인바운드 연결 시작은 막습니다.</p></article>
-        <article class="feature"><p class="ft">NAT gateway</p><h3>관리형 NAT</h3><p>5 Gbps에서 시작해 100 Gbps까지 자동 확장하고, IPv4 주소를 최대 8개 붙여 목적지별 동시 연결 한도를 늘립니다. 퍼블릭 · 프라이빗 유형이 있고, NAT64도 지원합니다. regional 모드는 워크로드가 있는 AZ로 자동 확장됩니다.</p></article>
+        <article class="feature"><p class="ft">NAT gateway</p><h3>관리형 NAT</h3><p>5 Gbps에서 시작해 100 Gbps까지 자동 확장하고, IPv4 주소를 최대 8개(주소당 목적지별 동시 연결 55,000개) 붙입니다. 퍼블릭 · 프라이빗 유형이 있고 NAT64도 지원합니다. regional 모드는 퍼블릭 서브넷 없이 VPC 단위로 만들고, 워크로드가 있는 AZ로 자동 확장되며 AZ당 IP를 최대 32개까지 씁니다. 프라이빗 NAT는 zonal 모드에서만 됩니다.</p></article>
         <article class="feature"><p class="ft">VPC peering</p><h3>VPC 피어링</h3><p>두 VPC를 사설 IP로 1:1 연결합니다. 계정과 리전을 넘을 수 있지만 전이 라우팅은 안 되고 CIDR이 겹치면 연결할 수 없습니다. 많은 VPC를 엮을 때는 <a href="../transit-gateway/">Transit Gateway</a>를 씁니다.</p></article>
         <article class="feature"><p class="ft">VPC endpoints</p><h3>게이트웨이 · 인터페이스 엔드포인트</h3><p>S3와 DynamoDB는 무료 게이트웨이 엔드포인트로, 그 밖의 AWS 서비스와 SaaS는 <a href="../privatelink/">PrivateLink</a> 기반 인터페이스 엔드포인트로 인터넷을 거치지 않고 접근합니다.</p></article>
         <article class="feature"><p class="ft">IPAM</p><h3>VPC IP Address Manager</h3><p>조직 전체 IP 대역을 풀로 나눠 계정과 리전에 할당하고, 겹침과 사용률을 모니터링합니다. BYOIP, Amazon 제공 연속 IPv6 블록, Public IP Insights를 함께 다룹니다.</p></article>
         <article class="feature"><p class="ft">Block Public Access</p><h3>VPC BPA</h3><p>리전 단위로 IGW · EIGW 경로를 권한 있게 차단합니다. bidirectional 모드는 양방향을, ingress-only 모드는 인바운드만 막고 NAT · EIGW 아웃바운드는 허용합니다. 필요한 VPC나 서브넷만 exclusion으로 뺍니다.</p></article>
+        <article class="feature"><p class="ft">Encryption Controls</p><h3>VPC Encryption Controls</h3><p>VPC 안과 VPC 간 트래픽의 전송 중 암호화 상태를 모니터링하고 강제합니다. monitor 모드에서 Flow Logs의 encryption-status로 평문 흐름을 찾고, enforce 모드에서는 암호화를 지원하지 않는 리소스 생성을 막습니다. IGW, NAT 등 정해진 리소스만 exclusion으로 둡니다.</p></article>
+        <article class="feature"><p class="ft">Route Server</p><h3>VPC Route Server</h3><p>VPC 안의 방화벽 · 라우터 어플라이언스와 BGP(BFD 선택)로 피어링해, 최적 경로를 서브넷 · IGW 라우팅 테이블에 동적으로 넣습니다. 어플라이언스 장애 시 스크립트 없이 경로가 페일오버됩니다.</p></article>
+        <article class="feature"><p class="ft">VPC sharing</p><h3>서브넷 공유 · SG 재사용</h3><p>AWS RAM으로 서브넷을 조직 내 다른 계정과 공유해 한 VPC를 여러 계정이 씁니다. 보안 그룹은 VPC associations로 같은 계정 · 리전의 다른 VPC에 연결하거나 공유 VPC 참여 계정과 공유합니다.</p></article>
       </div>
     </div>
   </section>
@@ -413,6 +416,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
           <tr><td class="row-h">규칙 종류</td><td data-k="Security group">allow만 가능</td><td data-k="Network ACL">allow와 deny 모두 가능</td></tr>
           <tr><td class="row-h">평가 방식</td><td data-k="Security group">모든 규칙을 함께 평가해 하나라도 맞으면 허용</td><td data-k="Network ACL">규칙 번호가 낮은 것부터 평가해 처음 맞는 규칙 적용</td></tr>
           <tr><td class="row-h">참조 대상</td><td data-k="Security group">CIDR, prefix list, 다른 보안 그룹</td><td data-k="Network ACL">CIDR</td></tr>
+          <tr><td class="row-h">재사용 범위</td><td data-k="Security group">기본은 만든 VPC 안. VPC associations로 같은 리전의 다른 VPC에도 연결 가능</td><td data-k="Network ACL">한 VPC 안의 서브넷에만 연결</td></tr>
           <tr><td class="row-h">기본 동작</td><td data-k="Security group">새 보안 그룹은 인바운드 없음, 아웃바운드 전체 허용</td><td data-k="Network ACL">기본 NACL은 전체 허용, 새로 만든 NACL은 규칙을 넣기 전까지 전체 거부</td></tr>
           <tr><td class="row-h">주 용도</td><td data-k="Security group">워크로드 간 최소 권한 통신. 계층 간 허용을 SG 참조로 표현</td><td data-k="Network ACL">특정 대역 차단, 서브넷 계층 간 가드레일</td></tr>
           </tbody>
@@ -511,18 +515,19 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
     <div class="wrap">
       <p class="tag">Pricing</p>
       <h2 id="pricing-h">비용 항목</h2>
-      <p class="lede">VPC, 서브넷, 라우팅 테이블, IGW, 보안 그룹, NACL 자체에는 요금이 없습니다. 비용은 NAT 게이트웨이, 공인 IPv4 주소, 엔드포인트, IPAM 같은 구성 요소와 데이터 전송에서 생깁니다.</p>
+      <p class="lede">VPC, 서브넷, 라우팅 테이블, IGW, 보안 그룹, NACL 자체에는 요금이 없습니다. 비용은 NAT 게이트웨이, 공인 IPv4 주소, 엔드포인트, IPAM, Encryption Controls 같은 구성 요소와 데이터 전송에서 생깁니다.</p>
       <div class="tbl-wrap">
         <table>
           <caption class="sr-only">Amazon VPC 관련 과금 항목</caption>
           <thead><tr><th scope="col">과금 항목</th><th scope="col">과금 기준</th><th scope="col">참고</th></tr></thead>
           <tbody>
-          <tr><td class="row-h">NAT gateway</td><td data-k="과금 기준">NAT 게이트웨이 시간 + 처리한 GB</td><td data-k="참고">부분 시간은 1시간으로 계산합니다. 출발지 · 목적지와 무관하게 처리 요금이 붙고, 표준 데이터 전송 요금은 별도입니다. S3 · DynamoDB 트래픽은 게이트웨이 엔드포인트로 돌리면 처리 요금을 줄일 수 있습니다.</td></tr>
-          <tr><td class="row-h">공인 IPv4 주소</td><td data-k="과금 기준">주소당 시간</td><td data-k="참고">EC2 자동 할당 공인 IP, Elastic IP(사용 중 · 유휴 모두), 관리형 서비스가 만든 공인 IP가 포함됩니다. 사설 IPv4는 무료입니다. EC2 프리 티어에는 공인 IPv4 750시간이 포함됩니다.</td></tr>
+          <tr><td class="row-h">NAT gateway</td><td data-k="과금 기준">NAT 게이트웨이 시간 + 처리한 GB (regional 모드는 확장된 AZ마다 시간 과금)</td><td data-k="참고">부분 시간은 1시간으로 계산합니다. 출발지 · 목적지와 무관하게 처리 요금이 붙고, 표준 데이터 전송 요금은 별도입니다. S3 · DynamoDB 트래픽은 게이트웨이 엔드포인트로 돌리면 처리 요금을 줄일 수 있습니다.</td></tr>
+          <tr><td class="row-h">공인 IPv4 주소</td><td data-k="과금 기준">주소당 시간</td><td data-k="참고">EC2 자동 할당 공인 IP, Elastic IP(사용 중 · 유휴 모두), 관리형 서비스가 만든 공인 IP가 포함됩니다. 사설 IPv4와 BYOIP 주소는 과금하지 않습니다. EC2 프리 티어에는 공인 IPv4 750시간이 포함됩니다.</td></tr>
           <tr><td class="row-h">IPAM</td><td data-k="과금 기준">Free tier 무료 · Advanced tier는 관리 대상 활성 IP 수 × 시간</td><td data-k="참고">Free tier는 단일 리전 · 단일 계정 범위로 BYOIP, Public IP Insights, 사설 IPv6 관리 등을 제공합니다. 사설 IPv4 관리, 계정 간 풀 공유, IP 이력 감사는 Advanced tier에서 씁니다. ENI에 붙지 않은 IP는 과금하지 않습니다.</td></tr>
+          <tr><td class="row-h">Encryption Controls</td><td data-k="과금 기준">monitor · enforce 모드인 비어 있지 않은 VPC당 시간</td><td data-k="참고">Encryption Support를 켠 Transit Gateway에 연결된 VPC는 Encryption Controls를 켜지 않아도 과금됩니다(VPC당 시간 1회).</td></tr>
           <tr><td class="row-h">VPC endpoints</td><td data-k="과금 기준">게이트웨이 엔드포인트 무료 · 인터페이스 엔드포인트는 AZ별 시간 + 처리 GB</td><td data-k="참고">인터페이스 엔드포인트 요금은 <a href="../privatelink/">AWS PrivateLink</a> 요금으로 청구됩니다.</td></tr>
           <tr><td class="row-h">데이터 전송</td><td data-k="과금 기준">AZ 간, 리전 간, 인터넷 아웃바운드 GB</td><td data-k="참고">같은 AZ 안의 사설 IP 통신은 무료입니다. VPC 피어링도 같은 AZ 안 전송은 무료이고, AZ 간 · 리전 간 전송에는 요금이 붙습니다.</td></tr>
-          <tr><td class="row-h">네트워크 분석</td><td data-k="과금 기준">Reachability Analyzer 분석 횟수 · Network Access Analyzer 분석한 ENI 수 · Traffic Mirroring 세션 ENI 시간</td><td data-k="참고">Flow Logs는 CloudWatch Logs, S3, Data Firehose 쪽 수집 · 저장 요금으로 청구됩니다.</td></tr>
+          <tr><td class="row-h">네트워크 분석</td><td data-k="과금 기준">Reachability Analyzer 분석 횟수 · Network Access Analyzer 분석한 EC2 인스턴스 ENI 수 · Traffic Mirroring 세션 ENI 시간</td><td data-k="참고">Flow Logs는 CloudWatch Logs, S3, Data Firehose 쪽 수집 · 저장 요금으로 청구됩니다.</td></tr>
           </tbody>
         </table>
       </div>

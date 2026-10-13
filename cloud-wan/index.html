@@ -268,7 +268,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
 
 <nav aria-label="주요 메뉴">
   <div class="wrap">
-    <a class="brand" href="#top">Cloud <span>WAN</span></a>
+    <a class="brand" href="#top">AWS <span>Cloud WAN</span></a>
     <div class="navlinks">
       <a href="../">전체 서비스</a>
       <a href="#policy">정책 구조</a>
@@ -354,7 +354,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
       <p class="lede">정책 문서는 최상위 키 여덟 개로 이루어집니다. 앞의 세 개는 필수이고, 나머지는 필요한 만큼 더합니다.</p>
       <div class="anatomy">
         <div class="key"><code>version</code><span class="req r">required</span><p>정책 문법 버전입니다. Routing policy와 BGP 커뮤니티 전달을 쓰려면 <span class="mono">2025.11</span>을 지정합니다.</p></div>
-        <div class="key"><code>core-network-configuration</code><span class="req r">required</span><p>ASN 범위, 엣지를 둘 리전(edge-locations), VPN ECMP와 DNS 지원 같은 전역 설정입니다.</p></div>
+        <div class="key"><code>core-network-configuration</code><span class="req r">required</span><p>ASN 범위, 엣지를 둘 리전(edge-locations), VPN ECMP · DNS · 보안 그룹 참조 지원 같은 전역 설정입니다.</p></div>
         <div class="key"><code>segments</code><span class="req r">required</span><p>라우팅 도메인을 정의합니다. 세그먼트별로 사용할 리전, 연결 승인 필요 여부, attachment 간 격리 여부를 정합니다.</p></div>
         <div class="key"><code>network-function-groups</code><span class="req">optional</span><p>방화벽이나 IDS/IPS를 호스팅하는 attachment 묶음입니다. 서비스 삽입의 대상이 됩니다.</p></div>
         <div class="key"><code>segment-actions</code><span class="req">optional</span><p>세그먼트 사이의 경로 공유, 정적 경로, 서비스 삽입, Routing policy 연결을 정의합니다.</p></div>
@@ -375,9 +375,9 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
       <h2 id="features-h">주요 기능</h2>
       <div class="features">
         <article class="feature"><p class="ft">Auto mapping</p><h3>Attachment 정책</h3><p>attachment에 붙은 태그를 보고 세그먼트를 자동으로 정합니다. 승인이 필요한 세그먼트는 네트워크 팀이 확인한 뒤 연결합니다.</p></article>
-        <article class="feature"><p class="ft">Service insertion</p><h3>Network function group</h3><p>send-via로 세그먼트 간 트래픽을, send-to로 인터넷이나 온프레미스로 나가는 트래픽을 검사 VPC로 보냅니다. single-hop과 dual-hop을 고릅니다.</p></article>
+        <article class="feature"><p class="ft">Service insertion</p><h3>Network function group</h3><p>send-via로 세그먼트 간 트래픽을, send-to로 인터넷이나 온프레미스로 나가는 트래픽을 검사 VPC로 보냅니다. send-via는 single-hop과 dual-hop 중에서 고릅니다.</p></article>
         <article class="feature"><p class="ft">Hybrid</p><h3>Direct Connect gateway 연결</h3><p>DX gateway를 코어 네트워크에 직접 붙입니다. 중간 Transit Gateway 없이 Transit VIF로 받은 온프레미스 경로가 세그먼트 전체 리전에 전파됩니다.</p></article>
-        <article class="feature"><p class="ft">Route control</p><h3>Routing policy</h3><p>prefix, prefix list, BGP 커뮤니티로 경로를 골라 필터링하거나 요약하고, Local Preference · AS-PATH · MED로 경로 선호를 조정합니다.</p></article>
+        <article class="feature"><p class="ft">Route control</p><h3>Routing policy</h3><p>prefix, prefix list, AS-PATH, BGP 커뮤니티, MED로 경로를 골라 필터링하거나 요약하고, Local Preference · AS-PATH · MED로 경로 선호를 조정합니다. attachment뿐 아니라 세그먼트 공유와 리전 간 경로에도 적용합니다.</p></article>
         <article class="feature"><p class="ft">SD-WAN</p><h3>Tunnel-less Connect</h3><p>VPC 안의 SD-WAN 장비가 GRE 터널 없이 코어 네트워크 엣지와 BGP를 맺습니다. Connect 피어당 AZ별 최대 100 Gbps입니다.</p></article>
         <article class="feature"><p class="ft">Migration</p><h3>Transit Gateway 피어링</h3><p>기존 Transit Gateway를 같은 리전의 코어 네트워크 엣지와 피어링하고, Transit Gateway 라우팅 테이블을 세그먼트에 연결해 단계적으로 옮깁니다.</p></article>
       </div>
@@ -404,7 +404,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
               <td class="row-h">Site-to-Site VPN</td>
               <td data-k="최대 대역폭">터널당 <span class="num">1.25</span> Gbps, Large bandwidth 터널 <span class="num">5</span> Gbps</td>
               <td data-k="Routing policy">필터 · 요약 · 경로 선호 · BGP 커뮤니티</td>
-              <td data-k="참고">정책에서 VPN ECMP를 켤 수 있습니다. Accelerated VPN과 VPN Concentrator도 연결할 수 있습니다.</td>
+              <td data-k="참고">VPN ECMP는 정책에서 켜고 끕니다(기본값 켜짐). Accelerated VPN과 VPN Concentrator는 Transit Gateway 전용이라 코어 네트워크에 직접 붙일 수 없습니다.</td>
             </tr>
             <tr>
               <td class="row-h">Connect</td>
@@ -528,9 +528,9 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
           <tr><td class="row-h">Core network edge 시간</td><td data-k="과금 기준">정책의 edge-locations에 있는 리전마다 엣지 하나의 시간. 부분 시간은 1시간으로 계산합니다.</td><td data-k="참고">코어 네트워크를 만든 계정에 청구됩니다.</td></tr>
           <tr><td class="row-h">Attachment 시간</td><td data-k="과금 기준">attachment마다 연결된 시간</td><td data-k="참고">VPC는 VPC 소유자, Direct Connect는 DX gateway 소유자, VPN과 Connect는 코어 네트워크 소유 계정에 청구됩니다.</td></tr>
           <tr><td class="row-h">Transit Gateway 피어링</td><td data-k="과금 기준">피어링으로 연결된 엣지와 Transit Gateway의 시간</td><td data-k="참고">피어링 위의 Transit Gateway 라우팅 테이블 attachment에는 추가 요금이 없습니다.</td></tr>
-          <tr><td class="row-h">데이터 처리</td><td data-k="과금 기준">VPC, VPN, Direct Connect에서 코어 네트워크로 보낸 GB</td><td data-k="참고">피어링으로 오가는 트래픽과 엣지에서 VPC로 나가는 트래픽에는 처리 요금이 없습니다.</td></tr>
+          <tr><td class="row-h">데이터 처리</td><td data-k="과금 기준">VPC, VPN, Direct Connect에서 코어 네트워크로 보낸 GB</td><td data-k="참고">Connect(SD-WAN) 트래픽은 기반 VPC에서 보낸 데이터로 계산합니다. 코어 네트워크 엣지와 Transit Gateway 사이 피어링으로 보낸 트래픽, 엣지에서 VPC로 나가는 트래픽에는 처리 요금이 없습니다.</td></tr>
           <tr><td class="row-h">리전 간 데이터 전송</td><td data-k="과금 기준">리전 사이로 보낸 GB</td><td data-k="참고">표준 AWS 데이터 전송 요금으로 청구됩니다.</td></tr>
-          <tr><td class="row-h">Site-to-Site VPN · Direct Connect</td><td data-k="과금 기준">VPN 연결 시간, Direct Connect 포트 시간과 데이터 전송</td><td data-k="참고">각 서비스 요금으로 따로 청구됩니다. Accelerated VPN은 Global Accelerator 시간 요금과 Data Transfer Premium이 붙습니다.</td></tr>
+          <tr><td class="row-h">Site-to-Site VPN · Direct Connect</td><td data-k="과금 기준">VPN 연결 시간, Direct Connect 포트 시간과 데이터 전송</td><td data-k="참고">각 서비스 요금으로 따로 청구됩니다.</td></tr>
           </tbody>
         </table>
       </div>
