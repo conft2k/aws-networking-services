@@ -825,20 +825,28 @@ html.presenting #prices .tablist{position:static}
     // Flat-rate
     if (x.flatRate && x.flatRate.length) {
       var speeds = [], tiers = [];
-      x.flatRate.forEach(function (f) { var k = f.speed + (f.pair ? '-Pair' : ''); if (speeds.indexOf(k) < 0) speeds.push(k); if (tiers.indexOf(f.tier) < 0) tiers.push(f.tier); });
+      x.flatRate.forEach(function (f) { if (speeds.indexOf(f.speed) < 0) speeds.push(f.speed); if (tiers.indexOf(f.tier) < 0) tiers.push(f.tier); });
       tiers.sort();
+      // Price List: "-Pair" SKUs are per port of a port-pair (billed twice); single-port SKUs equal the pair total
+      var frOf = function (s, t, pair) { return x.flatRate.filter(function (z) { return z.speed === s && z.tier === t && z.pair === pair; })[0]; };
+      var frConn = function (s, t) { var one = frOf(s, t, false), pr = frOf(s, t, true); return one ? one.h : pr ? Math.round(pr.h * 200) / 100 : null; };
+      var ex = frOf(speeds[0], tiers[0], true), exOne = frOf(speeds[0], tiers[0], false);
       out += sub('Flat-rate ports', 'The Price List includes flat-rate port products with DTO included (<code>FlatRatePortUsage</code>) by tier. Tier criteria and eligibility are not in the Price List; check the official documentation or your AWS account team.');
       out += table({
-        caption: '<b>Flat-rate</b> hourly port rates (monthly in parentheses)',
-        head: [{ h: 'Port' }].concat(tiers.map(function (t) { return { h: t }; })),
-        rows: speeds.map(function (k) {
-          return { th: th(speed(k.replace('-Pair', '')) + (k.indexOf('Pair') > 0 ? ' × 2 (Pair)' : '')), cells: tiers.map(function (t) {
-            var f = x.flatRate.filter(function (z) { return z.speed + (z.pair ? '-Pair' : '') === k && z.tier === t; })[0];
-            return f ? cell(usd(f.h) + '<br><span style="color:var(--ink-3)">' + month(f.h) + '</span>') : cell(null);
+        caption: '<b>Flat-rate</b> hourly rate per connection (monthly below; port-pair total = single port)',
+        head: [{ h: 'Bandwidth' }].concat(tiers.map(function (t) { return { h: t }; })),
+        rows: speeds.map(function (s) {
+          return { th: th(speed(s)), cells: tiers.map(function (t) {
+            var h = frConn(s, t);
+            return h != null ? cell(usd(h) + '<br><span style="color:var(--ink-3)">' + month(h) + '</span>') : cell(null);
           }) };
         }),
         geo: false, label: 'Flat-rate port pricing'
       });
+      out += notes([
+        ex && exOne ? 'The Price List charges a port-pair per port (<code>' + esc(ex.speed) + '-Pair-' + esc(ex.tier) + '</code> ' + usd(ex.h) + ', billed for each of the two ports) and lists a single port (<code>' + esc(exOne.speed) + '-' + esc(exOne.tier) + '</code>) at the pair total of ' + usd(exOne.h) + '. The table shows the rate per connection.' : '',
+        'A port-pair is two ports on different devices or locations: one carries traffic and the other stands by. Usable bandwidth is the capacity of one port.'
+      ]);
     }
     return out;
   }

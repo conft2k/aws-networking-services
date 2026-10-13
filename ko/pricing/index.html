@@ -833,20 +833,28 @@ html.presenting #prices .tablist{position:static}
     // Flat-rate
     if (x.flatRate && x.flatRate.length) {
       var speeds = [], tiers = [];
-      x.flatRate.forEach(function (f) { var k = f.speed + (f.pair ? '-Pair' : ''); if (speeds.indexOf(k) < 0) speeds.push(k); if (tiers.indexOf(f.tier) < 0) tiers.push(f.tier); });
+      x.flatRate.forEach(function (f) { if (speeds.indexOf(f.speed) < 0) speeds.push(f.speed); if (tiers.indexOf(f.tier) < 0) tiers.push(f.tier); });
       tiers.sort();
+      // Price List: "-Pair" SKUs are per port of a port-pair (billed twice); single-port SKUs equal the pair total
+      var frOf = function (s, t, pair) { return x.flatRate.filter(function (z) { return z.speed === s && z.tier === t && z.pair === pair; })[0]; };
+      var frConn = function (s, t) { var one = frOf(s, t, false), pr = frOf(s, t, true); return one ? one.h : pr ? Math.round(pr.h * 200) / 100 : null; };
+      var ex = frOf(speeds[0], tiers[0], true), exOne = frOf(speeds[0], tiers[0], false);
       out += sub('Flat-rate 포트', 'Price List에는 DTO가 포함된 정액 포트 상품(<code>FlatRatePortUsage</code>)이 Tier별로 있습니다. Tier 기준과 신청 조건은 Price List에 없으니 공식 문서와 AWS 담당자에게 확인하세요.');
       out += table({
-        caption: '<b>Flat-rate</b> 포트 시간당 요금 (괄호 안은 월 요금)',
-        head: [{ h: '포트' }].concat(tiers.map(function (t) { return { h: t }; })),
-        rows: speeds.map(function (k) {
-          return { th: th(speed(k.replace('-Pair', '')) + (k.indexOf('Pair') > 0 ? ' × 2 (Pair)' : '')), cells: tiers.map(function (t) {
-            var f = x.flatRate.filter(function (z) { return z.speed + (z.pair ? '-Pair' : '') === k && z.tier === t; })[0];
-            return f ? cell(usd(f.h) + '<br><span style="color:var(--ink-3)">' + month(f.h) + '</span>') : cell(null);
+        caption: '<b>Flat-rate</b> 연결당 시간당 요금 (아래는 월 요금, port-pair 합계 = 단일 포트)',
+        head: [{ h: '대역폭' }].concat(tiers.map(function (t) { return { h: t }; })),
+        rows: speeds.map(function (s) {
+          return { th: th(speed(s)), cells: tiers.map(function (t) {
+            var h = frConn(s, t);
+            return h != null ? cell(usd(h) + '<br><span style="color:var(--ink-3)">' + month(h) + '</span>') : cell(null);
           }) };
         }),
         geo: false, label: 'Flat-rate 포트 요금'
       });
+      out += notes([
+        ex && exOne ? 'Price List는 port-pair를 포트당 요금(<code>' + esc(ex.speed) + '-Pair-' + esc(ex.tier) + '</code> ' + usd(ex.h) + ')으로 두 포트에 각각 매기고, 단일 포트(<code>' + esc(exOne.speed) + '-' + esc(exOne.tier) + '</code>)는 pair 합계와 같은 ' + usd(exOne.h) + '로 기재합니다. 표는 연결당 요금입니다.' : '',
+        'port-pair는 서로 다른 장비나 로케이션의 포트 2개로 구성되며, 하나는 트래픽을 처리하고 다른 하나는 대기합니다. 사용 가능한 대역폭은 포트 1개 용량입니다.'
+      ]);
     }
     return out;
   }
