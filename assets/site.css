@@ -82,3 +82,7 @@ html.presenting main>.slide.slide-on{top:46px}
 .pricing-btn:hover{background:var(--fiber-soft)}
 .pricing-btn:focus-visible{outline:2px solid var(--fiber);outline-offset:2px}
 @media (max-width:640px){.pricing-btn{height:34px;padding:0 10px;font-size:14px}}
+/* presentation: anchor every slide to the top-left so the title sits in the same place on each slide */
+html.presenting main>.slide.slide-on{padding:10px 0 24px}
+html.presenting main>.slide.slide-on>.wrap{margin:0;max-width:var(--maxw,1120px)}
+html.presenting .present-title{left:24px}
