@@ -124,6 +124,15 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
 .stamp dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:14px 0 0;font-size:13px}
 .stamp dt{font-family:var(--mono);color:var(--ink-2)}
 .stamp dd{margin:0;font-family:var(--mono);color:var(--ink);text-align:right;white-space:nowrap}
+.stamp>summary{list-style:none;cursor:pointer;display:block}
+.stamp>summary::-webkit-details-marker{display:none}
+.stamp>summary:focus-visible{outline:2px solid var(--fiber);outline-offset:4px;border-radius:4px}
+.stamp-more{display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-size:13px;font-weight:600;color:var(--fiber-ink)}
+.stamp-more::before{content:attr(data-more)}
+.stamp-more::after{content:"";width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:translateY(-2px) rotate(45deg);transition:transform .15s ease}
+.stamp[open] .stamp-more::before{content:attr(data-less)}
+.stamp[open] .stamp-more::after{transform:translateY(2px) rotate(-135deg)}
+.stamp>summary:hover .stamp-more{text-decoration:underline}
 .stamp-foot{margin-top:12px;font-size:13px;color:var(--ink-2)}
 .facts{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
 .facts span{font-family:var(--mono);font-size:12.5px;background:var(--surface);border:1px solid var(--line);padding:4px 10px;border-radius:3px;color:var(--ink-2)}
@@ -279,12 +288,10 @@ html.presenting #prices .tablist{position:static}
             <span>Excludes China · GovCloud</span>
           </div>
         </div>
-        <aside class="stamp" aria-labelledby="stamp-h">
-          <div class="stamp-head"><span id="stamp-h">Price List published</span><span>UTC</span></div>
-          <p class="big" id="stamp-date">Loading…</p>
-          <dl id="stamp-offers"></dl>
-          <p class="stamp-foot" id="stamp-foot"></p>
-        </aside>
+        <details class="stamp" id="stamp">
+          <summary aria-labelledby="stamp-h"><div class="stamp-head"><span id="stamp-h">Price List published</span><span>UTC</span></div><p class="big" id="stamp-date">Loading…</p><span class="stamp-more" data-more="Show per-service publication times" data-less="Hide"></span></summary>
+          <div class="stamp-body"><dl id="stamp-offers"></dl><p class="stamp-foot" id="stamp-foot"></p></div>
+        </details>
       </div>
     </div>
   </header>
