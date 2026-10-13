@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cloud WAN 소개</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+body{margin:0}img{max-width:100%}[hidden]{display:none!important}
+
+/* Layout: a cross-connect work order. Cool steel paper, navy ink, Amazon orange as the one accent; section tags read like fiber labels. */
+:root{
+  --bg:#EEF1F4; --surface:#FFFFFF; --sunken:#E3E8ED;
+  --ink:#14202E; --ink-2:#44515F; --ink-3:#5A6672;
+  --line:#CDD5DD; --line-2:#B4BFCA;
+  --fiber:#FF9900;          /* Amazon orange — fills only */
+  --fiber-ink:#B35C00;      /* orange-derived, AA on light surfaces */
+  --fiber-soft:#FFF0D9;
+  --on-fiber:#14202E;
+  --trace:#2E7D9A;          /* secondary line color for diagram paths */
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --maxw:1120px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--fiber-ink);outline-offset:3px;border-radius:2px}
+.skip-link{position:absolute;left:16px;top:-60px;background:var(--fiber);color:var(--on-fiber);padding:8px 14px;font-weight:700;z-index:50;text-decoration:none}
+.skip-link:focus{top:12px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.wrap{max-width:var(--maxw);margin:0 auto;padding-inline:24px}
+section{padding-block:88px;border-top:1px solid var(--line)}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.25}
+h2{font-size:clamp(26px,3.4vw,36px);font-weight:700;letter-spacing:-.01em}
+h3{font-size:18px;font-weight:700}
+p{margin:0}
+.lede{color:var(--ink-2);max-width:62ch;margin-top:14px}
+.num{font-family:var(--display);font-variant-numeric:tabular-nums lining-nums}
+.mono{font-family:var(--mono)}
+
+/* fiber label: the section tag */
+.tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-bottom:14px}
+.tag::before{content:"";width:22px;height:8px;background:var(--fiber);border-radius:1px}
+
+/* nav */
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:60px}
+.brand{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.02em;text-decoration:none;text-transform:uppercase}
+.brand span{color:var(--fiber-ink)}
+.navlinks{display:flex;gap:22px;font-size:14px;align-items:center}
+.navlinks a{text-decoration:none;color:var(--ink-2)}
+.navlinks a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;font-weight:700;font-size:15px;text-decoration:none;border-radius:4px;border:1px solid transparent;transition:transform .15s ease,background .15s ease}
+.btn-primary{background:var(--fiber);color:var(--on-fiber)}
+.btn-primary:hover{transform:translateY(-1px)}
+.btn-ghost{border-color:var(--line-2);color:var(--ink)}
+.btn-ghost:hover{background:var(--sunken)}
+.navlinks .btn{min-height:38px;padding:0 14px;font-size:14px;color:var(--on-fiber)}
+
+/* hero */
+.hero{padding-block:72px 64px;border-top:0}
+.hero-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:56px;align-items:center}
+.eyebrow{font-family:var(--mono);font-size:13px;color:var(--fiber-ink);letter-spacing:.04em}
+.hero h1{font-size:clamp(34px,5vw,56px);font-weight:700;letter-spacing:-.02em;margin-top:16px}
+.hero h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--fiber) 62%,var(--fiber) 90%,transparent 90%);padding-inline:2px}
+.hero .lede{font-size:18px}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+
+/* hero visual: port faceplate */
+.faceplate{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px}
+.faceplate-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.ports{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+.port{border:1px solid var(--line);border-radius:4px;padding:14px 14px 12px;background:var(--sunken);display:flex;flex-direction:column;gap:2px}
+.port .num{font-size:40px;font-weight:600;line-height:1}
+.port .num small{font-size:18px;color:var(--ink-2);margin-left:2px}
+.port .optic{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+.port .led{width:8px;height:8px;border-radius:50%;background:var(--fiber);align-self:flex-end;margin-top:-6px;animation:blink 2.4s ease-in-out infinite}
+.port:nth-child(2) .led{animation-delay:.6s}.port:nth-child(3) .led{animation-delay:1.2s}.port:nth-child(4) .led{animation-delay:1.8s}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.faceplate-foot{margin-top:14px;font-size:13px;color:var(--ink-2)}
+
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:56px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.chip{padding:18px 20px;border-left:1px solid var(--line);min-width:0}
+.chip:first-child{border-left:0}
+.chip .num{font-size:34px;font-weight:600;line-height:1.1}
+.chip p{font-size:13.5px;color:var(--ink-2);margin-top:4px}
+
+/* value */
+.split{display:grid;grid-template-columns:1fr 1.4fr;gap:56px}
+.pillars{display:grid;gap:0;border-top:1px solid var(--line-2)}
+.pillar{display:grid;grid-template-columns:120px 1fr;gap:20px;padding-block:22px;border-bottom:1px solid var(--line)}
+.pillar .k{font-family:var(--display);font-size:22px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--fiber-ink)}
+.pillar p{color:var(--ink-2);margin-top:6px}
+
+/* stack (L1/L2/L3) */
+.stack{margin-top:40px;display:grid;gap:10px}
+.layer{display:grid;grid-template-columns:96px 1fr 1.2fr;gap:24px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px 24px}
+.layer .lv{font-family:var(--display);font-size:44px;font-weight:700;line-height:.9}
+.layer .lv small{display:block;font-family:var(--mono);font-size:11px;font-weight:400;color:var(--ink-3);letter-spacing:.06em;margin-top:8px;text-transform:uppercase}
+.layer p{color:var(--ink-2);margin-top:6px;font-size:15px}
+.specs{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+.specs code{font-family:var(--mono);font-size:12.5px;background:var(--sunken);border:1px solid var(--line);padding:3px 8px;border-radius:3px;color:var(--ink)}
+
+/* features */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:40px}
+.feature{background:var(--surface);padding:26px 24px;min-width:0}
+.feature .ft{font-family:var(--mono);font-size:11.5px;color:var(--fiber-ink);letter-spacing:.06em;text-transform:uppercase}
+.feature h3{margin-top:8px}
+.feature p{color:var(--ink-2);font-size:15px;margin-top:8px}
+
+/* table */
+.tbl-wrap{margin-top:36px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:14px 18px;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--sunken)}
+tbody tr:last-child td{border-bottom:0}
+td.row-h{font-weight:700;width:22%}
+td .num{font-size:18px;font-weight:600}
+
+/* architecture */
+.arch{margin-top:36px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px}
+.arch-scroll{overflow-x:auto}
+.arch svg{display:block;width:100%;min-width:860px;height:auto}
+.arch-hint{display:none;font-size:13px;color:var(--ink-3);margin-top:10px}
+svg .box{fill:var(--sunken);stroke:var(--line-2)}
+svg .zone{fill:none;stroke:var(--line-2);stroke-dasharray:4 4}
+svg .t{fill:var(--ink);font-family:var(--sans);font-size:14px;font-weight:700}
+svg .s{fill:var(--ink-3);font-family:var(--mono);font-size:11px}
+svg .z{fill:var(--ink-2);font-family:var(--mono);font-size:11px;letter-spacing:.08em}
+svg .fiber{stroke:var(--fiber);stroke-width:5;fill:none;stroke-linecap:round}
+svg .path{stroke:var(--trace);stroke-width:2;fill:none}
+svg .site{stroke:var(--fiber-ink);stroke-width:2;fill:none;stroke-dasharray:6 5}
+svg .lbl{fill:var(--trace);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .lbl2{fill:var(--fiber-ink);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .dot{fill:var(--fiber)}
+.legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--ink-2)}
+.legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--fiber)}
+.legend i.p{border-top:2px solid var(--trace)}
+.legend i.s{border-top:2px dashed var(--fiber-ink)}
+
+/* steps */
+.steps{list-style:none;padding:0;margin:40px 0 0;display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:4px solid var(--fiber)}
+.steps li{padding:20px 18px 0 0;min-width:0}
+.steps .num{font-size:15px;font-weight:600;color:var(--fiber-ink);letter-spacing:.06em}
+.steps h3{font-size:16px;margin-top:6px}
+.steps p{font-size:14px;color:var(--ink-2);margin-top:6px}
+
+/* resiliency */
+.res{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:36px}
+.res-card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:26px}
+.res-card .num{font-size:52px;font-weight:700;line-height:1}
+.res-card .num small{font-size:20px;color:var(--ink-2)}
+.res-card h3{margin-top:10px}
+.res-card p{color:var(--ink-2);font-size:15px;margin-top:6px}
+.res-card.max{border-color:var(--fiber);box-shadow:inset 0 4px 0 var(--fiber)}
+
+/* cta */
+.cta{text-align:center}
+.cta h2{max-width:22ch;margin:0 auto}
+.cta .lede{margin:14px auto 0}
+.cta .cta-row{justify-content:center}
+footer{border-top:1px solid var(--line);padding-block:28px;font-size:13px;color:var(--ink-3)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+
+@media (max-width:1024px){
+  .hero-grid,.split{grid-template-columns:1fr;gap:40px}
+  .features{grid-template-columns:repeat(2,1fr)}
+  .steps{grid-template-columns:repeat(2,1fr);border-top:0;gap:0 24px}
+  .steps li{border-top:4px solid var(--fiber);padding-bottom:24px}
+  .layer{grid-template-columns:80px 1fr}
+  .layer .specs{grid-column:2}
+  .chips{grid-template-columns:repeat(2,1fr)}
+  .chip:nth-child(3){border-left:0}
+  .chip:nth-child(n+3){border-top:1px solid var(--line)}
+}
+@media (max-width:640px){
+  .wrap{padding-inline:18px}
+  section{padding-block:60px}
+  .navlinks a:not(.btn){display:none}
+  .features,.res{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr}
+  .pillar{grid-template-columns:1fr;gap:0}
+  .layer{grid-template-columns:1fr;gap:12px}
+  .layer .specs{grid-column:auto}
+  .cta-row .btn{width:100%}
+  .arch-hint{display:block}
+  table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  table,tbody,tr,td{display:block;width:100%}
+  tr{border-bottom:1px solid var(--line);padding:14px 16px}
+  tbody tr:last-child{border-bottom:0}
+  td{border:0;padding:3px 0}
+  td.row-h{width:100%;font-size:16px;padding-bottom:6px}
+  td[data-k]::before{content:attr(data-k);display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+
+/* ---- service-specific ---- */
+/* Cloud WAN: hero policy document + policy anatomy */
+.policy{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px;min-width:0}
+.policy-head{display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.policy-head .live{display:inline-flex;align-items:center;gap:6px;color:var(--fiber-ink)}
+.policy-head .live::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--fiber);animation:blink 2.4s ease-in-out infinite}
+.code{margin:14px 0 0;background:var(--sunken);border:1px solid var(--line);border-radius:4px;padding:14px 16px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.65;color:var(--ink-2);tab-size:2}
+.code .k{color:var(--ink);font-weight:500}
+.code .v{color:var(--trace)}
+.code .hl{background:var(--fiber-soft);box-shadow:inset 0 -2px 0 var(--fiber);border-radius:2px;padding:0 2px}
+.policy-foot{margin-top:14px;font-size:13px;color:var(--ink-2)}
+
+.anatomy{margin-top:40px;display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.key{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px 22px;min-width:0;display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:baseline}
+.key code{font-family:var(--mono);font-size:13.5px;font-weight:500;color:var(--ink);overflow-wrap:anywhere}
+.key .req{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);justify-self:end}
+.key .req.r{color:var(--fiber-ink)}
+.key p{grid-column:1 / -1;color:var(--ink-2);font-size:15px;margin-top:4px}
+.actions{margin-top:28px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.actions span.lbl{font-size:14px;color:var(--ink-2);margin-right:4px}
+.actions code{font-family:var(--mono);font-size:12.5px;background:var(--sunken);border:1px solid var(--line);padding:3px 8px;border-radius:3px;color:var(--ink)}
+@media (max-width:640px){
+  .policy{padding:16px}
+  .code{font-size:11.5px;padding:12px}
+  .anatomy{grid-template-columns:1fr}
+  .key{padding:16px 18px}
+}
+@media (max-width:640px){
+  .chip .num{font-size:24px}
+}
+/* nav: 6 links need room; keep labels on one line and collapse to the CTA earlier */
+.navlinks a{white-space:nowrap}
+@media (max-width:880px){
+  .navlinks a:not(.btn){display:none}
+}
+
+/* nav: keep links on one line, show only CTA below 960px */
+.navlinks a{white-space:nowrap}
+@media (max-width:960px){.navlinks a:not(.btn){display:none}}
+
+/* Korean line breaking: never split a word mid-syllable */
+h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
+</style>
+</head>
+<body>
+
+
+<a class="skip-link" href="#main">본문으로 건너뛰기</a>
+
+<nav aria-label="주요 메뉴">
+  <div class="wrap">
+    <a class="brand" href="#top">Cloud <span>WAN</span></a>
+    <div class="navlinks">
+      <a href="../">전체 서비스</a>
+      <a href="#policy">정책 구조</a>
+      <a href="#features">주요 기능</a>
+      <a href="#attachments">연결 유형</a>
+      <a href="#arch">아키텍처</a>
+      <a href="#pricing">비용</a>
+      <a class="btn btn-primary" href="#start">시작하기</a>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+  <header class="hero" id="top">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">AWS Cloud WAN · 글로벌 코어 네트워크</p>
+          <h1>여러 리전의 네트워크를 <em>정책 문서 하나</em>로 운영하세요</h1>
+          <p class="lede">AWS Cloud WAN은 리전, 세그먼트, 연결 규칙을 JSON 정책으로 선언하면 AWS가 각 리전에 코어 네트워크 엣지를 만들고 서로 메시로 연결합니다. 리전마다 Transit Gateway를 만들고 피어링 경로를 직접 관리하던 일을 정책 하나로 바꿉니다.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="#policy">정책 구조 보기</a>
+            <a class="btn btn-ghost" href="#arch">아키텍처 보기</a>
+          </div>
+        </div>
+
+        <div class="policy" aria-label="Cloud WAN 코어 네트워크 정책 예시">
+          <div class="policy-head"><span>core-network-policy.json</span><span class="live">LIVE</span></div>
+<pre class="code"><code>{
+  <span class="k">"version"</span>: <span class="v hl">"2025.11"</span>,
+  <span class="k">"core-network-configuration"</span>: {
+    <span class="k">"asn-ranges"</span>: [<span class="v">"64512-64555"</span>],
+    <span class="k">"edge-locations"</span>: [
+      { <span class="k">"location"</span>: <span class="v">"ap-northeast-2"</span> },
+      { <span class="k">"location"</span>: <span class="v">"ap-northeast-1"</span> },
+      { <span class="k">"location"</span>: <span class="v">"us-east-1"</span> }
+    ]
+  },
+  <span class="k">"segments"</span>: [
+    { <span class="k">"name"</span>: <span class="v hl">"prod"</span>,
+      <span class="k">"require-attachment-acceptance"</span>: <span class="v">true</span> },
+    { <span class="k">"name"</span>: <span class="v hl">"shared"</span> }
+  ],
+  <span class="k">"segment-actions"</span>: [{
+    <span class="k">"action"</span>: <span class="v">"share"</span>,
+    <span class="k">"mode"</span>: <span class="v">"attachment-route"</span>,
+    <span class="k">"segment"</span>: <span class="v">"shared"</span>,
+    <span class="k">"share-with"</span>: [<span class="v">"prod"</span>]
+  }]
+}</code></pre>
+          <p class="policy-foot">세 리전에 코어 네트워크 엣지를 두고, prod와 shared 세그먼트를 만든 뒤 shared 경로를 prod에 공유합니다.</p>
+        </div>
+      </div>
+
+      <div class="chips" role="list">
+        <div class="chip" role="listitem"><span class="num">100 Gbps</span><p>VPC 연결당 AZ별 최대 대역폭</p></div>
+        <div class="chip" role="listitem"><span class="num">8500</span><p>VPC · 피어링 · Tunnel-less Connect 간 MTU (bytes)</p></div>
+        <div class="chip" role="listitem"><span class="num">Full mesh</span><p>코어 네트워크 엣지 간 자동 피어링</p></div>
+        <div class="chip" role="listitem"><span class="num">2025.11</span><p>Routing policy를 지원하는 정책 버전</p></div>
+      </div>
+    </div>
+  </header>
+
+  <section id="why" aria-labelledby="why-h">
+    <div class="wrap split">
+      <div>
+        <p class="tag">Why Cloud WAN</p>
+        <h2 id="why-h">리전이 늘어도 라우팅 의도는 한 곳에 있어야 합니다</h2>
+        <p class="lede">리전별 Transit Gateway와 피어링, 정적 경로로 글로벌 네트워크를 만들면 리전이 늘 때마다 설정이 흩어집니다. Cloud WAN은 원하는 상태를 선언하고, 변경 내용을 미리 확인한 뒤 적용합니다.</p>
+      </div>
+      <div class="pillars">
+        <div class="pillar"><span class="k">Declare</span><div><h3>선언형 정책</h3><p>세그먼트, 리전, 연결 매핑 규칙을 정책 버전으로 관리합니다. 적용 전에 변경 사항을 검토하고, 이전 버전으로 되돌릴 수 있습니다.</p></div></div>
+        <div class="pillar"><span class="k">Segment</span><div><h3>글로벌 세그먼트</h3><p>세그먼트는 모든 리전에 걸친 라우팅 도메인입니다. 기본적으로 같은 세그먼트 안에서만 통신하며, MPLS의 VRF와 비슷하게 동작합니다.</p></div></div>
+        <div class="pillar"><span class="k">Mesh</span><div><h3>자동 리전 간 연결</h3><p>정책에 리전을 추가하면 코어 네트워크 엣지가 생기고, 다른 엣지와 풀 메시로 연결됩니다. 리전 간 경로는 동적으로 전파됩니다.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="policy" aria-labelledby="policy-h">
+    <div class="wrap">
+      <p class="tag">Policy anatomy</p>
+      <h2 id="policy-h">코어 네트워크 정책의 구성 요소</h2>
+      <p class="lede">정책 문서는 최상위 키 여덟 개로 이루어집니다. 앞의 세 개는 필수이고, 나머지는 필요한 만큼 더합니다.</p>
+      <div class="anatomy">
+        <div class="key"><code>version</code><span class="req r">required</span><p>정책 문법 버전입니다. Routing policy와 BGP 커뮤니티 전달을 쓰려면 <span class="mono">2025.11</span>을 지정합니다.</p></div>
+        <div class="key"><code>core-network-configuration</code><span class="req r">required</span><p>ASN 범위, 엣지를 둘 리전(edge-locations), VPN ECMP와 DNS 지원 같은 전역 설정입니다.</p></div>
+        <div class="key"><code>segments</code><span class="req r">required</span><p>라우팅 도메인을 정의합니다. 세그먼트별로 사용할 리전, 연결 승인 필요 여부, attachment 간 격리 여부를 정합니다.</p></div>
+        <div class="key"><code>network-function-groups</code><span class="req">optional</span><p>방화벽이나 IDS/IPS를 호스팅하는 attachment 묶음입니다. 서비스 삽입의 대상이 됩니다.</p></div>
+        <div class="key"><code>segment-actions</code><span class="req">optional</span><p>세그먼트 사이의 경로 공유, 정적 경로, 서비스 삽입, Routing policy 연결을 정의합니다.</p></div>
+        <div class="key"><code>attachment-policies</code><span class="req">optional</span><p>태그 같은 조건으로 attachment를 세그먼트나 network function group에 자동으로 매핑합니다.</p></div>
+        <div class="key"><code>routing-policies</code><span class="req">optional</span><p>inbound 또는 outbound 방향의 경로 필터, 요약, BGP 속성 변경 규칙입니다.</p></div>
+        <div class="key"><code>attachment-routing-policy-rules</code><span class="req">optional</span><p>Routing policy 레이블 조건에 맞는 attachment에 어떤 Routing policy를 적용할지 정합니다.</p></div>
+      </div>
+      <div class="actions" aria-label="segment-actions의 action 값">
+        <span class="lbl">segment-actions의 action 값</span>
+        <code>share</code><code>create-route</code><code>send-via</code><code>send-to</code><code>associate-routing-policy</code>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" aria-labelledby="features-h">
+    <div class="wrap">
+      <p class="tag">Features</p>
+      <h2 id="features-h">주요 기능</h2>
+      <div class="features">
+        <article class="feature"><p class="ft">Auto mapping</p><h3>Attachment 정책</h3><p>attachment에 붙은 태그를 보고 세그먼트를 자동으로 정합니다. 승인이 필요한 세그먼트는 네트워크 팀이 확인한 뒤 연결합니다.</p></article>
+        <article class="feature"><p class="ft">Service insertion</p><h3>Network function group</h3><p>send-via로 세그먼트 간 트래픽을, send-to로 인터넷이나 온프레미스로 나가는 트래픽을 검사 VPC로 보냅니다. single-hop과 dual-hop을 고릅니다.</p></article>
+        <article class="feature"><p class="ft">Hybrid</p><h3>Direct Connect gateway 연결</h3><p>DX gateway를 코어 네트워크에 직접 붙입니다. 중간 Transit Gateway 없이 Transit VIF로 받은 온프레미스 경로가 세그먼트 전체 리전에 전파됩니다.</p></article>
+        <article class="feature"><p class="ft">Route control</p><h3>Routing policy</h3><p>prefix, prefix list, BGP 커뮤니티로 경로를 골라 필터링하거나 요약하고, Local Preference · AS-PATH · MED로 경로 선호를 조정합니다.</p></article>
+        <article class="feature"><p class="ft">SD-WAN</p><h3>Tunnel-less Connect</h3><p>VPC 안의 SD-WAN 장비가 GRE 터널 없이 코어 네트워크 엣지와 BGP를 맺습니다. Connect 피어당 AZ별 최대 100 Gbps입니다.</p></article>
+        <article class="feature"><p class="ft">Migration</p><h3>Transit Gateway 피어링</h3><p>기존 Transit Gateway를 같은 리전의 코어 네트워크 엣지와 피어링하고, Transit Gateway 라우팅 테이블을 세그먼트에 연결해 단계적으로 옮깁니다.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="attachments" aria-labelledby="att-h">
+    <div class="wrap">
+      <p class="tag">Attachment types</p>
+      <h2 id="att-h">연결 유형별 대역폭과 Routing policy 지원</h2>
+      <p class="lede">VPC는 inbound 경로 필터링만 지원하고, BGP 기반 연결은 요약과 BGP 속성 변경까지 지원합니다. Routing policy는 network function group에는 적용되지 않습니다.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">Cloud WAN 연결 유형별 대역폭과 Routing policy 지원 범위</caption>
+          <thead><tr><th scope="col">연결 유형</th><th scope="col">최대 대역폭</th><th scope="col">Routing policy</th><th scope="col">참고</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="row-h">VPC</td>
+              <td data-k="최대 대역폭"><span class="num">100</span> Gbps · AZ별</td>
+              <td data-k="Routing policy">inbound 경로 필터링 (allow · drop)</td>
+              <td data-k="참고">MTU 8500 bytes, AZ별 최대 7,500,000 PPS</td>
+            </tr>
+            <tr>
+              <td class="row-h">Site-to-Site VPN</td>
+              <td data-k="최대 대역폭">터널당 <span class="num">1.25</span> Gbps, Large bandwidth 터널 <span class="num">5</span> Gbps</td>
+              <td data-k="Routing policy">필터 · 요약 · 경로 선호 · BGP 커뮤니티</td>
+              <td data-k="참고">정책에서 VPN ECMP를 켤 수 있습니다. Accelerated VPN과 VPN Concentrator도 연결할 수 있습니다.</td>
+            </tr>
+            <tr>
+              <td class="row-h">Connect</td>
+              <td data-k="최대 대역폭">GRE 피어 <span class="num">5</span> Gbps, Tunnel-less 피어 AZ별 <span class="num">100</span> Gbps</td>
+              <td data-k="Routing policy">필터 · 요약 · 경로 선호 · BGP 커뮤니티</td>
+              <td data-k="참고">SD-WAN 연동용입니다.</td>
+            </tr>
+            <tr>
+              <td class="row-h">Direct Connect gateway</td>
+              <td data-k="최대 대역폭">Direct Connect 한도를 따릅니다.</td>
+              <td data-k="Routing policy">필터 · 요약 · 경로 선호</td>
+              <td data-k="참고">DX gateway 하나는 코어 네트워크 하나에만 연결합니다.</td>
+            </tr>
+            <tr>
+              <td class="row-h">Transit Gateway 라우팅 테이블</td>
+              <td data-k="최대 대역폭">Transit Gateway 피어링 한도를 따릅니다.</td>
+              <td data-k="Routing policy">필터 · 요약 · 경로 선호</td>
+              <td data-k="참고">같은 리전의 Transit Gateway와 피어링한 뒤 생성합니다.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="arch" aria-labelledby="arch-h">
+    <div class="wrap">
+      <p class="tag">Reference architecture</p>
+      <h2 id="arch-h">세 리전에 걸친 코어 네트워크</h2>
+      <p class="lede">코어 네트워크 엣지 세 개가 풀 메시로 연결됩니다. 각 attachment는 태그에 따라 세그먼트에 들어가고, 세그먼트 간 트래픽은 network function group의 검사 VPC를 거칩니다.</p>
+      <figure class="arch">
+        <div class="arch-scroll">
+          <svg viewBox="0 0 980 440" role="img" aria-labelledby="arch-title arch-desc">
+            <title id="arch-title">Cloud WAN 레퍼런스 아키텍처</title>
+            <desc id="arch-desc">서울, 도쿄, 버지니아 북부 리전의 코어 네트워크 엣지가 풀 메시로 연결됩니다. 데이터센터는 Direct Connect gateway를 거쳐 hybrid 세그먼트로 들어오고, 지사의 SD-WAN은 SD-WAN VPC의 Tunnel-less Connect로 도쿄 엣지에 연결됩니다. 서울 엣지에는 prod 세그먼트 VPC가, 버지니아 엣지에는 검사 VPC로 구성된 network function group과 dev 세그먼트 VPC가, 도쿄 엣지에는 기존 Transit Gateway 피어링이 연결됩니다.</desc>
+            <rect class="zone" x="10" y="40" width="150" height="380" rx="6"/>
+            <text class="z" x="24" y="62">ON-PREMISES</text>
+            <rect class="zone" x="180" y="40" width="790" height="380" rx="6"/>
+            <text class="z" x="194" y="62">AWS</text>
+            <rect class="zone" x="350" y="74" width="360" height="320" rx="6"/>
+            <text class="z" x="364" y="96">CORE NETWORK</text>
+
+            <rect class="box" x="24" y="100" width="122" height="60" rx="4"/>
+            <text class="t" x="36" y="126">데이터센터</text><text class="s" x="36" y="146">BGP router</text>
+            <rect class="box" x="24" y="300" width="122" height="60" rx="4"/>
+            <text class="t" x="36" y="326">지사</text><text class="s" x="36" y="346">SD-WAN edge</text>
+
+            <rect class="box" x="196" y="100" width="136" height="60" rx="4"/>
+            <text class="t" x="208" y="126">DX Gateway</text><text class="s" x="208" y="146">seg: hybrid</text>
+            <rect class="box" x="196" y="300" width="136" height="60" rx="4"/>
+            <text class="t" x="208" y="326">SD-WAN VPC</text><text class="s" x="208" y="346">seg: hybrid</text>
+
+            <rect class="box" x="380" y="110" width="140" height="60" rx="4"/>
+            <text class="t" x="392" y="136">CNE 서울</text><text class="s" x="392" y="156">ap-northeast-2</text>
+            <rect class="box" x="380" y="300" width="140" height="60" rx="4"/>
+            <text class="t" x="392" y="326">CNE 도쿄</text><text class="s" x="392" y="346">ap-northeast-1</text>
+            <rect class="box" x="560" y="205" width="136" height="60" rx="4"/>
+            <text class="t" x="572" y="231">CNE 버지니아</text><text class="s" x="572" y="251">us-east-1</text>
+
+            <path class="fiber" d="M450 170 V300"/>
+            <path class="fiber" d="M520 150 C560 150 560 205 600 205"/>
+            <path class="fiber" d="M520 320 C560 320 560 265 600 265"/>
+
+            <rect class="box" x="760" y="80" width="190" height="56" rx="4"/>
+            <text class="t" x="772" y="104">VPC prod</text><text class="s" x="772" y="122">seg: prod</text>
+            <rect class="box" x="760" y="160" width="190" height="56" rx="4"/>
+            <text class="t" x="772" y="184">검사 VPC</text><text class="s" x="772" y="202">NFG: inspection</text>
+            <rect class="box" x="760" y="240" width="190" height="56" rx="4"/>
+            <text class="t" x="772" y="264">VPC dev</text><text class="s" x="772" y="282">seg: dev</text>
+            <rect class="box" x="760" y="330" width="190" height="56" rx="4"/>
+            <text class="t" x="772" y="354">Transit Gateway</text><text class="s" x="772" y="372">peering · seg: shared</text>
+
+            <path class="path" d="M146 130 H196"/>
+            <text class="lbl2" x="152" y="122">DX</text>
+            <path class="path" d="M332 130 H380"/>
+            <path class="site" d="M146 330 H196"/>
+            <path class="path" d="M332 330 H380"/>
+            <text class="lbl" x="200" y="382">Tunnel-less Connect</text>
+
+            <path class="path" d="M520 124 C640 124 640 108 760 108"/>
+            <path class="path" d="M696 222 C730 222 730 188 760 188"/>
+            <path class="path" d="M696 250 C730 250 730 268 760 268"/>
+            <path class="path" d="M520 346 C640 346 640 358 760 358"/>
+            <text class="lbl2" x="702" y="180">send-via</text>
+          </svg>
+        </div>
+        <figcaption class="legend">
+          <span><i></i>코어 네트워크 엣지 간 메시</span>
+          <span><i class="p"></i>attachment</span>
+          <span><i class="s"></i>SD-WAN 언더레이 (인터넷)</span>
+        </figcaption>
+        <p class="arch-hint">좁은 화면에서는 다이어그램을 좌우로 밀어서 보세요.</p>
+      </figure>
+    </div>
+  </section>
+
+  <section id="start" aria-labelledby="start-h">
+    <div class="wrap">
+      <p class="tag">Getting started</p>
+      <h2 id="start-h">코어 네트워크를 여는 순서</h2>
+      <ol class="steps">
+        <li><span class="num">STEP 1</span><h3>Global network 생성</h3><p>Network Manager에서 코어 네트워크를 담을 global network를 만듭니다.</p></li>
+        <li><span class="num">STEP 2</span><h3>정책 작성</h3><p>ASN 범위, 엣지 리전, 세그먼트, attachment 정책을 정의합니다.</p></li>
+        <li><span class="num">STEP 3</span><h3>변경 사항 검토 · 적용</h3><p>정책 버전의 change set을 확인하고 실행해 엣지를 배포합니다.</p></li>
+        <li><span class="num">STEP 4</span><h3>Attachment 연결</h3><p>VPC, VPN, Connect, DX gateway를 태그와 함께 연결하고, 필요하면 승인합니다.</p></li>
+        <li><span class="num">STEP 5</span><h3>경로 확인</h3><p>세그먼트별 라우팅 테이블에서 리전 간 경로와 공유 경로를 확인합니다.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="pricing" aria-labelledby="pricing-h">
+    <div class="wrap">
+      <p class="tag">Pricing</p>
+      <h2 id="pricing-h">비용 항목</h2>
+      <p class="lede">Cloud WAN 요금은 코어 네트워크 엣지 수, attachment 수와 시간, 그리고 코어 네트워크로 보낸 데이터 양으로 정해집니다. 리전 간 전송과 VPN, Direct Connect 회선 요금은 따로 붙습니다.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">AWS Cloud WAN 과금 항목</caption>
+          <thead><tr><th scope="col">과금 항목</th><th scope="col">과금 기준</th><th scope="col">참고</th></tr></thead>
+          <tbody>
+          <tr><td class="row-h">Core network edge 시간</td><td data-k="과금 기준">정책의 edge-locations에 있는 리전마다 엣지 하나의 시간. 부분 시간은 1시간으로 계산합니다.</td><td data-k="참고">코어 네트워크를 만든 계정에 청구됩니다.</td></tr>
+          <tr><td class="row-h">Attachment 시간</td><td data-k="과금 기준">attachment마다 연결된 시간</td><td data-k="참고">VPC는 VPC 소유자, Direct Connect는 DX gateway 소유자, VPN과 Connect는 코어 네트워크 소유 계정에 청구됩니다.</td></tr>
+          <tr><td class="row-h">Transit Gateway 피어링</td><td data-k="과금 기준">피어링으로 연결된 엣지와 Transit Gateway의 시간</td><td data-k="참고">피어링 위의 Transit Gateway 라우팅 테이블 attachment에는 추가 요금이 없습니다.</td></tr>
+          <tr><td class="row-h">데이터 처리</td><td data-k="과금 기준">VPC, VPN, Direct Connect에서 코어 네트워크로 보낸 GB</td><td data-k="참고">피어링으로 오가는 트래픽과 엣지에서 VPC로 나가는 트래픽에는 처리 요금이 없습니다.</td></tr>
+          <tr><td class="row-h">리전 간 데이터 전송</td><td data-k="과금 기준">리전 사이로 보낸 GB</td><td data-k="참고">표준 AWS 데이터 전송 요금으로 청구됩니다.</td></tr>
+          <tr><td class="row-h">Site-to-Site VPN · Direct Connect</td><td data-k="과금 기준">VPN 연결 시간, Direct Connect 포트 시간과 데이터 전송</td><td data-k="참고">각 서비스 요금으로 따로 청구됩니다. Accelerated VPN은 Global Accelerator 시간 요금과 Data Transfer Premium이 붙습니다.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="lede" style="font-size:14px">요금 단가는 리전과 사용량에 따라 다릅니다. 최신 단가는 <a href="https://aws.amazon.com/cloud-wan/pricing/" target="_blank" rel="noopener">AWS Cloud WAN 요금 페이지</a>에서 확인하세요.</p>
+    </div>
+  </section>
+
+  <section class="cta" aria-labelledby="cta-h">
+    <div class="wrap">
+      <p class="tag">Next step</p>
+      <h2 id="cta-h">우리 글로벌 네트워크의 세그먼트를 함께 설계해 보세요</h2>
+      <p class="lede">운영 리전, 세그먼트 분리 기준, 온프레미스와 SD-WAN 연결, 검사 요구사항을 정리해 오시면 정책 초안과 전환 계획을 함께 검토합니다.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="https://aws.amazon.com/cloud-wan/" target="_blank" rel="noopener">서비스 페이지 열기</a>
+        <a class="btn btn-ghost" href="https://docs.aws.amazon.com/network-manager/latest/cloudwan/what-is-cloudwan.html" target="_blank" rel="noopener">사용 설명서 읽기</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a href="../">← 전체 AWS 네트워킹 서비스</a>
+    <span>AWS Cloud WAN 소개 자료. 지원 리전, 한도, 정책 문법은 바뀔 수 있으니 공식 문서를 확인하세요.</span>
+    <a href="https://docs.aws.amazon.com/network-manager/latest/cloudwan/cloudwan-policies-json.html" target="_blank" rel="noopener">정책 파라미터 문서</a>
+  </div>
+</footer>
+
+</body>
+</html>

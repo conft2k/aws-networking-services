@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>API Gateway 소개</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+body{margin:0}img{max-width:100%}[hidden]{display:none!important}
+
+/* Layout: a cross-connect work order. Cool steel paper, navy ink, Amazon orange as the one accent; section tags read like fiber labels. */
+:root{
+  --bg:#EEF1F4; --surface:#FFFFFF; --sunken:#E3E8ED;
+  --ink:#14202E; --ink-2:#44515F; --ink-3:#5A6672;
+  --line:#CDD5DD; --line-2:#B4BFCA;
+  --fiber:#FF9900;          /* Amazon orange — fills only */
+  --fiber-ink:#B35C00;      /* orange-derived, AA on light surfaces */
+  --fiber-soft:#FFF0D9;
+  --on-fiber:#14202E;
+  --trace:#2E7D9A;          /* secondary line color for diagram paths */
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --maxw:1120px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--fiber-ink);outline-offset:3px;border-radius:2px}
+.skip-link{position:absolute;left:16px;top:-60px;background:var(--fiber);color:var(--on-fiber);padding:8px 14px;font-weight:700;z-index:50;text-decoration:none}
+.skip-link:focus{top:12px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.wrap{max-width:var(--maxw);margin:0 auto;padding-inline:24px}
+section{padding-block:88px;border-top:1px solid var(--line)}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.25}
+h2{font-size:clamp(26px,3.4vw,36px);font-weight:700;letter-spacing:-.01em}
+h3{font-size:18px;font-weight:700}
+p{margin:0}
+.lede{color:var(--ink-2);max-width:62ch;margin-top:14px}
+.num{font-family:var(--display);font-variant-numeric:tabular-nums lining-nums}
+.mono{font-family:var(--mono)}
+
+/* fiber label: the section tag */
+.tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-bottom:14px}
+.tag::before{content:"";width:22px;height:8px;background:var(--fiber);border-radius:1px}
+
+/* nav */
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:60px}
+.brand{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.02em;text-decoration:none;text-transform:uppercase}
+.brand span{color:var(--fiber-ink)}
+.navlinks{display:flex;gap:22px;font-size:14px;align-items:center}
+.navlinks a{text-decoration:none;color:var(--ink-2)}
+.navlinks a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;font-weight:700;font-size:15px;text-decoration:none;border-radius:4px;border:1px solid transparent;transition:transform .15s ease,background .15s ease}
+.btn-primary{background:var(--fiber);color:var(--on-fiber)}
+.btn-primary:hover{transform:translateY(-1px)}
+.btn-ghost{border-color:var(--line-2);color:var(--ink)}
+.btn-ghost:hover{background:var(--sunken)}
+.navlinks .btn{min-height:38px;padding:0 14px;font-size:14px;color:var(--on-fiber)}
+
+/* hero */
+.hero{padding-block:72px 64px;border-top:0}
+.hero-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:56px;align-items:center}
+.eyebrow{font-family:var(--mono);font-size:13px;color:var(--fiber-ink);letter-spacing:.04em}
+.hero h1{font-size:clamp(34px,5vw,56px);font-weight:700;letter-spacing:-.02em;margin-top:16px}
+.hero h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--fiber) 62%,var(--fiber) 90%,transparent 90%);padding-inline:2px}
+.hero .lede{font-size:18px}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+
+/* hero visual: port faceplate */
+.faceplate{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px}
+.faceplate-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.ports{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+.port{border:1px solid var(--line);border-radius:4px;padding:14px 14px 12px;background:var(--sunken);display:flex;flex-direction:column;gap:2px}
+.port .num{font-size:40px;font-weight:600;line-height:1}
+.port .num small{font-size:18px;color:var(--ink-2);margin-left:2px}
+.port .optic{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+.port .led{width:8px;height:8px;border-radius:50%;background:var(--fiber);align-self:flex-end;margin-top:-6px;animation:blink 2.4s ease-in-out infinite}
+.port:nth-child(2) .led{animation-delay:.6s}.port:nth-child(3) .led{animation-delay:1.2s}.port:nth-child(4) .led{animation-delay:1.8s}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.faceplate-foot{margin-top:14px;font-size:13px;color:var(--ink-2)}
+
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:56px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.chip{padding:18px 20px;border-left:1px solid var(--line);min-width:0}
+.chip:first-child{border-left:0}
+.chip .num{font-size:34px;font-weight:600;line-height:1.1}
+.chip p{font-size:13.5px;color:var(--ink-2);margin-top:4px}
+
+/* value */
+.split{display:grid;grid-template-columns:1fr 1.4fr;gap:56px}
+.pillars{display:grid;gap:0;border-top:1px solid var(--line-2)}
+.pillar{display:grid;grid-template-columns:120px 1fr;gap:20px;padding-block:22px;border-bottom:1px solid var(--line)}
+.pillar .k{font-family:var(--display);font-size:22px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--fiber-ink)}
+.pillar p{color:var(--ink-2);margin-top:6px}
+
+/* stack (L1/L2/L3) */
+.stack{margin-top:40px;display:grid;gap:10px}
+.layer{display:grid;grid-template-columns:96px 1fr 1.2fr;gap:24px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px 24px}
+.layer .lv{font-family:var(--display);font-size:44px;font-weight:700;line-height:.9}
+.layer .lv small{display:block;font-family:var(--mono);font-size:11px;font-weight:400;color:var(--ink-3);letter-spacing:.06em;margin-top:8px;text-transform:uppercase}
+.layer p{color:var(--ink-2);margin-top:6px;font-size:15px}
+.specs{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+.specs code{font-family:var(--mono);font-size:12.5px;background:var(--sunken);border:1px solid var(--line);padding:3px 8px;border-radius:3px;color:var(--ink)}
+
+/* features */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:40px}
+.feature{background:var(--surface);padding:26px 24px;min-width:0}
+.feature .ft{font-family:var(--mono);font-size:11.5px;color:var(--fiber-ink);letter-spacing:.06em;text-transform:uppercase}
+.feature h3{margin-top:8px}
+.feature p{color:var(--ink-2);font-size:15px;margin-top:8px}
+
+/* table */
+.tbl-wrap{margin-top:36px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:14px 18px;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--sunken)}
+tbody tr:last-child td{border-bottom:0}
+td.row-h{font-weight:700;width:22%}
+td .num{font-size:18px;font-weight:600}
+
+/* architecture */
+.arch{margin-top:36px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px}
+.arch-scroll{overflow-x:auto}
+.arch svg{display:block;width:100%;min-width:860px;height:auto}
+.arch-hint{display:none;font-size:13px;color:var(--ink-3);margin-top:10px}
+svg .box{fill:var(--sunken);stroke:var(--line-2)}
+svg .zone{fill:none;stroke:var(--line-2);stroke-dasharray:4 4}
+svg .t{fill:var(--ink);font-family:var(--sans);font-size:14px;font-weight:700}
+svg .s{fill:var(--ink-3);font-family:var(--mono);font-size:11px}
+svg .z{fill:var(--ink-2);font-family:var(--mono);font-size:11px;letter-spacing:.08em}
+svg .fiber{stroke:var(--fiber);stroke-width:5;fill:none;stroke-linecap:round}
+svg .path{stroke:var(--trace);stroke-width:2;fill:none}
+svg .site{stroke:var(--fiber-ink);stroke-width:2;fill:none;stroke-dasharray:6 5}
+svg .lbl{fill:var(--trace);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .lbl2{fill:var(--fiber-ink);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .dot{fill:var(--fiber)}
+.legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--ink-2)}
+.legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--fiber)}
+.legend i.p{border-top:2px solid var(--trace)}
+.legend i.s{border-top:2px dashed var(--fiber-ink)}
+
+/* steps */
+.steps{list-style:none;padding:0;margin:40px 0 0;display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:4px solid var(--fiber)}
+.steps li{padding:20px 18px 0 0;min-width:0}
+.steps .num{font-size:15px;font-weight:600;color:var(--fiber-ink);letter-spacing:.06em}
+.steps h3{font-size:16px;margin-top:6px}
+.steps p{font-size:14px;color:var(--ink-2);margin-top:6px}
+
+/* resiliency */
+.res{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:36px}
+.res-card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:26px}
+.res-card .num{font-size:52px;font-weight:700;line-height:1}
+.res-card .num small{font-size:20px;color:var(--ink-2)}
+.res-card h3{margin-top:10px}
+.res-card p{color:var(--ink-2);font-size:15px;margin-top:6px}
+.res-card.max{border-color:var(--fiber);box-shadow:inset 0 4px 0 var(--fiber)}
+
+/* cta */
+.cta{text-align:center}
+.cta h2{max-width:22ch;margin:0 auto}
+.cta .lede{margin:14px auto 0}
+.cta .cta-row{justify-content:center}
+footer{border-top:1px solid var(--line);padding-block:28px;font-size:13px;color:var(--ink-3)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+
+@media (max-width:1024px){
+  .hero-grid,.split{grid-template-columns:1fr;gap:40px}
+  .features{grid-template-columns:repeat(2,1fr)}
+  .steps{grid-template-columns:repeat(2,1fr);border-top:0;gap:0 24px}
+  .steps li{border-top:4px solid var(--fiber);padding-bottom:24px}
+  .layer{grid-template-columns:80px 1fr}
+  .layer .specs{grid-column:2}
+  .chips{grid-template-columns:repeat(2,1fr)}
+  .chip:nth-child(3){border-left:0}
+  .chip:nth-child(n+3){border-top:1px solid var(--line)}
+}
+@media (max-width:640px){
+  .wrap{padding-inline:18px}
+  section{padding-block:60px}
+  .navlinks a:not(.btn){display:none}
+  .features,.res{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr}
+  .pillar{grid-template-columns:1fr;gap:0}
+  .layer{grid-template-columns:1fr;gap:12px}
+  .layer .specs{grid-column:auto}
+  .cta-row .btn{width:100%}
+  .arch-hint{display:block}
+  table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  table,tbody,tr,td{display:block;width:100%}
+  tr{border-bottom:1px solid var(--line);padding:14px 16px}
+  tbody tr:last-child{border-bottom:0}
+  td{border:0;padding:3px 0}
+  td.row-h{width:100%;font-size:16px;padding-bottom:6px}
+  td[data-k]::before{content:attr(data-k);display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+
+/* ---- service-specific ---- */
+.hero h1,h2,h3{word-break:keep-all}
+.hero-grid>*{min-width:0}
+
+/* hero visual: request inspector */
+.inspect{background:var(--surface);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.inspect-head{display:flex;justify-content:space-between;gap:12px;padding:14px 20px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.inspect pre{margin:0;padding:16px 20px;font-family:var(--mono);font-size:12.5px;line-height:1.75;color:var(--ink-2);background:var(--sunken);overflow-x:auto;white-space:pre}
+.inspect .m{color:var(--fiber-ink);font-weight:500}
+.inspect .k{color:var(--ink);font-weight:500}
+.checks{display:grid;grid-template-columns:repeat(2,1fr);border-top:1px solid var(--line)}
+.check{padding:12px 16px;border-left:1px solid var(--line);border-top:1px solid var(--line);min-width:0}
+.check:nth-child(odd){border-left:0}
+.check:nth-child(-n+2){border-top:0}
+.check span{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.check b{font-size:14px}
+.check b::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--trace);margin-right:6px;vertical-align:1px}
+.check.ok b::before{background:var(--fiber);animation:blink 2.4s ease-in-out infinite}
+.inspect-foot{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 16px;border-top:1px solid var(--line);font-size:13px;color:var(--ink-2)}
+.status{font-family:var(--mono);font-size:12px;font-weight:500;padding:3px 8px;border-radius:3px;background:var(--fiber);color:var(--on-fiber)}
+.status.warn{background:transparent;border:1px solid var(--line-2);color:var(--ink)}
+
+/* authorization rows reuse .layer with a word label */
+.auth .lv{font-size:32px;text-transform:uppercase}
+.auth .layer{grid-template-columns:120px 1fr 1.2fr}
+
+/* integration types */
+.ints{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:36px}
+.int{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px;min-width:0}
+.int code{font-family:var(--mono);font-size:12px;color:var(--fiber-ink);font-weight:500}
+.int h3{margin-top:8px;font-size:17px}
+.int p{color:var(--ink-2);font-size:14.5px;margin-top:6px}
+
+@media (max-width:1024px){
+  .auth .layer{grid-template-columns:110px 1fr}
+  .ints{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:640px){
+  .inspect pre{font-size:11.5px;padding:16px}
+  .auth .layer{grid-template-columns:1fr}
+  .ints{grid-template-columns:1fr}
+}
+@media (min-width:641px){
+  #types td.row-h{width:15%}
+  #types td:nth-child(2){width:13%;word-break:keep-all}
+}
+
+/* nav: keep links on one line, show only CTA below 960px */
+.navlinks a{white-space:nowrap}
+@media (max-width:960px){.navlinks a:not(.btn){display:none}}
+
+/* Korean line breaking: never split a word mid-syllable */
+h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
+</style>
+</head>
+<body>
+
+
+<a class="skip-link" href="#main">본문으로 건너뛰기</a>
+
+<nav aria-label="주요 메뉴">
+  <div class="wrap">
+    <a class="brand" href="#top">API <span>Gateway</span></a>
+    <div class="navlinks">
+      <a href="../">전체 서비스</a>
+      <a href="#types">API 유형</a>
+      <a href="#auth">인증</a>
+      <a href="#features">주요 기능</a>
+      <a href="#arch">사설 API</a>
+      <a href="#pricing">비용</a>
+      <a class="btn btn-primary" href="#start">시작하기</a>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+  <header class="hero" id="top">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">Amazon API Gateway · 관리형 API 진입점</p>
+          <h1>모든 API 호출을 <em>한 지점에서</em> 인증하고 제어하세요</h1>
+          <p class="lede">API Gateway는 REST, HTTP, WebSocket API의 진입점입니다. 요청을 인증하고, 한도를 넘는 트래픽을 제한하고, Lambda나 VPC 안의 서비스로 전달합니다. VPC 안에서만 호출되는 사설 API도 만들 수 있습니다.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="#types">API 유형 비교</a>
+            <a class="btn btn-ghost" href="#arch">사설 API 구성 보기</a>
+          </div>
+        </div>
+
+        <div class="inspect" aria-label="API 요청 처리 예시">
+          <div class="inspect-head"><span>Request · prod stage</span><span>HTTP API</span></div>
+<pre><span class="m">GET</span> <span class="k">/orders/42</span> HTTP/1.1
+Host: api.example.com
+Authorization: Bearer eyJhbGciOi...
+Accept: application/json</pre>
+          <div class="checks">
+            <div class="check ok"><span>Authorizer</span><b>JWT 검증 통과</b></div>
+            <div class="check ok"><span>Throttling</span><b>한도 이내</b></div>
+            <div class="check"><span>Route</span><b class="mono">GET /orders/{id}</b></div>
+            <div class="check"><span>Integration</span><b>VPC link → ALB</b></div>
+          </div>
+          <div class="inspect-foot"><span class="status">200 OK</span><span>한도를 넘으면</span><span class="status warn">429 Too Many Requests</span></div>
+        </div>
+      </div>
+
+      <div class="chips" role="list">
+        <div class="chip" role="listitem"><span class="num">99.95%</span><p>월간 가용성 SLA</p></div>
+        <div class="chip" role="listitem"><span class="num">10,000</span><p>계정·리전당 기본 초당 요청 한도 (상향 요청 가능)</p></div>
+        <div class="chip" role="listitem"><span class="num">10 MB</span><p>REST · HTTP API 최대 페이로드</p></div>
+        <div class="chip" role="listitem"><span class="num">2 h</span><p>WebSocket 연결 최대 유지 시간</p></div>
+      </div>
+    </div>
+  </header>
+
+  <section id="why" aria-labelledby="why-h">
+    <div class="wrap split">
+      <div>
+        <p class="tag">Why API Gateway</p>
+        <h2 id="why-h">API가 늘어날수록 공통 관문이 필요합니다</h2>
+        <p class="lede">서비스마다 인증, 한도 제어, 로깅을 따로 구현하면 정책이 어긋나고 운영 부담이 커집니다. 관문에서 공통 정책을 적용하고, 백엔드는 업무 로직에 집중하게 합니다.</p>
+      </div>
+      <div class="pillars">
+        <div class="pillar"><span class="k">Secure</span><div><h3>관문에서 인증</h3><p>IAM, Lambda authorizer, Cognito와 JWT로 백엔드에 닿기 전에 호출자를 확인합니다.</p></div></div>
+        <div class="pillar"><span class="k">Control</span><div><h3>트래픽 한도</h3><p>계정, 스테이지와 메서드, 클라이언트 단위로 token bucket 방식의 한도를 적용합니다.</p></div></div>
+        <div class="pillar"><span class="k">Private</span><div><h3>사설 경로</h3><p>인터페이스 VPC 엔드포인트로 API를 VPC와 온프레미스에만 열고, VPC link로 사설 백엔드에 연결합니다.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="types" aria-labelledby="types-h">
+    <div class="wrap">
+      <p class="tag">API types</p>
+      <h2 id="types-h">REST, HTTP, WebSocket API</h2>
+      <p class="lede">HTTP API는 기능을 줄여 더 낮은 가격으로 제공되고, REST API는 사설 엔드포인트, API key, 캐싱, AWS WAF 같은 관리 기능을 갖춥니다. 양방향 실시간 통신에는 WebSocket API를 씁니다.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">API Gateway API 유형 비교</caption>
+          <thead><tr><th scope="col">유형</th><th scope="col">통신 모델</th><th scope="col">인증</th><th scope="col">대표 기능</th><th scope="col">맞는 경우</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="row-h">REST API</td>
+              <td data-k="통신 모델">요청 · 응답</td>
+              <td data-k="인증">IAM, Cognito user pool, Lambda authorizer, resource policy</td>
+              <td data-k="대표 기능">Edge-optimized · Regional · Private 엔드포인트, API key와 usage plan, 캐싱, AWS WAF, 요청 검증, canary 배포</td>
+              <td data-k="맞는 경우">사설 API, 클라이언트별 한도, 세밀한 요청 변환이 필요한 경우</td>
+            </tr>
+            <tr>
+              <td class="row-h">HTTP API</td>
+              <td data-k="통신 모델">요청 · 응답</td>
+              <td data-k="인증">IAM, JWT authorizer (Cognito 포함), Lambda authorizer</td>
+              <td data-k="대표 기능">Regional 엔드포인트, 자동 배포, AWS Cloud Map 사설 통합</td>
+              <td data-k="맞는 경우">Lambda나 HTTP 백엔드 앞의 단순한 프록시 API</td>
+            </tr>
+            <tr>
+              <td class="row-h">WebSocket API</td>
+              <td data-k="통신 모델">양방향 지속 연결</td>
+              <td data-k="인증">IAM, Lambda authorizer ($connect 라우트)</td>
+              <td data-k="대표 기능">$connect · $disconnect · $default 라우트, route selection expression, @connections로 서버 푸시</td>
+              <td data-k="맞는 경우">채팅, 알림, 실시간 대시보드</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="auth" aria-labelledby="auth-h">
+    <div class="wrap">
+      <p class="tag">Authorization</p>
+      <h2 id="auth-h">호출자를 확인하는 세 가지 방법</h2>
+      <p class="lede">호출자가 AWS 자격 증명을 가진 워크로드인지, 사용자 토큰을 가진 앱인지에 따라 고릅니다.</p>
+      <div class="stack auth">
+        <div class="layer">
+          <span class="lv">IAM<small>SigV4</small></span>
+          <div><h3>IAM 권한</h3><p>호출자가 SigV4로 서명한 요청을 IAM 정책으로 판단합니다. REST API는 resource policy로 출발지 VPC, VPC 엔드포인트, 계정을 함께 제한할 수 있습니다.</p></div>
+          <div class="specs"><code>SigV4</code><code>IAM policy</code><code>Resource policy</code><code>aws:SourceVpce</code></div>
+        </div>
+        <div class="layer">
+          <span class="lv">Lambda<small>Custom</small></span>
+          <div><h3>Lambda authorizer</h3><p>헤더나 쿼리 문자열의 토큰을 Lambda 함수가 검사해 허용 여부를 돌려줍니다. 사내 인증 체계나 REST API의 JWT 검증에 씁니다.</p></div>
+          <div class="specs"><code>Token</code><code>Request parameters</code><code>REST · HTTP · WebSocket</code></div>
+        </div>
+        <div class="layer">
+          <span class="lv">JWT<small>OIDC</small></span>
+          <div><h3>Cognito · JWT authorizer</h3><p>REST API는 Cognito user pool authorizer를, HTTP API는 JWT authorizer를 씁니다. HTTP API의 JWT authorizer는 Cognito를 비롯한 OIDC 발급자의 토큰을 검증합니다.</p></div>
+          <div class="specs"><code>Cognito user pool</code><code>JWT issuer</code><code>Audience</code><code>Scopes</code></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" aria-labelledby="features-h">
+    <div class="wrap">
+      <p class="tag">Features</p>
+      <h2 id="features-h">주요 기능</h2>
+      <div class="features">
+        <article class="feature"><p class="ft">Private endpoint</p><h3>Private API</h3><p>execute-api 인터페이스 VPC 엔드포인트로만 호출되는 REST API입니다. 트래픽은 인터넷을 거치지 않고, Direct Connect로 온프레미스에서도 호출할 수 있습니다.</p></article>
+        <article class="feature"><p class="ft">Private domain</p><h3>Private custom domain</h3><p>사설 API에 사내 도메인 이름을 붙이고 ACM 인증서로 관리합니다. AWS RAM으로 다른 계정에 공유하고, 소비 계정은 VPC 엔드포인트와 연결해 씁니다.</p></article>
+        <article class="feature"><p class="ft">Throttling</p><h3>단계별 한도</h3><p>AWS 리전, 계정, 스테이지와 메서드, 클라이언트 순으로 rate와 burst 한도를 둡니다. 한도를 넘는 요청은 429로 응답합니다.</p></article>
+        <article class="feature"><p class="ft">API management</p><h3>Usage plan · API key</h3><p>REST API에서 API key로 클라이언트를 식별하고, 클라이언트별 요청 한도와 기간별 사용량을 정합니다.</p></article>
+        <article class="feature"><p class="ft">Custom domain</p><h3>사용자 지정 도메인 · mTLS</h3><p>api.example.com 같은 도메인에 여러 API와 스테이지를 매핑합니다. REST와 HTTP API 모두 mutual TLS로 클라이언트 인증서를 검증할 수 있습니다.</p></article>
+        <article class="feature"><p class="ft">Private integration</p><h3>VPC link</h3><p>REST와 HTTP API 모두 VPC link v2로 사설 서브넷의 ALB에 직접 연결하고, NLB 연결도 지원합니다. HTTP API는 AWS Cloud Map에 등록된 서비스로도 보낼 수 있습니다.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="integrations" aria-labelledby="int-h">
+    <div class="wrap">
+      <p class="tag">Integration types</p>
+      <h2 id="int-h">요청을 백엔드로 넘기는 방식</h2>
+      <p class="lede">REST API의 통합 유형입니다. 프록시 유형은 요청과 응답을 그대로 넘기고, 비프록시 유형은 매핑으로 형식을 바꿉니다.</p>
+      <div class="ints">
+        <article class="int"><code>AWS_PROXY</code><h3>Lambda 프록시</h3><p>요청 전체를 Lambda 함수에 넘기는, Lambda 호출에 권장되는 방식입니다.</p></article>
+        <article class="int"><code>HTTP_PROXY</code><h3>HTTP 프록시</h3><p>요청과 응답을 HTTP 엔드포인트와 그대로 주고받습니다. VPC link와 함께 사설 백엔드에 씁니다.</p></article>
+        <article class="int"><code>AWS · HTTP</code><h3>매핑 통합</h3><p>AWS 서비스 액션이나 HTTP 엔드포인트를 호출하며, 통합 요청과 응답의 매핑을 직접 정합니다.</p></article>
+        <article class="int"><code>MOCK</code><h3>Mock</h3><p>백엔드를 호출하지 않고 API Gateway가 응답합니다. 테스트와 병행 개발에 씁니다.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="arch" aria-labelledby="arch-h">
+    <div class="wrap">
+      <p class="tag">Reference architecture</p>
+      <h2 id="arch-h">VPC와 온프레미스에만 열린 사설 API</h2>
+      <p class="lede">execute-api 인터페이스 엔드포인트를 통해서만 사설 REST API를 호출하고, resource policy로 허용할 VPC 엔드포인트를 지정합니다. 온프레미스 클라이언트는 Direct Connect로 들어와 Resolver inbound 엔드포인트로 이름을 해석합니다.</p>
+      <figure class="arch">
+        <div class="arch-scroll">
+          <svg viewBox="0 0 980 440" role="img" aria-labelledby="arch-title arch-desc">
+            <title id="arch-title">API Gateway 사설 API 레퍼런스 아키텍처</title>
+            <desc id="arch-desc">온프레미스 사내 클라이언트가 Direct Connect로 소비자 VPC에 연결되고, Route 53 Resolver inbound 엔드포인트로 API 이름을 해석합니다. 소비자 VPC의 애플리케이션과 온프레미스 클라이언트는 execute-api 인터페이스 엔드포인트로 사설 REST API를 호출합니다. 사설 REST API는 resource policy로 허용된 VPC 엔드포인트의 요청만 받고, Lambda 함수로 프록시 통합하거나 VPC link를 거쳐 사설 서브넷의 ALB 또는 NLB로 전달합니다.</desc>
+            <!-- zones -->
+            <rect class="zone" x="10" y="40" width="180" height="380" rx="6"/>
+            <text class="z" x="24" y="62">ON-PREMISES</text>
+            <rect class="zone" x="210" y="40" width="760" height="380" rx="6"/>
+            <text class="z" x="224" y="62">AWS REGION</text>
+            <rect class="zone" x="230" y="80" width="250" height="320" rx="6"/>
+            <text class="z" x="244" y="100">CONSUMER VPC</text>
+            <rect class="zone" x="500" y="80" width="220" height="320" rx="6"/>
+            <text class="z" x="514" y="100">API GATEWAY</text>
+            <rect class="zone" x="740" y="80" width="220" height="320" rx="6"/>
+            <text class="z" x="754" y="100">BACKEND</text>
+
+            <!-- on-prem -->
+            <rect class="box" x="28" y="190" width="144" height="64" rx="4"/>
+            <text class="t" x="42" y="218">사내 클라이언트</text><text class="s" x="42" y="238">사내 DNS 사용</text>
+
+            <!-- consumer vpc -->
+            <rect class="box" x="250" y="112" width="210" height="56" rx="4"/>
+            <text class="t" x="264" y="136">애플리케이션</text><text class="s" x="264" y="154">10.0.1.0/24</text>
+            <rect class="box" x="250" y="190" width="210" height="64" rx="4"/>
+            <text class="t" x="264" y="218">Interface endpoint</text><text class="s" x="264" y="238">execute-api · Private DNS</text>
+            <rect class="box" x="250" y="300" width="210" height="64" rx="4"/>
+            <text class="t" x="264" y="328">Resolver inbound</text><text class="s" x="264" y="348">온프레미스 이름 해석</text>
+
+            <!-- api gateway -->
+            <rect class="box" x="515" y="190" width="190" height="64" rx="4"/>
+            <text class="t" x="529" y="218">Private REST API</text><text class="s" x="529" y="238">aws:SourceVpce 정책</text>
+            <rect class="box" x="515" y="300" width="190" height="64" rx="4"/>
+            <text class="t" x="529" y="328">VPC link</text><text class="s" x="529" y="348">VPC link v2</text>
+
+            <!-- backend -->
+            <rect class="box" x="755" y="112" width="190" height="64" rx="4"/>
+            <text class="t" x="769" y="140">Lambda</text><text class="s" x="769" y="160">AWS_PROXY</text>
+            <rect class="box" x="755" y="300" width="190" height="64" rx="4"/>
+            <text class="t" x="769" y="328">ALB · NLB</text><text class="s" x="769" y="348">사설 서브넷</text>
+
+            <!-- links -->
+            <path class="fiber" d="M172 222 H250"/>
+            <text class="lbl2" x="178" y="212">DX</text>
+            <path class="site" d="M100 254 V332 H250"/>
+            <text class="lbl2" x="108" y="300">DNS 질의</text>
+            <path class="path" d="M355 168 V190"/>
+            <path class="path" d="M460 222 H515"/>
+            <text class="lbl" x="466" y="212">HTTPS</text>
+            <path class="path" d="M705 210 C730 210 730 144 755 144"/>
+            <path class="path" d="M610 254 V300"/>
+            <path class="path" d="M705 332 H755"/>
+          </svg>
+        </div>
+        <figcaption class="legend">
+          <span><i></i>Direct Connect</span>
+          <span><i class="p"></i>API 호출 경로</span>
+          <span><i class="s"></i>DNS 질의</span>
+        </figcaption>
+        <p class="arch-hint">좁은 화면에서는 다이어그램을 좌우로 밀어서 보세요.</p>
+      </figure>
+    </div>
+  </section>
+
+  <section id="start" aria-labelledby="start-h">
+    <div class="wrap">
+      <p class="tag">Getting started</p>
+      <h2 id="start-h">사설 API를 여는 순서</h2>
+      <ol class="steps">
+        <li><span class="num">STEP 1</span><h3>엔드포인트 생성</h3><p>소비자 VPC에 execute-api 인터페이스 엔드포인트를 만들고 보안 그룹에 443을 허용합니다.</p></li>
+        <li><span class="num">STEP 2</span><h3>Private API 생성</h3><p>엔드포인트 유형을 Private로 골라 REST API를 만듭니다.</p></li>
+        <li><span class="num">STEP 3</span><h3>Resource policy</h3><p>aws:SourceVpce 조건으로 허용할 VPC 엔드포인트를 지정합니다.</p></li>
+        <li><span class="num">STEP 4</span><h3>통합 · 배포</h3><p>메서드에 Lambda나 VPC link 통합을 붙이고 스테이지에 배포합니다.</p></li>
+        <li><span class="num">STEP 5</span><h3>호출 확인</h3><p>VPC 안에서 호출해 보고, 온프레미스는 Resolver inbound 엔드포인트를 거쳐 이름을 해석합니다.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="pricing" aria-labelledby="pricing-h">
+    <div class="wrap">
+      <p class="tag">Pricing</p>
+      <h2 id="pricing-h">비용 항목</h2>
+      <p class="lede">API Gateway에는 최소 요금이나 약정이 없고, 받은 API 호출 수와 WebSocket 메시지·연결 시간, 나가는 데이터 전송량으로 비용이 정해집니다. 프리 티어 적용 방식은 계정 가입 시기에 따라 다릅니다.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">API Gateway 과금 항목</caption>
+          <thead><tr><th scope="col">과금 항목</th><th scope="col">과금 기준</th><th scope="col">참고</th></tr></thead>
+          <tbody>
+          <tr><td class="row-h">REST API 호출</td><td data-k="과금 기준">수신한 API 호출 100만 건당, 사용량 구간별 단가</td><td data-k="참고">프리 티어 대상 계정은 월 100만 건까지 무료입니다.</td></tr>
+          <tr><td class="row-h">HTTP API 호출</td><td data-k="과금 기준">수신한 API 호출 100만 건당</td><td data-k="참고">REST API보다 기능을 줄인 대신 단가가 낮습니다. 프리 티어 대상 계정은 월 100만 건까지 무료입니다.</td></tr>
+          <tr><td class="row-h">WebSocket API</td><td data-k="과금 기준">주고받은 메시지 100만 건당(32 KB 단위 계량)과 연결 시간(분)</td><td data-k="참고">ping·pong 같은 제어 프레임은 계량하지 않습니다.</td></tr>
+          <tr><td class="row-h">API 캐시</td><td data-k="과금 기준">REST API 스테이지 캐시의 선택한 크기별 시간 요금</td><td data-k="참고">캐시를 켠 스테이지에만 붙습니다.</td></tr>
+          <tr><td class="row-h">Portal</td><td data-k="과금 기준">Portal당 월 요금(PortalProduct 10개 포함), 추가 PortalProduct당 월 요금</td><td data-k="참고">월 중 사용 기간에 비례해 청구합니다.</td></tr>
+          <tr><td class="row-h">데이터 전송</td><td data-k="과금 기준">외부로 나가는 데이터 GB당, EC2 데이터 전송 요금 적용</td><td data-k="참고">Private API에는 데이터 전송 아웃 요금이 없습니다.</td></tr>
+          <tr><td class="row-h">Private API 엔드포인트</td><td data-k="과금 기준">execute-api 인터페이스 VPC 엔드포인트의 AZ당 시간 요금과 처리 데이터 GB당</td><td data-k="참고">AWS PrivateLink에서 과금합니다.</td></tr>
+          <tr><td class="row-h">연관 서비스</td><td data-k="과금 기준">Lambda 호출, CloudWatch Logs, AWS WAF</td><td data-k="참고">각 서비스에서 따로 과금합니다.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="lede" style="font-size:14px">요금 단가는 리전과 사용량에 따라 다릅니다. 최신 단가는 <a href="https://aws.amazon.com/api-gateway/pricing/" target="_blank" rel="noopener">API Gateway 요금 페이지</a>에서 확인하세요.</p>
+    </div>
+  </section>
+
+  <section class="cta" aria-labelledby="cta-h">
+    <div class="wrap">
+      <p class="tag">Next step</p>
+      <h2 id="cta-h">우리 API에 맞는 관문 구성을 함께 정해 보세요</h2>
+      <p class="lede">호출 주체, 공개 범위, 예상 트래픽, 백엔드 위치를 정리해 오시면 API 유형과 인증, 네트워크 경로를 함께 검토합니다.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="https://aws.amazon.com/api-gateway/" target="_blank" rel="noopener">서비스 페이지 열기</a>
+        <a class="btn btn-ghost" href="https://docs.aws.amazon.com/apigateway/latest/developerguide/welcome.html" target="_blank" rel="noopener">개발자 안내서 읽기</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a href="../">← 전체 AWS 네트워킹 서비스</a>
+    <span>Amazon API Gateway 소개 자료. 기능 지원 범위, 할당량, 요금은 리전과 API 유형에 따라 다르니 공식 문서를 확인하세요.</span>
+    <a href="https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-private-apis.html" target="_blank" rel="noopener">Private API 문서</a>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Elastic Load Balancing 소개</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+body{margin:0}img{max-width:100%}[hidden]{display:none!important}
+
+/* Layout: a cross-connect work order. Cool steel paper, navy ink, Amazon orange as the one accent; section tags read like fiber labels. */
+:root{
+  --bg:#EEF1F4; --surface:#FFFFFF; --sunken:#E3E8ED;
+  --ink:#14202E; --ink-2:#44515F; --ink-3:#5A6672;
+  --line:#CDD5DD; --line-2:#B4BFCA;
+  --fiber:#FF9900;          /* Amazon orange — fills only */
+  --fiber-ink:#B35C00;      /* orange-derived, AA on light surfaces */
+  --fiber-soft:#FFF0D9;
+  --on-fiber:#14202E;
+  --trace:#2E7D9A;          /* secondary line color for diagram paths */
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --maxw:1120px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--fiber-ink);outline-offset:3px;border-radius:2px}
+.skip-link{position:absolute;left:16px;top:-60px;background:var(--fiber);color:var(--on-fiber);padding:8px 14px;font-weight:700;z-index:50;text-decoration:none}
+.skip-link:focus{top:12px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.wrap{max-width:var(--maxw);margin:0 auto;padding-inline:24px}
+section{padding-block:88px;border-top:1px solid var(--line)}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.25}
+h2{font-size:clamp(26px,3.4vw,36px);font-weight:700;letter-spacing:-.01em}
+h3{font-size:18px;font-weight:700}
+p{margin:0}
+.lede{color:var(--ink-2);max-width:62ch;margin-top:14px}
+.num{font-family:var(--display);font-variant-numeric:tabular-nums lining-nums}
+.mono{font-family:var(--mono)}
+
+/* fiber label: the section tag */
+.tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-bottom:14px}
+.tag::before{content:"";width:22px;height:8px;background:var(--fiber);border-radius:1px}
+
+/* nav */
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:60px}
+.brand{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.02em;text-decoration:none;text-transform:uppercase}
+.brand span{color:var(--fiber-ink)}
+.navlinks{display:flex;gap:22px;font-size:14px;align-items:center}
+.navlinks a{text-decoration:none;color:var(--ink-2)}
+.navlinks a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;font-weight:700;font-size:15px;text-decoration:none;border-radius:4px;border:1px solid transparent;transition:transform .15s ease,background .15s ease}
+.btn-primary{background:var(--fiber);color:var(--on-fiber)}
+.btn-primary:hover{transform:translateY(-1px)}
+.btn-ghost{border-color:var(--line-2);color:var(--ink)}
+.btn-ghost:hover{background:var(--sunken)}
+.navlinks .btn{min-height:38px;padding:0 14px;font-size:14px;color:var(--on-fiber)}
+
+/* hero */
+.hero{padding-block:72px 64px;border-top:0}
+.hero-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:56px;align-items:center}
+.eyebrow{font-family:var(--mono);font-size:13px;color:var(--fiber-ink);letter-spacing:.04em}
+.hero h1{font-size:clamp(34px,5vw,56px);font-weight:700;letter-spacing:-.02em;margin-top:16px}
+.hero h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--fiber) 62%,var(--fiber) 90%,transparent 90%);padding-inline:2px}
+.hero .lede{font-size:18px}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+
+/* hero visual: port faceplate */
+.faceplate{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px}
+.faceplate-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.ports{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+.port{border:1px solid var(--line);border-radius:4px;padding:14px 14px 12px;background:var(--sunken);display:flex;flex-direction:column;gap:2px}
+.port .num{font-size:40px;font-weight:600;line-height:1}
+.port .num small{font-size:18px;color:var(--ink-2);margin-left:2px}
+.port .optic{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+.port .led{width:8px;height:8px;border-radius:50%;background:var(--fiber);align-self:flex-end;margin-top:-6px;animation:blink 2.4s ease-in-out infinite}
+.port:nth-child(2) .led{animation-delay:.6s}.port:nth-child(3) .led{animation-delay:1.2s}.port:nth-child(4) .led{animation-delay:1.8s}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.faceplate-foot{margin-top:14px;font-size:13px;color:var(--ink-2)}
+
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:56px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.chip{padding:18px 20px;border-left:1px solid var(--line);min-width:0}
+.chip:first-child{border-left:0}
+.chip .num{font-size:34px;font-weight:600;line-height:1.1}
+.chip p{font-size:13.5px;color:var(--ink-2);margin-top:4px}
+
+/* value */
+.split{display:grid;grid-template-columns:1fr 1.4fr;gap:56px}
+.pillars{display:grid;gap:0;border-top:1px solid var(--line-2)}
+.pillar{display:grid;grid-template-columns:120px 1fr;gap:20px;padding-block:22px;border-bottom:1px solid var(--line)}
+.pillar .k{font-family:var(--display);font-size:22px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--fiber-ink)}
+.pillar p{color:var(--ink-2);margin-top:6px}
+
+/* stack (L1/L2/L3) */
+.stack{margin-top:40px;display:grid;gap:10px}
+.layer{display:grid;grid-template-columns:96px 1fr 1.2fr;gap:24px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px 24px}
+.layer .lv{font-family:var(--display);font-size:44px;font-weight:700;line-height:.9}
+.layer .lv small{display:block;font-family:var(--mono);font-size:11px;font-weight:400;color:var(--ink-3);letter-spacing:.06em;margin-top:8px;text-transform:uppercase}
+.layer p{color:var(--ink-2);margin-top:6px;font-size:15px}
+.specs{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+.specs code{font-family:var(--mono);font-size:12.5px;background:var(--sunken);border:1px solid var(--line);padding:3px 8px;border-radius:3px;color:var(--ink)}
+
+/* features */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:40px}
+.feature{background:var(--surface);padding:26px 24px;min-width:0}
+.feature .ft{font-family:var(--mono);font-size:11.5px;color:var(--fiber-ink);letter-spacing:.06em;text-transform:uppercase}
+.feature h3{margin-top:8px}
+.feature p{color:var(--ink-2);font-size:15px;margin-top:8px}
+
+/* table */
+.tbl-wrap{margin-top:36px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:14px 18px;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--sunken)}
+tbody tr:last-child td{border-bottom:0}
+td.row-h{font-weight:700;width:22%}
+td .num{font-size:18px;font-weight:600}
+
+/* architecture */
+.arch{margin-top:36px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px}
+.arch-scroll{overflow-x:auto}
+.arch svg{display:block;width:100%;min-width:860px;height:auto}
+.arch-hint{display:none;font-size:13px;color:var(--ink-3);margin-top:10px}
+svg .box{fill:var(--sunken);stroke:var(--line-2)}
+svg .zone{fill:none;stroke:var(--line-2);stroke-dasharray:4 4}
+svg .t{fill:var(--ink);font-family:var(--sans);font-size:14px;font-weight:700}
+svg .s{fill:var(--ink-3);font-family:var(--mono);font-size:11px}
+svg .z{fill:var(--ink-2);font-family:var(--mono);font-size:11px;letter-spacing:.08em}
+svg .fiber{stroke:var(--fiber);stroke-width:5;fill:none;stroke-linecap:round}
+svg .path{stroke:var(--trace);stroke-width:2;fill:none}
+svg .site{stroke:var(--fiber-ink);stroke-width:2;fill:none;stroke-dasharray:6 5}
+svg .lbl{fill:var(--trace);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .lbl2{fill:var(--fiber-ink);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .dot{fill:var(--fiber)}
+.legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--ink-2)}
+.legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--fiber)}
+.legend i.p{border-top:2px solid var(--trace)}
+.legend i.s{border-top:2px dashed var(--fiber-ink)}
+
+/* steps */
+.steps{list-style:none;padding:0;margin:40px 0 0;display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:4px solid var(--fiber)}
+.steps li{padding:20px 18px 0 0;min-width:0}
+.steps .num{font-size:15px;font-weight:600;color:var(--fiber-ink);letter-spacing:.06em}
+.steps h3{font-size:16px;margin-top:6px}
+.steps p{font-size:14px;color:var(--ink-2);margin-top:6px}
+
+/* resiliency */
+.res{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:36px}
+.res-card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:26px}
+.res-card .num{font-size:52px;font-weight:700;line-height:1}
+.res-card .num small{font-size:20px;color:var(--ink-2)}
+.res-card h3{margin-top:10px}
+.res-card p{color:var(--ink-2);font-size:15px;margin-top:6px}
+.res-card.max{border-color:var(--fiber);box-shadow:inset 0 4px 0 var(--fiber)}
+
+/* cta */
+.cta{text-align:center}
+.cta h2{max-width:22ch;margin:0 auto}
+.cta .lede{margin:14px auto 0}
+.cta .cta-row{justify-content:center}
+footer{border-top:1px solid var(--line);padding-block:28px;font-size:13px;color:var(--ink-3)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+
+@media (max-width:1024px){
+  .hero-grid,.split{grid-template-columns:1fr;gap:40px}
+  .features{grid-template-columns:repeat(2,1fr)}
+  .steps{grid-template-columns:repeat(2,1fr);border-top:0;gap:0 24px}
+  .steps li{border-top:4px solid var(--fiber);padding-bottom:24px}
+  .layer{grid-template-columns:80px 1fr}
+  .layer .specs{grid-column:2}
+  .chips{grid-template-columns:repeat(2,1fr)}
+  .chip:nth-child(3){border-left:0}
+  .chip:nth-child(n+3){border-top:1px solid var(--line)}
+}
+@media (max-width:640px){
+  .wrap{padding-inline:18px}
+  section{padding-block:60px}
+  .navlinks a:not(.btn){display:none}
+  .features,.res{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr}
+  .pillar{grid-template-columns:1fr;gap:0}
+  .layer{grid-template-columns:1fr;gap:12px}
+  .layer .specs{grid-column:auto}
+  .cta-row .btn{width:100%}
+  .arch-hint{display:block}
+  table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  table,tbody,tr,td{display:block;width:100%}
+  tr{border-bottom:1px solid var(--line);padding:14px 16px}
+  tbody tr:last-child{border-bottom:0}
+  td{border:0;padding:3px 0}
+  td.row-h{width:100%;font-size:16px;padding-bottom:6px}
+  td[data-k]::before{content:attr(data-k);display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+
+/* ---- service-specific ---- */
+/* hero visual: OSI layer selector */
+.osi{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px;min-width:0}
+.osi-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.osi-rows{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:6px}
+.osi-row{display:grid;grid-template-columns:44px 1fr auto;gap:14px;align-items:center;border:1px solid var(--line);border-radius:4px;padding:10px 14px;background:transparent;min-width:0}
+.osi-row .lv{font-family:var(--display);font-size:22px;font-weight:600;color:var(--ink-3);line-height:1}
+.osi-row .lname{font-size:13.5px;color:var(--ink-3)}
+.osi-row.on{background:var(--sunken);border-color:var(--line-2)}
+.osi-row.on .lv{color:var(--ink);font-size:30px;font-weight:700}
+.osi-row.on .lname{color:var(--ink);font-weight:700;font-size:15px}
+.osi-row .lb{font-family:var(--display);font-size:24px;font-weight:700;letter-spacing:.03em;color:var(--on-fiber);background:var(--fiber);padding:2px 10px;border-radius:3px;line-height:1.2}
+.osi-row .pr{display:block;font-family:var(--mono);font-size:11.5px;font-weight:400;color:var(--ink-3);margin-top:2px;overflow-wrap:anywhere}
+.osi-foot{margin-top:14px;font-size:13px;color:var(--ink-2)}
+
+/* listener rule table */
+.rules{margin-top:36px;border:1px solid var(--line);border-radius:6px;background:var(--surface);min-width:0}
+.rules-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 18px;border-bottom:1px solid var(--line);background:var(--sunken);font-family:var(--mono);font-size:12px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.rule{display:grid;grid-template-columns:80px 1.3fr 1fr;gap:20px;align-items:start;padding:16px 18px;border-bottom:1px solid var(--line);min-width:0}
+.rule:last-child{border-bottom:0}
+.rule .pri{font-family:var(--display);font-size:28px;font-weight:600;line-height:1}
+.rule .pri small{display:block;font-family:var(--mono);font-size:10.5px;font-weight:400;color:var(--ink-3);letter-spacing:.06em;margin-top:4px;text-transform:uppercase}
+.rule .cond,.rule .act{font-family:var(--mono);font-size:13px;line-height:1.7;min-width:0;overflow-wrap:anywhere}
+.rule .cond b{color:var(--trace);font-weight:500}
+.rule .act b{color:var(--fiber-ink);font-weight:500}
+.rule .act::before{content:"→ ";color:var(--ink-3)}
+.rule.dflt{background:var(--sunken)}
+.rule-note{margin-top:14px;font-size:14px;color:var(--ink-2);max-width:72ch}
+
+@media (max-width:640px){
+  .rule{grid-template-columns:1fr;gap:8px}
+  .rule .pri{font-size:22px}
+  .rule .pri small{display:inline;margin-left:8px}
+}
+
+/* nav: six items need more room than the base 640px breakpoint gives */
+.brand,.navlinks a{white-space:nowrap}
+@media (max-width:900px){.navlinks a:not(.btn){display:none}}
+@media (max-width:640px){.brand{font-size:17px}}
+
+/* nav: keep links on one line, show only CTA below 960px */
+.navlinks a{white-space:nowrap}
+@media (max-width:960px){.navlinks a:not(.btn){display:none}}
+
+/* Korean line breaking: never split a word mid-syllable */
+h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
+</style>
+</head>
+<body>
+
+
+<a class="skip-link" href="#main">본문으로 건너뛰기</a>
+
+<nav aria-label="주요 메뉴">
+  <div class="wrap">
+    <a class="brand" href="#top">Elastic Load <span>Balancing</span></a>
+    <div class="navlinks">
+      <a href="../">전체 서비스</a>
+      <a href="#compare">유형 비교</a>
+      <a href="#rules">리스너 규칙</a>
+      <a href="#features">주요 기능</a>
+      <a href="#arch">아키텍처</a>
+      <a href="#pricing">비용</a>
+      <a class="btn btn-primary" href="#start">시작하기</a>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+  <header class="hero" id="top">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">Elastic Load Balancing · ALB · NLB · GWLB</p>
+          <h1>트래픽의 <em>계층</em>에 맞는 로드 밸런서를 고르세요</h1>
+          <p class="lede">Elastic Load Balancing은 들어오는 트래픽을 여러 가용 영역의 정상 대상으로 나눕니다. HTTP 요청은 Application Load Balancer가, TCP · UDP 연결은 Network Load Balancer가, 보안 어플라이언스로 보낼 IP 패킷은 Gateway Load Balancer가 맡습니다.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="#compare">유형 비교 보기</a>
+            <a class="btn btn-ghost" href="#arch">아키텍처 보기</a>
+          </div>
+        </div>
+
+        <div class="osi" aria-label="OSI 계층별 로드 밸런서 유형">
+          <div class="osi-head"><span>OSI layer</span><span>Load balancer</span></div>
+          <ol class="osi-rows" reversed>
+            <li class="osi-row on"><span class="lv">L7</span><span class="lname">Application<span class="pr">HTTP · HTTPS · HTTP/2 · gRPC</span></span><span class="lb">ALB</span></li>
+            <li class="osi-row"><span class="lv">L6</span><span class="lname">Presentation</span><span></span></li>
+            <li class="osi-row"><span class="lv">L5</span><span class="lname">Session</span><span></span></li>
+            <li class="osi-row on"><span class="lv">L4</span><span class="lname">Transport<span class="pr">TCP · UDP · TLS · QUIC</span></span><span class="lb">NLB</span></li>
+            <li class="osi-row on"><span class="lv">L3</span><span class="lname">Network<span class="pr">모든 IP 패킷 · GENEVE 6081</span></span><span class="lb">GWLB</span></li>
+          </ol>
+          <p class="osi-foot">세 유형 모두 리스너, 대상 그룹, 헬스 체크라는 같은 구성 요소를 씁니다.</p>
+        </div>
+      </div>
+
+      <div class="chips" role="list">
+        <div class="chip" role="listitem"><span class="num">3</span><p>로드 밸런서 유형 (ALB · NLB · GWLB)</p></div>
+        <div class="chip" role="listitem"><span class="num">6081</span><p>GWLB와 어플라이언스 사이 GENEVE 포트</p></div>
+        <div class="chip" role="listitem"><span class="num">8500</span><p>GWLB 인터페이스 최대 패킷 크기 (bytes)</p></div>
+        <div class="chip" role="listitem"><span class="num">mTLS</span><p>ALB 상호 TLS 인증 (passthrough · verify)</p></div>
+      </div>
+    </div>
+  </header>
+
+  <section id="why" aria-labelledby="why-h">
+    <div class="wrap split">
+      <div>
+        <p class="tag">Why Elastic Load Balancing</p>
+        <h2 id="why-h">대상이 늘고 줄어도 진입점은 하나로 유지됩니다</h2>
+        <p class="lede">로드 밸런서는 대상의 상태를 계속 확인하고, 정상인 대상에만 트래픽을 보냅니다. Auto Scaling 그룹이나 컨테이너가 바뀌어도 클라이언트가 쓰는 주소는 그대로입니다.</p>
+      </div>
+      <div class="pillars">
+        <div class="pillar"><span class="k">Available</span><div><h3>가용 영역 분산</h3><p>여러 가용 영역에 노드를 두고, 헬스 체크를 통과한 대상에만 요청을 보냅니다.</p></div></div>
+        <div class="pillar"><span class="k">Scale</span><div><h3>트래픽에 따른 확장</h3><p>로드 밸런서 용량은 트래픽에 맞춰 자동으로 늘어납니다. Network Load Balancer는 초당 수백만 건의 요청을 처리합니다.</p></div></div>
+        <div class="pillar"><span class="k">Secure</span><div><h3>TLS와 인증을 앞단에서</h3><p>ACM 인증서로 TLS를 종료하고, ALB에서는 mTLS, OIDC · Amazon Cognito 인증, JWT 검증까지 처리합니다.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="compare" aria-labelledby="compare-h">
+    <div class="wrap">
+      <p class="tag">Layer comparison</p>
+      <h2 id="compare-h">ALB · NLB · GWLB 비교</h2>
+      <p class="lede">트래픽을 어느 계층에서 보고 결정해야 하는지가 선택 기준입니다.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">Application, Network, Gateway Load Balancer 비교</caption>
+          <thead><tr><th scope="col">유형</th><th scope="col">리스너 프로토콜</th><th scope="col">대상 유형</th><th scope="col">대상 선택 방식</th><th scope="col">교차 영역 분산</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="row-h">Application<br><span class="mono" style="font-size:12px;font-weight:400;color:var(--ink-3)">L7 · ALB</span></td>
+              <td data-k="리스너 프로토콜">HTTP · HTTPS<br><span style="color:var(--ink-3);font-size:13.5px">HTTP/2 · gRPC는 HTTPS 리스너</span></td>
+              <td data-k="대상 유형"><span class="mono">instance · ip · lambda</span></td>
+              <td data-k="대상 선택 방식">대상 그룹별 알고리즘: round robin(기본), least outstanding requests, weighted random</td>
+              <td data-k="교차 영역 분산">로드 밸런서 수준에서 항상 켜짐. 대상 그룹 수준에서 끌 수 있음</td>
+            </tr>
+            <tr>
+              <td class="row-h">Network<br><span class="mono" style="font-size:12px;font-weight:400;color:var(--ink-3)">L4 · NLB</span></td>
+              <td data-k="리스너 프로토콜">TCP · TLS · UDP · TCP_UDP · QUIC · TCP_QUIC</td>
+              <td data-k="대상 유형"><span class="mono">instance · ip · alb</span></td>
+              <td data-k="대상 선택 방식">프로토콜, 출발지·목적지 IP와 포트, TCP 시퀀스 번호 기반 flow hash. 연결 하나는 한 대상으로</td>
+              <td data-k="교차 영역 분산">기본 꺼짐. 생성 후 켜고 끌 수 있음</td>
+            </tr>
+            <tr>
+              <td class="row-h">Gateway<br><span class="mono" style="font-size:12px;font-weight:400;color:var(--ink-3)">L3 · GWLB</span></td>
+              <td data-k="리스너 프로토콜">모든 포트의 IP 패킷. 어플라이언스와는 GENEVE (UDP 6081)</td>
+              <td data-k="대상 유형"><span class="mono">instance · ip</span></td>
+              <td data-k="대상 선택 방식">5-tuple flow hash(기본). 3-tuple, 2-tuple 고정도 선택 가능</td>
+              <td data-k="교차 영역 분산">기본 꺼짐. 생성 후 켜고 끌 수 있음</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="rules" aria-labelledby="rules-h">
+    <div class="wrap">
+      <p class="tag">Listener rules</p>
+      <h2 id="rules-h">ALB는 요청 내용을 보고 경로를 정합니다</h2>
+      <p class="lede">리스너 규칙은 우선순위가 낮은 번호부터 평가하고, 처음 일치한 규칙의 액션을 실행합니다. 조건은 host-header, path-pattern, http-header, http-request-method, query-string, source-ip 여섯 가지입니다.</p>
+      <div class="rules" role="table" aria-label="HTTPS:443 리스너 규칙 예시">
+        <div class="rules-head" role="row"><span role="columnheader">Priority · Condition · Action</span><span>listener HTTPS:443</span></div>
+        <div class="rule" role="row">
+          <span class="pri" role="cell">1<small>priority</small></span>
+          <div class="cond" role="cell"><b>host-header</b> api.example.com<br><b>path-pattern</b> /v2/*</div>
+          <div class="act" role="cell"><b>forward</b> tg-v2 weight 90<br>tg-v1 weight 10</div>
+        </div>
+        <div class="rule" role="row">
+          <span class="pri" role="cell">2<small>priority</small></span>
+          <div class="cond" role="cell"><b>path-pattern</b> /admin/*<br><b>source-ip</b> 192.0.2.0/24</div>
+          <div class="act" role="cell"><b>authenticate-oidc</b><br><b>forward</b> tg-admin</div>
+        </div>
+        <div class="rule" role="row">
+          <span class="pri" role="cell">3<small>priority</small></span>
+          <div class="cond" role="cell"><b>http-header</b> X-Client-Version: 1.*</div>
+          <div class="act" role="cell"><b>fixed-response</b> 426</div>
+        </div>
+        <div class="rule" role="row">
+          <span class="pri" role="cell">4<small>priority</small></span>
+          <div class="cond" role="cell"><b>path-pattern</b> /old-docs/*</div>
+          <div class="act" role="cell"><b>redirect</b> HTTP_301<br>host docs.example.com · path /#{path}</div>
+        </div>
+        <div class="rule dflt" role="row">
+          <span class="pri" role="cell">*<small>default</small></span>
+          <div class="cond" role="cell">일치하는 규칙이 없을 때</div>
+          <div class="act" role="cell"><b>forward</b> tg-web</div>
+        </div>
+      </div>
+      <p class="rule-note">규칙마다 forward, redirect, fixed-response 중 하나의 라우팅 액션이 마지막에 있어야 합니다. HTTPS 리스너에서는 authenticate-cognito, authenticate-oidc, jwt-validation 액션을 그 앞에 둘 수 있습니다.</p>
+    </div>
+  </section>
+
+  <section id="features" aria-labelledby="features-h">
+    <div class="wrap">
+      <p class="tag">Features</p>
+      <h2 id="features-h">주요 기능</h2>
+      <div class="features">
+        <article class="feature"><p class="ft">ALB · Authentication</p><h3>인증 액션</h3><p>Amazon Cognito나 OIDC 호환 IdP로 사용자를 인증하거나, 요청의 JWT 액세스 토큰을 검증한 뒤 대상으로 보냅니다.</p></article>
+        <article class="feature"><p class="ft">ALB · mTLS</p><h3>상호 TLS 인증</h3><p>verify 모드는 트러스트 스토어의 CA로 클라이언트 인증서를 검증합니다. passthrough 모드는 인증서 체인을 대상에 그대로 넘깁니다.</p></article>
+        <article class="feature"><p class="ft">TLS</p><h3>TLS 종료와 보안 정책</h3><p>ALB HTTPS 리스너와 NLB TLS 리스너에 인증서를 두고, 보안 정책으로 프로토콜과 암호 스위트를 정합니다. NLB는 ALPN 정책도 지원합니다.</p></article>
+        <article class="feature"><p class="ft">NLB · Static IP</p><h3>고정 IP와 Elastic IP</h3><p>NLB 노드는 가용 영역마다 고정 IP를 가집니다. 인터넷 연결 NLB는 서브넷마다 Elastic IP 하나를 붙일 수 있고, ALB를 대상으로 등록해 ALB 앞에 고정 IP를 둘 수 있습니다.</p></article>
+        <article class="feature"><p class="ft">NLB · Source IP</p><h3>클라이언트 IP 보존</h3><p>대상이 원래 클라이언트 IP를 그대로 받습니다. instance 대상은 기본으로 켜져 있고, UDP · QUIC 대상 그룹에서는 끌 수 없습니다.</p></article>
+        <article class="feature"><p class="ft">GWLB · Inspection</p><h3>Gateway Load Balancer endpoint</h3><p>VPC 라우팅 테이블에서 GWLB endpoint를 다음 홉으로 지정하면, 트래픽이 PrivateLink로 보안 VPC의 어플라이언스를 거쳐 돌아옵니다.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="arch" aria-labelledby="arch-h">
+    <div class="wrap">
+      <p class="tag">Reference architecture</p>
+      <h2 id="arch-h">인바운드 검사 뒤 ALB로 분산</h2>
+      <p class="lede">인터넷 게이트웨이의 엣지 라우팅 테이블이 ALB 서브넷으로 가는 트래픽을 GWLB endpoint로 보냅니다. GWLB는 GENEVE로 감싼 패킷을 어플라이언스에 나누고, 검사를 통과한 트래픽은 ALB를 거쳐 대상에 도착합니다.</p>
+      <figure class="arch">
+        <div class="arch-scroll">
+          <svg viewBox="0 0 980 440" role="img" aria-labelledby="arch-title arch-desc">
+            <title id="arch-title">Gateway Load Balancer와 Application Load Balancer 조합 아키텍처</title>
+            <desc id="arch-desc">인터넷 클라이언트의 트래픽이 애플리케이션 VPC의 인터넷 게이트웨이로 들어와 GWLB endpoint로 라우팅됩니다. GWLB endpoint는 보안 VPC의 Gateway Load Balancer로 트래픽을 보내고, GWLB는 GENEVE UDP 6081로 두 어플라이언스에 분산합니다. 검사 후 트래픽은 GWLB endpoint를 거쳐 ALB로 가고, ALB는 EC2 인스턴스 대상 그룹과 Lambda 대상 그룹으로 요청을 나눕니다.</desc>
+            <!-- zones -->
+            <rect class="zone" x="10" y="40" width="130" height="380" rx="6"/>
+            <text class="z" x="24" y="62">INTERNET</text>
+            <rect class="zone" x="170" y="40" width="470" height="380" rx="6"/>
+            <text class="z" x="184" y="62">APPLICATION VPC</text>
+            <rect class="zone" x="670" y="40" width="300" height="380" rx="6"/>
+            <text class="z" x="684" y="62">SECURITY VPC</text>
+
+            <!-- client & igw -->
+            <rect class="box" x="24" y="190" width="102" height="64" rx="4"/>
+            <text class="t" x="36" y="218">클라이언트</text><text class="s" x="36" y="238">HTTPS</text>
+            <rect class="box" x="190" y="190" width="110" height="64" rx="4"/>
+            <text class="t" x="204" y="218">IGW</text><text class="s" x="204" y="238">엣지 라우팅</text>
+            <path class="path" d="M126 222 H190"/>
+
+            <!-- gwlbe & alb -->
+            <rect class="box" x="340" y="80" width="130" height="64" rx="4"/>
+            <text class="t" x="352" y="108">GWLB endpoint</text><text class="s" x="352" y="128">라우팅 다음 홉</text>
+            <rect class="box" x="340" y="200" width="130" height="64" rx="4"/>
+            <text class="t" x="352" y="228">ALB</text><text class="s" x="352" y="248">HTTPS:443</text>
+            <path class="fiber" d="M300 206 C322 206 318 112 340 112"/>
+            <path class="fiber" d="M405 144 V200"/>
+            <text class="lbl2" x="412" y="178">검사 후</text>
+
+            <!-- targets -->
+            <rect class="box" x="510" y="120" width="110" height="64" rx="4"/>
+            <text class="t" x="522" y="148">EC2</text><text class="s" x="522" y="168">instance TG</text>
+            <rect class="box" x="510" y="280" width="110" height="64" rx="4"/>
+            <text class="t" x="522" y="308">Lambda</text><text class="s" x="522" y="328">lambda TG</text>
+            <path class="path" d="M470 222 C492 222 488 152 510 152"/>
+            <path class="path" d="M470 242 C492 242 488 312 510 312"/>
+            <text class="s" x="190" y="396">ALB 서브넷 → 0.0.0.0/0 경로도 GWLB endpoint를 거칩니다</text>
+
+            <!-- security vpc -->
+            <rect class="box" x="700" y="80" width="240" height="64" rx="4"/>
+            <text class="t" x="714" y="108">Gateway Load Balancer</text><text class="s" x="714" y="128">listener: 모든 IP 패킷</text>
+            <path class="fiber" d="M470 112 H700"/>
+            <text class="lbl2" x="540" y="102">PrivateLink</text>
+            <rect class="box" x="700" y="240" width="110" height="64" rx="4"/>
+            <text class="t" x="712" y="268">어플라이언스</text><text class="s" x="712" y="288">target A</text>
+            <rect class="box" x="830" y="240" width="110" height="64" rx="4"/>
+            <text class="t" x="842" y="268">어플라이언스</text><text class="s" x="842" y="288">target B</text>
+            <path class="site" d="M755 144 V240"/>
+            <path class="site" d="M885 144 V240"/>
+            <text class="lbl2" x="700" y="340">GENEVE · UDP 6081</text>
+            <text class="s" x="700" y="360">5-tuple 흐름 고정 · MTU 8500</text>
+          </svg>
+        </div>
+        <figcaption class="legend">
+          <span><i></i>검사 경로 (GWLB endpoint)</span>
+          <span><i class="p"></i>애플리케이션 트래픽</span>
+          <span><i class="s"></i>GENEVE 캡슐화</span>
+        </figcaption>
+        <p class="arch-hint">좁은 화면에서는 다이어그램을 좌우로 밀어서 보세요.</p>
+      </figure>
+    </div>
+  </section>
+
+  <section id="pricing" aria-labelledby="pricing-h">
+    <div class="wrap">
+      <p class="tag">Pricing</p>
+      <h2 id="pricing-h">비용 항목</h2>
+      <p class="lede">세 유형 모두 로드 밸런서 실행 시간과 용량 단위(LCU · NLCU · GLCU) 사용량으로 과금됩니다. 용량 단위는 시간마다 여러 측정 항목 중 사용량이 가장 큰 항목 하나로 계산합니다.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">Elastic Load Balancing 과금 항목</caption>
+          <thead><tr><th scope="col">과금 항목</th><th scope="col">과금 기준</th><th scope="col">참고</th></tr></thead>
+          <tbody>
+            <tr><td class="row-h">로드 밸런서 시간</td><td data-k="과금 기준">ALB · NLB · GWLB가 실행된 시간 (1시간 미만도 1시간)</td><td data-k="참고">유형별 단가가 다릅니다</td></tr>
+            <tr><td class="row-h">ALB LCU</td><td data-k="과금 기준">LCU-시간. 새 연결, 활성 연결, 처리 바이트, 규칙 평가 중 가장 큰 값</td><td data-k="참고">처리한 규칙 중 처음 10개는 무료입니다. mTLS를 쓰면 LCU당 활성 연결 기준이 절반으로 줄어듭니다</td></tr>
+            <tr><td class="row-h">NLB NLCU</td><td data-k="과금 기준">NLCU-시간. 새 연결 · 흐름, 활성 연결 · 흐름, 처리 바이트 중 가장 큰 값</td><td data-k="참고">TCP, UDP, TLS마다 NLCU 하나의 기준치가 다릅니다</td></tr>
+            <tr><td class="row-h">GWLB GLCU</td><td data-k="과금 기준">GLCU-시간. 새 연결 · 흐름, 활성 연결 · 흐름, 처리 바이트 중 가장 큰 값</td><td data-k="참고">GWLB endpoint는 엔드포인트 시간과 처리 GB로 AWS PrivateLink 요금에서 청구됩니다</td></tr>
+            <tr><td class="row-h">용량 예약</td><td data-k="과금 기준">예약한 용량 단위-시간</td><td data-k="참고">Load Balancer Capacity Unit Reservation 사용 시. 예약을 넘는 사용량은 따로 과금됩니다</td></tr>
+            <tr><td class="row-h">관련 요금</td><td data-k="과금 기준">다른 서비스에서 청구</td><td data-k="참고">데이터 전송(Amazon EC2 요금), 로드 밸런서가 쓰는 퍼블릭 IPv4 주소(Amazon VPC 요금)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="lede" style="font-size:14px">요금 단가는 리전과 사용량에 따라 다릅니다. 최신 단가는 <a href="https://aws.amazon.com/elasticloadbalancing/pricing/" target="_blank" rel="noopener">Elastic Load Balancing 요금 페이지</a>에서 확인하세요.</p>
+    </div>
+  </section>
+
+  <section class="cta" id="start" aria-labelledby="cta-h">
+    <div class="wrap">
+      <p class="tag">Next step</p>
+      <h2 id="cta-h">워크로드에 맞는 로드 밸런서 조합을 정해 보세요</h2>
+      <p class="lede">프로토콜, 고정 IP 필요 여부, 인증 방식, 검사 요구 사항을 정리해 오시면 ALB · NLB · GWLB 배치를 함께 검토합니다.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="https://aws.amazon.com/elasticloadbalancing/" target="_blank" rel="noopener">서비스 페이지 열기</a>
+        <a class="btn btn-ghost" href="https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/what-is-load-balancing.html" target="_blank" rel="noopener">사용 설명서 읽기</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a href="../">← 전체 AWS 네트워킹 서비스</a>
+    <span>Elastic Load Balancing 소개 자료. 기능 지원 범위, 할당량, 요금은 리전과 로드 밸런서 유형에 따라 다르니 공식 문서를 확인하세요.</span>
+    <a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html" target="_blank" rel="noopener">ELB 동작 방식 문서</a>
+  </div>
+</footer>
+
+</body>
+</html>

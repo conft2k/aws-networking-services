@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Client VPN 소개</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+body{margin:0}img{max-width:100%}[hidden]{display:none!important}
+
+/* Layout: a cross-connect work order. Cool steel paper, navy ink, Amazon orange as the one accent; section tags read like fiber labels. */
+:root{
+  --bg:#EEF1F4; --surface:#FFFFFF; --sunken:#E3E8ED;
+  --ink:#14202E; --ink-2:#44515F; --ink-3:#5A6672;
+  --line:#CDD5DD; --line-2:#B4BFCA;
+  --fiber:#FF9900;          /* Amazon orange — fills only */
+  --fiber-ink:#B35C00;      /* orange-derived, AA on light surfaces */
+  --fiber-soft:#FFF0D9;
+  --on-fiber:#14202E;
+  --trace:#2E7D9A;          /* secondary line color for diagram paths */
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --maxw:1120px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--fiber-ink);outline-offset:3px;border-radius:2px}
+.skip-link{position:absolute;left:16px;top:-60px;background:var(--fiber);color:var(--on-fiber);padding:8px 14px;font-weight:700;z-index:50;text-decoration:none}
+.skip-link:focus{top:12px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.wrap{max-width:var(--maxw);margin:0 auto;padding-inline:24px}
+section{padding-block:88px;border-top:1px solid var(--line)}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.25}
+h2{font-size:clamp(26px,3.4vw,36px);font-weight:700;letter-spacing:-.01em}
+h3{font-size:18px;font-weight:700}
+p{margin:0}
+.lede{color:var(--ink-2);max-width:62ch;margin-top:14px}
+.num{font-family:var(--display);font-variant-numeric:tabular-nums lining-nums}
+.mono{font-family:var(--mono)}
+
+/* fiber label: the section tag */
+.tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-bottom:14px}
+.tag::before{content:"";width:22px;height:8px;background:var(--fiber);border-radius:1px}
+
+/* nav */
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:60px}
+.brand{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.02em;text-decoration:none;text-transform:uppercase}
+.brand span{color:var(--fiber-ink)}
+.navlinks{display:flex;gap:22px;font-size:14px;align-items:center}
+.navlinks a{text-decoration:none;color:var(--ink-2)}
+.navlinks a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;font-weight:700;font-size:15px;text-decoration:none;border-radius:4px;border:1px solid transparent;transition:transform .15s ease,background .15s ease}
+.btn-primary{background:var(--fiber);color:var(--on-fiber)}
+.btn-primary:hover{transform:translateY(-1px)}
+.btn-ghost{border-color:var(--line-2);color:var(--ink)}
+.btn-ghost:hover{background:var(--sunken)}
+.navlinks .btn{min-height:38px;padding:0 14px;font-size:14px;color:var(--on-fiber)}
+
+/* hero */
+.hero{padding-block:72px 64px;border-top:0}
+.hero-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:56px;align-items:center}
+.eyebrow{font-family:var(--mono);font-size:13px;color:var(--fiber-ink);letter-spacing:.04em}
+.hero h1{font-size:clamp(34px,5vw,56px);font-weight:700;letter-spacing:-.02em;margin-top:16px}
+.hero h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--fiber) 62%,var(--fiber) 90%,transparent 90%);padding-inline:2px}
+.hero .lede{font-size:18px}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+
+/* hero visual: port faceplate */
+.faceplate{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px}
+.faceplate-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.ports{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+.port{border:1px solid var(--line);border-radius:4px;padding:14px 14px 12px;background:var(--sunken);display:flex;flex-direction:column;gap:2px}
+.port .num{font-size:40px;font-weight:600;line-height:1}
+.port .num small{font-size:18px;color:var(--ink-2);margin-left:2px}
+.port .optic{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+.port .led{width:8px;height:8px;border-radius:50%;background:var(--fiber);align-self:flex-end;margin-top:-6px;animation:blink 2.4s ease-in-out infinite}
+.port:nth-child(2) .led{animation-delay:.6s}.port:nth-child(3) .led{animation-delay:1.2s}.port:nth-child(4) .led{animation-delay:1.8s}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.faceplate-foot{margin-top:14px;font-size:13px;color:var(--ink-2)}
+
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:56px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.chip{padding:18px 20px;border-left:1px solid var(--line);min-width:0}
+.chip:first-child{border-left:0}
+.chip .num{font-size:34px;font-weight:600;line-height:1.1}
+.chip p{font-size:13.5px;color:var(--ink-2);margin-top:4px}
+
+/* value */
+.split{display:grid;grid-template-columns:1fr 1.4fr;gap:56px}
+.pillars{display:grid;gap:0;border-top:1px solid var(--line-2)}
+.pillar{display:grid;grid-template-columns:120px 1fr;gap:20px;padding-block:22px;border-bottom:1px solid var(--line)}
+.pillar .k{font-family:var(--display);font-size:22px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--fiber-ink)}
+.pillar p{color:var(--ink-2);margin-top:6px}
+
+/* stack (L1/L2/L3) */
+.stack{margin-top:40px;display:grid;gap:10px}
+.layer{display:grid;grid-template-columns:96px 1fr 1.2fr;gap:24px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px 24px}
+.layer .lv{font-family:var(--display);font-size:44px;font-weight:700;line-height:.9}
+.layer .lv small{display:block;font-family:var(--mono);font-size:11px;font-weight:400;color:var(--ink-3);letter-spacing:.06em;margin-top:8px;text-transform:uppercase}
+.layer p{color:var(--ink-2);margin-top:6px;font-size:15px}
+.specs{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+.specs code{font-family:var(--mono);font-size:12.5px;background:var(--sunken);border:1px solid var(--line);padding:3px 8px;border-radius:3px;color:var(--ink)}
+
+/* features */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:40px}
+.feature{background:var(--surface);padding:26px 24px;min-width:0}
+.feature .ft{font-family:var(--mono);font-size:11.5px;color:var(--fiber-ink);letter-spacing:.06em;text-transform:uppercase}
+.feature h3{margin-top:8px}
+.feature p{color:var(--ink-2);font-size:15px;margin-top:8px}
+
+/* table */
+.tbl-wrap{margin-top:36px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:14px 18px;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--sunken)}
+tbody tr:last-child td{border-bottom:0}
+td.row-h{font-weight:700;width:22%}
+td .num{font-size:18px;font-weight:600}
+
+/* architecture */
+.arch{margin-top:36px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px}
+.arch-scroll{overflow-x:auto}
+.arch svg{display:block;width:100%;min-width:860px;height:auto}
+.arch-hint{display:none;font-size:13px;color:var(--ink-3);margin-top:10px}
+svg .box{fill:var(--sunken);stroke:var(--line-2)}
+svg .zone{fill:none;stroke:var(--line-2);stroke-dasharray:4 4}
+svg .t{fill:var(--ink);font-family:var(--sans);font-size:14px;font-weight:700}
+svg .s{fill:var(--ink-3);font-family:var(--mono);font-size:11px}
+svg .z{fill:var(--ink-2);font-family:var(--mono);font-size:11px;letter-spacing:.08em}
+svg .fiber{stroke:var(--fiber);stroke-width:5;fill:none;stroke-linecap:round}
+svg .path{stroke:var(--trace);stroke-width:2;fill:none}
+svg .site{stroke:var(--fiber-ink);stroke-width:2;fill:none;stroke-dasharray:6 5}
+svg .lbl{fill:var(--trace);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .lbl2{fill:var(--fiber-ink);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .dot{fill:var(--fiber)}
+.legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--ink-2)}
+.legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--fiber)}
+.legend i.p{border-top:2px solid var(--trace)}
+.legend i.s{border-top:2px dashed var(--fiber-ink)}
+
+/* steps */
+.steps{list-style:none;padding:0;margin:40px 0 0;display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:4px solid var(--fiber)}
+.steps li{padding:20px 18px 0 0;min-width:0}
+.steps .num{font-size:15px;font-weight:600;color:var(--fiber-ink);letter-spacing:.06em}
+.steps h3{font-size:16px;margin-top:6px}
+.steps p{font-size:14px;color:var(--ink-2);margin-top:6px}
+
+/* resiliency */
+.res{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:36px}
+.res-card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:26px}
+.res-card .num{font-size:52px;font-weight:700;line-height:1}
+.res-card .num small{font-size:20px;color:var(--ink-2)}
+.res-card h3{margin-top:10px}
+.res-card p{color:var(--ink-2);font-size:15px;margin-top:6px}
+.res-card.max{border-color:var(--fiber);box-shadow:inset 0 4px 0 var(--fiber)}
+
+/* cta */
+.cta{text-align:center}
+.cta h2{max-width:22ch;margin:0 auto}
+.cta .lede{margin:14px auto 0}
+.cta .cta-row{justify-content:center}
+footer{border-top:1px solid var(--line);padding-block:28px;font-size:13px;color:var(--ink-3)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+
+@media (max-width:1024px){
+  .hero-grid,.split{grid-template-columns:1fr;gap:40px}
+  .features{grid-template-columns:repeat(2,1fr)}
+  .steps{grid-template-columns:repeat(2,1fr);border-top:0;gap:0 24px}
+  .steps li{border-top:4px solid var(--fiber);padding-bottom:24px}
+  .layer{grid-template-columns:80px 1fr}
+  .layer .specs{grid-column:2}
+  .chips{grid-template-columns:repeat(2,1fr)}
+  .chip:nth-child(3){border-left:0}
+  .chip:nth-child(n+3){border-top:1px solid var(--line)}
+}
+@media (max-width:640px){
+  .wrap{padding-inline:18px}
+  section{padding-block:60px}
+  .navlinks a:not(.btn){display:none}
+  .features,.res{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr}
+  .pillar{grid-template-columns:1fr;gap:0}
+  .layer{grid-template-columns:1fr;gap:12px}
+  .layer .specs{grid-column:auto}
+  .cta-row .btn{width:100%}
+  .arch-hint{display:block}
+  table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  table,tbody,tr,td{display:block;width:100%}
+  tr{border-bottom:1px solid var(--line);padding:14px 16px}
+  tbody tr:last-child{border-bottom:0}
+  td{border:0;padding:3px 0}
+  td.row-h{width:100%;font-size:16px;padding-bottom:6px}
+  td[data-k]::before{content:attr(data-k);display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+
+/* ---- service-specific ---- */
+/* hero visual: client connection profile */
+.profile{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px;min-width:0}
+.profile-head{display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.conn{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:4px;background:var(--sunken)}
+.conn b{font-family:var(--display);font-size:26px;font-weight:600;line-height:1.1}
+.conn .state{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+.conn .state::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--fiber);animation:blink 2.4s ease-in-out infinite}
+.pf{margin:12px 0 0}
+.pf div{display:grid;grid-template-columns:110px 1fr;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);align-items:baseline}
+.pf dt{font-family:var(--mono);font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em}
+.pf dd{margin:0;display:flex;flex-wrap:wrap;gap:4px;min-width:0;font-size:14px}
+.pf code{font-family:var(--mono);font-size:11.5px;padding:1px 6px;border:1px solid var(--line);border-radius:3px;background:var(--sunken);color:var(--ink)}
+.pf code.on{background:var(--fiber-soft);border-color:var(--fiber)}
+.profile-foot{margin-top:12px;font-size:13px;color:var(--ink-2)}
+/* auth options */
+.auth{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:40px}
+.auth-card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:24px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.auth-card .k{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--fiber-ink)}
+.auth-card p{color:var(--ink-2);font-size:15px}
+.auth-card .specs{margin-top:auto;padding-top:8px}
+.auth-card.base{border-color:var(--fiber);box-shadow:inset 0 4px 0 var(--fiber)}
+.combo{margin-top:16px;display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:16px 20px;border:1px dashed var(--line-2);border-radius:6px;font-size:15px;color:var(--ink-2)}
+.combo strong{color:var(--ink)}
+.combo code{font-family:var(--mono);font-size:12.5px;background:var(--sunken);border:1px solid var(--line);padding:3px 8px;border-radius:3px;color:var(--ink)}
+/* authorization rule evaluation */
+.rules{margin-top:36px;display:grid;grid-template-columns:1.1fr 1fr;gap:24px;align-items:start}
+.rule-box{background:var(--surface);border:1px solid var(--line);border-radius:6px;overflow:hidden;min-width:0}
+.rule-box .hd{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--sunken);padding:10px 16px;border-bottom:1px solid var(--line)}
+.rule{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;padding:11px 16px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:13px;align-items:center}
+.rule:last-child{border-bottom:0}
+.rule .g{color:var(--ink-2)}
+.rule .ok{font-size:11px;padding:2px 8px;border-radius:3px;background:var(--fiber-soft);border:1px solid var(--fiber);color:var(--ink)}
+.rule .no{font-size:11px;padding:2px 8px;border-radius:3px;border:1px solid var(--line-2);color:var(--ink-2)}
+.notes{list-style:none;margin:0;padding:0;display:grid;gap:0;border-top:1px solid var(--line-2)}
+.notes li{padding:16px 0;border-bottom:1px solid var(--line);color:var(--ink-2);font-size:15px}
+.notes li strong{display:block;color:var(--ink);font-size:16px;margin-bottom:4px}
+svg .tls{stroke:var(--fiber);stroke-width:3;fill:none;stroke-linecap:round}
+.legend i.t{border-top:3px solid var(--fiber)}
+@media (max-width:1024px){
+  .rules{grid-template-columns:1fr}
+}
+@media (max-width:640px){
+  .auth{grid-template-columns:1fr}
+  .pf div{grid-template-columns:1fr;gap:4px}
+  .profile{padding:18px}
+  .rule{grid-template-columns:1fr auto;gap:4px 12px}
+  .rule .g{grid-column:1}
+  .rule .ok,.rule .no{grid-column:2;grid-row:1 / span 2}
+}
+
+/* nav: keep links on one line, show only CTA below 960px */
+.navlinks a{white-space:nowrap}
+@media (max-width:960px){.navlinks a:not(.btn){display:none}}
+
+/* Korean line breaking: never split a word mid-syllable */
+h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
+</style>
+</head>
+<body>
+
+
+<a class="skip-link" href="#main">본문으로 건너뛰기</a>
+
+<nav aria-label="주요 메뉴">
+  <div class="wrap">
+    <a class="brand" href="#top">Client <span>VPN</span></a>
+    <div class="navlinks">
+      <a href="../">전체 서비스</a>
+      <a href="#auth">인증</a>
+      <a href="#authz">권한 규칙</a>
+      <a href="#features">주요 기능</a>
+      <a href="#arch">아키텍처</a>
+      <a href="#pricing">비용</a>
+      <a class="btn btn-primary" href="#start">시작하기</a>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+  <header class="hero" id="top">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">AWS Client VPN · 관리형 원격 접속</p>
+          <h1>어디서 접속하든, <em>인증된 사용자만</em> 필요한 네트워크로</h1>
+          <p class="lede">AWS Client VPN은 OpenVPN 기반 클라이언트로 AWS와 온프레미스 리소스에 접속하는 관리형 VPN입니다. 인증은 인증서, Active Directory, SAML 2.0 IdP로 하고, 접근 범위는 사용자 그룹과 목적지 CIDR 단위로 정합니다. VPN 서버를 직접 운영하거나 증설하지 않아도 됩니다.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="#start">구성 절차 보기</a>
+            <a class="btn btn-ghost" href="#arch">아키텍처 보기</a>
+          </div>
+        </div>
+
+        <div class="profile" aria-label="Client VPN 엔드포인트 구성 예시">
+          <div class="profile-head"><span>Client VPN endpoint</span><span>OpenVPN · TLS</span></div>
+          <div class="conn"><b>cvpn-endpoint</b><span class="state">available</span></div>
+          <dl class="pf">
+            <div><dt>Authentication</dt><dd><code class="on">Mutual cert</code><code>Active Directory</code><code class="on">SAML 2.0</code></dd></div>
+            <div><dt>Transport</dt><dd><code class="on">UDP</code><code>TCP</code><code class="on">443</code><code>1194</code></dd></div>
+            <div><dt>Client CIDR</dt><dd><code>10.100.0.0/22</code></dd></div>
+            <div><dt>Split tunnel</dt><dd><code class="on">enabled</code></dd></div>
+            <div><dt>Pushed routes</dt><dd><code>10.0.0.0/16</code><code>172.16.0.0/24</code></dd></div>
+            <div><dt>Target</dt><dd><code>VPC subnets</code><code>Transit Gateway</code></dd></div>
+          </dl>
+          <p class="profile-foot">강조된 값이 이 예시에서 선택한 설정입니다. 전송 프로토콜은 엔드포인트를 만든 뒤 바꿀 수 없습니다.</p>
+        </div>
+      </div>
+
+      <div class="chips" role="list">
+        <div class="chip" role="listitem"><span class="num">99.9%</span><p>리전별 월간 가동률 SLA</p></div>
+        <div class="chip" role="listitem"><span class="num">3</span><p>인증 방식 (인증서 · AD · SAML)</p></div>
+        <div class="chip" role="listitem"><span class="num">443 · 1194</span><p>지원 포트, TCP · UDP</p></div>
+        <div class="chip" role="listitem"><span class="num">/22–/12</span><p>클라이언트 IPv4 CIDR 크기 범위</p></div>
+      </div>
+    </div>
+  </header>
+
+  <section id="why" aria-labelledby="why-h">
+    <div class="wrap split">
+      <div>
+        <p class="tag">Why Client VPN</p>
+        <h2 id="why-h">원격 접속도 클라우드 리소스처럼 관리합니다</h2>
+        <p class="lede">VPN 어플라이언스를 직접 운영하면 용량 계획, 패치, 이중화를 모두 챙겨야 합니다. Client VPN은 접속자 수에 맞춰 확장되고, 인증과 접근 제어를 기존 ID 체계에 연결합니다.</p>
+      </div>
+      <div class="pillars">
+        <div class="pillar"><span class="k">Managed</span><div><h3>운영할 서버가 없음</h3><p>엔드포인트를 만들고 서브넷이나 Transit Gateway를 연결하면 됩니다. 접속자 수에 따라 AWS가 용량을 관리합니다.</p></div></div>
+        <div class="pillar"><span class="k">Identity</span><div><h3>기존 ID 체계 연동</h3><p>AWS Directory Service의 Active Directory나 SAML 2.0 IdP를 쓰고, IdP의 MFA를 그대로 적용합니다.</p></div></div>
+        <div class="pillar"><span class="k">Scoped</span><div><h3>그룹별 접근 범위</h3><p>권한 규칙으로 그룹마다 접근할 수 있는 네트워크를 정합니다. 규칙이 없는 목적지는 기본적으로 차단됩니다.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="auth" aria-labelledby="auth-h">
+    <div class="wrap">
+      <p class="tag">Authentication</p>
+      <h2 id="auth-h">세 가지 인증 방식</h2>
+      <p class="lede">어떤 방식이든 서버 인증서는 엔드포인트와 같은 리전의 AWS Certificate Manager(ACM)에 있어야 합니다. 인증서 기반 인증은 사용자 기반 인증과 함께 쓸 수 있습니다.</p>
+      <div class="auth">
+        <article class="auth-card base">
+          <span class="k">Certificate-based</span>
+          <h3>상호 인증 (Mutual)</h3>
+          <p>클라이언트 인증서로 기기를 인증합니다. 인증서 해지 목록으로 분실 기기의 접속을 막고, 클라이언트 연결 핸들러로 기기 상태를 평가할 때도 이 방식이 필요합니다.</p>
+          <div class="specs"><code>ACM</code><code>CRL 20,000 entries</code></div>
+        </article>
+        <article class="auth-card">
+          <span class="k">User-based</span>
+          <h3>Active Directory</h3>
+          <p>AWS Directory Service에 연결된 디렉터리의 사용자 자격 증명으로 인증합니다. 디렉터리는 엔드포인트와 같은 계정에 있어야 합니다.</p>
+          <div class="specs"><code>AWS Directory Service</code><code>MFA</code><code>AD groups</code></div>
+        </article>
+        <article class="auth-card">
+          <span class="k">User-based</span>
+          <h3>SAML 2.0 페더레이션</h3>
+          <p>IAM SAML 자격 증명 공급자로 Okta 같은 외부 IdP와 연동해 SSO로 접속합니다. 이 방식은 AWS 제공 클라이언트로 접속합니다.</p>
+          <div class="specs"><code>SAML 2.0</code><code>IAM SAML provider</code><code>SSO</code></div>
+        </article>
+      </div>
+      <p class="combo"><strong>조합할 수 있는 방식</strong><code>Mutual + Active Directory</code><code>Mutual + SAML</code>함께 설정하면 두 인증을 모두 통과해야 접속됩니다.</p>
+    </div>
+  </section>
+
+  <section id="authz" aria-labelledby="authz-h">
+    <div class="wrap">
+      <p class="tag">Authorization rules</p>
+      <h2 id="authz-h">누가 어디로 갈 수 있는지 정합니다</h2>
+      <p class="lede">권한 규칙은 목적지 CIDR과 그룹 ID(또는 모든 사용자)의 조합입니다. 허용 규칙만 만들 수 있고, 가장 구체적인 접두사가 우선합니다.</p>
+      <div class="rules">
+        <div class="rule-box" role="group" aria-label="권한 규칙 평가 예시">
+          <div class="hd">Authorization rules · longest prefix match</div>
+          <div class="rule"><span>10.0.0.0/16</span><span class="g">group: dev</span><span class="ok">allow</span></div>
+          <div class="rule"><span>10.0.2.119/32</span><span class="g">group: managers</span><span class="ok">allow</span></div>
+          <div class="rule"><span>172.16.0.0/24</span><span class="g">all users</span><span class="ok">allow</span></div>
+          <div class="rule"><span>0.0.0.0/0</span><span class="g">group: managers</span><span class="ok">allow</span></div>
+          <div class="rule"><span>규칙 없는 목적지</span><span class="g">managers 외 그룹</span><span class="no">deny</span></div>
+        </div>
+        <ul class="notes">
+          <li><strong>기본 차단</strong>권한 규칙이 없으면 아무 목적지에도 접근할 수 없습니다. 엔드포인트를 만든 뒤 규칙부터 추가합니다.</li>
+          <li><strong>가장 구체적인 규칙이 우선</strong>위 예시에서 10.0.2.119/32 규칙은 managers에게만 열려 있으므로, dev 그룹은 10.0.0.0/16 안에서도 이 호스트에 접근할 수 없습니다.</li>
+          <li><strong>0.0.0.0/0은 마지막에 평가</strong>다른 규칙에 정의되지 않은 목적지를 뜻하며, 만든 순서와 관계없이 마지막에 평가됩니다.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" aria-labelledby="features-h">
+    <div class="wrap">
+      <p class="tag">Features</p>
+      <h2 id="features-h">주요 기능</h2>
+      <div class="features">
+        <article class="feature"><p class="ft">Routing</p><h3>Split tunnel</h3><p>켜면 엔드포인트 라우팅 테이블의 경로만 클라이언트에 푸시되어 해당 트래픽만 터널로 보냅니다. 기본값은 꺼짐으로, 모든 트래픽이 터널을 지납니다.</p></article>
+        <article class="feature"><p class="ft">Visibility</p><h3>연결 로그</h3><p>접속 시도와 연결, 종료 기록을 Amazon CloudWatch Logs로 보냅니다. 사용량 분석과 사고 조사에 씁니다.</p></article>
+        <article class="feature"><p class="ft">Custom logic</p><h3>클라이언트 연결 핸들러</h3><p>인증 뒤, 권한 규칙 평가 전에 Lambda 함수로 접속을 허용하거나 거부합니다. 함수 이름은 AWSClientVPN- 으로 시작해야 하고 제한 시간은 30초입니다.</p></article>
+        <article class="feature"><p class="ft">Device posture</p><h3>기기 상태 확인</h3><p>CrowdStrike, Jamf, JumpCloud 같은 기기 신뢰 공급자의 정보로 Cedar 기반 정책을 평가합니다. 접속할 때와 세션 중 5분마다 다시 평가합니다.</p></article>
+        <article class="feature"><p class="ft">Distribution</p><h3>셀프 서비스 포털</h3><p>사용자가 포털에서 AWS 제공 클라이언트와 엔드포인트 구성 파일을 직접 내려받습니다. 구성 파일을 따로 배포하지 않아도 됩니다.</p></article>
+        <article class="feature"><p class="ft">Session</p><h3>세션 제어 · 로그인 배너</h3><p>최대 세션 시간(8·10·12·24시간, 기본 24시간)과 만료 시 재접속 방식을 정하고, 접속 시 보여줄 배너(최대 1,400자)를 설정합니다.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="targets" aria-labelledby="targets-h">
+    <div class="wrap">
+      <p class="tag">Target network</p>
+      <h2 id="targets-h">VPC 서브넷 연결과 Transit Gateway 연결</h2>
+      <p class="lede">엔드포인트를 만들 때 한 가지 연결 방식을 고릅니다. 두 방식을 한 엔드포인트에 섞을 수 없습니다.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">VPC 서브넷 연결과 Transit Gateway 연결 비교</caption>
+          <thead><tr><th scope="col">연결 방식</th><th scope="col">접근 범위</th><th scope="col">클라이언트 IP</th><th scope="col">접근 제어</th><th scope="col">어떤 경우에 맞나</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="row-h">VPC 서브넷 연결<br><span class="mono" style="font-size:12px;font-weight:400;color:var(--ink-3)">Subnet association</span></td>
+              <td data-k="접근 범위">연결한 VPC와, 그 VPC에서 라우팅되는 네트워크</td>
+              <td data-k="클라이언트 IP">엔드포인트 네트워크 인터페이스 주소로 SNAT</td>
+              <td data-k="접근 제어">권한 규칙과 보안 그룹</td>
+              <td data-k="어떤 경우에 맞나">한 VPC를 중심으로 원격 접속을 제공하는 경우</td>
+            </tr>
+            <tr>
+              <td class="row-h">Transit Gateway 연결<br><span class="mono" style="font-size:12px;font-weight:400;color:var(--ink-3)">client-vpn attachment</span></td>
+              <td data-k="접근 범위">같은 리전 Transit Gateway에 연결된 여러 VPC와 온프레미스</td>
+              <td data-k="클라이언트 IP">SNAT 없이 원본 클라이언트 IP 유지</td>
+              <td data-k="접근 제어">네트워크 기반 권한 규칙 (보안 그룹 미적용)</td>
+              <td data-k="어떤 경우에 맞나">중계용 VPC 없이 여러 VPC에 접속하고, 사용자별 트래픽을 추적해야 하는 경우</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="arch" aria-labelledby="arch-h">
+    <div class="wrap">
+      <p class="tag">Reference architecture</p>
+      <h2 id="arch-h">원격 사용자에서 VPC와 온프레미스까지</h2>
+      <p class="lede">사용자는 OpenVPN 기반 클라이언트로 엔드포인트에 TLS 터널을 맺고, 엔드포인트는 IdP나 디렉터리로 인증합니다. Transit Gateway에 연결한 엔드포인트는 원본 클라이언트 IP를 유지한 채 여러 VPC와 온프레미스로 트래픽을 보냅니다.</p>
+      <figure class="arch">
+        <div class="arch-scroll">
+          <svg viewBox="0 0 980 430" role="img" aria-labelledby="arch-title arch-desc">
+            <title id="arch-title">Client VPN 레퍼런스 아키텍처</title>
+            <desc id="arch-desc">재택 사용자와 출장 사용자의 노트북이 인터넷을 거쳐 Client VPN 엔드포인트에 TLS 터널로 접속합니다. 엔드포인트는 SAML IdP 또는 Active Directory로 사용자를 인증하고 연결 로그를 CloudWatch Logs로 보냅니다. 엔드포인트는 Transit Gateway에 연결되어 VPC A, VPC B, 그리고 Transit Gateway의 Direct Connect나 Site-to-Site VPN 어태치먼트를 거쳐 온프레미스로 트래픽을 보냅니다.</desc>
+            <rect class="zone" x="10" y="40" width="190" height="370" rx="6"/>
+            <text class="z" x="24" y="62">REMOTE USERS</text>
+            <rect class="zone" x="230" y="40" width="740" height="370" rx="6"/>
+            <text class="z" x="244" y="62">AWS REGION</text>
+
+            <rect class="box" x="30" y="110" width="150" height="64" rx="4"/>
+            <text class="t" x="44" y="138">재택 사용자</text><text class="s" x="44" y="158">Client VPN client</text>
+            <rect class="box" x="30" y="250" width="150" height="64" rx="4"/>
+            <text class="t" x="44" y="278">출장 사용자</text><text class="s" x="44" y="298">OpenVPN client</text>
+
+            <rect class="box" x="290" y="180" width="180" height="64" rx="4"/>
+            <text class="t" x="304" y="208">Client VPN endpoint</text><text class="s" x="304" y="228">client CIDR /22</text>
+
+            <rect class="box" x="290" y="80" width="180" height="56" rx="4"/>
+            <text class="t" x="304" y="104">SAML IdP · AD</text><text class="s" x="304" y="122">사용자 인증</text>
+            <rect class="box" x="290" y="300" width="180" height="56" rx="4"/>
+            <text class="t" x="304" y="324">CloudWatch Logs</text><text class="s" x="304" y="342">연결 로그</text>
+
+            <rect class="box" x="560" y="180" width="170" height="64" rx="4"/>
+            <text class="t" x="574" y="208">Transit Gateway</text><text class="s" x="574" y="228">client-vpn attachment</text>
+
+            <rect class="box" x="790" y="80" width="160" height="60" rx="4"/>
+            <text class="t" x="804" y="106">VPC A</text><text class="s" x="804" y="126">10.0.0.0/16</text>
+            <rect class="box" x="790" y="182" width="160" height="60" rx="4"/>
+            <text class="t" x="804" y="208">VPC B</text><text class="s" x="804" y="228">10.1.0.0/16</text>
+            <rect class="box" x="790" y="284" width="160" height="60" rx="4"/>
+            <text class="t" x="804" y="310">온프레미스 경로</text><text class="s" x="804" y="330">DX · VPN 어태치먼트</text>
+
+            <path class="tls" d="M180 142 C240 142 230 204 290 204"/>
+            <path class="tls" d="M180 282 C240 282 230 222 290 222"/>
+            <text class="lbl2" x="196" y="184">TLS</text>
+            <text class="lbl2" x="190" y="252">UDP 443</text>
+
+            <path class="site" d="M380 180 V136"/>
+            <path class="site" d="M380 244 V300"/>
+
+            <path class="path" d="M470 212 H560"/>
+            <text class="lbl" x="482" y="204">원본 IP 유지</text>
+            <path class="path" d="M730 202 C760 202 760 110 790 110"/>
+            <path class="path" d="M730 212 H790"/>
+            <path class="path" d="M730 222 C760 222 760 314 790 314"/>
+            <text class="lbl" x="560" y="290">TGW 라우팅 테이블</text>
+          </svg>
+        </div>
+        <figcaption class="legend">
+          <span><i class="t"></i>클라이언트 TLS 터널</span>
+          <span><i class="s"></i>인증 · 로그</span>
+          <span><i class="p"></i>어태치먼트 · 라우팅</span>
+        </figcaption>
+        <p class="arch-hint">좁은 화면에서는 다이어그램을 좌우로 밀어서 보세요.</p>
+      </figure>
+    </div>
+  </section>
+
+  <section id="start" aria-labelledby="start-h">
+    <div class="wrap">
+      <p class="tag">Getting started</p>
+      <h2 id="start-h">엔드포인트를 여는 순서</h2>
+      <ol class="steps">
+        <li><span class="num">STEP 1</span><h3>인증 준비</h3><p>ACM에 서버 인증서를 두고, 클라이언트 인증서나 디렉터리, SAML 공급자를 준비합니다.</p></li>
+        <li><span class="num">STEP 2</span><h3>엔드포인트 생성</h3><p>클라이언트 CIDR, 전송 프로토콜, Split tunnel, 연결 로그를 정합니다.</p></li>
+        <li><span class="num">STEP 3</span><h3>대상 네트워크 연결</h3><p>VPC 서브넷을 연결하거나 Transit Gateway 어태치먼트가 available이 될 때까지 기다립니다.</p></li>
+        <li><span class="num">STEP 4</span><h3>권한 규칙 · 라우트</h3><p>그룹별 권한 규칙과 목적지 라우트를 추가하고, VPC에 클라이언트 CIDR로 가는 복귀 경로를 둡니다.</p></li>
+        <li><span class="num">STEP 5</span><h3>클라이언트 배포</h3><p>구성 파일을 내보내거나 셀프 서비스 포털을 켜서 사용자에게 안내합니다.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="pricing" aria-labelledby="pricing-h">
+    <div class="wrap">
+      <p class="tag">Pricing</p>
+      <h2 id="pricing-h">비용 항목</h2>
+      <p class="lede">엔드포인트에 연결한 대상 네트워크 수와 동시에 활성화된 클라이언트 연결 수가 시간 단위로 과금됩니다. 로그, Lambda, 데이터 전송은 각 서비스 요금으로 더해집니다.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">AWS Client VPN 과금 항목</caption>
+          <thead><tr><th scope="col">과금 항목</th><th scope="col">과금 기준</th><th scope="col">참고</th></tr></thead>
+          <tbody>
+          <tr><td class="row-h">엔드포인트 연결</td><td data-k="과금 기준">대상 네트워크 연결(association)마다 시간당</td><td data-k="참고">IPv6·듀얼 스택 엔드포인트도 IPv4와 같은 단가입니다.</td></tr>
+          <tr><td class="row-h">클라이언트 연결</td><td data-k="과금 기준">활성 VPN 연결마다 시간당</td><td data-k="참고">접속한 사용자 수에 비례합니다.</td></tr>
+          <tr><td class="row-h">데이터 전송</td><td data-k="과금 기준">EC2에서 인터넷으로 나가는 데이터 전송(DTO)</td><td data-k="참고">Full tunnel로 인터넷 트래픽까지 보내면 이 비용이 늘어납니다.</td></tr>
+          <tr><td class="row-h">퍼블릭 IPv4 주소</td><td data-k="과금 기준">인터넷 게이트웨이가 있는 VPC 서브넷에 연결할 때 엔드포인트 ENI에 붙는 Elastic IP</td><td data-k="참고">사용 중인 퍼블릭 IPv4 주소로 VPC 요금에서 청구됩니다.</td></tr>
+          <tr><td class="row-h">연결 로그</td><td data-k="과금 기준">CloudWatch Logs 로그 그룹 사용량</td><td data-k="참고">CloudWatch 요금으로 청구됩니다.</td></tr>
+          <tr><td class="row-h">클라이언트 연결 핸들러</td><td data-k="과금 기준">Lambda 함수 호출</td><td data-k="참고">AWS Lambda 요금으로 청구됩니다.</td></tr>
+          <tr><td class="row-h">Transit Gateway 연결</td><td data-k="과금 기준">Transit Gateway 표준 요금</td><td data-k="참고">Transit Gateway 통합 자체에는 추가 요금이 없습니다.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="lede" style="font-size:14px">요금 단가는 리전과 사용량에 따라 다릅니다. 최신 단가는 <a href="https://aws.amazon.com/vpn/pricing/" target="_blank" rel="noopener">AWS VPN 요금 페이지</a>에서 확인하세요.</p>
+    </div>
+  </section>
+
+  <section class="cta" aria-labelledby="cta-h">
+    <div class="wrap">
+      <p class="tag">Next step</p>
+      <h2 id="cta-h">우리 조직에 맞는 원격 접속 구성을 설계해 보세요</h2>
+      <p class="lede">사용자 규모, 쓰고 있는 IdP나 디렉터리, 접속해야 할 네트워크를 정리해 오시면 인증 방식과 권한 규칙 설계를 함께 검토합니다.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="https://aws.amazon.com/vpn/client-vpn/" target="_blank" rel="noopener">서비스 페이지 열기</a>
+        <a class="btn btn-ghost" href="https://docs.aws.amazon.com/vpn/latest/clientvpn-admin/what-is.html" target="_blank" rel="noopener">관리자 안내서 읽기</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a href="../">← 전체 AWS 네트워킹 서비스</a>
+    <span>AWS Client VPN 소개 자료. 기능 지원 범위와 요금은 리전에 따라 다르니 공식 문서를 확인하세요.</span>
+    <a href="https://docs.aws.amazon.com/vpn/latest/clientvpn-admin/limits.html" target="_blank" rel="noopener">할당량 문서</a>
+  </div>
+</footer>
+
+</body>
+</html>

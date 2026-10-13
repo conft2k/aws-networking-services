@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PrivateLink 소개</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+body{margin:0}img{max-width:100%}[hidden]{display:none!important}
+
+/* Layout: a cross-connect work order. Cool steel paper, navy ink, Amazon orange as the one accent; section tags read like fiber labels. */
+:root{
+  --bg:#EEF1F4; --surface:#FFFFFF; --sunken:#E3E8ED;
+  --ink:#14202E; --ink-2:#44515F; --ink-3:#5A6672;
+  --line:#CDD5DD; --line-2:#B4BFCA;
+  --fiber:#FF9900;          /* Amazon orange — fills only */
+  --fiber-ink:#B35C00;      /* orange-derived, AA on light surfaces */
+  --fiber-soft:#FFF0D9;
+  --on-fiber:#14202E;
+  --trace:#2E7D9A;          /* secondary line color for diagram paths */
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --maxw:1120px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--fiber-ink);outline-offset:3px;border-radius:2px}
+.skip-link{position:absolute;left:16px;top:-60px;background:var(--fiber);color:var(--on-fiber);padding:8px 14px;font-weight:700;z-index:50;text-decoration:none}
+.skip-link:focus{top:12px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.wrap{max-width:var(--maxw);margin:0 auto;padding-inline:24px}
+section{padding-block:88px;border-top:1px solid var(--line)}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.25}
+h2{font-size:clamp(26px,3.4vw,36px);font-weight:700;letter-spacing:-.01em}
+h3{font-size:18px;font-weight:700}
+p{margin:0}
+.lede{color:var(--ink-2);max-width:62ch;margin-top:14px}
+.num{font-family:var(--display);font-variant-numeric:tabular-nums lining-nums}
+.mono{font-family:var(--mono)}
+
+/* fiber label: the section tag */
+.tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-bottom:14px}
+.tag::before{content:"";width:22px;height:8px;background:var(--fiber);border-radius:1px}
+
+/* nav */
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:60px}
+.brand{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.02em;text-decoration:none;text-transform:uppercase}
+.brand span{color:var(--fiber-ink)}
+.navlinks{display:flex;gap:22px;font-size:14px;align-items:center}
+.navlinks a{text-decoration:none;color:var(--ink-2)}
+.navlinks a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;font-weight:700;font-size:15px;text-decoration:none;border-radius:4px;border:1px solid transparent;transition:transform .15s ease,background .15s ease}
+.btn-primary{background:var(--fiber);color:var(--on-fiber)}
+.btn-primary:hover{transform:translateY(-1px)}
+.btn-ghost{border-color:var(--line-2);color:var(--ink)}
+.btn-ghost:hover{background:var(--sunken)}
+.navlinks .btn{min-height:38px;padding:0 14px;font-size:14px;color:var(--on-fiber)}
+
+/* hero */
+.hero{padding-block:72px 64px;border-top:0}
+.hero-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:56px;align-items:center}
+.eyebrow{font-family:var(--mono);font-size:13px;color:var(--fiber-ink);letter-spacing:.04em}
+.hero h1{font-size:clamp(34px,5vw,56px);font-weight:700;letter-spacing:-.02em;margin-top:16px}
+.hero h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--fiber) 62%,var(--fiber) 90%,transparent 90%);padding-inline:2px}
+.hero .lede{font-size:18px}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+
+/* hero visual: port faceplate */
+.faceplate{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px}
+.faceplate-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.ports{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+.port{border:1px solid var(--line);border-radius:4px;padding:14px 14px 12px;background:var(--sunken);display:flex;flex-direction:column;gap:2px}
+.port .num{font-size:40px;font-weight:600;line-height:1}
+.port .num small{font-size:18px;color:var(--ink-2);margin-left:2px}
+.port .optic{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+.port .led{width:8px;height:8px;border-radius:50%;background:var(--fiber);align-self:flex-end;margin-top:-6px;animation:blink 2.4s ease-in-out infinite}
+.port:nth-child(2) .led{animation-delay:.6s}.port:nth-child(3) .led{animation-delay:1.2s}.port:nth-child(4) .led{animation-delay:1.8s}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.faceplate-foot{margin-top:14px;font-size:13px;color:var(--ink-2)}
+
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:56px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.chip{padding:18px 20px;border-left:1px solid var(--line);min-width:0}
+.chip:first-child{border-left:0}
+.chip .num{font-size:34px;font-weight:600;line-height:1.1}
+.chip p{font-size:13.5px;color:var(--ink-2);margin-top:4px}
+
+/* value */
+.split{display:grid;grid-template-columns:1fr 1.4fr;gap:56px}
+.pillars{display:grid;gap:0;border-top:1px solid var(--line-2)}
+.pillar{display:grid;grid-template-columns:120px 1fr;gap:20px;padding-block:22px;border-bottom:1px solid var(--line)}
+.pillar .k{font-family:var(--display);font-size:22px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--fiber-ink)}
+.pillar p{color:var(--ink-2);margin-top:6px}
+
+/* stack (L1/L2/L3) */
+.stack{margin-top:40px;display:grid;gap:10px}
+.layer{display:grid;grid-template-columns:96px 1fr 1.2fr;gap:24px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px 24px}
+.layer .lv{font-family:var(--display);font-size:44px;font-weight:700;line-height:.9}
+.layer .lv small{display:block;font-family:var(--mono);font-size:11px;font-weight:400;color:var(--ink-3);letter-spacing:.06em;margin-top:8px;text-transform:uppercase}
+.layer p{color:var(--ink-2);margin-top:6px;font-size:15px}
+.specs{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+.specs code{font-family:var(--mono);font-size:12.5px;background:var(--sunken);border:1px solid var(--line);padding:3px 8px;border-radius:3px;color:var(--ink)}
+
+/* features */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:40px}
+.feature{background:var(--surface);padding:26px 24px;min-width:0}
+.feature .ft{font-family:var(--mono);font-size:11.5px;color:var(--fiber-ink);letter-spacing:.06em;text-transform:uppercase}
+.feature h3{margin-top:8px}
+.feature p{color:var(--ink-2);font-size:15px;margin-top:8px}
+
+/* table */
+.tbl-wrap{margin-top:36px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:14px 18px;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--sunken)}
+tbody tr:last-child td{border-bottom:0}
+td.row-h{font-weight:700;width:22%}
+td .num{font-size:18px;font-weight:600}
+
+/* architecture */
+.arch{margin-top:36px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px}
+.arch-scroll{overflow-x:auto}
+.arch svg{display:block;width:100%;min-width:860px;height:auto}
+.arch-hint{display:none;font-size:13px;color:var(--ink-3);margin-top:10px}
+svg .box{fill:var(--sunken);stroke:var(--line-2)}
+svg .zone{fill:none;stroke:var(--line-2);stroke-dasharray:4 4}
+svg .t{fill:var(--ink);font-family:var(--sans);font-size:14px;font-weight:700}
+svg .s{fill:var(--ink-3);font-family:var(--mono);font-size:11px}
+svg .z{fill:var(--ink-2);font-family:var(--mono);font-size:11px;letter-spacing:.08em}
+svg .fiber{stroke:var(--fiber);stroke-width:5;fill:none;stroke-linecap:round}
+svg .path{stroke:var(--trace);stroke-width:2;fill:none}
+svg .site{stroke:var(--fiber-ink);stroke-width:2;fill:none;stroke-dasharray:6 5}
+svg .lbl{fill:var(--trace);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .lbl2{fill:var(--fiber-ink);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .dot{fill:var(--fiber)}
+.legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--ink-2)}
+.legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--fiber)}
+.legend i.p{border-top:2px solid var(--trace)}
+.legend i.s{border-top:2px dashed var(--fiber-ink)}
+
+/* steps */
+.steps{list-style:none;padding:0;margin:40px 0 0;display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:4px solid var(--fiber)}
+.steps li{padding:20px 18px 0 0;min-width:0}
+.steps .num{font-size:15px;font-weight:600;color:var(--fiber-ink);letter-spacing:.06em}
+.steps h3{font-size:16px;margin-top:6px}
+.steps p{font-size:14px;color:var(--ink-2);margin-top:6px}
+
+/* resiliency */
+.res{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:36px}
+.res-card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:26px}
+.res-card .num{font-size:52px;font-weight:700;line-height:1}
+.res-card .num small{font-size:20px;color:var(--ink-2)}
+.res-card h3{margin-top:10px}
+.res-card p{color:var(--ink-2);font-size:15px;margin-top:6px}
+.res-card.max{border-color:var(--fiber);box-shadow:inset 0 4px 0 var(--fiber)}
+
+/* cta */
+.cta{text-align:center}
+.cta h2{max-width:22ch;margin:0 auto}
+.cta .lede{margin:14px auto 0}
+.cta .cta-row{justify-content:center}
+footer{border-top:1px solid var(--line);padding-block:28px;font-size:13px;color:var(--ink-3)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+
+@media (max-width:1024px){
+  .hero-grid,.split{grid-template-columns:1fr;gap:40px}
+  .features{grid-template-columns:repeat(2,1fr)}
+  .steps{grid-template-columns:repeat(2,1fr);border-top:0;gap:0 24px}
+  .steps li{border-top:4px solid var(--fiber);padding-bottom:24px}
+  .layer{grid-template-columns:80px 1fr}
+  .layer .specs{grid-column:2}
+  .chips{grid-template-columns:repeat(2,1fr)}
+  .chip:nth-child(3){border-left:0}
+  .chip:nth-child(n+3){border-top:1px solid var(--line)}
+}
+@media (max-width:640px){
+  .wrap{padding-inline:18px}
+  section{padding-block:60px}
+  .navlinks a:not(.btn){display:none}
+  .features,.res{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr}
+  .pillar{grid-template-columns:1fr;gap:0}
+  .layer{grid-template-columns:1fr;gap:12px}
+  .layer .specs{grid-column:auto}
+  .cta-row .btn{width:100%}
+  .arch-hint{display:block}
+  table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  table,tbody,tr,td{display:block;width:100%}
+  tr{border-bottom:1px solid var(--line);padding:14px 16px}
+  tbody tr:last-child{border-bottom:0}
+  td{border:0;padding:3px 0}
+  td.row-h{width:100%;font-size:16px;padding-bottom:6px}
+  td[data-k]::before{content:attr(data-k);display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+
+/* ---- service-specific ---- */
+/* PrivateLink: hero endpoint object + provider/consumer split */
+.vpce{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px;min-width:0}
+.vpce-head{display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.vpce-head .ok{display:inline-flex;align-items:center;gap:6px;color:var(--fiber-ink)}
+.vpce-head .ok::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--fiber);animation:blink 2.4s ease-in-out infinite}
+.enis{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+.eni{border:1px solid var(--line);border-radius:4px;padding:14px;background:var(--sunken);min-width:0}
+.eni .az{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.eni .ip{display:block;font-family:var(--display);font-size:30px;font-weight:600;line-height:1.1;margin-top:4px;font-variant-numeric:tabular-nums}
+.eni .id{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);overflow-wrap:anywhere}
+.dns{margin-top:12px;border:1px solid var(--line);border-radius:4px;background:var(--sunken);padding:12px 14px;font-family:var(--mono);font-size:12px;color:var(--ink-2);overflow-wrap:anywhere}
+.dns b{display:block;font-weight:500;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:2px}
+.dns span{color:var(--ink)}
+.flow{margin-top:12px;display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;color:var(--ink-2);flex-wrap:wrap}
+.flow .pill{border:1px solid var(--line-2);border-radius:3px;padding:3px 8px;color:var(--ink)}
+.flow .pill.svc{background:var(--fiber);border-color:var(--fiber);color:var(--on-fiber)}
+.flow .arr{color:var(--trace)}
+
+.roles{margin-top:40px;display:grid;grid-template-columns:1fr auto 1fr;gap:0;align-items:stretch}
+.role{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:24px;min-width:0}
+.role .who{font-family:var(--display);font-size:24px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--fiber-ink)}
+.role h3{margin-top:4px}
+.role ul{list-style:none;padding:0;margin:14px 0 0;display:grid;gap:10px}
+.role li{display:grid;grid-template-columns:auto 1fr;gap:10px;color:var(--ink-2);font-size:15px}
+.role li code{font-family:var(--mono);font-size:12px;background:var(--sunken);border:1px solid var(--line);padding:1px 7px;border-radius:3px;color:var(--ink);align-self:start;margin-top:2px}
+.bridge{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:0 18px;min-width:120px}
+.bridge .line{width:100%;height:4px;background:var(--fiber);border-radius:2px;position:relative}
+.bridge .line::after{content:"";position:absolute;right:-12px;top:-5px;border:7px solid transparent;border-left-color:var(--fiber)}
+.bridge span{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);text-align:center}
+@media (max-width:1024px){
+  .roles{grid-template-columns:1fr;gap:0}
+  .bridge{flex-direction:row;padding:14px 0;min-width:0}
+  .bridge .line{width:4px;height:36px;flex:none}
+  .bridge .line::after{right:auto;left:-5px;top:auto;bottom:-12px;border-left-color:transparent;border-top-color:var(--fiber)}
+}
+@media (max-width:640px){
+  .vpce{padding:16px}
+  .eni .ip{font-size:24px}
+  .role{padding:20px}
+}
+@media (max-width:640px){
+  .chip .num{font-size:24px}
+}
+/* nav: 6 links need room; keep labels on one line and collapse to the CTA earlier */
+.navlinks a{white-space:nowrap}
+@media (max-width:880px){
+  .navlinks a:not(.btn){display:none}
+}
+
+/* nav: keep links on one line, show only CTA below 960px */
+.navlinks a{white-space:nowrap}
+@media (max-width:960px){.navlinks a:not(.btn){display:none}}
+
+/* Korean line breaking: never split a word mid-syllable */
+h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
+</style>
+</head>
+<body>
+
+
+<a class="skip-link" href="#main">본문으로 건너뛰기</a>
+
+<nav aria-label="주요 메뉴">
+  <div class="wrap">
+    <a class="brand" href="#top">Private<span>Link</span></a>
+    <div class="navlinks">
+      <a href="../">전체 서비스</a>
+      <a href="#roles">연결 모델</a>
+      <a href="#features">주요 기능</a>
+      <a href="#types">엔드포인트 유형</a>
+      <a href="#arch">아키텍처</a>
+      <a href="#pricing">비용</a>
+      <a class="btn btn-primary" href="#start">시작하기</a>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+  <header class="hero" id="top">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">AWS PrivateLink · 서비스 단위 사설 연결</p>
+          <h1>필요한 서비스만 <em>사설 IP</em>로 내 VPC에 연결하세요</h1>
+          <p class="lede">AWS PrivateLink는 서비스를 내 VPC 안의 사설 IP로 가져옵니다. 인터넷 게이트웨이, NAT, 공인 IP 없이 AWS 서비스, 다른 계정의 서비스, 파트너 SaaS에 접근하고, 접근 가능한 대상을 서비스 단위로 제한합니다.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="#roles">연결 모델 보기</a>
+            <a class="btn btn-ghost" href="#arch">아키텍처 보기</a>
+          </div>
+        </div>
+
+        <div class="vpce" aria-label="Interface endpoint 예시">
+          <div class="vpce-head"><span>Interface endpoint</span><span class="ok">available</span></div>
+          <div class="enis">
+            <div class="eni"><span class="az">AZ a · ENI</span><span class="ip">10.0.1.25</span><span class="id">subnet-app-a</span></div>
+            <div class="eni"><span class="az">AZ c · ENI</span><span class="ip">10.0.2.37</span><span class="id">subnet-app-c</span></div>
+          </div>
+          <div class="dns"><b>Private DNS name</b><span>api.example.com</span></div>
+          <div class="dns"><b>Regional DNS name</b>vpce-0a1b2c3d4e5f6a7b8-k3m9x2p1.vpce-svc-0123456789abcdef0.ap-northeast-2.vpce.amazonaws.com</div>
+          <div class="flow" aria-label="트래픽 흐름"><span class="pill">consumer app</span><span class="arr" aria-hidden="true">→</span><span class="pill">ENI</span><span class="arr" aria-hidden="true">→</span><span class="pill svc">endpoint service</span></div>
+        </div>
+      </div>
+
+      <div class="chips" role="list">
+        <div class="chip" role="listitem"><span class="num">100 Gbps</span><p>엔드포인트당 AZ별 최대 대역폭 (기본 10 Gbps에서 자동 확장)</p></div>
+        <div class="chip" role="listitem"><span class="num">8500</span><p>VPC 엔드포인트 MTU (bytes)</p></div>
+        <div class="chip" role="listitem"><span class="num">TCP · UDP</span><p>Interface endpoint 지원 프로토콜</p></div>
+        <div class="chip" role="listitem"><span class="num">IPv4 · IPv6</span><p>IPv4, IPv6, Dualstack 엔드포인트</p></div>
+      </div>
+    </div>
+  </header>
+
+  <section id="why" aria-labelledby="why-h">
+    <div class="wrap split">
+      <div>
+        <p class="tag">Why PrivateLink</p>
+        <h2 id="why-h">서비스 하나를 쓰려고 네트워크 전체를 열 필요는 없습니다</h2>
+        <p class="lede">VPC 피어링이나 Transit Gateway는 네트워크끼리 경로를 엽니다. PrivateLink는 특정 서비스로 가는 진입점만 내 VPC에 만듭니다. 상대 VPC의 다른 자원에는 경로가 생기지 않습니다.</p>
+      </div>
+      <div class="pillars">
+        <div class="pillar"><span class="k">Private</span><div><h3>인터넷 노출 없음</h3><p>프라이빗 서브넷에서 인터넷 게이트웨이, NAT, 공인 IP 없이 서비스에 접근합니다.</p></div></div>
+        <div class="pillar"><span class="k">One-way</span><div><h3>단방향 연결</h3><p>소비자 VPC만 연결을 시작할 수 있습니다. 공급자 VPC에서 소비자 VPC로 들어오는 경로는 생기지 않습니다.</p></div></div>
+        <div class="pillar"><span class="k">Overlap</span><div><h3>CIDR 중복 허용</h3><p>소비자와 공급자가 서로 다른 VPC라면 IP 대역이 겹쳐도 됩니다. 소비자 VPC 안의 ENI로 접근하기 때문입니다.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="roles" aria-labelledby="roles-h">
+    <div class="wrap">
+      <p class="tag">Provider &amp; consumer</p>
+      <h2 id="roles-h">공급자는 서비스를 내놓고, 소비자는 엔드포인트를 만듭니다</h2>
+      <p class="lede">PrivateLink 연결은 두 계정의 작업이 만나서 완성됩니다. 공급자는 로드 밸런서 뒤에 서비스를 두고 endpoint service로 공개하며, 소비자는 자기 VPC에 엔드포인트를 만들어 그 서비스에 연결합니다.</p>
+      <div class="roles">
+        <div class="role">
+          <span class="who">Consumer</span>
+          <h3>서비스를 쓰는 쪽</h3>
+          <ul>
+            <li><code>subnet</code><span>AZ마다 서브넷을 골라 Interface endpoint를 만듭니다. AZ마다 ENI가 하나씩 생깁니다.</span></li>
+            <li><code>SG</code><span>엔드포인트 ENI에 보안 그룹을 붙여 접근할 수 있는 클라이언트를 제한합니다.</span></li>
+            <li><code>DNS</code><span>Private DNS를 켜면 기존 서비스 이름 그대로 엔드포인트로 접속합니다.</span></li>
+          </ul>
+        </div>
+        <div class="bridge" aria-hidden="true"><span>consumer → provider</span><div class="line"></div><span>단방향</span></div>
+        <div class="role">
+          <span class="who">Provider</span>
+          <h3>서비스를 내놓는 쪽</h3>
+          <ul>
+            <li><code>NLB</code><span>Network Load Balancer 뒤에 서비스를 두고 endpoint service를 만듭니다. 어플라이언스는 Gateway Load Balancer를 씁니다.</span></li>
+            <li><code>allow</code><span>연결을 허용할 AWS 계정이나 IAM 주체를 지정하고, 요청을 수동으로 수락하게 설정할 수 있습니다.</span></li>
+            <li><code>region</code><span>지원 리전을 추가하면 다른 리전의 소비자도 엔드포인트를 만들 수 있습니다.</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" aria-labelledby="features-h">
+    <div class="wrap">
+      <p class="tag">Features</p>
+      <h2 id="features-h">주요 기능</h2>
+      <div class="features">
+        <article class="feature"><p class="ft">Cross-Region</p><h3>리전 간 PrivateLink</h3><p>다른 리전에 있는 endpoint service와 AWS 서비스에 Interface endpoint로 연결합니다. 리전 DNS 이름만 제공되며, 장애 시 AZ 간 전환은 되지만 리전 간 전환은 하지 않습니다.</p></article>
+        <article class="feature"><p class="ft">Name resolution</p><h3>Private DNS</h3><p>공급자가 도메인 이름을 검증해 연결해 두면, 소비자는 애플리케이션 설정을 바꾸지 않고 같은 이름으로 엔드포인트에 접속합니다.</p></article>
+        <article class="feature"><p class="ft">Access control</p><h3>Endpoint policy</h3><p>엔드포인트에 리소스 정책을 붙여 이 엔드포인트로 호출할 수 있는 주체와 작업, 리소스를 제한합니다.</p></article>
+        <article class="feature"><p class="ft">Hybrid</p><h3>온프레미스에서 접근</h3><p>Direct Connect, Site-to-Site VPN, Transit Gateway, Cloud WAN, VPC 피어링을 거쳐 온 트래픽도 엔드포인트에 도달합니다.</p></article>
+        <article class="feature"><p class="ft">VPC Lattice</p><h3>Resource endpoint</h3><p>로드 밸런서 없이 다른 VPC나 온프레미스의 데이터베이스, 도메인 이름, IP 대상에 TCP로 접근합니다. 공급자는 resource gateway로 리소스를 공유합니다.</p></article>
+        <article class="feature"><p class="ft">Inspection</p><h3>Gateway Load Balancer endpoint</h3><p>VPC 라우팅 테이블의 next hop으로 지정해 트래픽을 방화벽 같은 가상 어플라이언스 플릿으로 보냅니다.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="types" aria-labelledby="types-h">
+    <div class="wrap">
+      <p class="tag">Endpoint types</p>
+      <h2 id="types-h">PrivateLink 기반 VPC 엔드포인트 유형</h2>
+      <p class="lede">연결할 대상에 따라 엔드포인트 유형이 다릅니다. Amazon S3와 DynamoDB용 Gateway endpoint는 PrivateLink를 쓰지 않으므로 여기에 포함하지 않았습니다.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">PrivateLink 기반 VPC 엔드포인트 유형 비교</caption>
+          <thead><tr><th scope="col">유형</th><th scope="col">연결 대상</th><th scope="col">공급자 쪽 구성</th><th scope="col">트래픽을 보내는 방법</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="row-h">Interface</td>
+              <td data-k="연결 대상">AWS 서비스, 다른 계정이나 파트너의 서비스</td>
+              <td data-k="공급자 쪽 구성">NLB 기반 endpoint service</td>
+              <td data-k="트래픽을 보내는 방법">DNS 이름이 ENI의 사설 IP로 해석됩니다. TCP · UDP</td>
+            </tr>
+            <tr>
+              <td class="row-h">Gateway Load Balancer</td>
+              <td data-k="연결 대상">가상 어플라이언스 플릿</td>
+              <td data-k="공급자 쪽 구성">GWLB 기반 endpoint service</td>
+              <td data-k="트래픽을 보내는 방법">라우팅 테이블에서 엔드포인트를 next hop으로 지정합니다.</td>
+            </tr>
+            <tr>
+              <td class="row-h">Resource</td>
+              <td data-k="연결 대상">데이터베이스, EC2 인스턴스, 도메인 이름이나 IP 대상</td>
+              <td data-k="공급자 쪽 구성">resource gateway와 resource configuration</td>
+              <td data-k="트래픽을 보내는 방법">엔드포인트 DNS 이름으로 접근합니다. TCP</td>
+            </tr>
+            <tr>
+              <td class="row-h">Service network</td>
+              <td data-k="연결 대상">VPC Lattice 서비스 네트워크에 연결된 여러 서비스와 리소스</td>
+              <td data-k="공급자 쪽 구성">VPC Lattice 서비스 네트워크</td>
+              <td data-k="트래픽을 보내는 방법">엔드포인트 하나로 여러 대상에 접근합니다.</td>
+            </tr>
+            <tr>
+              <td class="row-h">Tunnel</td>
+              <td data-k="연결 대상">공유받은 네트워크 세그먼트 (CIDR 범위)</td>
+              <td data-k="공급자 쪽 구성">CIDR 범위의 resource configuration을 AWS RAM으로 공유</td>
+              <td data-k="트래픽을 보내는 방법">GENEVE로 캡슐화해 보냅니다.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="arch" aria-labelledby="arch-h">
+    <div class="wrap">
+      <p class="tag">Reference architecture</p>
+      <h2 id="arch-h">IP 대역이 겹쳐도 서비스만 연결합니다</h2>
+      <p class="lede">소비자 VPC와 공급자 VPC가 같은 10.0.0.0/16을 써도 Interface endpoint로 서비스에 연결됩니다. 온프레미스는 소비자 VPC를 거쳐 엔드포인트에 도달하고, 다른 리전의 소비자는 리전 간 PrivateLink를 씁니다.</p>
+      <figure class="arch">
+        <div class="arch-scroll">
+          <svg viewBox="0 0 980 440" role="img" aria-labelledby="arch-title arch-desc">
+            <title id="arch-title">PrivateLink 레퍼런스 아키텍처</title>
+            <desc id="arch-desc">서울 리전의 소비자 VPC에 Interface endpoint와 Resource endpoint가 있습니다. 애플리케이션과 온프레미스 데이터센터는 Interface endpoint를 거쳐, 같은 10.0.0.0/16 대역을 쓰는 공급자 VPC의 Network Load Balancer 기반 endpoint service와 서비스 대상에 연결됩니다. Resource endpoint는 다른 VPC의 resource gateway를 거쳐 데이터베이스에 연결됩니다. 다른 리전의 소비자 VPC는 리전 간 PrivateLink로 같은 endpoint service에 연결됩니다.</desc>
+            <rect class="zone" x="10" y="40" width="150" height="380" rx="6"/>
+            <text class="z" x="24" y="62">ON-PREMISES</text>
+            <rect class="zone" x="190" y="40" width="260" height="380" rx="6"/>
+            <text class="z" x="204" y="62">CONSUMER VPC · 10.0.0.0/16</text>
+            <rect class="zone" x="520" y="40" width="250" height="240" rx="6"/>
+            <text class="z" x="534" y="62">PROVIDER VPC · 10.0.0.0/16</text>
+            <rect class="zone" x="520" y="300" width="250" height="120" rx="6"/>
+            <text class="z" x="534" y="322">RESOURCE VPC</text>
+            <rect class="zone" x="800" y="40" width="170" height="240" rx="6"/>
+            <text class="z" x="814" y="62">OTHER REGION</text>
+
+            <rect class="box" x="24" y="196" width="122" height="64" rx="4"/>
+            <text class="t" x="36" y="224">데이터센터</text><text class="s" x="36" y="244">DX · VPN</text>
+
+            <rect class="box" x="210" y="84" width="220" height="56" rx="4"/>
+            <text class="t" x="224" y="108">애플리케이션</text><text class="s" x="224" y="126">api.example.com 호출</text>
+            <rect class="box" x="210" y="190" width="220" height="76" rx="4"/>
+            <text class="t" x="224" y="216">Interface endpoint</text><text class="s" x="224" y="236">ENI 10.0.1.25 · AZ a</text><text class="s" x="224" y="252">ENI 10.0.2.37 · AZ c</text>
+            <rect class="box" x="210" y="330" width="220" height="60" rx="4"/>
+            <text class="t" x="224" y="356">Resource endpoint</text><text class="s" x="224" y="376">TCP · DNS 이름</text>
+
+            <rect class="box" x="540" y="84" width="210" height="60" rx="4"/>
+            <text class="t" x="554" y="110">Endpoint service</text><text class="s" x="554" y="130">Network Load Balancer</text>
+            <rect class="box" x="540" y="196" width="210" height="60" rx="4"/>
+            <text class="t" x="554" y="222">서비스 대상</text><text class="s" x="554" y="242">EC2 · 컨테이너</text>
+
+            <rect class="box" x="534" y="340" width="120" height="60" rx="4"/>
+            <text class="t" x="544" y="366">Resource GW</text><text class="s" x="544" y="386">ingress</text>
+            <rect class="box" x="664" y="340" width="96" height="60" rx="4"/>
+            <text class="t" x="672" y="366">데이터베이스</text><text class="s" x="672" y="386">Amazon RDS</text>
+
+            <rect class="box" x="814" y="96" width="144" height="76" rx="4"/>
+            <text class="t" x="826" y="122">소비자 VPC</text><text class="s" x="826" y="142">Interface endpoint</text><text class="s" x="826" y="158">service Region 지정</text>
+
+            <path class="path" d="M146 228 H210"/>
+            <path class="path" d="M320 140 V190"/>
+            <path class="fiber" d="M430 216 C480 216 490 114 540 114"/>
+            <text class="lbl2" x="486" y="200">PrivateLink</text>
+            <path class="path" d="M645 144 V196"/>
+            <path class="fiber" d="M430 360 C480 360 490 370 534 370"/>
+            <path class="path" d="M654 370 H664"/>
+            <path class="site" d="M814 134 C790 134 780 114 750 114"/>
+            <text class="lbl2" x="814" y="196">cross-Region</text>
+          </svg>
+        </div>
+        <figcaption class="legend">
+          <span><i></i>PrivateLink 연결</span>
+          <span><i class="p"></i>VPC 내부 · 하이브리드 경로</span>
+          <span><i class="s"></i>리전 간 PrivateLink</span>
+        </figcaption>
+        <p class="arch-hint">좁은 화면에서는 다이어그램을 좌우로 밀어서 보세요.</p>
+      </figure>
+    </div>
+  </section>
+
+  <section id="start" aria-labelledby="start-h">
+    <div class="wrap">
+      <p class="tag">Getting started</p>
+      <h2 id="start-h">내 서비스를 PrivateLink로 공개하는 순서</h2>
+      <ol class="steps">
+        <li><span class="num">STEP 1</span><h3>NLB 준비</h3><p>공급자 VPC의 두 개 이상 AZ에 Network Load Balancer와 대상 그룹을 만듭니다.</p></li>
+        <li><span class="num">STEP 2</span><h3>Endpoint service 생성</h3><p>NLB를 선택해 endpoint service를 만들고, 연결을 허용할 주체를 추가합니다.</p></li>
+        <li><span class="num">STEP 3</span><h3>엔드포인트 생성</h3><p>소비자는 서비스 이름으로 Interface endpoint를 만들고 서브넷과 보안 그룹을 고릅니다.</p></li>
+        <li><span class="num">STEP 4</span><h3>연결 수락</h3><p>수락이 필요하도록 설정했다면 공급자가 연결 요청을 수락합니다.</p></li>
+        <li><span class="num">STEP 5</span><h3>DNS로 접속 확인</h3><p>엔드포인트 DNS 이름이나 Private DNS 이름으로 서비스에 접속해 봅니다.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="pricing" aria-labelledby="pricing-h">
+    <div class="wrap">
+      <p class="tag">Pricing</p>
+      <h2 id="pricing-h">비용 항목</h2>
+      <p class="lede">PrivateLink 요금은 엔드포인트가 프로비저닝된 시간과 엔드포인트로 처리한 데이터 양으로 정해집니다. 공급자 쪽 로드 밸런서와 리전 간 전송 요금은 따로 붙습니다.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">AWS PrivateLink 과금 항목</caption>
+          <thead><tr><th scope="col">과금 항목</th><th scope="col">과금 기준</th><th scope="col">참고</th></tr></thead>
+          <tbody>
+          <tr><td class="row-h">Interface endpoint 시간</td><td data-k="과금 기준">엔드포인트가 있는 AZ마다 프로비저닝된 시간. 부분 시간은 1시간으로 계산합니다.</td><td data-k="참고">엔드포인트를 만든 소비자에게 청구됩니다.</td></tr>
+          <tr><td class="row-h">Interface endpoint 데이터 처리</td><td data-k="과금 기준">엔드포인트로 처리한 GB</td><td data-k="참고">리전 안 모든 Interface endpoint의 처리량 합계에 사용량 구간별 단가가 적용됩니다.</td></tr>
+          <tr><td class="row-h">Gateway Load Balancer endpoint</td><td data-k="과금 기준">엔드포인트 시간과 처리한 GB</td><td data-k="참고">공급자 쪽 Gateway Load Balancer 요금은 Elastic Load Balancing 요금으로 따로 청구됩니다.</td></tr>
+          <tr><td class="row-h">Resource · Tunnel endpoint</td><td data-k="과금 기준">Resource endpoint는 리소스별 시간, Tunnel endpoint는 엔드포인트 시간. 둘 다 처리한 GB</td><td data-k="참고">처리 요금 구간은 Interface endpoint와 따로 계산합니다. Service network endpoint 자체에는 추가 요금이 없고, 서비스 네트워크로 접근하는 리소스와 서비스는 VPC Lattice 요금을 따릅니다.</td></tr>
+          <tr><td class="row-h">리전 간 연결</td><td data-k="과금 기준">공급자는 활성 원격 리전마다 고정 시간 요금. 소비자는 표준 엔드포인트 요금에 리전 간 전송 GB</td><td data-k="참고">원격 리전에 연결된 Interface endpoint가 하나라도 있으면 활성 리전입니다. 리전 간 전송 요금은 엔드포인트 소유자에게 청구됩니다.</td></tr>
+          <tr><td class="row-h">공급자 Network Load Balancer</td><td data-k="과금 기준">NLB 시간과 NLCU</td><td data-k="참고">Elastic Load Balancing 요금으로 따로 청구됩니다.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="lede" style="font-size:14px">요금 단가는 리전과 사용량에 따라 다릅니다. 최신 단가는 <a href="https://aws.amazon.com/privatelink/pricing/" target="_blank" rel="noopener">AWS PrivateLink 요금 페이지</a>에서 확인하세요.</p>
+    </div>
+  </section>
+
+  <section class="cta" aria-labelledby="cta-h">
+    <div class="wrap">
+      <p class="tag">Next step</p>
+      <h2 id="cta-h">서비스 공개와 사설 접근 구조를 함께 설계해 보세요</h2>
+      <p class="lede">공개할 서비스, 소비자 계정 범위, 온프레미스 접근 경로, DNS 구성을 정리해 오시면 엔드포인트 유형과 배치를 함께 검토합니다.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="https://aws.amazon.com/privatelink/" target="_blank" rel="noopener">서비스 페이지 열기</a>
+        <a class="btn btn-ghost" href="https://docs.aws.amazon.com/vpc/latest/privatelink/what-is-privatelink.html" target="_blank" rel="noopener">사용 설명서 읽기</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a href="../">← 전체 AWS 네트워킹 서비스</a>
+    <span>AWS PrivateLink 소개 자료. 엔드포인트 유형별 지원 리전과 기능은 다를 수 있으니 공식 문서를 확인하세요.</span>
+    <a href="https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-limits-endpoints.html" target="_blank" rel="noopener">PrivateLink 한도 문서</a>
+  </div>
+</footer>
+
+</body>
+</html>
