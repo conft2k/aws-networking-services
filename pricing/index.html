@@ -146,6 +146,25 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .tgroup[data-area="app"]{--g:#9D88CF}:root:not([data-theme="light"]) .tgroup[data-area="edge"]{--g:#6FA9C8}:root:not([data-theme="light"]) .tgroup[data-area="hybrid"]{--g:#6FB596}:root:not([data-theme="light"]) .tgroup[data-area="fnd"]{--g:#CF9C67}}
 :root[data-theme="dark"] .tgroup[data-area="app"]{--g:#9D88CF}:root[data-theme="dark"] .tgroup[data-area="edge"]{--g:#6FA9C8}:root[data-theme="dark"] .tgroup[data-area="hybrid"]{--g:#6FB596}:root[data-theme="dark"] .tgroup[data-area="fnd"]{--g:#CF9C67}
 @media (max-width:640px){.tabgroups{flex-direction:column;align-items:stretch;gap:12px;width:100%}}
+/* two-level tabs: area segmented bar, then underline sub-tabs of the chosen area only */
+.areatabs .at{display:inline-flex;align-items:center;gap:8px}
+.areatabs .at::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--g,var(--line-2))}
+.areatabs .at[data-area="app"],.tgroup[data-area="app"]{--g:#C7B8EA}.areatabs .at[data-area="edge"],.tgroup[data-area="edge"]{--g:#A6D4EC}.areatabs .at[data-area="hybrid"],.tgroup[data-area="hybrid"]{--g:#A9DEC4}.areatabs .at[data-area="fnd"],.tgroup[data-area="fnd"]{--g:#F6CDA2}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .areatabs .at[data-area="app"]{--g:#9D88CF}:root:not([data-theme="light"]) .areatabs .at[data-area="edge"]{--g:#6FA9C8}:root:not([data-theme="light"]) .areatabs .at[data-area="hybrid"]{--g:#6FB596}:root:not([data-theme="light"]) .areatabs .at[data-area="fnd"]{--g:#CF9C67}}
+:root[data-theme="dark"] .areatabs .at[data-area="app"]{--g:#9D88CF}:root[data-theme="dark"] .areatabs .at[data-area="edge"]{--g:#6FA9C8}:root[data-theme="dark"] .areatabs .at[data-area="hybrid"]{--g:#6FB596}:root[data-theme="dark"] .areatabs .at[data-area="fnd"]{--g:#CF9C67}
+.areatabs .at[aria-selected="true"]{box-shadow:inset 0 -3px 0 var(--g),0 1px 2px rgba(0,0,0,.06)}
+.toolbar .areatabs{flex:0 0 auto}
+.toolbar .tabgroups{display:block;flex:1 0 100%;margin-top:10px}
+#prices .toolbar{flex-wrap:wrap}
+.tgroup{display:block}.tgroup[hidden]{display:none}
+.tgroup-label{display:none}
+.subtabs{display:flex;flex-wrap:wrap;gap:2px 6px;border-bottom:1px solid var(--line-2);padding:0 4px}
+.subtabs button{appearance:none;background:transparent;border:0;border-bottom:3px solid transparent;margin-bottom:-1px;padding:11px 12px 9px;font:500 14px/1.2 var(--sans);color:var(--ink-2);cursor:pointer;white-space:nowrap}
+.subtabs button:hover{color:var(--ink)}
+.subtabs button[aria-selected="true"]{color:var(--ink);font-weight:700;border-bottom-color:var(--g,var(--fiber))}
+.subtabs button:focus-visible{outline:2px solid var(--fiber);outline-offset:-2px;border-radius:4px}
+.subtabs{overflow:visible}
+@media (max-width:640px){.areatabs.tablist{display:grid;grid-template-columns:1fr 1fr;width:100%}.areatabs .at{justify-content:center;padding:9px 6px;font-size:12.5px;white-space:normal;text-align:center}}
 .search{display:flex;align-items:center;gap:8px;margin-top:20px}
 .search label{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
 .search input,.sel select{height:40px;min-width:0;width:260px;max-width:100%;padding:0 12px;border:1px solid var(--line-2);border-radius:4px;background:var(--surface);color:var(--ink);font:400 15px var(--sans)}
@@ -220,8 +239,8 @@ html.presenting #prices .tablist{position:static}
 .panel thead th .corner span:last-child{color:var(--fiber-ink)}
 .panel thead th{vertical-align:bottom}
 </style>
-<link rel="stylesheet" href="../assets/site.css?v=3">
-<script src="../assets/site.js?v=3"></script>
+<link rel="stylesheet" href="../assets/site.css?v=5">
+<script src="../assets/site.js?v=5"></script>
 </head>
 <body>
 
@@ -231,10 +250,7 @@ html.presenting #prices .tablist{position:static}
   <div class="wrap">
     <a class="brand" href="../">AWS <span>Networking Pricing</span></a>
     <div class="navlinks">
-      <a href="../">서비스 포트폴리오</a>
-      <a href="#dx">Direct Connect</a>
-      <a href="#tgw">Transit Gateway</a>
-      <a href="#dt">데이터 전송</a>
+      <a href="../">AWS 네트워킹 서비스 포트폴리오</a>
       <a class="btn btn-primary" href="#prices">가격표 보기</a>
     </div>
   </div>
@@ -268,23 +284,29 @@ html.presenting #prices .tablist{position:static}
     <div class="wrap">
       <div class="toolbar">
         <!-- one tablist per service area; arrow keys move across all tabs in order (see script) -->
+        <div class="areatabs tablist" role="tablist" aria-label="서비스 영역" id="areatabs">
+          <button role="tab" class="at" data-area="app" id="at-app" aria-controls="sub-app" aria-selected="false" tabindex="-1">Application Networking</button>
+          <button role="tab" class="at" data-area="edge" id="at-edge" aria-controls="sub-edge" aria-selected="false" tabindex="-1">Edge Networking</button>
+          <button role="tab" class="at" data-area="hybrid" id="at-hybrid" aria-controls="sub-hybrid" aria-selected="false" tabindex="-1">Hybrid Networking</button>
+          <button role="tab" class="at" data-area="fnd" id="at-fnd" aria-controls="sub-fnd" aria-selected="false" tabindex="-1">Foundation (VPC)</button>
+        </div>
         <div class="tabgroups" id="tabgroups">
-          <div class="tgroup" data-area="app">
+          <div class="tgroup" data-area="app" id="sub-app" role="tabpanel" aria-labelledby="at-app">
             <span class="tgroup-label" aria-hidden="true">Application Networking</span>
-            <div class="tablist" role="tablist" aria-label="Application Networking">
+            <div class="subtabs" role="tablist" aria-label="Application Networking 서비스">
               <button role="tab" id="tab-elb" aria-controls="elb" aria-selected="false" tabindex="-1">Elastic Load Balancing</button>
               <button role="tab" id="tab-lattice" aria-controls="lattice" aria-selected="false" tabindex="-1">VPC Lattice</button>
             </div>
           </div>
-          <div class="tgroup" data-area="edge">
+          <div class="tgroup" data-area="edge" id="sub-edge" role="tabpanel" aria-labelledby="at-edge">
             <span class="tgroup-label" aria-hidden="true">Edge Networking</span>
-            <div class="tablist" role="tablist" aria-label="Edge Networking">
+            <div class="subtabs" role="tablist" aria-label="Edge Networking 서비스">
               <button role="tab" id="tab-ga" aria-controls="ga" aria-selected="false" tabindex="-1">Global Accelerator</button>
             </div>
           </div>
-          <div class="tgroup" data-area="hybrid">
+          <div class="tgroup" data-area="hybrid" id="sub-hybrid" role="tabpanel" aria-labelledby="at-hybrid">
             <span class="tgroup-label" aria-hidden="true">Hybrid Networking</span>
-            <div class="tablist" role="tablist" aria-label="Hybrid Networking">
+            <div class="subtabs" role="tablist" aria-label="Hybrid Networking 서비스">
               <button role="tab" id="tab-dx" aria-controls="dx" aria-selected="true" tabindex="0">Direct Connect</button>
               <button role="tab" id="tab-cloudwan" aria-controls="cloudwan" aria-selected="false" tabindex="-1">Cloud WAN</button>
               <button role="tab" id="tab-tgw" aria-controls="tgw" aria-selected="false" tabindex="-1">Transit Gateway</button>
@@ -292,9 +314,9 @@ html.presenting #prices .tablist{position:static}
               <button role="tab" id="tab-privatelink" aria-controls="privatelink" aria-selected="false" tabindex="-1">PrivateLink</button>
             </div>
           </div>
-          <div class="tgroup" data-area="fnd">
+          <div class="tgroup" data-area="fnd" id="sub-fnd" role="tabpanel" aria-labelledby="at-fnd">
             <span class="tgroup-label" aria-hidden="true">Foundation (VPC)</span>
-            <div class="tablist" role="tablist" aria-label="Foundation (VPC)">
+            <div class="subtabs" role="tablist" aria-label="Foundation (VPC) 서비스">
               <button role="tab" id="tab-dt" aria-controls="dt" aria-selected="false" tabindex="-1">EC2 데이터 전송</button>
             </div>
           </div>
@@ -953,9 +975,37 @@ html.presenting #prices .tablist{position:static}
       var b = document.getElementById('tab-' + t), p = document.getElementById(t), on = t === id;
       b.setAttribute('aria-selected', on ? 'true' : 'false'); b.tabIndex = on ? 0 : -1; p.hidden = !on;
     });
+    syncArea(id);
     if (focus) document.getElementById('tab-' + id).focus();
     if (D) ensure(id);
   }
+  var lastInArea = {};
+  function areaOf(id) { var b = document.getElementById('tab-' + id); var g = b && b.closest('.tgroup'); return g ? g.getAttribute('data-area') : null; }
+  function syncArea(id) {
+    var a = areaOf(id); lastInArea[a] = id;
+    document.querySelectorAll('#areatabs .at').forEach(function (b) { var on = b.getAttribute('data-area') === a; b.setAttribute('aria-selected', on ? 'true' : 'false'); b.tabIndex = on ? 0 : -1; });
+    document.querySelectorAll('#tabgroups .tgroup').forEach(function (g) { g.hidden = g.getAttribute('data-area') !== a; });
+  }
+  function firstIn(a) { var b = document.querySelector('#sub-' + a + ' [role="tab"]'); return b ? b.getAttribute('aria-controls') : 'dx'; }
+  var at = document.getElementById('areatabs'), AREAS = ['app', 'edge', 'hybrid', 'fnd'];
+  function goArea(a, focus) {
+    var id = lastInArea[a] || firstIn(a);
+    select(id);
+    try { history.replaceState(null, '', '#' + id); } catch (er) {}
+    if (focus) document.getElementById('at-' + a).focus();
+  }
+  at.addEventListener('click', function (e) { var b = e.target.closest('.at'); if (b) goArea(b.getAttribute('data-area')); });
+  at.addEventListener('keydown', function (e) {
+    var i = AREAS.indexOf(document.activeElement.getAttribute('data-area')), n = null;
+    if (i < 0) return;
+    if (e.key === 'ArrowRight') n = (i + 1) % AREAS.length;
+    else if (e.key === 'ArrowLeft') n = (i - 1 + AREAS.length) % AREAS.length;
+    else if (e.key === 'Home') n = 0;
+    else if (e.key === 'End') n = AREAS.length - 1;
+    if (n === null) return;
+    e.preventDefault(); e.stopPropagation();
+    goArea(AREAS[n], true);
+  });
   function ensure(id) {
     if (rendered[id]) { applyFilter(); return; }
     var host = document.querySelector('#' + id + ' [data-render]');
