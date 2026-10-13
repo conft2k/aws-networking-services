@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Amazon Route 53 Overview</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+body{margin:0}img{max-width:100%}[hidden]{display:none!important}
+
+/* Layout: a cross-connect work order. Cool steel paper, navy ink, Amazon orange as the one accent; section tags read like fiber labels. */
+:root{
+  --bg:#EEF1F4; --surface:#FFFFFF; --sunken:#E3E8ED;
+  --ink:#14202E; --ink-2:#44515F; --ink-3:#5A6672;
+  --line:#CDD5DD; --line-2:#B4BFCA;
+  --fiber:#FF9900;          /* Amazon orange — fills only */
+  --fiber-ink:#B35C00;      /* orange-derived, AA on light surfaces */
+  --fiber-soft:#FFF0D9;
+  --on-fiber:#14202E;
+  --trace:#2E7D9A;          /* secondary line color for diagram paths */
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --maxw:1120px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--fiber-ink);outline-offset:3px;border-radius:2px}
+.skip-link{position:absolute;left:16px;top:-60px;background:var(--fiber);color:var(--on-fiber);padding:8px 14px;font-weight:700;z-index:50;text-decoration:none}
+.skip-link:focus{top:12px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.wrap{max-width:var(--maxw);margin:0 auto;padding-inline:24px}
+section{padding-block:88px;border-top:1px solid var(--line)}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.25}
+h2{font-size:clamp(26px,3.4vw,36px);font-weight:700;letter-spacing:-.01em}
+h3{font-size:18px;font-weight:700}
+p{margin:0}
+.lede{color:var(--ink-2);max-width:62ch;margin-top:14px}
+.num{font-family:var(--display);font-variant-numeric:tabular-nums lining-nums}
+.mono{font-family:var(--mono)}
+
+/* fiber label: the section tag */
+.tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-bottom:14px}
+.tag::before{content:"";width:22px;height:8px;background:var(--fiber);border-radius:1px}
+
+/* nav */
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:60px}
+.brand{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.02em;text-decoration:none;text-transform:uppercase}
+.brand span{color:var(--fiber-ink)}
+.navlinks{display:flex;gap:22px;font-size:14px;align-items:center}
+.navlinks a{text-decoration:none;color:var(--ink-2)}
+.navlinks a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;font-weight:700;font-size:15px;text-decoration:none;border-radius:4px;border:1px solid transparent;transition:transform .15s ease,background .15s ease}
+.btn-primary{background:var(--fiber);color:var(--on-fiber)}
+.btn-primary:hover{transform:translateY(-1px)}
+.btn-ghost{border-color:var(--line-2);color:var(--ink)}
+.btn-ghost:hover{background:var(--sunken)}
+.navlinks .btn{min-height:38px;padding:0 14px;font-size:14px;color:var(--on-fiber)}
+
+/* hero */
+.hero{padding-block:72px 64px;border-top:0}
+.hero-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:56px;align-items:center}
+.eyebrow{font-family:var(--mono);font-size:13px;color:var(--fiber-ink);letter-spacing:.04em}
+.hero h1{font-size:clamp(34px,5vw,56px);font-weight:700;letter-spacing:-.02em;margin-top:16px}
+.hero h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--fiber) 62%,var(--fiber) 90%,transparent 90%);padding-inline:2px}
+.hero .lede{font-size:18px}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+
+/* hero visual: port faceplate */
+.faceplate{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px}
+.faceplate-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.ports{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+.port{border:1px solid var(--line);border-radius:4px;padding:14px 14px 12px;background:var(--sunken);display:flex;flex-direction:column;gap:2px}
+.port .num{font-size:40px;font-weight:600;line-height:1}
+.port .num small{font-size:18px;color:var(--ink-2);margin-left:2px}
+.port .optic{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+.port .led{width:8px;height:8px;border-radius:50%;background:var(--fiber);align-self:flex-end;margin-top:-6px;animation:blink 2.4s ease-in-out infinite}
+.port:nth-child(2) .led{animation-delay:.6s}.port:nth-child(3) .led{animation-delay:1.2s}.port:nth-child(4) .led{animation-delay:1.8s}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.faceplate-foot{margin-top:14px;font-size:13px;color:var(--ink-2)}
+
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:56px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.chip{padding:18px 20px;border-left:1px solid var(--line);min-width:0}
+.chip:first-child{border-left:0}
+.chip .num{font-size:34px;font-weight:600;line-height:1.1}
+.chip p{font-size:13.5px;color:var(--ink-2);margin-top:4px}
+
+/* value */
+.split{display:grid;grid-template-columns:1fr 1.4fr;gap:56px}
+.pillars{display:grid;gap:0;border-top:1px solid var(--line-2)}
+.pillar{display:grid;grid-template-columns:120px 1fr;gap:20px;padding-block:22px;border-bottom:1px solid var(--line)}
+.pillar .k{font-family:var(--display);font-size:22px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--fiber-ink)}
+.pillar p{color:var(--ink-2);margin-top:6px}
+
+/* stack (L1/L2/L3) */
+.stack{margin-top:40px;display:grid;gap:10px}
+.layer{display:grid;grid-template-columns:96px 1fr 1.2fr;gap:24px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px 24px}
+.layer .lv{font-family:var(--display);font-size:44px;font-weight:700;line-height:.9}
+.layer .lv small{display:block;font-family:var(--mono);font-size:11px;font-weight:400;color:var(--ink-3);letter-spacing:.06em;margin-top:8px;text-transform:uppercase}
+.layer p{color:var(--ink-2);margin-top:6px;font-size:15px}
+.specs{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+.specs code{font-family:var(--mono);font-size:12.5px;background:var(--sunken);border:1px solid var(--line);padding:3px 8px;border-radius:3px;color:var(--ink)}
+
+/* features */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:40px}
+.feature{background:var(--surface);padding:26px 24px;min-width:0}
+.feature .ft{font-family:var(--mono);font-size:11.5px;color:var(--fiber-ink);letter-spacing:.06em;text-transform:uppercase}
+.feature h3{margin-top:8px}
+.feature p{color:var(--ink-2);font-size:15px;margin-top:8px}
+
+/* table */
+.tbl-wrap{margin-top:36px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:14px 18px;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--sunken)}
+tbody tr:last-child td{border-bottom:0}
+td.row-h{font-weight:700;width:22%}
+td .num{font-size:18px;font-weight:600}
+
+/* architecture */
+.arch{margin-top:36px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px}
+.arch-scroll{overflow-x:auto}
+.arch svg{display:block;width:100%;min-width:860px;height:auto}
+.arch-hint{display:none;font-size:13px;color:var(--ink-3);margin-top:10px}
+svg .box{fill:var(--sunken);stroke:var(--line-2)}
+svg .zone{fill:none;stroke:var(--line-2);stroke-dasharray:4 4}
+svg .t{fill:var(--ink);font-family:var(--sans);font-size:14px;font-weight:700}
+svg .s{fill:var(--ink-3);font-family:var(--mono);font-size:11px}
+svg .z{fill:var(--ink-2);font-family:var(--mono);font-size:11px;letter-spacing:.08em}
+svg .fiber{stroke:var(--fiber);stroke-width:5;fill:none;stroke-linecap:round}
+svg .path{stroke:var(--trace);stroke-width:2;fill:none}
+svg .site{stroke:var(--fiber-ink);stroke-width:2;fill:none;stroke-dasharray:6 5}
+svg .lbl{fill:var(--trace);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .lbl2{fill:var(--fiber-ink);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .dot{fill:var(--fiber)}
+.legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--ink-2)}
+.legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--fiber)}
+.legend i.p{border-top:2px solid var(--trace)}
+.legend i.s{border-top:2px dashed var(--fiber-ink)}
+.legend i.o{border-top:2px solid var(--fiber-ink)}
+.legend i.a{border-top:2px dotted var(--ink-3)}
+.legend i.l{border-top:6px solid var(--line-2)}
+.legend i.dir{position:relative;width:26px}
+.legend i.dir::after{content:"";position:absolute;right:-3px;top:-6px;border-left:8px solid var(--trace);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.legend i.o.dir::after{border-left-color:var(--fiber-ink)}
+svg .q-in{stroke:var(--trace);stroke-width:2.5;fill:none}
+svg .q-out{stroke:var(--fiber-ink);stroke-width:2.5;fill:none}
+svg .ah-in{fill:var(--trace)}
+svg .ah-out{fill:var(--fiber-ink)}
+svg .assoc{stroke:var(--ink-3);stroke-width:2;fill:none;stroke-dasharray:1 5;stroke-linecap:round}
+svg .link{stroke:var(--line-2);stroke-width:8;fill:none;stroke-linecap:round}
+
+/* steps */
+.steps{list-style:none;padding:0;margin:40px 0 0;display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:4px solid var(--fiber)}
+.steps li{padding:20px 18px 0 0;min-width:0}
+.steps .num{font-size:15px;font-weight:600;color:var(--fiber-ink);letter-spacing:.06em}
+.steps h3{font-size:16px;margin-top:6px}
+.steps p{font-size:14px;color:var(--ink-2);margin-top:6px}
+
+/* resiliency */
+.res{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:36px}
+.res-card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:26px}
+.res-card .num{font-size:52px;font-weight:700;line-height:1}
+.res-card .num small{font-size:20px;color:var(--ink-2)}
+.res-card h3{margin-top:10px}
+.res-card p{color:var(--ink-2);font-size:15px;margin-top:6px}
+.res-card.max{border-color:var(--fiber);box-shadow:inset 0 4px 0 var(--fiber)}
+
+/* cta */
+.cta{text-align:center}
+.cta h2{max-width:22ch;margin:0 auto}
+.cta .lede{margin:14px auto 0}
+.cta .cta-row{justify-content:center}
+footer{border-top:1px solid var(--line);padding-block:28px;font-size:13px;color:var(--ink-3)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+
+@media (max-width:1024px){
+  .hero-grid,.split{grid-template-columns:1fr;gap:40px}
+  .features{grid-template-columns:repeat(2,1fr)}
+  .steps{grid-template-columns:repeat(2,1fr);border-top:0;gap:0 24px}
+  .steps li{border-top:4px solid var(--fiber);padding-bottom:24px}
+  .layer{grid-template-columns:80px 1fr}
+  .layer .specs{grid-column:2}
+  .chips{grid-template-columns:repeat(2,1fr)}
+  .chip:nth-child(3){border-left:0}
+  .chip:nth-child(n+3){border-top:1px solid var(--line)}
+}
+@media (max-width:640px){
+  .wrap{padding-inline:18px}
+  section{padding-block:60px}
+  .navlinks a:not(.btn){display:none}
+  .features,.res{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr}
+  .pillar{grid-template-columns:1fr;gap:0}
+  .layer{grid-template-columns:1fr;gap:12px}
+  .layer .specs{grid-column:auto}
+  .cta-row .btn{width:100%}
+  .arch-hint{display:block}
+  table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  table,tbody,tr,td{display:block;width:100%}
+  tr{border-bottom:1px solid var(--line);padding:14px 16px}
+  tbody tr:last-child{border-bottom:0}
+  td{border:0;padding:3px 0}
+  td.row-h{width:100%;font-size:16px;padding-bottom:6px}
+  td[data-k]::before{content:attr(data-k);display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+
+/* ---- service-specific ---- */
+.hero h1,h2,h3{word-break:keep-all}
+.hero-grid>*{min-width:0}
+
+/* hero visual: dig query / answer */
+.dig{background:var(--surface);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.dig-head{display:flex;justify-content:space-between;gap:12px;padding:14px 20px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.dig pre{margin:0;padding:18px 20px;font-family:var(--mono);font-size:12.5px;line-height:1.75;color:var(--ink-2);background:var(--sunken);overflow-x:auto;white-space:pre}
+.dig pre{tab-size:4}
+.dig .p{color:var(--fiber-ink);font-weight:500}
+.dig .c{color:var(--ink-3)}
+.dig .k{color:var(--ink);font-weight:500}
+.dig .v{color:var(--ink);font-weight:500;background:var(--fiber-soft);padding:0 3px;border-radius:2px}
+.dig-notes{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line)}
+.dig-notes div{padding:12px 16px;border-left:1px solid var(--line);min-width:0}
+.dig-notes div:first-child{border-left:0}
+.dig-notes span{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.dig-notes b{font-size:14px}
+.dig-notes .ok::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--fiber);margin-right:6px;vertical-align:1px;animation:blink 2.4s ease-in-out infinite}
+
+/* resolution scope rows reuse .layer with a word label */
+.scope .lv{font-size:30px;text-transform:uppercase}
+.scope .layer{grid-template-columns:120px 1fr 1.2fr}
+td code{font-family:var(--mono);font-size:12.5px;background:var(--sunken);border:1px solid var(--line);padding:1px 6px;border-radius:3px}
+
+@media (max-width:1024px){
+  .scope .layer{grid-template-columns:110px 1fr}
+}
+@media (max-width:640px){
+  .dig pre{font-size:11.5px;padding:16px}
+  .dig-notes{grid-template-columns:1fr}
+  .dig-notes div{border-left:0;border-top:1px solid var(--line)}
+  .dig-notes div:first-child{border-top:0}
+  .scope .layer{grid-template-columns:1fr}
+}
+
+/* nav: keep links on one line, show only CTA below 960px */
+.navlinks a{white-space:nowrap}
+@media (max-width:960px){.navlinks a:not(.btn){display:none}}
+
+/* Korean line breaking: never split a word mid-syllable */
+h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
+</style>
+<link rel="stylesheet" href="../../assets/site.css?v=17">
+<script src="../../assets/site.js?v=17"></script>
+</head>
+<body>
+
+
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<nav aria-label="Main menu">
+  <div class="wrap">
+    <a class="brand" href="#top">Amazon <span>Route 53</span></a>
+    <div class="navlinks">
+      <a href="../">Service portfolio</a>
+      <a href="#scope">Resolution scope</a>
+      <a href="#routing">Routing policies</a>
+      <a href="#features">Features</a>
+      <a href="#arch">Hybrid DNS</a>
+      <a href="#pricing">Pricing</a>
+      <a class="btn btn-primary" href="#start">Get started</a>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+  <header class="hero" id="top">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">Amazon Route 53 · DNS · Health checks · Hybrid resolution</p>
+          <h1>DNS that answers every query with a <em>healthy endpoint</em></h1>
+          <p class="lede">Route 53 runs authoritative DNS for public domains, private DNS inside VPCs, and hybrid DNS exchanged with on-premises, all in one service. It factors health check results into its answers so traffic doesn't go to failed endpoints.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="#routing">See routing policies</a>
+            <a class="btn btn-ghost" href="#arch">See the hybrid DNS design</a>
+          </div>
+        </div>
+
+        <div class="dig" aria-label="Example dig query and answer">
+          <div class="dig-head"><span>dig · Multivalue answer</span><span>example.com</span></div>
+<pre><span class="p">$</span> dig +noall +answer app.example.com A
+app.example.com.	60	IN	A	<span class="v">192.0.2.10</span>
+app.example.com.	60	IN	A	<span class="v">198.51.100.20</span></pre>
+          <div class="dig-notes">
+            <div><span>Routing policy</span><b>Multivalue</b></div>
+            <div><span>Health check</span><b class="ok">2 / 3 healthy</b></div>
+            <div><span>TTL</span><b class="num">60 s</b></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chips" role="list">
+        <div class="chip" role="listitem"><span class="num">100%</span><p>Hosted zone availability SLA (monthly)</p></div>
+        <div class="chip" role="listitem"><span class="num">8</span><p>Routing policy types</p></div>
+        <div class="chip" role="listitem"><span class="num">10 s</span><p>Fast health check request interval (default 30 s)</p></div>
+        <div class="chip" role="listitem"><span class="num">DoH</span><p>Encrypted DNS transport for Resolver endpoints</p></div>
+      </div>
+    </div>
+  </header>
+
+  <section id="why" aria-labelledby="why-h">
+    <div class="wrap split">
+      <div>
+        <p class="tag">Why Route 53</p>
+        <h2 id="why-h">DNS is the first hop of every connection</h2>
+        <p class="lede">If name resolution fails, the service stops even when the network is healthy. Design the availability of authoritative DNS, the health information reflected in answers, and the resolution paths between VPCs and on-premises together.</p>
+      </div>
+      <div class="pillars">
+        <div class="pillar"><span class="k">Available</span><div><h3>Authoritative DNS built for availability</h3><p>The SLA commits to 100% monthly availability per hosted zone. With accelerated recovery turned on, you can change public records again within an hour even during a us-east-1 outage.</p></div></div>
+        <div class="pillar"><span class="k">Aware</span><div><h3>Answers that know health</h3><p>Combine health checks with routing policies so only healthy endpoints appear in answers.</p></div></div>
+        <div class="pillar"><span class="k">Hybrid</span><div><h3>One resolution path</h3><p>Resolver endpoints and rules let VPC and on-premises DNS resolve each other's domains.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="scope" aria-labelledby="scope-h">
+    <div class="wrap">
+      <p class="tag">Resolution scope</p>
+      <h2 id="scope-h">Who answers a query, depending on where it's asked</h2>
+      <p class="lede">Within Route 53, the component that answers depends on where the query comes from.</p>
+      <div class="stack scope">
+        <div class="layer">
+          <span class="lv">Public<small>Internet</small></span>
+          <div><h3>Public hosted zones</h3><p>Answer as the authoritative server for queries from recursive resolvers on the internet. Each record can have a routing policy and a health check.</p></div>
+          <div class="specs"><code>Authoritative DNS</code><code>Alias record</code><code>Routing policy</code><code>Health check</code></div>
+        </div>
+        <div class="layer">
+          <span class="lv">VPC<small>Private</small></span>
+          <div><h3>VPC Resolver · Private hosted zones</h3><p>Instances in a VPC query the VPC Resolver at the VPC+2 address. It resolves private hosted zones associated with the VPC, VPC-internal names such as EC2 instances, and public domains.</p></div>
+          <div class="specs"><code>VPC+2</code><code>Private hosted zone</code><code>DNS Firewall</code><code>Query logging</code></div>
+        </div>
+        <div class="layer">
+          <span class="lv">Hybrid<small>On-premises</small></span>
+          <div><h3>Resolver endpoints · Rules</h3><p>Inbound endpoints accept queries from on-premises, and outbound endpoints forward domains that match forwarding rules to your corporate DNS. They run over Direct Connect or Site-to-Site VPN.</p></div>
+          <div class="specs"><code>Inbound endpoint</code><code>Outbound endpoint</code><code>Forwarding rule</code><code>Do53 / DoH</code></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="routing" aria-labelledby="routing-h">
+    <div class="wrap">
+      <p class="tag">Routing policies</p>
+      <h2 id="routing-h">Eight routing policies</h2>
+      <p class="lede">Choose a policy when you create a record, and Route 53 uses it to pick the value to return for each query.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">Route 53 routing policies compared</caption>
+          <thead><tr><th scope="col">Policy</th><th scope="col">Decision basis</th><th scope="col">Typical use case</th></tr></thead>
+          <tbody>
+            <tr><td class="row-h">Simple</td><td data-k="Decision basis">Returns the values in the record as is</td><td data-k="Typical use case">A single resource, such as one web server</td></tr>
+            <tr><td class="row-h">Weighted</td><td data-k="Decision basis">Weight ratio assigned to each record</td><td data-k="Typical use case">Gradual cutover that sends part of the traffic to a new version</td></tr>
+            <tr><td class="row-h">Latency</td><td data-k="Decision basis">The AWS Region with the lowest latency for the user</td><td data-k="Typical use case">The same service deployed in multiple Regions</td></tr>
+            <tr><td class="row-h">Failover</td><td data-k="Decision basis">Health check status of the primary</td><td data-k="Typical use case">Active-passive disaster recovery</td></tr>
+            <tr><td class="row-h">Geolocation</td><td data-k="Decision basis">User location (continent, country, US state)</td><td data-k="Typical use case">Country-specific content, regulatory geo-restrictions</td></tr>
+            <tr><td class="row-h">Geoproximity</td><td data-k="Decision basis">Resource location and bias value</td><td data-k="Typical use case">Shifting the traffic share between Regions based on distance</td></tr>
+            <tr><td class="row-h">Multivalue answer</td><td data-k="Decision basis">Returns up to 8 healthy records at random</td><td data-k="Typical use case">Simple DNS-level distribution with health checks</td></tr>
+            <tr><td class="row-h">IP-based</td><td data-k="Decision basis">CIDR collection containing the query source IP</td><td data-k="Typical use case">Assigning endpoints per ISP or corporate range</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" aria-labelledby="features-h">
+    <div class="wrap">
+      <p class="tag">Features</p>
+      <h2 id="features-h">Main features</h2>
+      <div class="features">
+        <article class="feature"><p class="ft">Health checks</p><h3>Health checks</h3><p>Check endpoints over HTTP, HTTPS, or TCP, or create calculated checks that combine other health checks and checks based on CloudWatch alarms. You can also match a string in the HTTP response body.</p></article>
+        <article class="feature"><p class="ft">Hybrid DNS</p><h3>Resolver endpoints</h3><p>Created as ENIs in VPC subnets and require at least two IP addresses. Placing them in two or more Availability Zones is recommended. Inbound supports Do53, DoH, and DoH-FIPS; outbound supports Do53 and DoH. You can also create delegation endpoints that receive subdomains delegated by NS records.</p></article>
+        <article class="feature"><p class="ft">Forwarding</p><h3>Resolver rules</h3><p>Decide, per domain, which DNS servers receive queries. Besides forwarding rules, delegation rules hand subdomains to your corporate DNS. Associate rules with VPCs and share them with other accounts through AWS RAM.</p></article>
+        <article class="feature"><p class="ft">DNS security</p><h3>DNS Firewall</h3><p>Applies ALLOW, ALERT, or BLOCK to outbound queries through the VPC Resolver based on domain lists. DNS Firewall Advanced detects DNS tunneling and DGA domains, and you can add Palo Alto Networks Advanced DNS Security rules.</p></article>
+        <article class="feature"><p class="ft">Multi-account</p><h3>Route 53 Profiles</h3><p>Bundle private hosted zones, Resolver rules, DNS Firewall rule groups, interface VPC endpoints, and query logging configurations into one Profile and apply it to many VPCs and accounts.</p></article>
+        <article class="feature"><p class="ft">Anycast resolver</p><h3>Route 53 Global Resolver</h3><p>An internet-reachable anycast resolver that lets authenticated clients resolve public domains and private hosted zones from anywhere. Generally available since March 2026, it accepts IPv4 and IPv6 queries and provides query filtering and centralized logging.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="arch" aria-labelledby="arch-h">
+    <div class="wrap">
+      <p class="tag">Reference architecture</p>
+      <h2 id="arch-h">Hybrid DNS through a shared services VPC</h2>
+      <p class="lede">Place Resolver endpoints in a shared services VPC, and deploy rules and private hosted zones to workload VPCs with a Profile. Query direction is the key. Inbound receives aws.corp.internal queries in the on-premises → AWS direction; outbound forwards corp.internal queries to corporate DNS in the AWS → on-premises direction. Queries arriving through the inbound endpoint are resolved in the context of the VPC that holds the endpoint, so the private hosted zone must also be associated with the shared services VPC.</p>
+      <figure class="arch">
+        <div class="arch-scroll">
+          <svg viewBox="0 0 980 470" role="img" aria-labelledby="arch-title arch-desc">
+            <title id="arch-title">Route 53 hybrid DNS reference architecture</title>
+            <desc id="arch-desc">Shows DNS query flows in two directions. Inbound (on-premises to AWS): a corporate client asks the corporate DNS server for aws.corp.internal, and the corporate DNS server conditionally forwards it over Direct Connect or VPN to the inbound endpoint ENIs in the shared services VPC. The inbound endpoint hands the query to the VPC Resolver, which finds the answer in the private hosted zone aws.corp.internal. Outbound (AWS to on-premises): an EC2 instance in a workload VPC asks the VPC Resolver at the VPC+2 address for corp.internal; when it matches a forwarding rule, the VPC Resolver sends the query through the outbound endpoint ENIs in the shared services VPC to the corporate DNS server across DX or VPN. Responses return along the same path in reverse. A Route 53 Profile associates the forwarding rules, private hosted zones, and DNS Firewall rule groups with the workload VPCs.</desc>
+            <defs>
+              <marker id="ah-in" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-in" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ah-out" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path class="ah-out" d="M0 0 L10 5 L0 10 L3.5 5 z"/></marker>
+            </defs>
+            <!-- zones -->
+            <rect class="zone" x="10" y="40" width="180" height="400" rx="6"/>
+            <image href="../../assets/aws-icons/Corporate-data-center_32.svg" x="18" y="48" width="22" height="22"/>
+            <text class="z" x="46" y="62">ON-PREMISES</text>
+            <rect class="zone" x="250" y="40" width="720" height="400" rx="6"/>
+            <image href="../../assets/aws-icons/Region_32.svg" x="258" y="48" width="22" height="22"/>
+            <text class="z" x="286" y="62">AWS REGION</text>
+            <rect class="zone" x="268" y="80" width="204" height="344" rx="6"/>
+            <image href="../../assets/aws-icons/Virtual-private-cloud-VPC_32.svg" x="276" y="86" width="20" height="20"/>
+            <text class="z" x="302" y="100">SHARED SERVICES VPC</text>
+            <rect class="zone" x="670" y="80" width="286" height="344" rx="6"/>
+            <image href="../../assets/aws-icons/Virtual-private-cloud-VPC_32.svg" x="678" y="86" width="20" height="20"/>
+            <text class="z" x="704" y="100">WORKLOAD VPCs</text>
+
+            <!-- DX / VPN link -->
+            <path class="link" d="M220 70 V420"/>
+            <text class="z" x="220" y="458" text-anchor="middle">DX / VPN</text>
+
+            <!-- on-prem -->
+            <rect class="box" x="18" y="80" width="164" height="60" rx="4"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Client_48_Light.svg" x="26" y="98" width="24" height="24"/><text class="t" x="56" y="106">Corp client</text><text class="s" x="56" y="126">aws.corp.internal?</text>
+            <rect class="box" x="18" y="200" width="164" height="80" rx="4"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Server_48_Light.svg" x="26" y="228" width="24" height="24"/><text class="t" x="56" y="226">Corp DNS server</text><text class="s" x="56" y="246">auth corp.internal</text><text class="s" x="56" y="264">cond. fwd aws.*</text>
+
+            <!-- shared services VPC -->
+            <text class="lbl" x="285" y="122">inbound: on-prem → AWS</text>
+            <rect class="box" x="285" y="130" width="183" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-VPC_Elastic-Network-Interface_48.svg" x="293" y="150" width="24" height="24"/><text class="t" x="323" y="158">Inbound endpoint</text><text class="s" x="323" y="178">ENI × 2 AZ</text>
+            <rect class="box" x="285" y="320" width="183" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-VPC_Elastic-Network-Interface_48.svg" x="293" y="340" width="24" height="24"/><text class="t" x="323" y="348">Outbound endpoint</text><text class="s" x="323" y="368">ENI × 2 AZ</text>
+            <text class="lbl2" x="285" y="406">outbound: AWS → on-prem</text>
+
+            <!-- regional resolver column -->
+            <rect class="box" x="495" y="100" width="160" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-Route-53-Hosted-Zone_48.svg" x="503" y="120" width="24" height="24"/><text class="t" x="533" y="128">Private zone</text><text class="s" x="533" y="148">aws.corp.internal</text>
+            <rect class="box" x="495" y="200" width="160" height="80" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-Route-53_Resolver_48.svg" x="503" y="228" width="24" height="24"/><text class="t" x="533" y="226">VPC Resolver</text><text class="s" x="533" y="246">.2 address per VPC</text><text class="s" x="533" y="264">Regional service</text>
+            <rect class="box" x="495" y="320" width="160" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-Route-53_Route-Table_48.svg" x="503" y="340" width="24" height="24"/><text class="t" x="533" y="348">Forwarding rule</text><text class="s" x="533" y="368">corp.internal</text>
+
+            <!-- workload -->
+            <rect class="box" x="690" y="110" width="245" height="56" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-Route-53_Resolver-DNS-Firewall_48.svg" x="700" y="124" width="28" height="28"/><text class="t" x="736" y="134">DNS Firewall</text><text class="s" x="736" y="152">Rule group · query filter</text>
+            <rect class="box" x="690" y="200" width="245" height="80" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-VPC_Virtual-private-cloud-VPC_48.svg" x="700" y="226" width="28" height="28"/><text class="t" x="736" y="226">Workload VPC A · B</text><text class="s" x="736" y="246">EC2 → VPC+2 query</text><text class="s" x="736" y="264">10.1.0.0/16 · 10.2.0.0/16</text>
+            <rect class="box" x="690" y="320" width="245" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_Amazon-Route-53_48.svg" x="700" y="338" width="28" height="28"/><text class="t" x="736" y="348">Route 53 Profile</text><text class="s" x="736" y="368">Rules·PHZ·Firewall in one</text>
+
+            <!-- profile associations -->
+            <path class="assoc" d="M812 320 V280"/>
+            <path class="assoc" d="M812 166 V200"/>
+            <path class="assoc" d="M690 352 H655"/>
+
+            <!-- inbound query path: on-prem -> AWS -->
+            <path class="q-in" d="M100 140 V199" marker-end="url(#ah-in)"/>
+            <text class="lbl" x="108" y="176">① query</text>
+            <path class="q-in" d="M182 222 C232 222 234 162 284 162" marker-end="url(#ah-in)"/>
+            <text class="lbl" x="282" y="214">② cond. forward</text>
+            <path class="q-in" d="M468 162 C484 162 478 225 494 225" marker-end="url(#ah-in)"/>
+            <text class="lbl" x="486" y="190">③</text>
+            <path class="q-in" d="M570 200 V165" marker-end="url(#ah-in)"/>
+            <text class="lbl" x="578" y="188">④ lookup</text>
+
+            <!-- outbound query path: AWS -> on-prem -->
+            <path class="q-out" d="M690 255 H656" marker-end="url(#ah-out)"/>
+            <text class="lbl2" x="665" y="246">❶</text>
+            <path class="q-out" d="M570 280 V319" marker-end="url(#ah-out)"/>
+            <text class="lbl2" x="578" y="304">❷ rule match</text>
+            <path class="q-out" d="M495 352 H469" marker-end="url(#ah-out)"/>
+            <text class="lbl2" x="475" y="344">❸</text>
+            <path class="q-out" d="M285 362 C234 362 232 262 183 262" marker-end="url(#ah-out)"/>
+            <text class="lbl2" x="282" y="300">❹ to corp DNS</text>
+          </svg>
+        </div>
+        <figcaption class="legend">
+          <span><i class="p dir"></i>DNS query direction · inbound (on-premises → AWS)</span>
+          <span><i class="o dir"></i>DNS query direction · outbound (AWS → on-premises)</span>
+          <span><i class="a"></i>Profile association</span>
+          <span><i class="l"></i>Direct Connect / VPN</span>
+          <span>Responses return along the same path in reverse.</span>
+        </figcaption>
+        <p class="arch-hint">On narrow screens, swipe the diagram sideways.</p>
+      </figure>
+    </div>
+  </section>
+
+  <section id="arch-global" aria-labelledby="arch-global-h">
+    <div class="wrap">
+      <p class="tag">Reference architecture · Global Resolver</p>
+      <h2 id="arch-global-h">Global Resolver: query the same anycast addresses from anywhere</h2>
+      <p class="lede">Branches, data centers, and remote users query the same two anycast IPs over the internet, without VPNs or Resolver endpoints. Queries are handled in the nearest of two or more Regions you choose, and if that Region stops, the next-nearest Region takes them on the same addresses. Each Region authenticates the client, applies the filtering rules in the DNS view, and resolves through the private hosted zones associated with the view or through public DNS.</p>
+      <figure class="arch">
+        <div class="arch-scroll">
+          <svg viewBox="0 0 980 470" role="img" aria-labelledby="argl-title argl-desc">
+            <title id="argl-title">Route 53 Global Resolver reference architecture</title>
+            <desc id="argl-desc">Branch offices, on-premises data centers, and remote users send Do53, DoT, and DoH queries over the internet to the two anycast IP addresses of Global Resolver. Anycast routing sends each query to the nearest deployed Region, or to the next-nearest Region if that one is unavailable. In each Region, Global Resolver authenticates the client with an access token or an IP-based access source, applies the DNS view's filtering rules to ALLOW, BLOCK, or ALERT the query, and then resolves it through the private hosted zones associated with the view or through public DNS on the internet. Query logs are sent to CloudWatch Logs, S3, or Data Firehose in the observability Region.</desc>
+            <defs>
+              <marker id="gah" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-in" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="gah-log" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto"><path style="fill:var(--ink-3)" d="M0 0 L10 5 L0 10 z"/></marker>
+            </defs>
+            <!-- zones -->
+            <rect class="zone" x="10" y="40" width="172" height="400" rx="6"/>
+            <text class="z" x="20" y="62">CLIENT LOCATIONS</text>
+            <rect class="zone" x="360" y="40" width="610" height="400" rx="6"/>
+            <image href="../../assets/aws-icons/AWS-Cloud_32.svg" x="368" y="48" width="22" height="22"/>
+            <text class="z" x="396" y="62">AWS CLOUD · DEPLOYED IN 2+ REGIONS</text>
+            <rect class="zone" x="372" y="80" width="190" height="160" rx="6"/>
+            <image href="../../assets/aws-icons/Region_32.svg" x="380" y="86" width="20" height="20"/>
+            <text class="z" x="406" y="100">AWS REGION A</text>
+            <rect class="zone" x="372" y="262" width="190" height="160" rx="6"/>
+            <image href="../../assets/aws-icons/Region_32.svg" x="380" y="268" width="20" height="20"/>
+            <text class="z" x="406" y="282">AWS REGION B</text>
+            <rect class="zone" x="594" y="80" width="362" height="250" rx="6"/>
+            <text class="z" x="606" y="100">DNS VIEW · SAME CONFIG IN EVERY REGION</text>
+
+            <!-- clients -->
+            <rect class="box" x="18" y="80" width="156" height="76" rx="4"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Office-building_48_Light.svg" x="26" y="106" width="24" height="24"/><text class="t" x="56" y="104">Branch office</text><text class="s" x="56" y="124">Access source</text><text class="s" x="56" y="142">Do53·DoT·DoH</text>
+            <rect class="box" x="18" y="190" width="156" height="76" rx="4"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Servers_48_Light.svg" x="26" y="216" width="24" height="24"/><text class="t" x="56" y="214">Data center</text><text class="s" x="56" y="234">Access source</text><text class="s" x="56" y="252">Public IP·CIDR</text>
+            <rect class="box" x="18" y="300" width="156" height="76" rx="4"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Users_48_Light.svg" x="26" y="326" width="24" height="24"/><text class="t" x="56" y="324">Remote users</text><text class="s" x="56" y="344">Access token</text><text class="s" x="56" y="362">DoH·DoT</text>
+
+            <!-- anycast -->
+            <text class="lbl" x="272" y="170" text-anchor="middle">① query over internet</text>
+            <rect class="box" x="208" y="180" width="128" height="120" rx="4"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Internet_48_Light.svg" x="260" y="190" width="24" height="24"/>
+            <text class="t" x="272" y="238" text-anchor="middle">Anycast IP</text>
+            <text class="s" x="272" y="258" text-anchor="middle">2 addresses</text>
+            <text class="s" x="272" y="276" text-anchor="middle">IPv4 · IPv6</text>
+            <text class="s" x="272" y="292" text-anchor="middle">same everywhere</text>
+            <text class="lbl" x="272" y="322" text-anchor="middle">② nearest Region</text>
+            <text class="lbl" x="272" y="340" text-anchor="middle">next one on failure</text>
+
+            <!-- regional instances -->
+            <rect class="box" x="384" y="114" width="166" height="96" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-Route-53_Resolver_48.svg" x="392" y="138" width="28" height="28"/><text class="t" x="428" y="140">Global Resolver</text><text class="s" x="428" y="162">auth → policy</text><text class="s" x="428" y="180">→ resolve → log</text>
+            <rect class="box" x="384" y="296" width="166" height="96" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-Route-53_Resolver_48.svg" x="392" y="320" width="28" height="28"/><text class="t" x="428" y="322">Global Resolver</text><text class="s" x="428" y="344">auth → policy</text><text class="s" x="428" y="362">→ resolve → log</text>
+
+            <!-- DNS view contents -->
+            <rect class="box" x="608" y="112" width="336" height="60" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-Route-53_Resolver-DNS-Firewall_48.svg" x="616" y="128" width="28" height="28"/><text class="t" x="652" y="136">DNS filtering rules</text><text class="s" x="652" y="156">ALLOW·BLOCK·ALERT · domains · DGA·tunneling</text>
+            <rect class="box" x="608" y="184" width="336" height="60" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-Route-53-Hosted-Zone_48.svg" x="616" y="200" width="28" height="28"/><text class="t" x="652" y="208">Private hosted zone</text><text class="s" x="652" y="228">linked to view · no per-Region association</text>
+            <rect class="box" x="608" y="256" width="336" height="60" rx="4"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Internet_48_Light.svg" x="618" y="274" width="24" height="24"/><text class="t" x="652" y="280">Public domains</text><text class="s" x="652" y="300">internet recursion · DNSSEC validation</text>
+
+            <!-- logs -->
+            <rect class="box" x="608" y="352" width="336" height="72" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-Route-53_Resolver-Query-Logging_48.svg" x="616" y="374" width="28" height="28"/><text class="t" x="652" y="374">Query logs (OCSF)</text><text class="s" x="652" y="394">sent to the observability Region</text><text class="s" x="652" y="412">CloudWatch Logs · S3 · Data Firehose</text>
+
+            <!-- query paths -->
+            <path class="q-in" d="M174 118 C192 118 190 206 207 206" marker-end="url(#gah)"/>
+            <path class="q-in" d="M174 228 H207" marker-end="url(#gah)"/>
+            <path class="q-in" d="M174 338 C192 338 190 274 207 274" marker-end="url(#gah)"/>
+            <path class="q-in" d="M336 214 C362 214 358 162 383 162" marker-end="url(#gah)"/>
+            <path class="q-in" style="stroke-dasharray:6 5" d="M336 266 C362 266 358 344 383 344" marker-end="url(#gah)"/>
+            <!-- region -> view bus -->
+            <path class="q-in" d="M550 162 H578 M550 344 H578 M578 142 V344"/>
+            <path class="q-in" d="M578 142 H607" marker-end="url(#gah)"/>
+            <path class="q-in" d="M578 214 H607" marker-end="url(#gah)"/>
+            <path class="q-in" d="M578 286 H607" marker-end="url(#gah)"/>
+            <text class="lbl" x="583" y="136">③</text>
+            <text class="lbl" x="583" y="208">④</text>
+            <text class="lbl" x="583" y="280">④</text>
+            <path class="assoc" d="M550 380 H606" marker-end="url(#gah-log)"/>
+            <text class="lbl" x="560" y="372" style="fill:var(--ink-3)">⑤</text>
+          </svg>
+        </div>
+        <figcaption class="legend">
+          <span><i class="p dir"></i>DNS query direction (client → Global Resolver)</span>
+          <span><i class="p" style="border-top-style:dashed"></i>Failover to the same anycast IPs on Regional failure</span>
+          <span><i class="a"></i>Query log delivery</span>
+          <span>③ policy evaluation after authentication · ④ private/public resolution · responses return along the same path.</span>
+        </figcaption>
+        <p class="arch-hint">On narrow screens, swipe the diagram sideways.</p>
+      </figure>
+    </div>
+  </section>
+
+  <section id="start" aria-labelledby="start-h">
+    <div class="wrap">
+      <p class="tag">Getting started</p>
+      <h2 id="start-h">Steps to set up hybrid DNS</h2>
+      <ol class="steps">
+        <li><span class="num">STEP 1</span><h3>Prepare security groups</h3><p>Allow TCP and UDP 53 in the endpoint security group. If you use DoH, also open 443.</p></li>
+        <li><span class="num">STEP 2</span><h3>Create endpoints</h3><p>Create inbound and outbound endpoints in the shared services VPC across two or more AZs.</p></li>
+        <li><span class="num">STEP 3</span><h3>Write forwarding rules</h3><p>On the outbound endpoint, create rules that send corporate domains such as corp.internal to your corporate DNS server IPs.</p></li>
+        <li><span class="num">STEP 4</span><h3>Deploy to VPCs</h3><p>Put the rules and private hosted zones in a Profile, associate it with workload VPCs, and share it with accounts through RAM.</p></li>
+        <li><span class="num">STEP 5</span><h3>Configure corporate DNS</h3><p>Add conditional forwarding on your corporate DNS that sends AWS domains to the inbound endpoint IPs, then verify both directions with dig.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="pricing" aria-labelledby="pricing-h">
+    <div class="wrap">
+      <p class="tag">Pricing</p>
+      <h2 id="pricing-h">Cost components</h2>
+      <p class="lede">Route 53 costs are driven by the number of hosted zones, query volume and routing policy type, the number of health checks, and Resolver endpoint ENI hours. In hybrid DNS, the number of endpoint ENIs becomes a fixed cost.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">Route 53 charges</caption>
+          <thead><tr><th scope="col">Charge</th><th scope="col">Billing basis</th><th scope="col">Notes</th></tr></thead>
+          <tbody>
+          <tr><td class="row-h">Hosted zones</td><td data-k="Billing basis">Monthly charge per hosted zone. Above 10,000 records per zone, a monthly charge per additional record</td><td data-k="Notes">Hosted zones deleted within 12 hours of creation aren't charged.</td></tr>
+          <tr><td class="row-h">Standard queries</td><td data-k="Billing basis">Per million queries to public hosted zones</td><td data-k="Notes">Queries to private hosted zones are free. Alias queries to supported AWS targets such as ELB, CloudFront, API Gateway, VPC endpoints, Global Accelerator, and S3 website endpoints are also free.</td></tr>
+          <tr><td class="row-h">Policy-based queries</td><td data-k="Billing basis">Per million Latency, Geolocation/Geoproximity, and IP-based queries, by type</td><td data-k="Notes">For IP-based routing, CIDR blocks beyond 1,000 incur a monthly charge per block.</td></tr>
+          <tr><td class="row-h">Traffic Flow</td><td data-k="Billing basis">Monthly charge per policy record</td><td data-k="Notes">Applies to policy records created by applying a traffic policy to a domain name.</td></tr>
+          <tr><td class="row-h">Health checks</td><td data-k="Billing basis">Monthly charge per health check. Rates differ for AWS endpoints and other endpoints.</td><td data-k="Notes">Up to 50 health checks for AWS endpoints are free. HTTPS, string matching, fast interval, and latency measurement each add a monthly charge.</td></tr>
+          <tr><td class="row-h">Resolver endpoints</td><td data-k="Billing basis">Hourly charge per endpoint ENI, plus per million queries through the endpoint</td><td data-k="Notes">Recursive queries resolved within the VPC without passing through an endpoint are free.</td></tr>
+          <tr><td class="row-h">DNS Firewall</td><td data-k="Billing basis">Per million queries from VPCs with rule groups associated, plus a monthly charge per domain in custom domain lists</td><td data-k="Notes">AWS managed domain lists have no domain charge. Advanced rules add an hourly charge per rule group VPC association.</td></tr>
+          <tr><td class="row-h">Route 53 Profiles</td><td data-k="Billing basis">Hourly charge per account per Region (includes 100 Profile-VPC associations), plus an hourly charge per additional association</td><td data-k="Notes">Beyond 100 Profile-VPC associations, a per-association charge is added.</td></tr>
+          <tr><td class="row-h">Global Resolver</td><td data-k="Billing basis">Hourly charge per deployment (first two Regions included, additional Regions charged per Region), plus per million queries above 1 billion per deployment per month</td><td data-k="Notes">The hourly rate depends on whether DNS filtering is used. New customers can use a 30-day free trial.</td></tr>
+          <tr><td class="row-h">Related costs</td><td data-k="Billing basis">Domain registration (annual fee by TLD), DNSSEC signing keys, query log storage</td><td data-k="Notes">DNSSEC signing and query logging have no Route 53 charge themselves; they're billed through AWS KMS and CloudWatch Logs, S3, or Data Firehose.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="lede" style="font-size:14px">Rates vary by Region and usage. See the <a href="https://aws.amazon.com/route53/pricing/" target="_blank" rel="noopener">Route 53 pricing page</a> for current rates.</p>
+    </div>
+  </section>
+
+  <section class="cta" aria-labelledby="cta-h">
+    <div class="wrap">
+      <p class="tag">Next step</p>
+      <h2 id="cta-h">Map out your organization's DNS resolution paths with us</h2>
+      <p class="lede">Bring your corporate domains, VPC and account structure, and failover criteria, and we'll review the hosted zone and Resolver design together.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="https://aws.amazon.com/route53/" target="_blank" rel="noopener">Open the service page</a>
+        <a class="btn btn-ghost" href="https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/Welcome.html" target="_blank" rel="noopener">Read the developer guide</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a href="../">← AWS Networking Services Portfolio</a>
+    <span>Amazon Route 53 overview. Feature availability and pricing vary by Region; check the official documentation.</span>
+    <a href="https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/resolver.html" target="_blank" rel="noopener">VPC Resolver documentation</a>
+  </div>
+</footer>
+
+</body>
+</html>
