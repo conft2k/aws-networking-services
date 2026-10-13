@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AWS Networking Services</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+body{margin:0}img{max-width:100%}[hidden]{display:none!important}
+
+/* Layout: a cross-connect work order. Cool steel paper, navy ink, Amazon orange as the one accent; section tags read like fiber labels. */
+:root{
+  --bg:#EEF1F4; --surface:#FFFFFF; --sunken:#E3E8ED;
+  --ink:#14202E; --ink-2:#44515F; --ink-3:#5A6672;
+  --line:#CDD5DD; --line-2:#B4BFCA;
+  --fiber:#FF9900;          /* Amazon orange — fills only */
+  --fiber-ink:#B35C00;      /* orange-derived, AA on light surfaces */
+  --fiber-soft:#FFF0D9;
+  --on-fiber:#14202E;
+  --trace:#2E7D9A;          /* secondary line color for diagram paths */
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --maxw:1120px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--fiber-ink);outline-offset:3px;border-radius:2px}
+.skip-link{position:absolute;left:16px;top:-60px;background:var(--fiber);color:var(--on-fiber);padding:8px 14px;font-weight:700;z-index:50;text-decoration:none}
+.skip-link:focus{top:12px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.wrap{max-width:var(--maxw);margin:0 auto;padding-inline:24px}
+section{padding-block:88px;border-top:1px solid var(--line)}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.25}
+h2{font-size:clamp(26px,3.4vw,36px);font-weight:700;letter-spacing:-.01em}
+h3{font-size:18px;font-weight:700}
+p{margin:0}
+.lede{color:var(--ink-2);max-width:62ch;margin-top:14px}
+.num{font-family:var(--display);font-variant-numeric:tabular-nums lining-nums}
+.mono{font-family:var(--mono)}
+
+/* fiber label: the section tag */
+.tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-bottom:14px}
+.tag::before{content:"";width:22px;height:8px;background:var(--fiber);border-radius:1px}
+
+/* nav */
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:60px}
+.brand{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.02em;text-decoration:none;text-transform:uppercase}
+.brand span{color:var(--fiber-ink)}
+.navlinks{display:flex;gap:22px;font-size:14px;align-items:center}
+.navlinks a{text-decoration:none;color:var(--ink-2)}
+.navlinks a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;font-weight:700;font-size:15px;text-decoration:none;border-radius:4px;border:1px solid transparent;transition:transform .15s ease,background .15s ease}
+.btn-primary{background:var(--fiber);color:var(--on-fiber)}
+.btn-primary:hover{transform:translateY(-1px)}
+.btn-ghost{border-color:var(--line-2);color:var(--ink)}
+.btn-ghost:hover{background:var(--sunken)}
+.navlinks .btn{min-height:38px;padding:0 14px;font-size:14px;color:var(--on-fiber)}
+
+/* hero */
+.hero{padding-block:72px 64px;border-top:0}
+.hero-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:56px;align-items:center}
+.eyebrow{font-family:var(--mono);font-size:13px;color:var(--fiber-ink);letter-spacing:.04em}
+.hero h1{font-size:clamp(34px,5vw,56px);font-weight:700;letter-spacing:-.02em;margin-top:16px}
+.hero h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--fiber) 62%,var(--fiber) 90%,transparent 90%);padding-inline:2px}
+.hero .lede{font-size:18px}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+
+/* hero visual: port faceplate */
+.faceplate{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px}
+.faceplate-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.ports{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+.port{border:1px solid var(--line);border-radius:4px;padding:14px 14px 12px;background:var(--sunken);display:flex;flex-direction:column;gap:2px}
+.port .num{font-size:40px;font-weight:600;line-height:1}
+.port .num small{font-size:18px;color:var(--ink-2);margin-left:2px}
+.port .optic{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+.port .led{width:8px;height:8px;border-radius:50%;background:var(--fiber);align-self:flex-end;margin-top:-6px;animation:blink 2.4s ease-in-out infinite}
+.port:nth-child(2) .led{animation-delay:.6s}.port:nth-child(3) .led{animation-delay:1.2s}.port:nth-child(4) .led{animation-delay:1.8s}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.faceplate-foot{margin-top:14px;font-size:13px;color:var(--ink-2)}
+
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:56px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.chip{padding:18px 20px;border-left:1px solid var(--line);min-width:0}
+.chip:first-child{border-left:0}
+.chip .num{font-size:34px;font-weight:600;line-height:1.1}
+.chip p{font-size:13.5px;color:var(--ink-2);margin-top:4px}
+
+/* value */
+.split{display:grid;grid-template-columns:1fr 1.4fr;gap:56px}
+.pillars{display:grid;gap:0;border-top:1px solid var(--line-2)}
+.pillar{display:grid;grid-template-columns:120px 1fr;gap:20px;padding-block:22px;border-bottom:1px solid var(--line)}
+.pillar .k{font-family:var(--display);font-size:22px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--fiber-ink)}
+.pillar p{color:var(--ink-2);margin-top:6px}
+
+/* stack (L1/L2/L3) */
+.stack{margin-top:40px;display:grid;gap:10px}
+.layer{display:grid;grid-template-columns:96px 1fr 1.2fr;gap:24px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px 24px}
+.layer .lv{font-family:var(--display);font-size:44px;font-weight:700;line-height:.9}
+.layer .lv small{display:block;font-family:var(--mono);font-size:11px;font-weight:400;color:var(--ink-3);letter-spacing:.06em;margin-top:8px;text-transform:uppercase}
+.layer p{color:var(--ink-2);margin-top:6px;font-size:15px}
+.specs{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+.specs code{font-family:var(--mono);font-size:12.5px;background:var(--sunken);border:1px solid var(--line);padding:3px 8px;border-radius:3px;color:var(--ink)}
+
+/* features */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:40px}
+.feature{background:var(--surface);padding:26px 24px;min-width:0}
+.feature .ft{font-family:var(--mono);font-size:11.5px;color:var(--fiber-ink);letter-spacing:.06em;text-transform:uppercase}
+.feature h3{margin-top:8px}
+.feature p{color:var(--ink-2);font-size:15px;margin-top:8px}
+
+/* table */
+.tbl-wrap{margin-top:36px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:14px 18px;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--sunken)}
+tbody tr:last-child td{border-bottom:0}
+td.row-h{font-weight:700;width:22%}
+td .num{font-size:18px;font-weight:600}
+
+/* architecture */
+.arch{margin-top:36px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px}
+.arch-scroll{overflow-x:auto}
+.arch svg{display:block;width:100%;min-width:860px;height:auto}
+.arch-hint{display:none;font-size:13px;color:var(--ink-3);margin-top:10px}
+svg .box{fill:var(--sunken);stroke:var(--line-2)}
+svg .zone{fill:none;stroke:var(--line-2);stroke-dasharray:4 4}
+svg .t{fill:var(--ink);font-family:var(--sans);font-size:14px;font-weight:700}
+svg .s{fill:var(--ink-3);font-family:var(--mono);font-size:11px}
+svg .z{fill:var(--ink-2);font-family:var(--mono);font-size:11px;letter-spacing:.08em}
+svg .fiber{stroke:var(--fiber);stroke-width:5;fill:none;stroke-linecap:round}
+svg .path{stroke:var(--trace);stroke-width:2;fill:none}
+svg .site{stroke:var(--fiber-ink);stroke-width:2;fill:none;stroke-dasharray:6 5}
+svg .lbl{fill:var(--trace);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .lbl2{fill:var(--fiber-ink);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .dot{fill:var(--fiber)}
+.legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--ink-2)}
+.legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--fiber)}
+.legend i.p{border-top:2px solid var(--trace)}
+.legend i.s{border-top:2px dashed var(--fiber-ink)}
+
+/* steps */
+.steps{list-style:none;padding:0;margin:40px 0 0;display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:4px solid var(--fiber)}
+.steps li{padding:20px 18px 0 0;min-width:0}
+.steps .num{font-size:15px;font-weight:600;color:var(--fiber-ink);letter-spacing:.06em}
+.steps h3{font-size:16px;margin-top:6px}
+.steps p{font-size:14px;color:var(--ink-2);margin-top:6px}
+
+/* resiliency */
+.res{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:36px}
+.res-card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:26px}
+.res-card .num{font-size:52px;font-weight:700;line-height:1}
+.res-card .num small{font-size:20px;color:var(--ink-2)}
+.res-card h3{margin-top:10px}
+.res-card p{color:var(--ink-2);font-size:15px;margin-top:6px}
+.res-card.max{border-color:var(--fiber);box-shadow:inset 0 4px 0 var(--fiber)}
+
+/* cta */
+.cta{text-align:center}
+.cta h2{max-width:22ch;margin:0 auto}
+.cta .lede{margin:14px auto 0}
+.cta .cta-row{justify-content:center}
+footer{border-top:1px solid var(--line);padding-block:28px;font-size:13px;color:var(--ink-3)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+
+@media (max-width:1024px){
+  .hero-grid,.split{grid-template-columns:1fr;gap:40px}
+  .features{grid-template-columns:repeat(2,1fr)}
+  .steps{grid-template-columns:repeat(2,1fr);border-top:0;gap:0 24px}
+  .steps li{border-top:4px solid var(--fiber);padding-bottom:24px}
+  .layer{grid-template-columns:80px 1fr}
+  .layer .specs{grid-column:2}
+  .chips{grid-template-columns:repeat(2,1fr)}
+  .chip:nth-child(3){border-left:0}
+  .chip:nth-child(n+3){border-top:1px solid var(--line)}
+}
+@media (max-width:640px){
+  .wrap{padding-inline:18px}
+  section{padding-block:60px}
+  .navlinks a:not(.btn){display:none}
+  .features,.res{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr}
+  .pillar{grid-template-columns:1fr;gap:0}
+  .layer{grid-template-columns:1fr;gap:12px}
+  .layer .specs{grid-column:auto}
+  .cta-row .btn{width:100%}
+  .arch-hint{display:block}
+  table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  table,tbody,tr,td{display:block;width:100%}
+  tr{border-bottom:1px solid var(--line);padding:14px 16px}
+  tbody tr:last-child{border-bottom:0}
+  td{border:0;padding:3px 0}
+  td.row-h{width:100%;font-size:16px;padding-bottom:6px}
+  td[data-k]::before{content:attr(data-k);display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+
+/* ---- landing ---- */
+.hero-grid>*{min-width:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px}
+.panel-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.jacks{display:flex;flex-direction:column;gap:6px;min-width:0}
+.jacks.row{flex-direction:row;flex-wrap:wrap}
+.jack{display:flex;align-items:center;gap:8px;min-height:40px;padding:6px 10px 6px 8px;border:1px solid var(--line);border-radius:4px;background:var(--surface);text-decoration:none;min-width:0;transition:border-color .15s ease}
+a.jack:hover{border-color:var(--fiber)}
+.jack .ico{flex:none;width:24px;height:24px;border-radius:4px;display:block}
+.jack .ico-ph{flex:none;width:24px;height:24px;border-radius:4px;border:1px dashed var(--line-2)}
+.jack span{font-size:13px;font-weight:500;line-height:1.3;color:var(--ink);min-width:0}
+.jack.soon{border-style:dashed;background:transparent}
+.jack.soon span{color:var(--ink-3);font-weight:400}
+.jack.soon .ico{opacity:.55}
+.stackmap{display:grid;grid-template-columns:150px 1fr 150px;grid-template-areas:"sec app obs" "sec edge obs" "sec conn obs" "sec fnd obs";gap:8px;margin-top:14px}
+.stackmap>*{min-width:0;background:var(--sunken);border:1px solid var(--line);border-radius:4px;padding:14px}
+.sec{grid-area:sec}.obs{grid-area:obs}.app{grid-area:app}.edge{grid-area:edge}.conn{grid-area:conn}.fnd{grid-area:fnd}
+.lay-h,.col-h{font-family:var(--display);font-size:20px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;line-height:1.1;margin-bottom:12px}
+.lay-h{text-align:center}
+.col-h{text-align:center}
+.stackmap>*{box-shadow:inset 0 4px 0 var(--bar,var(--fiber))}
+.sec{--bar:#F2A7AE}.app{--bar:#C7B8EA}.edge{--bar:#A6D4EC}.conn{--bar:#A9DEC4}.fnd{--bar:#F6CDA2}.obs{--bar:#F1DE94}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .sec{--bar:#C9727C}:root:not([data-theme="light"]) .app{--bar:#9D88CF}:root:not([data-theme="light"]) .edge{--bar:#6FA9C8}:root:not([data-theme="light"]) .conn{--bar:#6FB596}:root:not([data-theme="light"]) .fnd{--bar:#CF9C67}:root:not([data-theme="light"]) .obs{--bar:#C5B060}}
+:root[data-theme="dark"] .sec{--bar:#C9727C}:root[data-theme="dark"] .app{--bar:#9D88CF}:root[data-theme="dark"] .edge{--bar:#6FA9C8}:root[data-theme="dark"] .conn{--bar:#6FB596}:root[data-theme="dark"] .fnd{--bar:#CF9C67}:root[data-theme="dark"] .obs{--bar:#C5B060}
+.lay .jacks.row{justify-content:center}
+@media (max-width:1024px){
+  .stackmap{grid-template-columns:1fr 1fr;grid-template-areas:"app app" "edge edge" "conn conn" "fnd fnd" "sec obs"}
+}
+@media (max-width:640px){
+  .stackmap{grid-template-columns:1fr;grid-template-areas:"app" "edge" "conn" "fnd" "sec" "obs"}
+}
+.hero .hero-grid{grid-template-columns:1fr;gap:40px}
+.hero h1{max-width:none}
+.panel-foot{margin-top:12px;font-size:13px;color:var(--ink-2)}
+.group{padding-block:56px;border-top:1px solid var(--line)}
+.group-head{display:block}
+.group-head > p{color:var(--ink-2);margin-top:10px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:24px}
+.cards.four{grid-template-columns:repeat(4,1fr)}
+.card{display:flex;flex-direction:column;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px;text-decoration:none;min-width:0;transition:border-color .15s ease,transform .15s ease}
+.card:hover{border-color:var(--fiber);transform:translateY(-2px)}
+.card .role{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--fiber-ink)}
+.card h3{font-size:20px}
+.card p{color:var(--ink-2);font-size:14.5px;flex:1}
+.card .specs{margin-top:6px}
+.card .go{font-size:13.5px;font-weight:700;margin-top:6px}
+.card .go::after{content:" →"}
+td a{font-weight:700;text-decoration-color:var(--fiber);text-underline-offset:3px}
+@media (max-width:1024px){.cards,.cards.four{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:640px){.cards,.cards.four{grid-template-columns:1fr}.group{padding-block:44px}}
+.navlinks a{white-space:nowrap}
+@media (max-width:900px){.navlinks a:not(.btn){display:none}}
+
+/* Korean line breaking: never split a word mid-syllable */
+h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
+#finder tr.grp th{font-family:var(--mono);font-size:11.5px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--fiber-ink);background:var(--sunken);padding:10px 18px}
+#finder td.svc{width:17%;font-weight:700}
+#finder td.alt{width:22%;font-size:14px;color:var(--ink-2)}
+#finder td{font-size:14.5px}#finder td.row-h{font-size:15px}
+@media (max-width:640px){#finder tr.grp{padding:0;border-bottom:1px solid var(--line)}#finder tr.grp th{display:block;width:100%}#finder td.svc,#finder td.alt{width:100%}}
+</style>
+<link rel="stylesheet" href="../assets/site.css?v=16">
+<script src="../assets/site.js?v=16"></script>
+</head>
+<body>
+
+
+<a class="skip-link" href="#main">Skip to main content</a>
+<nav aria-label="Main menu">
+  <div class="wrap">
+    <a class="brand" href="#top">AWS <span>Networking Services</span></a>
+    <div class="navlinks">
+      <a href="#g0">AWS Networking Services Portfolio</a><a href="pricing/">Pricing</a>
+      <a class="btn btn-primary" href="#finder">Service finder</a>
+    </div>
+  </div>
+</nav>
+<main id="main">
+  <header class="hero" id="top">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">AWS Networking Services Portfolio</p>
+          <h1>AWS Networking Services</h1>
+          <p class="lede">From VPC and DNS to hybrid connectivity, traffic distribution, edge, network security, and observability. Each service gets one page covering its key concepts, main features, reference architectures, and cost components.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="#finder">Find the right service</a>
+            <a class="btn btn-ghost" href="#g0">Browse the portfolio</a>
+            <a class="btn btn-ghost" href="pricing/">Pricing by service</a>
+          </div>
+        </div>
+        <div class="panel" aria-label="Service shortcuts">
+          <div class="panel-head"><span>AWS Networking Services</span><span>22 services</span></div>
+          <div class="stackmap"><div class="pillar-col sec"><p class="col-h">Network Security</p><div class="jacks"><a class="jack" href="network-firewall/" aria-label="Network Firewall details"><img class="ico" src="../assets/icons/network-firewall.svg" width="24" height="24" alt="" aria-hidden="true"><span>Network Firewall</span></a><a class="jack" href="waf/" aria-label="AWS WAF details"><img class="ico" src="../assets/icons/waf.svg" width="24" height="24" alt="" aria-hidden="true"><span>AWS WAF</span></a><a class="jack" href="shield/" aria-label="AWS Shield details"><img class="ico" src="../assets/icons/shield.svg" width="24" height="24" alt="" aria-hidden="true"><span>AWS Shield</span></a><a class="jack" href="firewall-manager/" aria-label="AWS Firewall Manager details"><img class="ico" src="../assets/icons/firewall-manager.svg" width="24" height="24" alt="" aria-hidden="true"><span>AWS Firewall Manager</span></a></div></div><div class="lay app"><p class="lay-h">Application Networking</p><div class="jacks row"><a class="jack" href="elastic-load-balancing/#alb" aria-label="Application Load Balancer overview (Elastic Load Balancing details)"><img class="ico" src="../assets/icons/alb.svg" width="24" height="24" alt="" aria-hidden="true"><span>Application Load Balancer</span></a><a class="jack" href="elastic-load-balancing/#nlb" aria-label="Network Load Balancer overview (Elastic Load Balancing details)"><img class="ico" src="../assets/icons/nlb.svg" width="24" height="24" alt="" aria-hidden="true"><span>Network Load Balancer</span></a><a class="jack" href="elastic-load-balancing/#gwlb" aria-label="Gateway Load Balancer overview (Elastic Load Balancing details)"><img class="ico" src="../assets/icons/gwlb.svg" width="24" height="24" alt="" aria-hidden="true"><span>Gateway Load Balancer</span></a><a class="jack" href="vpc-lattice/" aria-label="VPC Lattice details"><img class="ico" src="../assets/icons/vpc-lattice.svg" width="24" height="24" alt="" aria-hidden="true"><span>VPC Lattice</span></a><a class="jack" href="api-gateway/" aria-label="API Gateway details"><img class="ico" src="../assets/icons/api-gateway.svg" width="24" height="24" alt="" aria-hidden="true"><span>API Gateway</span></a><span class="jack soon" title="Details page coming soon"><i class="ico-ph" aria-hidden="true"></i><span>ECS Service Connect</span></span></div></div><div class="lay edge"><p class="lay-h">Edge Networking</p><div class="jacks row"><a class="jack" href="cloudfront/" aria-label="CloudFront details"><img class="ico" src="../assets/icons/cloudfront.svg" width="24" height="24" alt="" aria-hidden="true"><span>CloudFront</span></a><a class="jack" href="global-accelerator/" aria-label="Global Accelerator details"><img class="ico" src="../assets/icons/global-accelerator.svg" width="24" height="24" alt="" aria-hidden="true"><span>Global Accelerator</span></a></div></div><div class="lay conn"><p class="lay-h">Hybrid Networking</p><div class="jacks row"><a class="jack" href="transit-gateway/" aria-label="Transit Gateway details"><img class="ico" src="../assets/icons/transit-gateway.svg" width="24" height="24" alt="" aria-hidden="true"><span>Transit Gateway</span></a><a class="jack" href="cloud-wan/" aria-label="Cloud WAN details"><img class="ico" src="../assets/icons/cloud-wan.svg" width="24" height="24" alt="" aria-hidden="true"><span>Cloud WAN</span></a><a class="jack" href="privatelink/" aria-label="PrivateLink details"><img class="ico" src="../assets/icons/privatelink.svg" width="24" height="24" alt="" aria-hidden="true"><span>PrivateLink</span></a><a class="jack" href="direct-connect/" aria-label="Direct Connect details"><img class="ico" src="../assets/icons/direct-connect.svg" width="24" height="24" alt="" aria-hidden="true"><span>Direct Connect</span></a><a class="jack" href="interconnect/#multicloud" aria-label="AWS Interconnect – multicloud overview"><img class="ico" src="../assets/icons/interconnect.svg" width="24" height="24" alt="" aria-hidden="true"><span>Interconnect – multicloud</span></a><a class="jack" href="interconnect/#lastmile" aria-label="AWS Interconnect – last mile overview"><img class="ico" src="../assets/icons/interconnect.svg" width="24" height="24" alt="" aria-hidden="true"><span>Interconnect – last mile</span></a><a class="jack" href="site-to-site-vpn/" aria-label="Site-to-Site VPN details"><img class="ico" src="../assets/icons/site-to-site-vpn.svg" width="24" height="24" alt="" aria-hidden="true"><span>Site-to-Site VPN</span></a><a class="jack" href="client-vpn/" aria-label="Client VPN details"><img class="ico" src="../assets/icons/client-vpn.svg" width="24" height="24" alt="" aria-hidden="true"><span>Client VPN</span></a></div></div><div class="lay fnd"><p class="lay-h">Foundation</p><div class="jacks row"><a class="jack" href="vpc/" aria-label="Amazon VPC details"><img class="ico" src="../assets/icons/vpc.svg" width="24" height="24" alt="" aria-hidden="true"><span>Amazon VPC</span></a><a class="jack" href="route-53/" aria-label="Route 53 details"><img class="ico" src="../assets/icons/route-53.svg" width="24" height="24" alt="" aria-hidden="true"><span>Route 53</span></a></div></div><div class="pillar-col obs"><p class="col-h">Network Observability</p><div class="jacks"><a class="jack" href="vpc-flow-logs/" aria-label="VPC Flow Logs details"><img class="ico" src="../assets/icons/vpc-flow-logs.svg" width="24" height="24" alt="" aria-hidden="true"><span>VPC Flow Logs</span></a><a class="jack" href="reachability-analyzer/" aria-label="Reachability Analyzer details"><img class="ico" src="../assets/icons/reachability-analyzer.svg" width="24" height="24" alt="" aria-hidden="true"><span>Reachability Analyzer</span></a><a class="jack" href="network-manager/" aria-label="Network Manager details"><img class="ico" src="../assets/icons/network-manager.svg" width="24" height="24" alt="" aria-hidden="true"><span>Network Manager</span></a><a class="jack" href="network-flow-monitor/" aria-label="CloudWatch Network Flow Monitor details"><img class="ico" src="../assets/icons/network-flow-monitor.svg" width="24" height="24" alt="" aria-hidden="true"><span>Network Flow Monitor</span></a></div></div></div>
+          <p class="panel-foot">Select a service to open its details page. Dashed items are coming soon.</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="group" id="g0" aria-labelledby="g0-h">
+    <div class="wrap">
+      <div class="group-head"><div><p class="tag">Application Networking</p><h2 id="g0-h">Application Networking</h2></div><p>Load balancing and service-to-service connectivity</p></div>
+      <div class="cards"><a class="card" href="elastic-load-balancing/#alb"><span class="role">L7 load balancing</span><h3>Application Load Balancer</h3><p>Routes HTTP, HTTPS, and gRPC requests by path, host, and header rules, and handles authentication and rewrites at the listener.</p><span class="specs"><code>listener rule</code><code>OIDC · JWT</code><code>Lambda</code></span><span class="go">Learn more</span></a><a class="card" href="elastic-load-balancing/#nlb"><span class="role">L4 load balancing</span><h3>Network Load Balancer</h3><p>Accepts TCP, UDP, TLS, and QUIC on a static IP per AZ and distributes it with ultra-low latency. Also fronts PrivateLink services.</p><span class="specs"><code>static IP</code><code>TLS · QUIC</code><code>PrivateLink</code></span><span class="go">Learn more</span></a><a class="card" href="elastic-load-balancing/#gwlb"><span class="role">Appliance insertion</span><h3>Gateway Load Balancer</h3><p>Transparently inserts firewall and IDS appliances into the traffic path with GENEVE and scales them out.</p><span class="specs"><code>GENEVE 6081</code><code>GWLB endpoint</code><code>flow stickiness</code></span><span class="go">Learn more</span></a><a class="card" href="vpc-lattice/"><span class="role">Service-to-service</span><h3>VPC Lattice</h3><p>Connects services across accounts and VPCs and controls access per request.</p><span class="specs"><code>service network</code><code>auth policy</code></span><span class="go">Learn more</span></a><a class="card" href="api-gateway/"><span class="role">API management</span><h3>API Gateway</h3><p>Runs REST, HTTP, and WebSocket APIs with authorization and throttling.</p><span class="specs"><code>REST</code><code>HTTP</code><code>WebSocket</code></span><span class="go">Learn more</span></a></div>
+    </div>
+  </section>
+  <section class="group" id="g1" aria-labelledby="g1-h">
+    <div class="wrap">
+      <div class="group-head"><div><p class="tag">Edge Networking</p><h2 id="g1-h">Edge Networking</h2></div><p>Deliver content and accelerate traffic close to users</p></div>
+      <div class="cards"><a class="card" href="cloudfront/"><span class="role">CDN</span><h3>CloudFront</h3><p>Delivers content from edge caches close to users and runs code at the edge.</p><span class="specs"><code>edge cache</code><code>OAC</code></span><span class="go">Learn more</span></a><a class="card" href="global-accelerator/"><span class="role">Global acceleration</span><h3>Global Accelerator</h3><p>Accelerates traffic from users worldwide with static anycast IPs and the AWS backbone.</p><span class="specs"><code>anycast IP</code><code>traffic dial</code></span><span class="go">Learn more</span></a></div>
+    </div>
+  </section>
+  <section class="group" id="g2" aria-labelledby="g2-h">
+    <div class="wrap">
+      <div class="group-head"><div><p class="tag">Hybrid Networking</p><h2 id="g2-h">Hybrid Networking</h2></div><p>Connectivity between VPCs, Regions, on-premises sites, and remote users</p></div>
+      <div class="cards"><a class="card" href="transit-gateway/"><span class="role">Regional hub</span><h3>Transit Gateway</h3><p>Attaches VPCs, VPNs, and Direct Connect to one hub and segments the network with route tables.</p><span class="specs"><code>attachment</code><code>route table</code><code>peering</code></span><span class="go">Learn more</span></a><a class="card" href="cloud-wan/"><span class="role">Global WAN</span><h3>Cloud WAN</h3><p>Declares a multi-Region network in a single policy and operates it by segment.</p><span class="specs"><code>core network</code><code>segment</code><code>policy</code></span><span class="go">Learn more</span></a><a class="card" href="privatelink/"><span class="role">Private service access</span><h3>PrivateLink</h3><p>Brings only the services you need into your VPC on private IPs, with no internet exposure.</p><span class="specs"><code>interface endpoint</code><code>endpoint service</code></span><span class="go">Learn more</span></a><a class="card" href="direct-connect/"><span class="role">Dedicated connection</span><h3>Direct Connect</h3><p>Connects your data center to AWS over a dedicated physical link for consistent bandwidth and latency.</p><span class="specs"><code>dedicated</code><code>VIF</code><code>BGP</code></span><span class="go">Learn more</span></a><a class="card" href="interconnect/#multicloud"><span class="role">Private cloud-to-cloud</span><h3>AWS Interconnect – multicloud</h3><p>Links AWS directly to Google Cloud, OCI, and Azure (preview) with managed dedicated bandwidth.</p><span class="specs"><code>Google Cloud</code><code>OCI</code><code>MACsec</code></span><span class="go">Learn more</span></a><a class="card" href="interconnect/#lastmile"><span class="role">Managed last mile</span><h3>AWS Interconnect – last mile</h3><p>Connects data centers and branch offices to AWS over carrier circuits as a managed service.</p><span class="specs"><code>Lumen</code><code>1–100 Gbps</code><code>99.99% SLA</code></span><span class="go">Learn more</span></a><a class="card" href="site-to-site-vpn/"><span class="role">IPsec VPN</span><h3>Site-to-Site VPN</h3><p>Connects sites with two IPsec tunnels over the internet or Direct Connect.</p><span class="specs"><code>IPsec</code><code>BGP</code><code>Accelerated VPN</code></span><span class="go">Learn more</span></a><a class="card" href="client-vpn/"><span class="role">Remote user access</span><h3>Client VPN</h3><p>Securely connects user devices to your VPC with certificate, AD, or SAML authentication.</p><span class="specs"><code>OpenVPN</code><code>SAML</code><code>split tunnel</code></span><span class="go">Learn more</span></a></div>
+    </div>
+  </section>
+  <section class="group" id="g3" aria-labelledby="g3-h">
+    <div class="wrap">
+      <div class="group-head"><div><p class="tag">Foundation</p><h2 id="g3-h">Foundation</h2></div><p>The starting point: build a private network and resolve names</p></div>
+      <div class="cards"><a class="card" href="vpc/"><span class="role">Virtual network</span><h3>Amazon VPC</h3><p>Builds an isolated private network with subnets, route tables, and security groups.</p><span class="specs"><code>subnet</code><code>NAT gateway</code><code>IPAM</code></span><span class="go">Learn more</span></a><a class="card" href="route-53/"><span class="role">DNS</span><h3>Route 53</h3><p>Provides authoritative DNS, routing policies, health checks, and hybrid DNS.</p><span class="specs"><code>routing policy</code><code>Resolver</code></span><span class="go">Learn more</span></a></div>
+    </div>
+  </section>
+  <section class="group" id="g4" aria-labelledby="g4-h">
+    <div class="wrap">
+      <div class="group-head"><div><p class="tag">Network Security</p><h2 id="g4-h">Network Security</h2></div><p>Inspect and protect traffic at the network and application layers</p></div>
+      <div class="cards"><a class="card" href="network-firewall/"><span class="role">Managed firewall</span><h3>Network Firewall</h3><p>Performs stateful inspection of VPC traffic with Suricata-compatible rules.</p><span class="specs"><code>stateful</code><code>TLS inspection</code></span><span class="go">Learn more</span></a><a class="card" href="waf/"><span class="role">Web application firewall</span><h3>AWS WAF</h3><p>Inspects HTTP requests to CloudFront, ALB, and API Gateway against rules.</p><span class="specs"><code>web ACL</code><code>managed rules</code><code>rate-based</code></span><span class="go">Learn more</span></a><a class="card" href="shield/"><span class="role">DDoS protection</span><h3>AWS Shield</h3><p>L3/L4 DDoS protection applies by default; Advanced adds L7 mitigation and SRT support.</p><span class="specs"><code>Standard</code><code>Advanced</code><code>SRT</code></span><span class="go">Learn more</span></a><a class="card" href="firewall-manager/"><span class="role">Central policy management</span><h3>AWS Firewall Manager</h3><p>Applies and audits firewall, WAF, and security group policies across your entire organization in Organizations.</p><span class="specs"><code>Organizations</code><code>auto remediation</code><code>compliance</code></span><span class="go">Learn more</span></a></div>
+    </div>
+  </section>
+  <section class="group" id="g5" aria-labelledby="g5-h">
+    <div class="wrap">
+      <div class="group-head"><div><p class="tag">Network Observability</p><h2 id="g5-h">Network Observability</h2></div><p>Traffic logging, path analysis, workload performance, and network-wide monitoring</p></div>
+      <div class="cards"><a class="card" href="vpc-flow-logs/"><span class="role">Traffic logging</span><h3>VPC Flow Logs</h3><p>Records metadata for IP traffic through VPCs, subnets, ENIs, and transit gateways.</p><span class="specs"><code>ACCEPT/REJECT</code><code>S3 Parquet</code><code>Logs Insights</code></span><span class="go">Learn more</span></a><a class="card" href="reachability-analyzer/"><span class="role">Connectivity diagnostics</span><h3>Reachability Analyzer</h3><p>Analyzes configuration without sending packets to find where a path is blocked and why.</p><span class="specs"><code>hop-by-hop</code><code>Network Access Analyzer</code></span><span class="go">Learn more</span></a><a class="card" href="network-manager/"><span class="role">Global network operations</span><h3>Network Manager</h3><p>Views transit gateways, Cloud WAN, and on-premises sites as one global network.</p><span class="specs"><code>topology</code><code>route analysis</code><code>latency</code></span><span class="go">Learn more</span></a><a class="card" href="network-flow-monitor/"><span class="role">Workload TCP performance</span><h3>CloudWatch Network Flow Monitor</h3><p>Collects retransmissions, timeouts, and RTT from real TCP flows and determines whether degradation is caused by the AWS network.</p><span class="specs"><code>eBPF agent</code><code>NHI</code><code>EC2 · EKS</code></span><span class="go">Learn more</span></a></div>
+    </div>
+  </section>
+  <section id="finder" aria-labelledby="finder-h">
+    <div class="wrap">
+      <p class="tag">Service finder</p>
+      <h2 id="finder-h">Which service for which need</h2>
+      <p class="lede">For common requirements, this table lists the service to start with, why, and related services or alternatives to evaluate. Real designs combine several services.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">Recommended services by requirement</caption>
+          <thead><tr><th scope="col">If you need</th><th scope="col">Start with</th><th scope="col">Why this service</th><th scope="col">Also consider</th></tr></thead><tbody><tr class="grp"><th colspan="4" scope="colgroup">Foundation</th></tr><tr><td class="row-h">Multi-AZ subnets with internet and NAT egress</td><td class="svc" data-k="Start with"><a href="vpc/">Amazon VPC</a></td><td data-k="Why this service">Place public and private subnets in each AZ and send outbound traffic through a NAT gateway (zonal or regional mode).</td><td class="alt" data-k="Also consider">IPAM for CIDR planning, <a href="network-firewall/">Network Firewall</a> for egress inspection</td></tr><tr><td class="row-h">DNS resolution between on-premises and VPCs</td><td class="svc" data-k="Start with"><a href="route-53/">Route 53 Resolver</a></td><td data-k="Why this service">The endpoint depends on query direction: on-premises → AWS uses an inbound endpoint; AWS → on-premises uses an outbound endpoint and forwarding rules.</td><td class="alt" data-k="Also consider">Transport over <a href="direct-connect/">Direct Connect</a> · <a href="site-to-site-vpn/">VPN</a></td></tr><tr><td class="row-h">Domain-level traffic distribution and Regional failover</td><td class="svc" data-k="Start with"><a href="route-53/">Route 53</a></td><td data-k="Why this service">Latency, weighted, and failover routing policies with health checks choose which endpoint answers.</td><td class="alt" data-k="Also consider"><a href="global-accelerator/">Global Accelerator</a> for fast failover independent of DNS caching</td></tr><tr class="grp"><th colspan="4" scope="colgroup">Hybrid Networking</th></tr><tr><td class="row-h">Routing many VPCs and accounts within a Region</td><td class="svc" data-k="Start with"><a href="transit-gateway/">Transit Gateway</a></td><td data-k="Why this service">Attach VPCs, VPNs, and DX to one hub and segment with route tables. No peering mesh as the number of VPCs grows.</td><td class="alt" data-k="Also consider">VPC peering for just a few VPCs</td></tr><tr><td class="row-h">A policy-driven global WAN across Regions and branches</td><td class="svc" data-k="Start with"><a href="cloud-wan/">Cloud WAN</a></td><td data-k="Why this service">Declares segments and inter-Region routing in a single JSON policy. The more Regions and segments, the bigger the payoff.</td><td class="alt" data-k="Also consider"><a href="transit-gateway/">TGW</a> peering for few Regions, <a href="network-manager/">Network Manager</a> for operational visibility</td></tr><tr><td class="row-h">Dedicated connectivity to a data center with consistent bandwidth and latency</td><td class="svc" data-k="Start with"><a href="direct-connect/">Direct Connect</a></td><td data-k="Why this service">A dedicated link that bypasses the internet handles bulk transfer reliably at a lower DTO rate. Supports MACsec encryption.</td><td class="alt" data-k="Also consider"><a href="site-to-site-vpn/">Site-to-Site VPN</a> as a backup path</td></tr><tr><td class="row-h">Encrypted site-to-site connectivity, fast</td><td class="svc" data-k="Start with"><a href="site-to-site-vpn/">Site-to-Site VPN</a></td><td data-k="Why this service">Brings up two IPsec tunnels over the internet right away and exchanges routes with BGP.</td><td class="alt" data-k="Also consider">Private IP VPN over <a href="direct-connect/">DX</a> for encryption on a dedicated link</td></tr><tr><td class="row-h">Private dedicated connectivity to another cloud</td><td class="svc" data-k="Start with"><a href="interconnect/#multicloud">Interconnect – multicloud</a></td><td data-k="Why this service">Connects to Google Cloud and OCI (Azure in preview) by choosing a bandwidth, with no circuits or routers to configure. On the AWS side it attaches to a Direct Connect gateway.</td><td class="alt" data-k="Also consider"><a href="direct-connect/">Direct Connect</a> or <a href="site-to-site-vpn/">VPN</a> to build it yourself</td></tr><tr><td class="row-h">Connecting data centers and branches to AWS over carrier circuits</td><td class="svc" data-k="Start with"><a href="interconnect/#lastmile">Interconnect – last mile</a></td><td data-k="Why this service">A managed last mile where the carrier (such as Lumen) handles the circuit through to the DX port. Choose a bandwidth from 1–100 Gbps.</td><td class="alt" data-k="Also consider"><a href="direct-connect/">Direct Connect</a> if you procure circuits yourself</td></tr><tr><td class="row-h">VPC access for remote and external users</td><td class="svc" data-k="Start with"><a href="client-vpn/">Client VPN</a></td><td data-k="Why this service">Users connect with an OpenVPN-based client and authenticate with AD, SAML, or certificates. Authorization rules narrow what they can reach.</td><td class="alt" data-k="Also consider"><a href="site-to-site-vpn/">Site-to-Site VPN</a> for branch-level connectivity</td></tr><tr><td class="row-h">Sharing services across accounts with overlapping CIDRs</td><td class="svc" data-k="Start with"><a href="privatelink/">PrivateLink</a></td><td data-k="Why this service">Exposes a single service as an interface endpoint in the consumer VPC. It is unidirectional, so IP ranges can overlap.</td><td class="alt" data-k="Also consider"><a href="vpc-lattice/">VPC Lattice</a> to group many services under policy</td></tr><tr class="grp"><th colspan="4" scope="colgroup">Application Networking</th></tr><tr><td class="row-h">Connecting microservices spread across accounts with per-request authorization</td><td class="svc" data-k="Start with"><a href="vpc-lattice/">VPC Lattice</a></td><td data-k="Why this service">Groups services in a service network without VPC-to-VPC connectivity, and controls access per request with IAM auth policies.</td><td class="alt" data-k="Also consider"><a href="privatelink/">PrivateLink</a> to expose a single service</td></tr><tr><td class="row-h">L7 distribution of web and API traffic</td><td class="svc" data-k="Start with"><a href="elastic-load-balancing/#alb">Application Load Balancer</a></td><td data-k="Why this service">Handles path-, host-, and header-based routing, OIDC authentication, JWT verification, and URL rewrites in listener rules. Containers and Lambda can be targets.</td><td class="alt" data-k="Also consider"><a href="api-gateway/">API Gateway</a> for external API management</td></tr><tr><td class="row-h">TCP and UDP services that need static IPs</td><td class="svc" data-k="Start with"><a href="elastic-load-balancing/#nlb">Network Load Balancer</a></td><td data-k="Why this service">Provides a static IP per AZ (Elastic IPs can be assigned) and distributes per connection with low latency. Preserves client IPs.</td><td class="alt" data-k="Also consider"><a href="global-accelerator/">Global Accelerator</a> for global anycast IPs</td></tr><tr><td class="row-h">Inserting third-party firewalls into the traffic path</td><td class="svc" data-k="Start with"><a href="elastic-load-balancing/#gwlb">Gateway Load Balancer</a></td><td data-k="Why this service">Set a GWLB endpoint as the next hop in a route table and the appliance fleet receives and inspects traffic over GENEVE.</td><td class="alt" data-k="Also consider"><a href="network-firewall/">Network Firewall</a> as the managed alternative</td></tr><tr><td class="row-h">Publishing APIs externally with authentication and throttling</td><td class="svc" data-k="Start with"><a href="api-gateway/">API Gateway</a></td><td data-k="Why this service">Runs REST, HTTP, and WebSocket APIs with authorizers, usage plans, and throttling.</td><td class="alt" data-k="Also consider"><a href="waf/">AWS WAF</a> for request filtering</td></tr><tr class="grp"><th colspan="4" scope="colgroup">Edge Networking</th></tr><tr><td class="row-h">Fast global delivery of static and dynamic content</td><td class="svc" data-k="Start with"><a href="cloudfront/">CloudFront</a></td><td data-k="Why this service">Edge caching reduces origin load and latency, and OAC keeps S3 origins private.</td><td class="alt" data-k="Also consider"><a href="waf/">AWS WAF</a> · <a href="shield/">Shield</a> for edge protection</td></tr><tr><td class="row-h">Static IPs and acceleration for TCP/UDP gaming and IoT traffic</td><td class="svc" data-k="Start with"><a href="global-accelerator/">Global Accelerator</a></td><td data-k="Why this service">Static anycast IPs take users in at the nearest edge and carry traffic over the AWS backbone; health checks switch endpoints quickly.</td><td class="alt" data-k="Also consider"><a href="cloudfront/">CloudFront</a> for HTTP content caching</td></tr><tr class="grp"><th colspan="4" scope="colgroup">Network Security</th></tr><tr><td class="row-h">Inspecting traffic in, out of, and between VPCs</td><td class="svc" data-k="Start with"><a href="network-firewall/">Network Firewall</a></td><td data-k="Why this service">Provides managed Suricata-compatible stateful rules, domain and URL filtering, and TLS inspection. Can attach directly to a TGW.</td><td class="alt" data-k="Also consider"><a href="elastic-load-balancing/#gwlb">GWLB</a> for third-party appliances</td></tr><tr><td class="row-h">Blocking SQL injection, bots, and excessive requests</td><td class="svc" data-k="Start with"><a href="waf/">AWS WAF</a></td><td data-k="Why this service">Evaluates HTTP requests in front of CloudFront, ALB, and API Gateway with managed rules, rate-based rules, and Bot Control.</td><td class="alt" data-k="Also consider">Anti-DDoS rule group · <a href="shield/">Shield Advanced</a> for L7 DDoS</td></tr><tr><td class="row-h">Large-scale DDoS response and cost protection</td><td class="svc" data-k="Start with"><a href="shield/">Shield Advanced</a></td><td data-k="Why this service">Adds Shield Response Team support and cost protection on top of automatic L3/L4 mitigation.</td><td class="alt" data-k="Also consider">Place CloudFront · Route 53 in front</td></tr><tr><td class="row-h">Applying the same firewall and WAF policies across many accounts</td><td class="svc" data-k="Start with"><a href="firewall-manager/">Firewall Manager</a></td><td data-k="Why this service">Declares security policies across your organization, applies them automatically to new accounts and resources, and checks compliance.</td><td class="alt" data-k="Also consider">Target services <a href="network-firewall/">Network Firewall</a> · <a href="waf/">WAF</a></td></tr><tr class="grp"><th colspan="4" scope="colgroup">Network Observability</th></tr><tr><td class="row-h">Finding why a security group blocked traffic, and auditing traffic</td><td class="svc" data-k="Start with"><a href="vpc-flow-logs/">VPC Flow Logs</a></td><td data-k="Why this service">Records ACCEPT and REJECT entries for ENIs, subnets, and TGWs, queryable with Athena or Logs Insights.</td><td class="alt" data-k="Also consider"><a href="reachability-analyzer/">Reachability Analyzer</a> to diagnose configuration causes</td></tr><tr><td class="row-h">Diagnosing why two resources can't communicate</td><td class="svc" data-k="Start with"><a href="reachability-analyzer/">Reachability Analyzer</a></td><td data-k="Why this service">Analyzes configuration without sending packets and pinpoints the component blocking the path and why.</td><td class="alt" data-k="Also consider">Network Access Analyzer to detect unintended access</td></tr><tr><td class="row-h">Operating topology and routes for multi-Region TGW and Cloud WAN</td><td class="svc" data-k="Start with"><a href="network-manager/">Network Manager</a></td><td data-k="Why this service">Shows topology, route analysis, events, and AWS backbone latency in one global network.</td><td class="alt" data-k="Also consider"><a href="vpc-flow-logs/">Flow Logs</a> for traffic records</td></tr><tr><td class="row-h">Determining whether latency or packet loss between workloads is caused by the AWS network</td><td class="svc" data-k="Start with"><a href="network-flow-monitor/">Network Flow Monitor</a></td><td data-k="Why this service">Delivers retransmissions, timeouts, and RTT of real TCP flows, plus whether AWS is the cause (NHI), as CloudWatch metrics and alarms.</td><td class="alt" data-k="Also consider">Network Synthetic Monitor for on-premises paths, <a href="vpc-flow-logs/">Flow Logs</a> for flow records</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+<footer>
+  <div class="wrap">
+    <span>AWS Networking Services Portfolio. Feature availability and pricing vary by Region; check the official documentation.</span>
+    <a href="https://docs.aws.amazon.com/" target="_blank" rel="noopener">AWS Documentation</a>
+  </div>
+</footer>
+
+</body>
+</html>

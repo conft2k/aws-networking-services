@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AWS Shield Overview</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+body{margin:0}img{max-width:100%}[hidden]{display:none!important}
+
+/* Layout: a cross-connect work order. Cool steel paper, navy ink, Amazon orange as the one accent; section tags read like fiber labels. */
+:root{
+  --bg:#EEF1F4; --surface:#FFFFFF; --sunken:#E3E8ED;
+  --ink:#14202E; --ink-2:#44515F; --ink-3:#5A6672;
+  --line:#CDD5DD; --line-2:#B4BFCA;
+  --fiber:#FF9900;          /* Amazon orange — fills only */
+  --fiber-ink:#B35C00;      /* orange-derived, AA on light surfaces */
+  --fiber-soft:#FFF0D9;
+  --on-fiber:#14202E;
+  --trace:#2E7D9A;          /* secondary line color for diagram paths */
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --maxw:1120px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--fiber-ink);outline-offset:3px;border-radius:2px}
+.skip-link{position:absolute;left:16px;top:-60px;background:var(--fiber);color:var(--on-fiber);padding:8px 14px;font-weight:700;z-index:50;text-decoration:none}
+.skip-link:focus{top:12px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.wrap{max-width:var(--maxw);margin:0 auto;padding-inline:24px}
+section{padding-block:88px;border-top:1px solid var(--line)}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.25}
+h2{font-size:clamp(26px,3.4vw,36px);font-weight:700;letter-spacing:-.01em}
+h3{font-size:18px;font-weight:700}
+p{margin:0}
+.lede{color:var(--ink-2);max-width:62ch;margin-top:14px}
+.num{font-family:var(--display);font-variant-numeric:tabular-nums lining-nums}
+.mono{font-family:var(--mono)}
+
+/* fiber label: the section tag */
+.tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-bottom:14px}
+.tag::before{content:"";width:22px;height:8px;background:var(--fiber);border-radius:1px}
+
+/* nav */
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:60px}
+.brand{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.02em;text-decoration:none;text-transform:uppercase}
+.brand span{color:var(--fiber-ink)}
+.navlinks{display:flex;gap:22px;font-size:14px;align-items:center}
+.navlinks a{text-decoration:none;color:var(--ink-2)}
+.navlinks a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;font-weight:700;font-size:15px;text-decoration:none;border-radius:4px;border:1px solid transparent;transition:transform .15s ease,background .15s ease}
+.btn-primary{background:var(--fiber);color:var(--on-fiber)}
+.btn-primary:hover{transform:translateY(-1px)}
+.btn-ghost{border-color:var(--line-2);color:var(--ink)}
+.btn-ghost:hover{background:var(--sunken)}
+.navlinks .btn{min-height:38px;padding:0 14px;font-size:14px;color:var(--on-fiber)}
+
+/* hero */
+.hero{padding-block:72px 64px;border-top:0}
+.hero-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:56px;align-items:center}
+.eyebrow{font-family:var(--mono);font-size:13px;color:var(--fiber-ink);letter-spacing:.04em}
+.hero h1{font-size:clamp(34px,5vw,56px);font-weight:700;letter-spacing:-.02em;margin-top:16px}
+.hero h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--fiber) 62%,var(--fiber) 90%,transparent 90%);padding-inline:2px}
+.hero .lede{font-size:18px}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+
+/* hero visual: port faceplate */
+.faceplate{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px}
+.faceplate-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.ports{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+.port{border:1px solid var(--line);border-radius:4px;padding:14px 14px 12px;background:var(--sunken);display:flex;flex-direction:column;gap:2px}
+.port .num{font-size:40px;font-weight:600;line-height:1}
+.port .num small{font-size:18px;color:var(--ink-2);margin-left:2px}
+.port .optic{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+.port .led{width:8px;height:8px;border-radius:50%;background:var(--fiber);align-self:flex-end;margin-top:-6px;animation:blink 2.4s ease-in-out infinite}
+.port:nth-child(2) .led{animation-delay:.6s}.port:nth-child(3) .led{animation-delay:1.2s}.port:nth-child(4) .led{animation-delay:1.8s}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.faceplate-foot{margin-top:14px;font-size:13px;color:var(--ink-2)}
+
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:56px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.chip{padding:18px 20px;border-left:1px solid var(--line);min-width:0}
+.chip:first-child{border-left:0}
+.chip .num{font-size:34px;font-weight:600;line-height:1.1}
+.chip p{font-size:13.5px;color:var(--ink-2);margin-top:4px}
+
+/* value */
+.split{display:grid;grid-template-columns:1fr 1.4fr;gap:56px}
+.pillars{display:grid;gap:0;border-top:1px solid var(--line-2)}
+.pillar{display:grid;grid-template-columns:120px 1fr;gap:20px;padding-block:22px;border-bottom:1px solid var(--line)}
+.pillar .k{font-family:var(--display);font-size:22px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--fiber-ink)}
+.pillar p{color:var(--ink-2);margin-top:6px}
+
+/* stack (L1/L2/L3) */
+.stack{margin-top:40px;display:grid;gap:10px}
+.layer{display:grid;grid-template-columns:96px 1fr 1.2fr;gap:24px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px 24px}
+.layer .lv{font-family:var(--display);font-size:44px;font-weight:700;line-height:.9}
+.layer .lv small{display:block;font-family:var(--mono);font-size:11px;font-weight:400;color:var(--ink-3);letter-spacing:.06em;margin-top:8px;text-transform:uppercase}
+.layer p{color:var(--ink-2);margin-top:6px;font-size:15px}
+.specs{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+.specs code{font-family:var(--mono);font-size:12.5px;background:var(--sunken);border:1px solid var(--line);padding:3px 8px;border-radius:3px;color:var(--ink)}
+
+/* features */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:40px}
+.feature{background:var(--surface);padding:26px 24px;min-width:0}
+.feature .ft{font-family:var(--mono);font-size:11.5px;color:var(--fiber-ink);letter-spacing:.06em;text-transform:uppercase}
+.feature h3{margin-top:8px}
+.feature p{color:var(--ink-2);font-size:15px;margin-top:8px}
+
+/* table */
+.tbl-wrap{margin-top:36px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:14px 18px;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--sunken)}
+tbody tr:last-child td{border-bottom:0}
+td.row-h{font-weight:700;width:22%}
+td .num{font-size:18px;font-weight:600}
+
+/* architecture */
+.arch{margin-top:36px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px}
+.arch-scroll{overflow-x:auto}
+.arch svg{display:block;width:100%;min-width:860px;height:auto}
+.arch-hint{display:none;font-size:13px;color:var(--ink-3);margin-top:10px}
+svg .box{fill:var(--sunken);stroke:var(--line-2)}
+svg .zone{fill:none;stroke:var(--line-2);stroke-dasharray:4 4}
+svg .t{fill:var(--ink);font-family:var(--sans);font-size:14px;font-weight:700}
+svg .s{fill:var(--ink-3);font-family:var(--mono);font-size:11px}
+svg .z{fill:var(--ink-2);font-family:var(--mono);font-size:11px;letter-spacing:.08em}
+svg .fiber{stroke:var(--fiber);stroke-width:5;fill:none;stroke-linecap:round}
+svg .path{stroke:var(--trace);stroke-width:2;fill:none}
+svg .site{stroke:var(--fiber-ink);stroke-width:2;fill:none;stroke-dasharray:6 5}
+svg .lbl{fill:var(--trace);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .lbl2{fill:var(--fiber-ink);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .dot{fill:var(--fiber)}
+.legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--ink-2)}
+.legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--fiber)}
+.legend i.p{border-top:2px solid var(--trace)}
+.legend i.s{border-top:2px dashed var(--fiber-ink)}
+
+/* steps */
+.steps{list-style:none;padding:0;margin:40px 0 0;display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:4px solid var(--fiber)}
+.steps li{padding:20px 18px 0 0;min-width:0}
+.steps .num{font-size:15px;font-weight:600;color:var(--fiber-ink);letter-spacing:.06em}
+.steps h3{font-size:16px;margin-top:6px}
+.steps p{font-size:14px;color:var(--ink-2);margin-top:6px}
+
+/* resiliency */
+.res{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:36px}
+.res-card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:26px}
+.res-card .num{font-size:52px;font-weight:700;line-height:1}
+.res-card .num small{font-size:20px;color:var(--ink-2)}
+.res-card h3{margin-top:10px}
+.res-card p{color:var(--ink-2);font-size:15px;margin-top:6px}
+.res-card.max{border-color:var(--fiber);box-shadow:inset 0 4px 0 var(--fiber)}
+
+/* cta */
+.cta{text-align:center}
+.cta h2{max-width:22ch;margin:0 auto}
+.cta .lede{margin:14px auto 0}
+.cta .cta-row{justify-content:center}
+footer{border-top:1px solid var(--line);padding-block:28px;font-size:13px;color:var(--ink-3)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+
+@media (max-width:1024px){
+  .hero-grid,.split{grid-template-columns:1fr;gap:40px}
+  .features{grid-template-columns:repeat(2,1fr)}
+  .steps{grid-template-columns:repeat(2,1fr);border-top:0;gap:0 24px}
+  .steps li{border-top:4px solid var(--fiber);padding-bottom:24px}
+  .layer{grid-template-columns:80px 1fr}
+  .layer .specs{grid-column:2}
+  .chips{grid-template-columns:repeat(2,1fr)}
+  .chip:nth-child(3){border-left:0}
+  .chip:nth-child(n+3){border-top:1px solid var(--line)}
+}
+@media (max-width:640px){
+  .wrap{padding-inline:18px}
+  section{padding-block:60px}
+  .navlinks a:not(.btn){display:none}
+  .features,.res{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr}
+  .pillar{grid-template-columns:1fr;gap:0}
+  .layer{grid-template-columns:1fr;gap:12px}
+  .layer .specs{grid-column:auto}
+  .cta-row .btn{width:100%}
+  .arch-hint{display:block}
+  table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  table,tbody,tr,td{display:block;width:100%}
+  tr{border-bottom:1px solid var(--line);padding:14px 16px}
+  tbody tr:last-child{border-bottom:0}
+  td{border:0;padding:3px 0}
+  td.row-h{width:100%;font-size:16px;padding-bottom:6px}
+  td[data-k]::before{content:attr(data-k);display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+
+/* ---- service-specific ---- */
+/* hero visual: protection console */
+.console{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px;min-width:0}
+.console-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.event{margin-top:14px;border:1px solid var(--fiber);border-radius:4px;background:var(--fiber-soft);padding:12px 14px;display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:center;min-width:0}
+.event .pulse{width:10px;height:10px;border-radius:50%;background:var(--fiber);animation:blink 1.6s ease-in-out infinite;grid-row:span 2}
+.event b{font-family:var(--display);font-size:22px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;line-height:1.1}
+.event span{font-family:var(--mono);font-size:11.5px;color:var(--ink-2);overflow-wrap:anywhere}
+.prot{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:0}
+.prot li{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--line);min-width:0}
+.prot .rn{font-weight:700;font-size:14px}
+.prot .rd{display:block;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);overflow-wrap:anywhere}
+.flags{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end}
+.flags code{font-family:var(--mono);font-size:11px;border:1px solid var(--line-2);padding:1px 6px;border-radius:3px;color:var(--ink-2);background:var(--sunken)}
+.flags code.on{background:var(--fiber);border-color:var(--fiber);color:var(--on-fiber);font-weight:500}
+.console-foot{margin-top:12px;font-size:13px;color:var(--ink-2)}
+
+/* tier comparison */
+.tier-tbl td.y{font-family:var(--mono);font-size:13px;color:var(--fiber-ink);font-weight:500}
+.tier-tbl td.n{font-family:var(--mono);font-size:13px;color:var(--ink-3)}
+.tier-tbl thead th:nth-child(n+2){width:30%}
+
+svg .edge{fill:var(--fiber-soft);stroke:var(--fiber)}
+svg .usr{stroke:var(--ink-3);stroke-width:2;fill:none;stroke-dasharray:3 4}
+svg .atk{stroke:#C2410C;stroke-width:2;fill:none;stroke-dasharray:6 5}
+svg .lbl3{fill:#C2410C;font-family:var(--mono);font-size:11px;font-weight:500}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) svg .atk{stroke:#FB923C}:root:not([data-theme="light"]) svg .lbl3{fill:#FB923C}}
+:root[data-theme="dark"] svg .atk{stroke:#FB923C}:root[data-theme="dark"] svg .lbl3{fill:#FB923C}
+.legend i.u{border-top:2px dashed var(--ink-3)}
+.legend i.a{border-top:2px dashed #C2410C}
+.note{margin-top:18px;font-size:14px;color:var(--ink-2);max-width:72ch}
+@media (max-width:640px){
+  .console{padding:18px}
+  .tier-tbl thead th:nth-child(n+2){width:auto}
+}
+
+/* nav: keep links on one line, show only CTA below 960px */
+.navlinks a{white-space:nowrap}
+@media (max-width:960px){.navlinks a:not(.btn){display:none}}
+
+/* line breaking */
+h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
+svg .ah-fiber{fill:var(--fiber)}
+svg .ah-trace{fill:var(--trace)}
+svg .ah-site{fill:var(--fiber-ink)}
+svg .ah-usr{fill:var(--ink-3)}
+svg .ah-atk{fill:#C2410C}
+.legend i.dir{position:relative;width:26px}
+.legend i.dir::after{content:"";position:absolute;right:-3px;top:-7px;border-left:8px solid var(--fiber);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.legend i.p.dir::after,.legend i.s.dir::after,.legend i.u.dir::after,.legend i.a.dir::after{top:-6px}
+.legend i.p.dir::after{border-left-color:var(--trace)}
+.legend i.s.dir::after{border-left-color:var(--fiber-ink)}
+.legend i.u.dir::after{border-left-color:var(--ink-3)}
+.legend i.a.dir::after{border-left-color:#C2410C}
+</style>
+<link rel="stylesheet" href="../../assets/site.css?v=16">
+<script src="../../assets/site.js?v=16"></script>
+</head>
+<body>
+
+
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<nav aria-label="Main menu">
+  <div class="wrap">
+    <a class="brand" href="#top">AWS <span>Shield</span></a>
+    <div class="navlinks">
+      <a href="../">Service portfolio</a>
+      <a href="#tiers">Tiers</a>
+      <a href="#features">Features</a>
+      <a href="#resources">Protected resources</a>
+      <a href="#arch">Architecture</a>
+      <a href="#pricing">Pricing</a>
+      <a class="btn btn-primary" href="#start">Get started</a>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+  <header class="hero" id="top">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">AWS Shield · Managed DDoS protection</p>
+          <h1>Stop DDoS at the edge, with <em>an expert team for large attacks</em></h1>
+          <p class="lede">AWS Shield is a managed service that protects applications running on AWS against DDoS attacks. Every customer gets L3 · L4 protection automatically at no additional cost. With a Shield Advanced subscription, the resources you designate also get automatic L7 mitigation, Shield Response Team support, and cost protection.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="#tiers">Compare tiers</a>
+            <a class="btn btn-ghost" href="#arch">View architecture</a>
+          </div>
+        </div>
+
+        <div class="console" aria-label="Example of Shield Advanced protected resources">
+          <div class="console-head"><span>Shield Advanced · protections</span><span>example account</span></div>
+          <div class="event">
+            <span class="pulse" aria-hidden="true"></span>
+            <b>DDoS event detected</b>
+            <span>CloudFront · HTTP request flood · auto-mitigating</span>
+          </div>
+          <ul class="prot">
+            <li><span><span class="rn">CloudFront distribution</span><span class="rd">www.example.com · web ACL associated</span></span><span class="flags"><code class="on">Anti-DDoS</code><code class="on">health</code></span></li>
+            <li><span><span class="rn">Route 53 hosted zone</span><span class="rd">example.com</span></span><span class="flags"><code>L3/L4</code></span></li>
+            <li><span><span class="rn">Global Accelerator</span><span class="rd">standard accelerator · UDP game servers</span></span><span class="flags"><code class="on">health</code><code>group: SUM</code></span></li>
+            <li><span><span class="rn">Application Load Balancer</span><span class="rd">CloudFront origin</span></span><span class="flags"><code>not protected</code></span></li>
+          </ul>
+          <p class="console-foot">Protect only the entry-point resource so the same traffic isn't charged the data transfer usage fee twice.</p>
+        </div>
+      </div>
+
+      <div class="chips" role="list">
+        <div class="chip" role="listitem"><span class="num">2</span><p>Tiers (Shield Standard · Shield Advanced)</p></div>
+        <div class="chip" role="listitem"><span class="num">L3 · L4 · L7</span><p>Attack layers covered by Shield Advanced</p></div>
+        <div class="chip" role="listitem"><span class="num">1,000</span><p>Default protections per resource type per account</p></div>
+        <div class="chip" role="listitem"><span class="num">24 × 7</span><p>Shield Response Team (requires Business · Enterprise Support)</p></div>
+      </div>
+    </div>
+  </header>
+
+  <section id="why" aria-labelledby="why-h">
+    <div class="wrap split">
+      <div>
+        <p class="tag">Why Shield</p>
+        <h2 id="why-h">Borrow AWS scale instead of building your own DDoS defense</h2>
+        <p class="lede">DDoS attacks saturate bandwidth (L3), exhaust connection state (L4), or flood you with legitimate-looking requests (L7). Shield detects and mitigates this traffic on the AWS edge and Regional infrastructure.</p>
+      </div>
+      <div class="pillars">
+        <div class="pillar"><span class="k">Always on</span><div><h3>Always-on detection and inline mitigation</h3><p>With no configuration, Shield Standard automatically mitigates common L3 · L4 attacks such as SYN floods, UDP floods, and reflection attacks.</p></div></div>
+        <div class="pillar"><span class="k">App aware</span><div><h3>Application-aware detection</h3><p>Shield Advanced combines each protected resource's traffic baseline with Route 53 health checks to catch smaller attacks, faster.</p></div></div>
+        <div class="pillar"><span class="k">Experts</span><div><h3>Humans in the loop</h3><p>During an attack, the Shield Response Team analyzes AWS WAF logs and writes custom rules, then provides post-attack analysis and architecture recommendations.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tiers" aria-labelledby="tiers-h">
+    <div class="wrap">
+      <p class="tag">Standard vs Advanced</p>
+      <h2 id="tiers-h">Shield Standard and Shield Advanced</h2>
+      <p class="lede">Shield Standard applies automatically to every AWS customer. Shield Advanced is subscribed per account and only takes effect on resources you explicitly add protection to.</p>
+      <div class="tbl-wrap">
+        <table class="tier-tbl">
+          <caption class="sr-only">Feature comparison of Shield Standard and Shield Advanced</caption>
+          <thead><tr><th scope="col">Item</th><th scope="col">Shield Standard</th><th scope="col">Shield Advanced</th></tr></thead>
+          <tbody>
+            <tr><td class="row-h">How it applies</td><td data-k="Standard">Automatic for all customers · no additional cost</td><td data-k="Advanced">Subscribe, then add protection per resource · 1-year commitment</td></tr>
+            <tr><td class="row-h">L3 · L4 detection and inline mitigation</td><td data-k="Standard" class="y">Yes</td><td data-k="Advanced" class="y">Yes + additional mitigation capacity for large attacks</td></tr>
+            <tr><td class="row-h">Application traffic monitoring</td><td data-k="Standard" class="n">—</td><td data-k="Advanced" class="y">Per-resource baselines · health-based detection</td></tr>
+            <tr><td class="row-h">L7 mitigation</td><td data-k="Standard">Build it yourself with AWS WAF rules · paid Anti-DDoS rule group</td><td data-k="Advanced">Anti-DDoS managed rule group included in subscription (transitioning from legacy automatic L7 mitigation) + SRT support</td></tr>
+            <tr><td class="row-h">Event notifications · reporting</td><td data-k="Standard" class="n">—</td><td data-k="Advanced" class="y">L3 · L4 · L7 event notifications, CloudWatch metrics, historical reports</td></tr>
+            <tr><td class="row-h">Shield Response Team</td><td data-k="Standard">Self-service best practices</td><td data-k="Advanced">Custom mitigation, post-attack analysis, proactive engagement (Business · Enterprise Support)</td></tr>
+            <tr><td class="row-h">DDoS cost protection</td><td data-k="Standard" class="n">—</td><td data-k="Advanced" class="y">Credits for protected-resource usage charges increased by an attack</td></tr>
+            <tr><td class="row-h">AWS WAF charges</td><td data-k="Standard">Billed separately</td><td data-k="Advanced">Standard WAF charges for protected resources included (with limits)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" aria-labelledby="features-h">
+    <div class="wrap">
+      <p class="tag">Shield Advanced features</p>
+      <h2 id="features-h">Shield Advanced key features</h2>
+      <div class="features">
+        <article class="feature"><p class="ft">L7 DDoS</p><h3>Anti-DDoS managed rule group</h3><p>L7 protection is moving to the <a href="../waf/">AWS WAF</a> <span class="mono">AWSManagedRulesAntiDDoSRuleSet</span> (50 WCU). It establishes a baseline within minutes without health checks, and you set Block and Challenge sensitivity separately. Legacy automatic L7 mitigation (150 WCU) is migrated automatically starting October 25, 2026, and support ends on January 29, 2027.</p></article>
+        <article class="feature"><p class="ft">Health-based</p><h3>Health-based detection</h3><p>Associate a Route 53 health check with a protection, and when the health check is unhealthy, Shield detects and mitigates faster at lower thresholds. Use it with every resource type except Route 53 hosted zones.</p></article>
+        <article class="feature"><p class="ft">SRT</p><h3>Shield Response Team</h3><p>Grant an IAM role that trusts <span class="mono">drt.shield.amazonaws.com</span>, and the SRT reviews WAF logs and creates or updates web ACL rules on your behalf. It acts only with your explicit authorization.</p></article>
+        <article class="feature"><p class="ft">Proactive engagement</p><h3>Proactive engagement</h3><p>If an associated health check becomes unhealthy during a detected event, the SRT contacts your registered contacts first. Associated health checks are a prerequisite.</p></article>
+        <article class="feature"><p class="ft">Protection groups</p><h3>Protection groups</h3><p>Group multiple protected resources into one unit for combined detection and reporting. Choose a pattern from <span class="mono">ALL · ARBITRARY · BY_RESOURCE_TYPE</span> and an aggregation from <span class="mono">SUM · MEAN · MAX</span>.</p></article>
+        <article class="feature"><p class="ft">At scale</p><h3>Firewall Manager policies</h3><p>An AWS Firewall Manager Shield Advanced policy automatically applies protection to in-scope resources across all accounts in your organization, including newly created ones.</p></article>
+      </div>
+      <p class="note">Cost protection: charges from protected resources scaling due to a DDoS attack can be reimbursed as service credits by request to AWS Support. This applies when you fulfill the 1-year subscription commitment.</p>
+    </div>
+  </section>
+
+  <section id="resources" aria-labelledby="resources-h">
+    <div class="wrap">
+      <p class="tag">Protected resources</p>
+      <h2 id="resources-h">Resources protected by Shield Advanced</h2>
+      <p class="lede">Shield Advanced protects only the resources you designate. Some types are protected directly, others through an associated Elastic IP. Only IPv4 is supported.</p>
+      <div class="stack">
+        <div class="layer">
+          <span class="lv">Edge<small>Global</small></span>
+          <div><h3><a href="../cloudfront/">CloudFront</a> · <a href="../route-53/">Route 53</a> · <a href="../global-accelerator/">Global Accelerator</a></h3><p>Resources that receive traffic at edge locations. CloudFront also gets L7 protection through a web ACL; for Global Accelerator, only standard accelerators are protected.</p></div>
+          <div class="specs"><code>CloudFront distribution</code><code>Route 53 hosted zone</code><code>GA standard accelerator</code></div>
+        </div>
+        <div class="layer">
+          <span class="lv">ELB<small>Regional</small></span>
+          <div><h3><a href="../elastic-load-balancing/">Elastic Load Balancing</a></h3><p>ALBs and Classic Load Balancers are protected directly; an NLB is protected by protecting its associated Elastic IPs. ALBs also get L7 protection through a web ACL.</p></div>
+          <div class="specs"><code>ALB</code><code>CLB</code><code>NLB via EIP</code></div>
+        </div>
+        <div class="layer">
+          <span class="lv">EIP<small>Regional</small></span>
+          <div><h3>Amazon EC2 Elastic IP</h3><p>Protecting an Elastic IP also protects the EC2 instance or NLB associated with that address. Use it for servers that face the internet directly.</p></div>
+          <div class="specs"><code>Elastic IP</code><code>EC2 via EIP</code></div>
+        </div>
+      </div>
+      <p class="note">Other types, such as Gateway Load Balancer and Global Accelerator custom routing accelerators, cannot be protected. NAT gateways are outbound-only and are not eligible.</p>
+    </div>
+  </section>
+
+  <section id="arch" aria-labelledby="arch-h">
+    <div class="wrap">
+      <p class="tag">Reference architecture</p>
+      <h2 id="arch-h">Consolidate entry points at the edge and protect them there</h2>
+      <p class="lede">Web traffic flows through CloudFront and AWS WAF to the ALB origin; TCP · UDP traffic flows through Global Accelerator to the NLB. Apply Shield Advanced protection to the entry-point resources, and use health checks and protection groups to improve detection accuracy.</p>
+      <figure class="arch">
+        <div class="arch-scroll">
+          <svg viewBox="0 0 980 450" role="img" aria-labelledby="arch-title arch-desc">
+            <title id="arch-title">AWS Shield Advanced reference architecture</title>
+            <desc id="arch-desc">User and attack traffic arrive from the internet. DNS queries are answered by a Route 53 hosted zone protected by Shield Advanced. Web traffic passes through a CloudFront distribution with Shield Advanced and an AWS WAF web ACL to the Regional Application Load Balancer origin and EC2. TCP and UDP traffic passes through a protected Global Accelerator standard accelerator to a Network Load Balancer and EC2. Attack traffic is absorbed and mitigated at the edge. The Shield Advanced control area contains the Shield Response Team, Route 53 health checks, protection groups, and CloudWatch metrics; health checks feed the entry points' health into detection.</desc>
+            <defs>
+              <marker id="ar-shield-fiber" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><path class="ah-fiber" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-shield-trace" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-trace" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-shield-usr" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-usr" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-shield-atk" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-atk" d="M0 0 L10 5 L0 10 z"/></marker>
+            </defs>
+            <!-- zones -->
+            <rect class="zone" x="10" y="150" width="180" height="280" rx="6"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Internet_48_Light.svg" x="18" y="158" width="22" height="22"/>
+            <text class="z" x="46" y="172">INTERNET</text>
+            <rect class="zone" x="220" y="40" width="300" height="390" rx="6"/>
+            <image href="../../assets/aws-icons/AWS-Cloud_32.svg" x="228" y="48" width="22" height="22"/>
+            <text class="z" x="256" y="62">AWS EDGE · SHIELD ADVANCED</text>
+            <rect class="zone" x="545" y="40" width="425" height="110" rx="6"/>
+            <text class="z" x="559" y="62">DETECTION · RESPONSE</text>
+            <rect class="zone" x="545" y="170" width="425" height="260" rx="6"/>
+            <image href="../../assets/aws-icons/Region_32.svg" x="553" y="178" width="22" height="22"/>
+            <text class="z" x="581" y="192">AWS REGION</text>
+
+            <!-- internet -->
+            <rect class="box" x="20" y="200" width="166" height="60" rx="4"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Users_48_Light.svg" x="27" y="218" width="24" height="24"/>
+            <text class="t" x="58" y="226">Users</text><text class="s" x="58" y="245">client</text>
+            <rect class="box" x="20" y="340" width="166" height="60" rx="4"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Client_48_Light.svg" x="27" y="358" width="24" height="24"/>
+            <text class="t" x="58" y="366">Attack traffic</text><text class="s" x="58" y="385">flood · reflection</text>
+
+            <!-- edge -->
+            <rect class="edge" x="250" y="80" width="240" height="56" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-Route-53-Hosted-Zone_48.svg" x="260" y="94" width="28" height="28"/>
+            <text class="t" x="296" y="104">Route 53 hosted zone</text><text class="s" x="296" y="123">L3/L4 protection</text>
+            <rect class="edge" x="250" y="190" width="240" height="84" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_Amazon-CloudFront_48.svg" x="260" y="200" width="28" height="28"/>
+            <image href="../../assets/aws-icons/Arch_AWS-WAF_48.svg" x="260" y="236" width="28" height="28"/>
+            <text class="t" x="296" y="214">CloudFront + AWS WAF</text>
+            <text class="s" x="296" y="234">web ACL · rate-based rules</text>
+            <text class="lbl2" x="296" y="258">Anti-DDoS rule group</text>
+            <rect class="edge" x="250" y="320" width="240" height="70" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_AWS-Global-Accelerator_48.svg" x="260" y="341" width="28" height="28"/>
+            <text class="t" x="296" y="346">Global Accelerator</text><text class="s" x="296" y="366">standard · TCP/UDP</text>
+
+            <path class="usr" d="M186 220 C218 220 218 108 248 108" marker-end="url(#ar-shield-usr)"/>
+            <path class="usr" d="M186 232 H248" marker-end="url(#ar-shield-usr)"/>
+            <path class="usr" d="M186 248 C218 248 218 346 248 346" marker-end="url(#ar-shield-usr)"/>
+            <path class="atk" d="M186 370 C218 370 218 258 248 258" marker-end="url(#ar-shield-atk)"/>
+            <path class="atk" d="M186 378 H248" marker-end="url(#ar-shield-atk)"/>
+            <text class="lbl3" x="236" y="420">Absorbed · mitigated at edge</text>
+
+            <!-- detection -->
+            <rect class="box" x="555" y="76" width="137" height="58" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_AWS-Shield_48.svg" x="563" y="93" width="24" height="24"/>
+            <text class="t" x="593" y="100">SRT</text><text class="s" x="593" y="119">DRT · contacts</text>
+            <rect class="box" x="698" y="76" width="131" height="58" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_Amazon-Route-53_48.svg" x="706" y="93" width="24" height="24"/>
+            <text class="t" x="736" y="100">Health check</text><text class="s" x="736" y="119">Route 53</text>
+            <rect class="box" x="835" y="76" width="125" height="58" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_Amazon-CloudWatch_48.svg" x="843" y="93" width="24" height="24"/>
+            <text class="t" x="873" y="100">CloudWatch</text><text class="s" x="873" y="119">DDoSDetected</text>
+
+            <!-- region -->
+            <rect class="box" x="560" y="210" width="210" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Elastic-Load-Balancing_Application-Load-Balancer_48.svg" x="570" y="228" width="28" height="28"/>
+            <text class="t" x="606" y="236">ALB</text><text class="s" x="606" y="256">Origin · CloudFront only</text>
+            <rect class="box" x="560" y="330" width="210" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Elastic-Load-Balancing_Network-Load-Balancer_48.svg" x="570" y="348" width="28" height="28"/>
+            <image href="../../assets/aws-icons/Res_Amazon-EC2_Elastic-IP-Address_48.svg" x="602" y="348" width="28" height="28"/>
+            <text class="t" x="638" y="356">NLB + Elastic IP</text><text class="s" x="638" y="376">Protected via EIP</text>
+            <rect class="box" x="800" y="210" width="150" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_Amazon-EC2_48.svg" x="810" y="228" width="28" height="28"/>
+            <text class="t" x="846" y="236">EC2</text><text class="s" x="846" y="256">Web server</text>
+            <rect class="box" x="800" y="330" width="150" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_Amazon-EC2_48.svg" x="810" y="348" width="28" height="28"/>
+            <text class="t" x="846" y="356">EC2</text><text class="s" x="846" y="376">Game/API server</text>
+
+            <path class="fiber" d="M490 232 H551" marker-end="url(#ar-shield-fiber)"/>
+            <path class="fiber" d="M490 355 C521 355 521 362 551 362" marker-end="url(#ar-shield-fiber)"/>
+            <path class="path" d="M770 242 H798" marker-end="url(#ar-shield-trace)"/>
+            <path class="path" d="M770 362 H798" marker-end="url(#ar-shield-trace)"/>
+            <path class="path" d="M763 134 V160 C763 176 740 176 700 190 L667 209" stroke-dasharray="6 5" marker-end="url(#ar-shield-trace)"/>
+            <text class="lbl" x="771" y="160">Health-based detection</text>
+            <text class="lbl" x="487" y="217">Legitimate</text>
+          </svg>
+        </div>
+        <figcaption class="legend">
+          <span><i class="u dir"></i>Internet traffic</span>
+          <span><i class="a dir"></i>Attack traffic (absorbed at the edge)</span>
+          <span><i class="dir"></i>Legitimate traffic after mitigation</span>
+          <span><i class="p dir"></i>In-Region requests · health check direction</span>
+        </figcaption>
+        <p class="arch-hint">On narrow screens, swipe the diagram sideways.</p>
+      </figure>
+    </div>
+  </section>
+
+  <section id="start" aria-labelledby="start-h">
+    <div class="wrap">
+      <p class="tag">Getting started</p>
+      <h2 id="start-h">Turning on Shield Advanced</h2>
+      <ol class="steps">
+        <li><span class="num">STEP 1</span><h3>Subscribe</h3><p>Subscribe to Shield Advanced in the account that owns the resources to protect. It is a 1-year commitment that renews automatically.</p></li>
+        <li><span class="num">STEP 2</span><h3>Add protections</h3><p>Select entry-point resources and add protection. For multiple accounts, use a Firewall Manager policy.</p></li>
+        <li><span class="num">STEP 3</span><h3>L7 · health checks</h3><p>Add the Anti-DDoS managed rule group to the CloudFront · ALB web ACL and associate Route 53 health checks.</p></li>
+        <li><span class="num">STEP 4</span><h3>Prepare for SRT</h3><p>Create the SRT access role and register proactive engagement contacts.</p></li>
+        <li><span class="num">STEP 5</span><h3>Groups and alarms</h3><p>Create protection groups and set SNS alarms on the CloudWatch <span class="mono">DDoSDetected</span> metric (<span class="mono">DDoSAttackRequests</span> for L7).</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="pricing" aria-labelledby="pricing-h">
+    <div class="wrap">
+      <p class="tag">Pricing</p>
+      <h2 id="pricing-h">Cost components</h2>
+      <p class="lede">Shield Standard has no additional charge. Shield Advanced consists of a monthly subscription fee and a data transfer usage fee on data out of protected resources.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">AWS Shield billing items</caption>
+          <thead><tr><th scope="col">Billing item</th><th scope="col">Billing basis</th><th scope="col">Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="row-h">Shield Standard</td><td data-k="Billing basis">None</td><td data-k="Notes">Included by default with the AWS services you use.</td></tr>
+            <tr><td class="row-h">Advanced subscription fee</td><td data-k="Billing basis">Fixed monthly fee · 1-year commitment</td><td data-k="Notes">Billed once per organization (payer account). Accounts under the same consolidated billing incur no additional subscription fee when each subscribes.</td></tr>
+            <tr><td class="row-h">Data transfer usage fee</td><td data-k="Billing basis">Per GB of Data Transfer Out from protected resources</td><td data-k="Notes">Rates vary by resource type. Protecting only the entry point, for example not the ELB behind CloudFront, avoids double charges.</td></tr>
+            <tr><td class="row-h">AWS WAF</td><td data-k="Billing basis">Standard charges included for protected resources</td><td data-k="Notes">Includes web ACL, rule, and request charges (within the default 1,500 WCU, up to 50 billion requests per month per payer) and the Anti-DDoS managed rule group. Requests detected as DDoS do not count toward the limit. Bot Control, Fraud Control, Marketplace rules, and similar are extra.</td></tr>
+            <tr><td class="row-h">Underlying services</td><td data-k="Billing basis">Each service's pricing</td><td data-k="Notes">Standard charges for CloudFront, ELB, Route 53, Global Accelerator, and EC2 are billed separately.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="lede" style="font-size:14px">Rates depend on resource type and usage. To cancel the subscription, contact AWS Support between 30 and 5 days before the renewal date. For current rates, see the <a href="https://aws.amazon.com/shield/pricing/" target="_blank" rel="noopener">AWS Shield pricing page</a>.</p>
+      <p class="note">See also: Shield network security director (preview) analyzes the network topology of your accounts and organization and reports missing or misconfigured WAF, security group, and NACL settings as findings by severity. A delegated administrator account can analyze the whole organization, and findings are also available in AWS Security Hub. It is not part of the Shield Advanced subscription; there is no additional cost during the preview, and features and supported Regions may change.</p>
+    </div>
+  </section>
+
+  <section class="cta" aria-labelledby="cta-h">
+    <div class="wrap">
+      <p class="tag">Next step</p>
+      <h2 id="cta-h">Review your service's DDoS resilience</h2>
+      <p class="lede">Bring your internet-facing entry points, traffic volume, support plan, and incident contact process, and we'll review together what to protect and whether to adopt Shield Advanced.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="https://aws.amazon.com/shield/" target="_blank" rel="noopener">Open service page</a>
+        <a class="btn btn-ghost" href="https://docs.aws.amazon.com/waf/latest/developerguide/ddos-overview.html" target="_blank" rel="noopener">Read the developer guide</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a href="../">← AWS Networking Services Portfolio</a>
+    <span>AWS Shield overview. Protected resources, feature coverage, and pricing may change; check the official documentation.</span>
+    <a href="https://docs.aws.amazon.com/waf/latest/developerguide/ddos-protections-by-resource-type.html" target="_blank" rel="noopener">Protected resources docs</a>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AWS Global Accelerator Overview</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+body{margin:0}img{max-width:100%}[hidden]{display:none!important}
+
+/* Layout: a cross-connect work order. Cool steel paper, navy ink, Amazon orange as the one accent; section tags read like fiber labels. */
+:root{
+  --bg:#EEF1F4; --surface:#FFFFFF; --sunken:#E3E8ED;
+  --ink:#14202E; --ink-2:#44515F; --ink-3:#5A6672;
+  --line:#CDD5DD; --line-2:#B4BFCA;
+  --fiber:#FF9900;          /* Amazon orange — fills only */
+  --fiber-ink:#B35C00;      /* orange-derived, AA on light surfaces */
+  --fiber-soft:#FFF0D9;
+  --on-fiber:#14202E;
+  --trace:#2E7D9A;          /* secondary line color for diagram paths */
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --maxw:1120px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--fiber-ink);outline-offset:3px;border-radius:2px}
+.skip-link{position:absolute;left:16px;top:-60px;background:var(--fiber);color:var(--on-fiber);padding:8px 14px;font-weight:700;z-index:50;text-decoration:none}
+.skip-link:focus{top:12px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.wrap{max-width:var(--maxw);margin:0 auto;padding-inline:24px}
+section{padding-block:88px;border-top:1px solid var(--line)}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.25}
+h2{font-size:clamp(26px,3.4vw,36px);font-weight:700;letter-spacing:-.01em}
+h3{font-size:18px;font-weight:700}
+p{margin:0}
+.lede{color:var(--ink-2);max-width:62ch;margin-top:14px}
+.num{font-family:var(--display);font-variant-numeric:tabular-nums lining-nums}
+.mono{font-family:var(--mono)}
+
+/* fiber label: the section tag */
+.tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-bottom:14px}
+.tag::before{content:"";width:22px;height:8px;background:var(--fiber);border-radius:1px}
+
+/* nav */
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:60px}
+.brand{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.02em;text-decoration:none;text-transform:uppercase}
+.brand span{color:var(--fiber-ink)}
+.navlinks{display:flex;gap:22px;font-size:14px;align-items:center}
+.navlinks a{text-decoration:none;color:var(--ink-2)}
+.navlinks a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;font-weight:700;font-size:15px;text-decoration:none;border-radius:4px;border:1px solid transparent;transition:transform .15s ease,background .15s ease}
+.btn-primary{background:var(--fiber);color:var(--on-fiber)}
+.btn-primary:hover{transform:translateY(-1px)}
+.btn-ghost{border-color:var(--line-2);color:var(--ink)}
+.btn-ghost:hover{background:var(--sunken)}
+.navlinks .btn{min-height:38px;padding:0 14px;font-size:14px;color:var(--on-fiber)}
+
+/* hero */
+.hero{padding-block:72px 64px;border-top:0}
+.hero-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:56px;align-items:center}
+.eyebrow{font-family:var(--mono);font-size:13px;color:var(--fiber-ink);letter-spacing:.04em}
+.hero h1{font-size:clamp(34px,5vw,56px);font-weight:700;letter-spacing:-.02em;margin-top:16px}
+.hero h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--fiber) 62%,var(--fiber) 90%,transparent 90%);padding-inline:2px}
+.hero .lede{font-size:18px}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+
+/* hero visual: port faceplate */
+.faceplate{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px}
+.faceplate-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.ports{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+.port{border:1px solid var(--line);border-radius:4px;padding:14px 14px 12px;background:var(--sunken);display:flex;flex-direction:column;gap:2px}
+.port .num{font-size:40px;font-weight:600;line-height:1}
+.port .num small{font-size:18px;color:var(--ink-2);margin-left:2px}
+.port .optic{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+.port .led{width:8px;height:8px;border-radius:50%;background:var(--fiber);align-self:flex-end;margin-top:-6px;animation:blink 2.4s ease-in-out infinite}
+.port:nth-child(2) .led{animation-delay:.6s}.port:nth-child(3) .led{animation-delay:1.2s}.port:nth-child(4) .led{animation-delay:1.8s}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.faceplate-foot{margin-top:14px;font-size:13px;color:var(--ink-2)}
+
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:56px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.chip{padding:18px 20px;border-left:1px solid var(--line);min-width:0}
+.chip:first-child{border-left:0}
+.chip .num{font-size:34px;font-weight:600;line-height:1.1}
+.chip p{font-size:13.5px;color:var(--ink-2);margin-top:4px}
+
+/* value */
+.split{display:grid;grid-template-columns:1fr 1.4fr;gap:56px}
+.pillars{display:grid;gap:0;border-top:1px solid var(--line-2)}
+.pillar{display:grid;grid-template-columns:120px 1fr;gap:20px;padding-block:22px;border-bottom:1px solid var(--line)}
+.pillar .k{font-family:var(--display);font-size:22px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--fiber-ink)}
+.pillar p{color:var(--ink-2);margin-top:6px}
+
+/* stack (L1/L2/L3) */
+.stack{margin-top:40px;display:grid;gap:10px}
+.layer{display:grid;grid-template-columns:96px 1fr 1.2fr;gap:24px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px 24px}
+.layer .lv{font-family:var(--display);font-size:44px;font-weight:700;line-height:.9}
+.layer .lv small{display:block;font-family:var(--mono);font-size:11px;font-weight:400;color:var(--ink-3);letter-spacing:.06em;margin-top:8px;text-transform:uppercase}
+.layer p{color:var(--ink-2);margin-top:6px;font-size:15px}
+.specs{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+.specs code{font-family:var(--mono);font-size:12.5px;background:var(--sunken);border:1px solid var(--line);padding:3px 8px;border-radius:3px;color:var(--ink)}
+
+/* features */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:40px}
+.feature{background:var(--surface);padding:26px 24px;min-width:0}
+.feature .ft{font-family:var(--mono);font-size:11.5px;color:var(--fiber-ink);letter-spacing:.06em;text-transform:uppercase}
+.feature h3{margin-top:8px}
+.feature p{color:var(--ink-2);font-size:15px;margin-top:8px}
+
+/* table */
+.tbl-wrap{margin-top:36px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:14px 18px;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--sunken)}
+tbody tr:last-child td{border-bottom:0}
+td.row-h{font-weight:700;width:22%}
+td .num{font-size:18px;font-weight:600}
+
+/* architecture */
+.arch{margin-top:36px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px}
+.arch-scroll{overflow-x:auto}
+.arch svg{display:block;width:100%;min-width:860px;height:auto}
+.arch-hint{display:none;font-size:13px;color:var(--ink-3);margin-top:10px}
+svg .box{fill:var(--sunken);stroke:var(--line-2)}
+svg .zone{fill:none;stroke:var(--line-2);stroke-dasharray:4 4}
+svg .t{fill:var(--ink);font-family:var(--sans);font-size:14px;font-weight:700}
+svg .s{fill:var(--ink-3);font-family:var(--mono);font-size:11px}
+svg .z{fill:var(--ink-2);font-family:var(--mono);font-size:11px;letter-spacing:.08em}
+svg .fiber{stroke:var(--fiber);stroke-width:5;fill:none;stroke-linecap:round}
+svg .path{stroke:var(--trace);stroke-width:2;fill:none}
+svg .site{stroke:var(--fiber-ink);stroke-width:2;fill:none;stroke-dasharray:6 5}
+svg .lbl{fill:var(--trace);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .lbl2{fill:var(--fiber-ink);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .dot{fill:var(--fiber)}
+.legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--ink-2)}
+.legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--fiber)}
+.legend i.p{border-top:2px solid var(--trace)}
+.legend i.s{border-top:2px dashed var(--fiber-ink)}
+
+/* steps */
+.steps{list-style:none;padding:0;margin:40px 0 0;display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:4px solid var(--fiber)}
+.steps li{padding:20px 18px 0 0;min-width:0}
+.steps .num{font-size:15px;font-weight:600;color:var(--fiber-ink);letter-spacing:.06em}
+.steps h3{font-size:16px;margin-top:6px}
+.steps p{font-size:14px;color:var(--ink-2);margin-top:6px}
+
+/* resiliency */
+.res{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:36px}
+.res-card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:26px}
+.res-card .num{font-size:52px;font-weight:700;line-height:1}
+.res-card .num small{font-size:20px;color:var(--ink-2)}
+.res-card h3{margin-top:10px}
+.res-card p{color:var(--ink-2);font-size:15px;margin-top:6px}
+.res-card.max{border-color:var(--fiber);box-shadow:inset 0 4px 0 var(--fiber)}
+
+/* cta */
+.cta{text-align:center}
+.cta h2{max-width:22ch;margin:0 auto}
+.cta .lede{margin:14px auto 0}
+.cta .cta-row{justify-content:center}
+footer{border-top:1px solid var(--line);padding-block:28px;font-size:13px;color:var(--ink-3)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+
+@media (max-width:1024px){
+  .hero-grid,.split{grid-template-columns:1fr;gap:40px}
+  .features{grid-template-columns:repeat(2,1fr)}
+  .steps{grid-template-columns:repeat(2,1fr);border-top:0;gap:0 24px}
+  .steps li{border-top:4px solid var(--fiber);padding-bottom:24px}
+  .layer{grid-template-columns:80px 1fr}
+  .layer .specs{grid-column:2}
+  .chips{grid-template-columns:repeat(2,1fr)}
+  .chip:nth-child(3){border-left:0}
+  .chip:nth-child(n+3){border-top:1px solid var(--line)}
+}
+@media (max-width:640px){
+  .wrap{padding-inline:18px}
+  section{padding-block:60px}
+  .navlinks a:not(.btn){display:none}
+  .features,.res{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr}
+  .pillar{grid-template-columns:1fr;gap:0}
+  .layer{grid-template-columns:1fr;gap:12px}
+  .layer .specs{grid-column:auto}
+  .cta-row .btn{width:100%}
+  .arch-hint{display:block}
+  table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  table,tbody,tr,td{display:block;width:100%}
+  tr{border-bottom:1px solid var(--line);padding:14px 16px}
+  tbody tr:last-child{border-bottom:0}
+  td{border:0;padding:3px 0}
+  td.row-h{width:100%;font-size:16px;padding-bottom:6px}
+  td[data-k]::before{content:attr(data-k);display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+
+/* ---- service-specific ---- */
+/* hero visual: anycast entry panel */
+.anycast{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px;min-width:0}
+.anycast-head{display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.ips{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
+.ip{border:1px solid var(--line);border-radius:4px;background:var(--sunken);padding:12px 14px;min-width:0;display:flex;flex-direction:column;gap:2px}
+.ip .num{font-size:22px;font-weight:600;line-height:1.1;overflow-wrap:anywhere}
+.ip span{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+.ip span::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--fiber);animation:blink 2.4s ease-in-out infinite}
+.ip:nth-child(2) span::before{animation-delay:1.2s}
+.listener{margin-top:12px;font-family:var(--mono);font-size:12px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:6px}
+.listener code{font-family:var(--mono);font-size:11.5px;padding:1px 6px;border:1px solid var(--line);border-radius:3px;background:var(--sunken);color:var(--ink)}
+.egs{margin-top:14px;display:grid;gap:10px}
+.eg{border-top:1px solid var(--line);padding-top:10px}
+.eg-top{display:flex;justify-content:space-between;gap:12px;font-size:14px}
+.eg-top b{font-weight:700}
+.eg-top span{font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+.dial{margin-top:6px;height:8px;border-radius:4px;background:var(--sunken);border:1px solid var(--line);overflow:hidden}
+.dial i{display:block;height:100%;background:var(--fiber)}
+.eps{margin-top:6px;font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+.anycast-foot{margin-top:12px;font-size:13px;color:var(--ink-2)}
+svg .edge{fill:var(--fiber-soft);stroke:var(--fiber)}
+svg .bb{stroke:var(--fiber);stroke-width:5;fill:none;stroke-linecap:round}
+svg .usr{stroke:var(--ink-3);stroke-width:2;fill:none;stroke-dasharray:3 4}
+.legend i.u{border-top:2px dashed var(--ink-3)}
+@media (max-width:640px){
+  .anycast{padding:18px}
+  .ip .num{font-size:20px}
+}
+
+/* nav: keep links on one line, show only CTA below 960px */
+.navlinks a{white-space:nowrap}
+@media (max-width:960px){.navlinks a:not(.btn){display:none}}
+
+/* Korean line breaking: never split a word mid-syllable */
+h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
+svg .ah-fiber{fill:var(--fiber)}
+svg .ah-trace{fill:var(--trace)}
+svg .ah-site{fill:var(--fiber-ink)}
+svg .ah-usr{fill:var(--ink-3)}
+svg .ah-atk{fill:#C2410C}
+.legend i.dir{position:relative;width:26px}
+.legend i.dir::after{content:"";position:absolute;right:-3px;top:-7px;border-left:8px solid var(--fiber);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.legend i.p.dir::after,.legend i.s.dir::after,.legend i.u.dir::after,.legend i.a.dir::after{top:-6px}
+.legend i.p.dir::after{border-left-color:var(--trace)}
+.legend i.s.dir::after{border-left-color:var(--fiber-ink)}
+.legend i.u.dir::after{border-left-color:var(--ink-3)}
+.legend i.a.dir::after{border-left-color:#C2410C}
+</style>
+<link rel="stylesheet" href="../../assets/site.css?v=16">
+<script src="../../assets/site.js?v=16"></script>
+</head>
+<body>
+
+
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<nav aria-label="Main menu">
+  <div class="wrap">
+    <a class="brand" href="#top">AWS <span>Global Accelerator</span></a>
+    <div class="navlinks">
+      <a href="../">Service portfolio</a>
+      <a href="#how">Traffic control</a>
+      <a href="#features">Features</a>
+      <a href="#types">Accelerator types</a>
+      <a href="#arch">Architecture</a>
+      <a href="#pricing">Pricing</a>
+      <a class="btn btn-primary" href="#start">Get started</a>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+  <header class="hero" id="top">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">AWS Global Accelerator · Network-layer acceleration</p>
+          <h1>Two static IPs put your traffic onto the AWS network at the <em>nearest edge</em></h1>
+          <p class="lede">AWS Global Accelerator places static anycast IP addresses in front of your application. User traffic enters the AWS global network at the nearest AWS edge location and is delivered to healthy Regional endpoints. It works for both TCP and UDP applications.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="#start">View setup steps</a>
+            <a class="btn btn-ghost" href="#arch">View architecture</a>
+          </div>
+        </div>
+
+        <div class="anycast" aria-label="Example standard accelerator configuration">
+          <div class="anycast-head"><span>Standard accelerator</span><span>IPv4 · anycast</span></div>
+          <div class="ips">
+            <div class="ip"><span>Network zone 1</span><b class="num">192.0.2.10</b></div>
+            <div class="ip"><span>Network zone 2</span><b class="num">198.51.100.7</b></div>
+          </div>
+          <div class="listener"><span>Listener</span><code>TCP 443</code><code>client affinity: SOURCE_IP</code></div>
+          <div class="egs">
+            <div class="eg">
+              <div class="eg-top"><b>ap-northeast-2</b><span>traffic dial 100%</span></div>
+              <div class="dial" aria-hidden="true"><i style="width:100%"></i></div>
+              <p class="eps">ALB weight 128 · EC2 weight 128</p>
+            </div>
+            <div class="eg">
+              <div class="eg-top"><b>us-west-2</b><span>traffic dial 30%</span></div>
+              <div class="dial" aria-hidden="true"><i style="width:30%"></i></div>
+              <p class="eps">NLB weight 128</p>
+            </div>
+          </div>
+          <p class="anycast-foot">IP addresses are examples. The two addresses are served from independent network zones.</p>
+        </div>
+      </div>
+
+      <div class="chips" role="list">
+        <div class="chip" role="listitem"><span class="num">2</span><p>Static anycast IPv4 addresses assigned per accelerator</p></div>
+        <div class="chip" role="listitem"><span class="num">99.99%</span><p>Monthly uptime SLA for Multi-AZ accelerators</p></div>
+        <div class="chip" role="listitem"><span class="num">TCP · UDP</span><p>Protocols a listener accepts</p></div>
+        <div class="chip" role="listitem"><span class="num">0–255</span><p>Endpoint weight range (default 128)</p></div>
+      </div>
+    </div>
+  </header>
+
+  <section id="why" aria-labelledby="why-h">
+    <div class="wrap split">
+      <div>
+        <p class="tag">Why Global Accelerator</p>
+        <h2 id="why-h">Keep the entry point fixed; change paths and endpoints inside AWS</h2>
+        <p class="lede">The farther away your users are, the longer the public internet segment and the less consistent the quality. Global Accelerator takes in traffic close to users, moves it onto the AWS network, and keeps the IP addresses clients see unchanged even when you change Regions or endpoints.</p>
+      </div>
+      <div class="pillars">
+        <div class="pillar"><span class="k">Static</span><div><h3>IPs that don't change</h3><p>The IP addresses stay with the accelerator until you delete it. You can change the backend without worrying about firewall allow lists or DNS caching.</p></div></div>
+        <div class="pillar"><span class="k">Edge</span><div><h3>Entry at the nearest edge</h3><p>Because the addresses are advertised via anycast, traffic is received at the edge location closest to the user and then travels over the AWS global network.</p></div></div>
+        <div class="pillar"><span class="k">Healthy</span><div><h3>Health-based routing</h3><p>Endpoint health is checked continuously and traffic goes only to healthy endpoints. Unhealthy endpoints are detected and removed from service within one minute.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how" aria-labelledby="how-h">
+    <div class="wrap">
+      <p class="tag">Traffic control</p>
+      <h2 id="how-h">How traffic reaches an endpoint</h2>
+      <p class="lede">A standard accelerator distributes traffic in three tiers: listener, endpoint group, and endpoint. They apply in order from the top.</p>
+      <div class="stack">
+        <div class="layer">
+          <span class="lv">01<small>Listener</small></span>
+          <div><h3>Listener</h3><p>Accepts incoming connections by protocol and port range. With client affinity enabled, requests from the same source IP go to the same endpoint.</p></div>
+          <div class="specs"><code>TCP</code><code>UDP</code><code>port ranges</code><code>client affinity</code></div>
+        </div>
+        <div class="layer">
+          <span class="lv">02<small>Endpoint group</small></span>
+          <div><h3>Endpoint group</h3><p>One per Region. The traffic dial sets the share of traffic that Region receives; setting it to 0% stops traffic to that Region.</p></div>
+          <div class="specs"><code>1 group per Region</code><code>traffic dial %</code><code>health check 10s · 30s</code><code>port override</code></div>
+        </div>
+        <div class="layer">
+          <span class="lv">03<small>Endpoint</small></span>
+          <div><h3>Endpoint</h3><p>Within a group, traffic is split in proportion to weights. ALBs, NLBs, EC2 instances, and Elastic IP addresses can be endpoints.</p></div>
+          <div class="specs"><code>ALB</code><code>NLB</code><code>EC2</code><code>Elastic IP</code><code>weight 0–255</code></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" aria-labelledby="features-h">
+    <div class="wrap">
+      <p class="tag">Features</p>
+      <h2 id="features-h">Key features</h2>
+      <div class="features">
+        <article class="feature"><p class="ft">Failover</p><h3>Health checks and failover</h3><p>New connections go to healthy endpoints immediately. Existing connections stay on the original endpoint until the idle timeout (TCP 340 seconds, UDP 30 seconds).</p></article>
+        <article class="feature"><p class="ft">Source IP</p><h3>Client IP address preservation</h3><p>ALB, EC2, and NLB endpoints with security groups receive the original client IP. It is on by default for ALBs and not available for Elastic IP addresses or NLBs with TLS listeners. Custom routing accelerators always preserve it.</p></article>
+        <article class="feature"><p class="ft">Stateful apps</p><h3>Client affinity</h3><p>Connects the same user to the same endpoint based on source IP. Use it for applications that keep session state on the server.</p></article>
+        <article class="feature"><p class="ft">Dual stack</p><h3>IPv6 support</h3><p>A dual-stack accelerator gets four static addresses: two IPv4 and two IPv6. Endpoints must be ALBs with client IP preservation enabled, NLBs with security groups, or EC2 instances; Elastic IP addresses are not supported.</p></article>
+        <article class="feature"><p class="ft">Your addresses</p><h3>BYOIP</h3><p>Bring your own IPv4 address pool and use it as the accelerator's static IPs, so addresses already on existing allow lists stay the same.</p></article>
+        <article class="feature"><p class="ft">Protection</p><h3>AWS Shield integration</h3><p>Because traffic is received at the edge, it works together with AWS Shield DDoS protection. Endpoint security groups and AWS WAF rules remain in place.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="types" aria-labelledby="types-h">
+    <div class="wrap">
+      <p class="tag">Accelerator types</p>
+      <h2 id="types-h">Standard and custom routing accelerators</h2>
+      <p class="lede">Choose based on whether AWS distributes the traffic or your application picks the destination itself.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">Comparison of standard and custom routing accelerators</caption>
+          <thead><tr><th scope="col">Type</th><th scope="col">Destination selection</th><th scope="col">Endpoints</th><th scope="col">Health checks · IP</th><th scope="col">Best fit</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="row-h">Standard<br><span class="mono" style="font-size:12px;font-weight:400;color:var(--ink-3)">standard accelerator</span></td>
+              <td data-k="Destination selection">User location, endpoint health, traffic dials and weights</td>
+              <td data-k="Endpoints">ALB · NLB · EC2 · Elastic IP</td>
+              <td data-k="Health checks · IP">Health checks and failover · IPv4 or dual stack</td>
+              <td data-k="Best fit">Multi-Region services, blue/green deployments, Regional failure readiness</td>
+            </tr>
+            <tr>
+              <td class="row-h">Custom routing<br><span class="mono" style="font-size:12px;font-weight:400;color:var(--ink-3)">custom routing accelerator</span></td>
+              <td data-k="Destination selection">The application uses port mappings to target a specific EC2 instance and port</td>
+              <td data-k="Endpoints">EC2 instances in VPC subnets</td>
+              <td data-k="Health checks · IP">No health checks or failover · IPv4 only · All destinations denied by default</td>
+              <td data-k="Best fit">Cases such as game matchmaking or VoIP where users must reach a specific session server</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="arch" aria-labelledby="arch-h">
+    <div class="wrap">
+      <p class="tag">Reference architecture</p>
+      <h2 id="arch-h">From users to Regional endpoints</h2>
+      <p class="lede">Users in Seoul and the US connect to the same static IPs, but each enters at a nearby edge location. From the edge, traffic crosses the AWS global network to the per-Region endpoint groups, and traffic dials set each Region's share.</p>
+      <figure class="arch">
+        <div class="arch-scroll">
+          <svg viewBox="0 0 980 430" role="img" aria-labelledby="arch-title arch-desc">
+            <title id="arch-title">Global Accelerator reference architecture</title>
+            <desc id="arch-desc">Users in Seoul and the US connect to the same two static anycast IPs. Each user enters at a nearby edge location, and from the edge traffic crosses the AWS global network to the Seoul Region endpoint group (traffic dial 100%, ALB and EC2) and the Oregon Region endpoint group (traffic dial 30%, NLB). The remaining 70% that the Oregon group does not take goes to the Seoul group.</desc>
+            <defs>
+              <marker id="ar-global-accelerator-fiber" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><path class="ah-fiber" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-global-accelerator-trace" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-trace" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-global-accelerator-usr" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-usr" d="M0 0 L10 5 L0 10 z"/></marker>
+            </defs>
+            <rect class="zone" x="10" y="40" width="180" height="370" rx="6"/>
+            <text class="z" x="24" y="62">USERS</text>
+            <rect class="zone" x="220" y="40" width="250" height="370" rx="6"/>
+            <text class="z" x="234" y="62">AWS EDGE</text>
+            <rect class="zone" x="500" y="40" width="470" height="370" rx="6"/>
+            <image href="../../assets/aws-icons/Region_32.svg" x="508" y="48" width="22" height="22"/>
+            <text class="z" x="536" y="62">AWS REGIONS</text>
+
+            <rect class="box" x="30" y="100" width="140" height="64" rx="4"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Users_48_Light.svg" x="40" y="118" width="28" height="28"/><text class="t" x="76" y="128">Seoul users</text><text class="s" x="76" y="148">client</text>
+            <rect class="box" x="30" y="290" width="140" height="64" rx="4"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Users_48_Light.svg" x="40" y="308" width="28" height="28"/><text class="t" x="76" y="318">US users</text><text class="s" x="76" y="338">client</text>
+
+            <rect class="edge" x="250" y="100" width="190" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-CloudFront_Edge-Location_48.svg" x="260" y="118" width="28" height="28"/><text class="t" x="296" y="128">Edge location</text><text class="s" x="296" y="148">Asia</text>
+            <rect class="edge" x="250" y="290" width="190" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-CloudFront_Edge-Location_48.svg" x="260" y="308" width="28" height="28"/><text class="t" x="296" y="318">Edge location</text><text class="s" x="296" y="338">North America</text>
+            <text class="lbl2" x="250" y="222">Same 2 static IPs</text>
+            <text class="lbl2" x="250" y="240">192.0.2.10 · 198.51.100.7</text>
+
+            <path class="usr" d="M170 132 H248" marker-end="url(#ar-global-accelerator-usr)"/>
+            <path class="usr" d="M170 322 H248" marker-end="url(#ar-global-accelerator-usr)"/>
+
+            <rect class="box" x="540" y="90" width="190" height="84" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_AWS-Global-Accelerator_48.svg" x="550" y="118" width="28" height="28"/><text class="t" x="586" y="118">ap-northeast-2</text><text class="s" x="586" y="138">endpoint group</text><text class="lbl2" x="586" y="160">traffic dial 100%</text>
+            <rect class="box" x="540" y="280" width="190" height="84" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_AWS-Global-Accelerator_48.svg" x="550" y="308" width="28" height="28"/><text class="t" x="586" y="308">us-west-2</text><text class="s" x="586" y="328">endpoint group</text><text class="lbl2" x="586" y="350">traffic dial 30%</text>
+
+            <path class="bb" d="M440 132 H531" marker-end="url(#ar-global-accelerator-fiber)"/>
+            <path class="bb" d="M440 322 H531" marker-end="url(#ar-global-accelerator-fiber)"/>
+            <path class="path" d="M440 304 C490 304 490 154 538 154" stroke-dasharray="6 5" marker-end="url(#ar-global-accelerator-trace)"/>
+            <text class="lbl" x="548" y="262">Remaining 70% → other Region</text>
+            <text class="lbl" x="250" y="196">AWS global network from edge</text>
+
+            <rect class="box" x="790" y="80" width="160" height="48" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Elastic-Load-Balancing_Application-Load-Balancer_48.svg" x="800" y="92" width="24" height="24"/><text class="t" x="834" y="102">ALB</text><text class="s" x="834" y="119">weight 128</text>
+            <rect class="box" x="790" y="140" width="160" height="48" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-EC2_Instance_48.svg" x="800" y="152" width="24" height="24"/><text class="t" x="834" y="162">EC2</text><text class="s" x="834" y="179">weight 128</text>
+            <rect class="box" x="790" y="298" width="160" height="48" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Elastic-Load-Balancing_Network-Load-Balancer_48.svg" x="800" y="310" width="24" height="24"/><text class="t" x="834" y="320">NLB</text><text class="s" x="834" y="337">weight 128</text>
+
+            <path class="path" d="M730 122 C760 122 760 104 788 104" marker-end="url(#ar-global-accelerator-trace)"/>
+            <path class="path" d="M730 142 C760 142 760 164 788 164" marker-end="url(#ar-global-accelerator-trace)"/>
+            <path class="path" d="M730 322 H788" marker-end="url(#ar-global-accelerator-trace)"/>
+            <text class="lbl" x="560" y="232">Health checks select healthy endpoints</text>
+          </svg>
+        </div>
+        <figcaption class="legend">
+          <span><i class="u dir"></i>Public internet (user → nearest edge, short hop)</span>
+          <span><i class="dir"></i>AWS global network (edge → endpoint group)</span>
+          <span><i class="p dir"></i>Endpoint distribution · dashed = traffic outside the dial</span>
+          <span>Responses return on the same path.</span>
+        </figcaption>
+        <p class="arch-hint">On narrow screens, swipe the diagram sideways.</p>
+      </figure>
+    </div>
+  </section>
+
+  <section id="start" aria-labelledby="start-h">
+    <div class="wrap">
+      <p class="tag">Getting started</p>
+      <h2 id="start-h">Steps to create an accelerator</h2>
+      <ol class="steps">
+        <li><span class="num">STEP 1</span><h3>Create the accelerator</h3><p>Choose standard or custom routing, then IPv4 or dual stack, and BYOIP addresses if needed.</p></li>
+        <li><span class="num">STEP 2</span><h3>Add listeners</h3><p>Set the protocol, port ranges, and client affinity.</p></li>
+        <li><span class="num">STEP 3</span><h3>Endpoint groups</h3><p>Create a group per Region and configure the traffic dial and health checks.</p></li>
+        <li><span class="num">STEP 4</span><h3>Register endpoints</h3><p>Add ALBs, NLBs, EC2 instances, or Elastic IPs and set weights and client IP preservation.</p></li>
+        <li><span class="num">STEP 5</span><h3>Switch DNS</h3><p>Point your application domain at the accelerator's static IPs or DNS name.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="pricing" aria-labelledby="pricing-h">
+    <div class="wrap">
+      <p class="tag">Pricing</p>
+      <h2 id="pricing-h">Cost components</h2>
+      <p class="lede">The base costs are a fixed hourly fee per accelerator and a DT-Premium charge on data that crosses the AWS network. Endpoint data transfer is still billed separately.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">AWS Global Accelerator billing components</caption>
+          <thead><tr><th scope="col">Component</th><th scope="col">Billing basis</th><th scope="col">Notes</th></tr></thead>
+          <tbody>
+          <tr><td class="row-h">Fixed accelerator fee</td><td data-k="Billing basis">Per accelerator, per full or partial hour</td><td data-k="Notes">Charged for each provisioned accelerator, whether enabled or not.</td></tr>
+          <tr><td class="row-h">DT-Premium</td><td data-k="Billing basis">Per GB, in the dominant direction only</td><td data-k="Notes">The rate depends on the combination of the source Region that served the request and the destination edge location.</td></tr>
+          <tr><td class="row-h">Endpoint data transfer</td><td data-k="Billing basis">Standard EC2 data transfer out (DTO) from endpoints</td><td data-k="Notes">Billed separately from DT-Premium.</td></tr>
+          <tr><td class="row-h">Public IPv4 addresses</td><td data-k="Billing basis">IPv4 addresses used by the accelerator</td><td data-k="Notes">Standard public IPv4 address pricing applies.</td></tr>
+          <tr><td class="row-h">Endpoint resources</td><td data-k="Billing basis">Usage of each resource such as ALB, NLB, EC2</td><td data-k="Notes">Billed at each service's rates.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="lede" style="font-size:14px">Rates vary by Region and usage. See the <a href="https://aws.amazon.com/global-accelerator/pricing/" target="_blank" rel="noopener">Global Accelerator pricing page</a> for current rates.</p>
+    </div>
+  </section>
+
+  <section class="cta" aria-labelledby="cta-h">
+    <div class="wrap">
+      <p class="tag">Next step</p>
+      <h2 id="cta-h">Design the entry point for your global users</h2>
+      <p class="lede">Bring your user distribution, serving Regions, protocols, and failover requirements, and we'll review the accelerator type and traffic distribution design together.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="https://aws.amazon.com/global-accelerator/" target="_blank" rel="noopener">Open service page</a>
+        <a class="btn btn-ghost" href="https://docs.aws.amazon.com/global-accelerator/latest/dg/what-is-global-accelerator.html" target="_blank" rel="noopener">Read the Developer Guide</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a href="../">← AWS Networking Services Portfolio</a>
+    <span>AWS Global Accelerator overview. Feature support and pricing vary by Region and endpoint type; check the official documentation.</span>
+    <a href="https://docs.aws.amazon.com/global-accelerator/latest/dg/limits-global-accelerator.html" target="_blank" rel="noopener">Quotas documentation</a>
+  </div>
+</footer>
+
+</body>
+</html>

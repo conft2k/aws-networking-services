@@ -1,0 +1,735 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Interconnect Overview</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+body{margin:0}img{max-width:100%}[hidden]{display:none!important}
+
+/* Layout: a cross-connect work order. Cool steel paper, navy ink, Amazon orange as the one accent; section tags read like fiber labels. */
+:root{
+  --bg:#EEF1F4; --surface:#FFFFFF; --sunken:#E3E8ED;
+  --ink:#14202E; --ink-2:#44515F; --ink-3:#5A6672;
+  --line:#CDD5DD; --line-2:#B4BFCA;
+  --fiber:#FF9900;          /* Amazon orange — fills only */
+  --fiber-ink:#B35C00;      /* orange-derived, AA on light surfaces */
+  --fiber-soft:#FFF0D9;
+  --on-fiber:#14202E;
+  --trace:#2E7D9A;          /* secondary line color for diagram paths */
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --maxw:1120px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--fiber-ink);outline-offset:3px;border-radius:2px}
+.skip-link{position:absolute;left:16px;top:-60px;background:var(--fiber);color:var(--on-fiber);padding:8px 14px;font-weight:700;z-index:50;text-decoration:none}
+.skip-link:focus{top:12px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.wrap{max-width:var(--maxw);margin:0 auto;padding-inline:24px}
+section{padding-block:88px;border-top:1px solid var(--line)}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.25}
+h2{font-size:clamp(26px,3.4vw,36px);font-weight:700;letter-spacing:-.01em}
+h3{font-size:18px;font-weight:700}
+p{margin:0}
+.lede{color:var(--ink-2);max-width:62ch;margin-top:14px}
+.num{font-family:var(--display);font-variant-numeric:tabular-nums lining-nums}
+.mono{font-family:var(--mono)}
+
+/* fiber label: the section tag */
+.tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-bottom:14px}
+.tag::before{content:"";width:22px;height:8px;background:var(--fiber);border-radius:1px}
+
+/* nav */
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:60px}
+.brand{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.02em;text-decoration:none;text-transform:uppercase}
+.brand span{color:var(--fiber-ink)}
+.navlinks{display:flex;gap:22px;font-size:14px;align-items:center}
+.navlinks a{text-decoration:none;color:var(--ink-2)}
+.navlinks a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;font-weight:700;font-size:15px;text-decoration:none;border-radius:4px;border:1px solid transparent;transition:transform .15s ease,background .15s ease}
+.btn-primary{background:var(--fiber);color:var(--on-fiber)}
+.btn-primary:hover{transform:translateY(-1px)}
+.btn-ghost{border-color:var(--line-2);color:var(--ink)}
+.btn-ghost:hover{background:var(--sunken)}
+.navlinks .btn{min-height:38px;padding:0 14px;font-size:14px;color:var(--on-fiber)}
+
+/* hero */
+.hero{padding-block:72px 64px;border-top:0}
+.hero-grid{display:grid;grid-template-columns:1fr 1.15fr;gap:56px;align-items:center}
+.eyebrow{font-family:var(--mono);font-size:13px;color:var(--fiber-ink);letter-spacing:.04em}
+.hero h1{font-size:clamp(34px,5vw,56px);font-weight:700;letter-spacing:-.02em;margin-top:16px}
+.hero h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--fiber) 62%,var(--fiber) 90%,transparent 90%);padding-inline:2px}
+.hero .lede{font-size:18px}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+
+/* hero visual: port faceplate */
+.faceplate{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px}
+.faceplate-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.ports{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+.port{border:1px solid var(--line);border-radius:4px;padding:14px 14px 12px;background:var(--sunken);display:flex;flex-direction:column;gap:2px}
+.port .num{font-size:40px;font-weight:600;line-height:1}
+.port .num small{font-size:18px;color:var(--ink-2);margin-left:2px}
+.port .optic{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+.port .led{width:8px;height:8px;border-radius:50%;background:var(--fiber);align-self:flex-end;margin-top:-6px;animation:blink 2.4s ease-in-out infinite}
+.port:nth-child(2) .led{animation-delay:.6s}.port:nth-child(3) .led{animation-delay:1.2s}.port:nth-child(4) .led{animation-delay:1.8s}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.faceplate-foot{margin-top:14px;font-size:13px;color:var(--ink-2)}
+
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:56px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.chip{padding:18px 20px;border-left:1px solid var(--line);min-width:0}
+.chip:first-child{border-left:0}
+.chip .num{font-size:34px;font-weight:600;line-height:1.1}
+.chip p{font-size:13.5px;color:var(--ink-2);margin-top:4px}
+
+/* value */
+.split{display:grid;grid-template-columns:1fr 1.4fr;gap:56px}
+.pillars{display:grid;gap:0;border-top:1px solid var(--line-2)}
+.pillar{display:grid;grid-template-columns:120px 1fr;gap:20px;padding-block:22px;border-bottom:1px solid var(--line)}
+.pillar .k{font-family:var(--display);font-size:22px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--fiber-ink)}
+.pillar p{color:var(--ink-2);margin-top:6px}
+
+/* stack (L1/L2/L3) */
+.stack{margin-top:40px;display:grid;gap:10px}
+.layer{display:grid;grid-template-columns:96px 1fr 1.2fr;gap:24px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px 24px}
+.layer .lv{font-family:var(--display);font-size:44px;font-weight:700;line-height:.9}
+.layer .lv small{display:block;font-family:var(--mono);font-size:11px;font-weight:400;color:var(--ink-3);letter-spacing:.06em;margin-top:8px;text-transform:uppercase}
+.layer p{color:var(--ink-2);margin-top:6px;font-size:15px}
+.specs{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+.specs code{font-family:var(--mono);font-size:12.5px;background:var(--sunken);border:1px solid var(--line);padding:3px 8px;border-radius:3px;color:var(--ink)}
+
+/* features */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:40px}
+.feature{background:var(--surface);padding:26px 24px;min-width:0}
+.feature .ft{font-family:var(--mono);font-size:11.5px;color:var(--fiber-ink);letter-spacing:.06em;text-transform:uppercase}
+.feature h3{margin-top:8px}
+.feature p{color:var(--ink-2);font-size:15px;margin-top:8px}
+
+/* table */
+.tbl-wrap{margin-top:36px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:14px 18px;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--sunken)}
+tbody tr:last-child td{border-bottom:0}
+td.row-h{font-weight:700;width:22%}
+td .num{font-size:18px;font-weight:600}
+
+/* architecture */
+.arch{margin-top:36px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px}
+.arch-scroll{overflow-x:auto}
+.arch svg{display:block;width:100%;min-width:860px;height:auto}
+.arch-hint{display:none;font-size:13px;color:var(--ink-3);margin-top:10px}
+svg .box{fill:var(--sunken);stroke:var(--line-2)}
+svg .zone{fill:none;stroke:var(--line-2);stroke-dasharray:4 4}
+svg .t{fill:var(--ink);font-family:var(--sans);font-size:14px;font-weight:700}
+svg .s{fill:var(--ink-3);font-family:var(--mono);font-size:11px}
+svg .z{fill:var(--ink-2);font-family:var(--mono);font-size:11px;letter-spacing:.08em}
+svg .fiber{stroke:var(--fiber);stroke-width:5;fill:none;stroke-linecap:round}
+svg .path{stroke:var(--trace);stroke-width:2;fill:none}
+svg .site{stroke:var(--fiber-ink);stroke-width:2;fill:none;stroke-dasharray:6 5}
+svg .lbl{fill:var(--trace);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .lbl2{fill:var(--fiber-ink);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .dot{fill:var(--fiber)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) svg .ic-gen{filter:invert(1)}}
+:root[data-theme="dark"] svg .ic-gen{filter:invert(1)}
+.legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--ink-2)}
+.legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--fiber)}
+.legend i.p{border-top:2px solid var(--trace)}
+.legend i.s{border-top:2px dashed var(--fiber-ink)}
+
+/* steps */
+.steps{list-style:none;padding:0;margin:40px 0 0;display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:4px solid var(--fiber)}
+.steps li{padding:20px 18px 0 0;min-width:0}
+.steps .num{font-size:15px;font-weight:600;color:var(--fiber-ink);letter-spacing:.06em}
+.steps h3{font-size:16px;margin-top:6px}
+.steps p{font-size:14px;color:var(--ink-2);margin-top:6px}
+
+/* resiliency */
+.res{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:36px}
+.res-card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:26px}
+.res-card .num{font-size:52px;font-weight:700;line-height:1}
+.res-card .num small{font-size:20px;color:var(--ink-2)}
+.res-card h3{margin-top:10px}
+.res-card p{color:var(--ink-2);font-size:15px;margin-top:6px}
+.res-card.max{border-color:var(--fiber);box-shadow:inset 0 4px 0 var(--fiber)}
+
+/* cta */
+.cta{text-align:center}
+.cta h2{max-width:22ch;margin:0 auto}
+.cta .lede{margin:14px auto 0}
+.cta .cta-row{justify-content:center}
+footer{border-top:1px solid var(--line);padding-block:28px;font-size:13px;color:var(--ink-3)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+
+@media (max-width:1024px){
+  .hero-grid,.split{grid-template-columns:1fr;gap:40px}
+  .features{grid-template-columns:repeat(2,1fr)}
+  .steps{grid-template-columns:repeat(2,1fr);border-top:0;gap:0 24px}
+  .steps li{border-top:4px solid var(--fiber);padding-bottom:24px}
+  .layer{grid-template-columns:80px 1fr}
+  .layer .specs{grid-column:2}
+  .chips{grid-template-columns:repeat(2,1fr)}
+  .chip:nth-child(3){border-left:0}
+  .chip:nth-child(n+3){border-top:1px solid var(--line)}
+}
+@media (max-width:640px){
+  .wrap{padding-inline:18px}
+  section{padding-block:60px}
+  .navlinks a:not(.btn){display:none}
+  .features,.res{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr}
+  .pillar{grid-template-columns:1fr;gap:0}
+  .layer{grid-template-columns:1fr;gap:12px}
+  .layer .specs{grid-column:auto}
+  .cta-row .btn{width:100%}
+  .arch-hint{display:block}
+  table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  table,tbody,tr,td{display:block;width:100%}
+  tr{border-bottom:1px solid var(--line);padding:14px 16px}
+  tbody tr:last-child{border-bottom:0}
+  td{border:0;padding:3px 0}
+  td.row-h{width:100%;font-size:16px;padding-bottom:6px}
+  td[data-k]::before{content:attr(data-k);display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+
+/* ---- service-specific ---- */
+.hero-grid>*{min-width:0}
+/* hero visual: one logical interconnect, four MACsec links underneath */
+.ixo{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px;min-width:0}
+.ixo-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.ixo-obj{margin-top:16px;border:1px dashed var(--line-2);border-radius:4px;padding:12px 14px;display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.ixo-obj .num{font-size:24px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;line-height:1.1}
+.ixo-obj .mono{font-size:11.5px;color:var(--ink-3)}
+.facs{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}
+.fac{background:var(--sunken);border:1px solid var(--line);border-radius:4px;padding:12px 12px 10px;min-width:0}
+.fac .fn{font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.link{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;margin-top:10px;font-family:var(--mono);font-size:11px;color:var(--ink-2)}
+.link .bar{height:4px;background:var(--fiber);border-radius:2px;position:relative}
+.link .bar::after{content:"";position:absolute;left:50%;top:-3px;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:var(--surface);border:2px solid var(--fiber-ink);animation:blink 2.4s ease-in-out infinite}
+.fac:nth-child(2) .link .bar::after{animation-delay:.6s}
+.link + .link .bar::after{animation-delay:1.2s}
+.partners{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.partners code{font-family:var(--mono);font-size:11.5px;border:1px solid var(--line-2);padding:2px 7px;border-radius:3px;color:var(--ink-2);background:var(--surface)}
+.partners code b{font-weight:500;color:var(--fiber-ink)}
+.ixo-foot{margin-top:12px;font-size:13px;color:var(--ink-2)}
+
+/* status badges */
+.st{display:inline-block;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:3px;border:1px solid var(--line-2);color:var(--ink-2);white-space:nowrap}
+.st.ga{background:var(--fiber);border-color:var(--fiber);color:var(--on-fiber)}
+.st.pv{background:var(--fiber-soft);border-color:var(--fiber-ink);color:var(--fiber-ink)}
+.note{font-size:14px;color:var(--ink-3);margin-top:14px;max-width:80ch}
+.nw{white-space:nowrap}
+td .sub{display:block;font-family:var(--mono);font-size:12px;font-weight:400;color:var(--ink-3)}
+@media (min-width:641px){.cmp td:first-child{width:16%}}
+
+@media (max-width:640px){
+  .ixo{padding:16px}
+  .facs{gap:8px}
+  .fac{padding:10px 8px 8px}
+  .link{font-size:10px;gap:5px}
+}
+
+
+/* two services: multicloud = orange, last mile = teal */
+.tag.lm::before{background:var(--trace)}
+.mk{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:7px;background:var(--fiber);vertical-align:0}
+.mk.lm{background:var(--trace)}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.svc{background:var(--sunken);border:1px solid var(--line);border-radius:4px;padding:14px 14px 12px;min-width:0;display:flex;flex-direction:column;gap:8px;box-shadow:inset 0 3px 0 var(--fiber)}
+.svc.lm{box-shadow:inset 0 3px 0 var(--trace)}
+.svc .fn{font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.svc h3{font-size:16.5px;line-height:1.3}
+.svc .who{font-size:13px;color:var(--ink-2);line-height:1.5}
+.svc .link{margin-top:0}
+.svc.lm .link .bar{background:var(--trace)}
+.svc.lm .link .bar::after{border-color:var(--trace)}
+.svc .partners{margin-top:2px}
+.kv{margin:0;display:grid;gap:5px;font-size:12.5px;line-height:1.45}
+.kv div{display:grid;grid-template-columns:58px 1fr;gap:6px}
+.kv dt{font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:var(--ink-3);padding-top:1px}
+.kv dd{margin:0;min-width:0}
+.tight{font-size:14px}
+.tight th,.tight td{padding:10px 16px}
+.tight td .sub{font-size:11.5px}
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:36px}
+.col{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:24px;min-width:0;box-shadow:inset 0 4px 0 var(--fiber)}
+.col.lm{box-shadow:inset 0 4px 0 var(--trace)}
+.col .ft{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.col h3{margin-top:6px}
+.flow{list-style:none;counter-reset:f;padding:0;margin:16px 0 0;display:grid;gap:12px}
+.flow li{counter-increment:f;display:grid;grid-template-columns:30px 1fr;gap:8px;font-size:14.5px;color:var(--ink-2);line-height:1.6}
+.flow li::before{content:counter(f,decimal-leading-zero);font-family:var(--display);font-weight:600;font-size:17px;color:var(--fiber-ink);line-height:1.45}
+.col.lm .flow li::before{color:var(--trace)}
+.flow b{color:var(--ink)}
+.features.f3{margin-top:28px}
+#lastmile .feature .ft,#lastmile-arch .feature .ft{color:var(--trace)}
+.features.f3 .feature{padding:20px 22px}
+.svc-arch{margin:24px 0 0}
+.svc-arch svg{min-width:820px}
+@media (max-width:1024px){.cols2{grid-template-columns:1fr}}
+@media (max-width:640px){.duo{grid-template-columns:1fr}.col{padding:18px}}
+
+/* nav: many items need room; show only CTA below 1100px */
+.brand,.navlinks a{white-space:nowrap}
+@media (max-width:1100px){.navlinks a:not(.btn){display:none}}
+
+/* Korean line breaking: never split a word mid-syllable */
+h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
+</style>
+<link rel="stylesheet" href="../../assets/site.css?v=16">
+<script src="../../assets/site.js?v=16"></script>
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<nav aria-label="Main menu">
+  <div class="wrap">
+    <a class="brand" href="#top">AWS <span>Interconnect</span></a>
+    <div class="navlinks">
+      <a href="../">Service portfolio</a>
+      <a href="#overview">Compare the two</a>
+      <a href="#multicloud">multicloud</a>
+      <a href="#lastmile">last mile</a>
+      <a href="#compare">vs DX · VPN</a>
+      <a href="#pricing">Pricing</a>
+      <a class="btn btn-primary" href="#start">Get started</a>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+  <header class="hero" id="top">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">AWS Interconnect · Managed private connectivity family</p>
+          <h1>One name, <em>two</em> services</h1>
+          <p class="lede">AWS Interconnect is the umbrella name for two independent services. <b>multicloud</b> connects AWS VPCs to VPCs in other public clouds, and <b>last mile</b> connects branches and data centers to AWS over a carrier's existing network. Each service has its own partners, supported Regions, pricing and quotas.</p>
+          <p class="lede">What they share is the operating model. You pick a Region, bandwidth and partner; AWS builds the connection on capacity it has pre-provisioned with that partner and presents it as a single <span class="mono">interconnect</span> object attached to a DX gateway.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="#overview">Compare the two</a>
+            <a class="btn btn-ghost" href="#start">Get started</a>
+          </div>
+        </div>
+
+        <div class="ixo" aria-label="Summary of the two AWS Interconnect services">
+          <div class="ixo-head"><span>AWS Interconnect</span><span>2 offerings</span></div>
+          <div class="duo">
+            <div class="svc">
+              <span class="fn">Service 01</span>
+              <h3>Interconnect – multicloud</h3>
+              <p class="who">AWS VPC ↔ other-cloud VPC</p>
+              <div class="link"><span>AWS</span><span class="bar" aria-hidden="true"></span><span>CSP</span></div>
+              <dl class="kv">
+                <div><dt>Partner</dt><dd>Cloud service provider (CSP)</dd></div>
+                <div><dt>attach</dt><dd>DX gateway ↔ CSP router</dd></div>
+                <div><dt>Bandwidth</dt><dd>Per partner/Region pair (e.g. 10 Gbps)</dd></div>
+              </dl>
+              <div class="partners" aria-label="multicloud partners and status">
+                <code>Google Cloud <b>GA</b></code><code>OCI <b>GA</b></code><code>Azure <b>Preview</b></code>
+              </div>
+            </div>
+            <div class="svc lm">
+              <span class="fn">Service 02</span>
+              <h3>Interconnect – last mile</h3>
+              <p class="who">Branch / data center ↔ AWS</p>
+              <div class="link"><span>Site</span><span class="bar" aria-hidden="true"></span><span>AWS</span></div>
+              <dl class="kv">
+                <div><dt>Partner</dt><dd>Carrier (delivery partner)</dd></div>
+                <div><dt>attach</dt><dd>DX gateway ↔ partner network ID</dd></div>
+                <div><dt>Bandwidth</dt><dd>1–100 Gbps, 7 steps</dd></div>
+              </dl>
+              <div class="partners" aria-label="last mile partners and status">
+                <code>Lumen <b>GA</b></code><code>AT&amp;T <b>Gated preview</b></code>
+              </div>
+            </div>
+          </div>
+          <p class="ixo-foot">Both services use four connections (ECMP) across at least two facilities and encrypt the AWS-to-partner device segment with MACsec.</p>
+        </div>
+      </div>
+
+      <div class="chips" role="list">
+        <div class="chip" role="listitem"><span class="num">2</span><p>Independent services: multicloud · last mile</p></div>
+        <div class="chip" role="listitem"><span class="num">4</span><p>Connections across 2+ facilities (both, ECMP)</p></div>
+        <div class="chip" role="listitem"><span class="num">1–100</span><p>last mile bandwidth steps (Gbps)</p></div>
+        <div class="chip" role="listitem"><span class="num">500 Mbps</span><p>multicloud Free Tier (one per Region per CSP)</p></div>
+      </div>
+    </div>
+  </header>
+
+  <section id="overview" aria-labelledby="overview-h">
+    <div class="wrap">
+      <p class="tag">Two offerings</p>
+      <h2 id="overview-h">multicloud and last mile are separate services</h2>
+      <p class="lede">The service depends on whether your partner is a cloud provider or a carrier. Console menus, supported Regions, pricing pages and per-partner quotas are all separate, so use only the one you need.</p>
+      <div class="tbl-wrap">
+        <table class="cmp tight">
+          <caption class="sr-only">AWS Interconnect – multicloud vs. last mile</caption>
+          <thead><tr><th scope="col">Item</th><th scope="col"><span class="mk" aria-hidden="true"></span>multicloud</th><th scope="col"><span class="mk lm" aria-hidden="true"></span>last mile</th></tr></thead>
+          <tbody>
+            <tr><td class="row-h">Connects</td><td data-k="multicloud">AWS VPC ↔ VPC in another public cloud</td><td data-k="last mile">Branches, data centers, remote sites ↔ AWS (over the partner's existing network)</td></tr>
+            <tr><td class="row-h">Partners</td><td data-k="multicloud">Google Cloud <span class="st ga">GA</span> · OCI <span class="st ga">GA</span> · Azure <span class="st pv">Preview</span></td><td data-k="last mile">Lumen <span class="st ga">GA</span> · AT&amp;T <span class="st pv">Gated preview</span></td></tr>
+            <tr><td class="row-h">Location choice</td><td data-k="multicloud">AWS local Region + paired CSP Region (8 Regions for Google Cloud, 1 for OCI, 4 for Azure)</td><td data-k="last mile">Choosing an Interconnect metro determines the Region (NY/NJ → <span class="nw">us-east-1</span>)</td></tr>
+            <tr><td class="row-h">Create · accept</td><td data-k="multicloud">DX console › AWS Interconnect › multicloud. Enter the partner ID (Google Cloud project ID, OCI tenancy OCID) → accept with the activation key in the CSP console</td><td data-k="last mile">DX console › Last mile Interconnect. Enter the partner account ID (email for Lumen) → accept with the activation key in the partner portal</td></tr>
+            <tr><td class="row-h">Partner-side attach point</td><td data-k="multicloud">CSP router</td><td data-k="last mile">Partner-side network identifier, with customer CPE beyond it</td></tr>
+            <tr><td class="row-h">Bandwidth</td><td data-k="multicloud">Supported list per partner/Region pair (e.g. Google Cloud 10 Gbps). 1 Gbps for preview partners</td><td data-k="last mile">1 · 2 · 5 · 10 · 25 · 50 · 100 Gbps</td></tr>
+            <tr><td class="row-h">Extras</td><td data-k="multicloud">500 Mbps Free Tier for GA partners (one per Region per CSP)</td><td data-k="last mile">99.99% availability SLA (to the DX port), MTU 8500, IPv4 · IPv6</td></tr>
+            <tr><td class="row-h">Pricing tier basis</td><td data-k="multicloud">Distance from the VPC traffic source Region ↔ Interconnect local Region</td><td data-k="last mile">Interconnect metro ↔ farthest Region attached to the DX gateway</td></tr>
+            <tr><td class="row-h">Quota</td><td data-k="multicloud">2 per partner CSP (per account)</td><td data-k="last mile">2 per partner (per account)</td></tr>
+            <tr><td class="row-h">Typical uses</td><td data-k="multicloud">Cross-cloud data pipelines, distributed analytics and AI workloads, cross-cloud DR</td><td data-k="last mile">Onboarding branches and data centers, replacing hosted connections or self-procured circuits</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note"><b>In common</b> · Both are managed in the Direct Connect console, CLI, API and CloudFormation (<span class="mono">AWS::Interconnect::Connection</span>, with the CSP or last mile provider set in Provider). The AWS-side attach point is a DX gateway; four connections, ECMP and MACsec are the default; and you pay an hourly rate with no per-GB transfer charge. The two services share a quota of 10 Interconnects per account (4 in requested state).</p>
+    </div>
+  </section>
+
+  <section id="multicloud" aria-labelledby="multicloud-h">
+    <div class="wrap">
+      <p class="tag">Service 01 · multicloud</p>
+      <h2 id="multicloud-h">Interconnect – multicloud: connect directly to other clouds</h2>
+      <p class="lede">Create private connections with dedicated bandwidth on a capacity pool that AWS and the partner CSP have pre-provisioned. Traffic rides the AWS global backbone and is handed straight to the partner CSP, with no on-premises equipment or virtual routers in the path.</p>
+      <div class="tbl-wrap">
+        <table class="tight">
+          <caption class="sr-only">multicloud status and supported Regions by partner CSP</caption>
+          <thead><tr><th scope="col">Partner CSP</th><th scope="col">Status</th><th scope="col">AWS Region – partner Region</th><th scope="col">Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="row-h">Google Cloud</td><td data-k="Status"><span class="st ga">GA</span></td><td data-k="AWS Region – partner Region"><span class="nw">us-east-1</span>, <span class="nw">us-west-1</span>, <span class="nw">us-west-2</span>, <span class="nw">eu-west-2</span>, <span class="nw">eu-central-1</span>, <span class="nw">eu-north-1</span>, <span class="nw">ap-southeast-1</span>, <span class="nw">ap-southeast-2</span> (e.g. <span class="nw">us-east-1 – us-east4</span>)</td><td data-k="Notes">Launch partner, GA April 2026. Enter the project ID at creation</td></tr>
+            <tr><td class="row-h">Oracle Cloud Infrastructure</td><td data-k="Status"><span class="st ga">GA</span></td><td data-k="AWS Region – partner Region"><span class="nw">us-east-1 – us-ashburn-1</span></td><td data-k="Notes">GA July 2026. Enter the tenancy OCID at creation</td></tr>
+            <tr><td class="row-h">Microsoft Azure</td><td data-k="Status"><span class="st pv">Preview</span></td><td data-k="AWS Region – partner Region"><span class="nw">us-east-1</span>, <span class="nw">us-west-1</span>, <span class="nw">eu-central-1</span>, <span class="nw">ap-southeast-2</span></td><td data-k="Notes">Public preview since August 2026. One per Region, 1 Gbps, free; preview connections are removed at GA</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="features f3">
+        <article class="feature"><p class="ft">Bandwidth</p><h3>Per-pair speeds, changed without downtime</h3><p>Choose from the list each partner/Region pair supports, and scale up or down by changing an attribute instead of recreating the connection.</p></article>
+        <article class="feature"><p class="ft">Resiliency</p><h3>4-way redundancy + MACsec</h3><p>ECMP across four connections in at least two facilities. The physical segment between AWS and CSP routers is encrypted with MACsec.</p></article>
+        <article class="feature"><p class="ft">Limits</p><h3>2 per CSP</h3><p>Up to two per partner CSP per account. Preview partners allow one per Region, and activation during preview may require the CLI.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="multicloud-arch" aria-labelledby="multicloud-arch-h">
+    <div class="wrap">
+      <p class="tag">multicloud · architecture</p>
+      <h2 id="multicloud-arch-h">Local Region through TGW or VGW, other Regions through Cloud WAN</h2>
+      <p class="lede">This example connects us-east-1, as the local Region, to Google Cloud (<span class="nw">us-east4</span>). A VGW or TGW reaches only an Interconnect in the same Region, while a Cloud WAN CNE reaches any Interconnect on the same DX gateway, from any Region.</p>
+      <figure class="arch svc-arch">
+        <div class="arch-scroll">
+          <svg viewBox="0 0 980 360" role="img" aria-labelledby="mc-title mc-desc">
+            <title id="mc-title">AWS Interconnect – multicloud reference architecture</title>
+            <desc id="mc-desc">Two VPCs in us-east-1 attach to a transit gateway, which is associated with a DX gateway. A Cloud WAN CNE in the Seoul Region connects to the same DX gateway through a DX attachment. The DX gateway reaches the Google Cloud Cloud Router over four multicloud Interconnect links split across facilities A and B, and the physical links are encrypted with MACsec.</desc>
+            <rect class="zone" x="10" y="30" width="450" height="320" rx="6"/>
+            <image href="../../assets/aws-icons/AWS-Cloud_32.svg" x="10" y="30" width="24" height="24"/>
+            <text class="z" x="42" y="46">AWS</text>
+            <rect class="zone" x="26" y="62" width="232" height="176" rx="4"/>
+            <image href="../../assets/aws-icons/Region_32.svg" x="26" y="62" width="20" height="20"/>
+            <text class="z" x="52" y="76">US-EAST-1 · LOCAL</text>
+            <rect class="box" x="40" y="96" width="96" height="50" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-VPC_Virtual-private-cloud-VPC_48.svg" x="46" y="109" width="24" height="24"/>
+            <text class="t" x="78" y="118">VPC A</text><text class="s" x="78" y="136">Workload</text>
+            <rect class="box" x="148" y="96" width="96" height="50" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-VPC_Virtual-private-cloud-VPC_48.svg" x="154" y="109" width="24" height="24"/>
+            <text class="t" x="186" y="118">VPC B</text><text class="s" x="186" y="136">Workload</text>
+            <rect class="box" x="40" y="178" width="204" height="48" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_AWS-Transit-Gateway_48.svg" x="50" y="188" width="28" height="28"/>
+            <text class="t" x="88" y="198">Transit Gateway</text><text class="s" x="88" y="216">Local-Region assoc.</text>
+            <path class="path" d="M88 146 V178"/>
+            <path class="path" d="M196 146 V178"/>
+            <rect class="zone" x="26" y="252" width="232" height="84" rx="4"/>
+            <image href="../../assets/aws-icons/Region_32.svg" x="26" y="252" width="20" height="20"/>
+            <text class="z" x="52" y="266">AP-NORTHEAST-2 · REMOTE</text>
+            <rect class="box" x="40" y="276" width="204" height="50" rx="4"/>
+            <image href="../../assets/aws-icons/Res_AWS-Cloud-WAN_Core-Network-Edge_48.svg" x="50" y="287" width="28" height="28"/>
+            <text class="t" x="88" y="297">Cloud WAN CNE</text><text class="s" x="88" y="315">Other-Region workloads</text>
+            <rect class="box" x="290" y="170" width="160" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Res_AWS-Direct-Connect_Gateway_48.svg" x="298" y="190" width="24" height="24"/>
+            <text class="t" x="330" y="198">DX Gateway</text><text class="s" x="330" y="218">AWS attach point</text>
+            <path class="path" d="M244 202 H290"/>
+            <text class="lbl" x="294" y="160">association</text>
+            <path class="path" d="M244 301 C276 301 264 222 290 222"/>
+            <text class="lbl" x="292" y="276">DX attachment</text>
+            <rect class="zone" x="480" y="30" width="220" height="320" rx="6"/>
+            <text class="z" x="494" y="52">INTERCONNECT</text>
+            <text class="z" x="494" y="84">MULTICLOUD · US-EAST-1</text>
+            <rect class="box" x="500" y="104" width="180" height="44" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_AWS-Interconnect_48.svg" x="508" y="114" width="24" height="24"/>
+            <text class="t" x="540" y="124">Facility A</text><text class="s" x="540" y="140">2 router pairs</text>
+            <rect class="box" x="500" y="164" width="180" height="44" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_AWS-Interconnect_48.svg" x="508" y="174" width="24" height="24"/>
+            <text class="t" x="540" y="184">Facility B</text><text class="s" x="540" y="200">2 router pairs</text>
+            <text class="lbl2" x="494" y="250">4 links · ECMP</text>
+            <text class="lbl2" x="494" y="268">MACsec (AWS–CSP routers)</text>
+            <path class="path" d="M450 190 C476 190 474 126 500 126"/>
+            <path class="path" d="M450 214 C478 214 472 186 500 186"/>
+
+            <rect class="zone" x="720" y="30" width="250" height="320" rx="6"/>
+            <text class="z" x="734" y="52">OTHER CSP</text>
+            <rect class="box" x="740" y="96" width="210" height="124" rx="4"/>
+            <text class="t" x="754" y="126">Google Cloud</text>
+            <text class="s" x="754" y="146">VPC · Cloud Router</text>
+            <text class="s" x="754" y="163">Paired Region us-east4</text>
+            <text class="s" x="754" y="200">attach point = CSP router</text>
+            <text class="s" x="734" y="330">OCI · Azure: same design</text>
+            <path class="fiber" style="stroke-width:3" d="M680 116 C710 116 710 128 740 128"/>
+            <path class="fiber" style="stroke-width:3" d="M680 132 C710 132 710 140 740 140"/>
+            <path class="fiber" style="stroke-width:3" d="M680 176 C710 176 710 160 740 160"/>
+            <path class="fiber" style="stroke-width:3" d="M680 192 C710 192 710 172 740 172"/>
+          </svg>
+        </div>
+        <figcaption class="legend">
+          <span><i></i>MACsec physical link (AWS–CSP)</span>
+          <span><i class="p"></i>Logical connection · association</span>
+        </figcaption>
+        <p class="arch-hint">On narrow screens, swipe the diagram sideways.</p>
+      </figure>
+      <div class="features f3">
+        <article class="feature"><p class="ft">When to use</p><h3>Cross-cloud data movement</h3><p>Connect AWS workloads to data and analytics services in another cloud without the internet or your own colocation.</p></article>
+        <article class="feature"><p class="ft">When to use</p><h3>Multi-Region hub integration</h3><p>With Cloud WAN, workloads in other Regions use the same Interconnect. The pricing tier rises to match the farthest CNE.</p></article>
+        <article class="feature"><p class="ft">When to use</p><h3>Validate for free first</h3><p>GA partners include a Tier 1 500 Mbps Free Tier, so you can verify paths and routing first (it cannot be converted to paid).</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="lastmile" aria-labelledby="lastmile-h">
+    <div class="wrap">
+      <p class="tag lm">Service 02 · last mile</p>
+      <h2 id="lastmile-h">Interconnect – last mile: reach AWS through the carrier you already use</h2>
+      <p class="lede">Come into AWS directly from the Ethernet or MPLS network of a carrier you already have a contract with. The service automates partner discovery, cross-connects and VLAN, ASN and BGP configuration, and enforces the AWS recommended configuration. On your side, all you need is CPE connected to the partner's network.</p>
+      <div class="tbl-wrap">
+        <table class="tight">
+          <caption class="sr-only">last mile status and metros by partner</caption>
+          <thead><tr><th scope="col">Partner</th><th scope="col">Status</th><th scope="col">Interconnect metro → AWS Region</th><th scope="col">Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="row-h">Lumen</td><td data-k="Status"><span class="st ga">GA</span></td><td data-k="Metro → Region">New York/New Jersey → <span class="nw">us-east-1</span></td><td data-k="Notes">GA April 2026. Connect from anywhere in the contiguous US over the Lumen network. The partner account ID is an email address</td></tr>
+            <tr><td class="row-h">AT&amp;T</td><td data-k="Status"><span class="st pv">Gated preview</span></td><td data-k="Metro → Region">United States</td><td data-k="Notes">Gated preview since June 30, 2026</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="features f3">
+        <article class="feature"><p class="ft">Bandwidth</p><h3>1–100 Gbps, 7 steps</h3><p>Choose 1 · 2 · 5 · 10 · 25 · 50 · 100 Gbps and scale up or down in the console or CLI without recreating the connection.</p></article>
+        <article class="feature"><p class="ft">Resiliency</p><h3>99.99% SLA (to the DX port)</h3><p>Four connections on four router pairs at two separate sites, load-shared with ECMP. At least one link stays up during planned maintenance.</p></article>
+        <article class="feature"><p class="ft">Network</p><h3>MTU 8500 · IPv4/IPv6</h3><p>Jumbo frames by default and BGP configured automatically. 256-bit MACsec is applied to every connection by default.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="lastmile-arch" aria-labelledby="lastmile-arch-h">
+    <div class="wrap">
+      <p class="tag lm">last mile · architecture</p>
+      <h2 id="lastmile-arch-h">Enter AWS at the metro, fan out through the DX gateway</h2>
+      <p class="lede">In this example, traffic leaves the site's CPE, crosses the Lumen network (first mile) and enters AWS at the NY/NJ metro. Workloads need not be in us-east-1; with Cloud WAN they can be in other Regions too.</p>
+      <figure class="arch svc-arch">
+        <div class="arch-scroll">
+          <svg viewBox="0 0 980 360" role="img" aria-labelledby="lm-title lm-desc">
+            <title id="lm-title">AWS Interconnect – last mile reference architecture</title>
+            <desc id="lm-desc">CPE at data centers and branches connects over first-mile circuits to the Lumen network, which connects to AWS with four last mile Interconnect links split across two sites in the New York/New Jersey metro. The physical links are encrypted with MACsec. The Interconnect attaches to a DX gateway, which is associated with a transit gateway in us-east-1 and connected to a Cloud WAN CNE in the Seoul Region through a DX attachment.</desc>
+            <rect class="zone" x="10" y="30" width="450" height="320" rx="6"/>
+            <image href="../../assets/aws-icons/AWS-Cloud_32.svg" x="10" y="30" width="24" height="24"/>
+            <text class="z" x="42" y="46">AWS</text>
+            <rect class="zone" x="26" y="62" width="232" height="176" rx="4"/>
+            <image href="../../assets/aws-icons/Region_32.svg" x="26" y="62" width="20" height="20"/>
+            <text class="z" x="52" y="76">US-EAST-1 · LOCAL</text>
+            <rect class="box" x="40" y="96" width="96" height="50" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-VPC_Virtual-private-cloud-VPC_48.svg" x="46" y="109" width="24" height="24"/>
+            <text class="t" x="78" y="118">VPC A</text><text class="s" x="78" y="136">Workload</text>
+            <rect class="box" x="148" y="96" width="96" height="50" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-VPC_Virtual-private-cloud-VPC_48.svg" x="154" y="109" width="24" height="24"/>
+            <text class="t" x="186" y="118">VPC B</text><text class="s" x="186" y="136">Workload</text>
+            <rect class="box" x="40" y="178" width="204" height="48" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_AWS-Transit-Gateway_48.svg" x="50" y="188" width="28" height="28"/>
+            <text class="t" x="88" y="198">Transit Gateway</text><text class="s" x="88" y="216">Local-Region assoc.</text>
+            <path class="path" d="M88 146 V178"/>
+            <path class="path" d="M196 146 V178"/>
+            <rect class="zone" x="26" y="252" width="232" height="84" rx="4"/>
+            <image href="../../assets/aws-icons/Region_32.svg" x="26" y="252" width="20" height="20"/>
+            <text class="z" x="52" y="266">AP-NORTHEAST-2 · REMOTE</text>
+            <rect class="box" x="40" y="276" width="204" height="50" rx="4"/>
+            <image href="../../assets/aws-icons/Res_AWS-Cloud-WAN_Core-Network-Edge_48.svg" x="50" y="287" width="28" height="28"/>
+            <text class="t" x="88" y="297">Cloud WAN CNE</text><text class="s" x="88" y="315">Other-Region workloads</text>
+            <rect class="box" x="290" y="170" width="160" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Res_AWS-Direct-Connect_Gateway_48.svg" x="298" y="190" width="24" height="24"/>
+            <text class="t" x="330" y="198">DX Gateway</text><text class="s" x="330" y="218">AWS attach point</text>
+            <path class="path" d="M244 202 H290"/>
+            <text class="lbl" x="294" y="160">association</text>
+            <path class="path" d="M244 301 C276 301 264 222 290 222"/>
+            <text class="lbl" x="292" y="276">DX attachment</text>
+            <rect class="zone" x="480" y="30" width="220" height="320" rx="6"/>
+            <text class="z" x="494" y="52">INTERCONNECT</text>
+            <text class="z" x="494" y="84">LAST MILE · NY/NJ METRO</text>
+            <rect class="box" x="500" y="104" width="180" height="44" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_AWS-Interconnect_48.svg" x="508" y="114" width="24" height="24"/>
+            <text class="t" x="540" y="124">Site 1</text><text class="s" x="540" y="140">2 router pairs</text>
+            <rect class="box" x="500" y="164" width="180" height="44" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_AWS-Interconnect_48.svg" x="508" y="174" width="24" height="24"/>
+            <text class="t" x="540" y="184">Site 2</text><text class="s" x="540" y="200">2 router pairs</text>
+            <text class="lbl2" x="494" y="250">4 links · ECMP</text>
+            <text class="lbl2" x="494" y="268">256-bit MACsec</text>
+            <text class="lbl2" x="494" y="286">SLA 99.99% (to the port)</text>
+            <path class="path" d="M450 190 C476 190 474 126 500 126"/>
+            <path class="path" d="M450 214 C478 214 472 186 500 186"/>
+
+            <rect class="zone" x="720" y="30" width="250" height="320" rx="6"/>
+            <text class="z" x="734" y="52">DELIVERY PARTNER</text>
+            <rect class="box" x="740" y="96" width="210" height="92" rx="4"/>
+            <text class="t" x="754" y="124">Lumen network</text>
+            <text class="s" x="754" y="144">Ethernet · MPLS</text>
+            <text class="s" x="754" y="161">Anywhere in the US</text>
+            <text class="s" x="754" y="178">Partner-side network ID</text>
+            <path class="fiber" style="stroke-width:3" d="M680 116 C710 116 710 120 740 120"/>
+            <path class="fiber" style="stroke-width:3" d="M680 132 C710 132 710 132 740 132"/>
+            <path class="fiber" style="stroke-width:3" d="M680 176 C710 176 710 152 740 152"/>
+            <path class="fiber" style="stroke-width:3" d="M680 192 C710 192 710 164 740 164"/>
+            <path class="site" d="M845 188 V262"/>
+            <text class="lbl2" x="853" y="230">first mile</text>
+            <rect class="box" x="740" y="262" width="210" height="56" rx="4"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Office-building_48_Light.svg" x="750" y="276" width="28" height="28"/>
+            <text class="t" x="788" y="286">Data center · branch</text><text class="s" x="788" y="304">CPE</text>
+          </svg>
+        </div>
+        <figcaption class="legend">
+          <span><i></i>MACsec physical link (AWS–partner)</span>
+          <span><i class="p"></i>Logical connection · association</span>
+          <span><i class="s"></i>First-mile circuit</span>
+        </figcaption>
+        <p class="arch-hint">On narrow screens, swipe the diagram sideways.</p>
+      </figure>
+      <div class="features f3">
+        <article class="feature"><p class="ft">vs hosted connection</p><h3>Procurement, setup and redundancy automated</h3><p>With a hosted connection, finding a partner, procuring the circuit and configuring VIFs and BGP are up to you; it isn't redundant by default and isn't covered by the DX SLA. last mile automates all of this and enforces redundancy.</p></article>
+        <article class="feature"><p class="ft">When to use</p><h3>Onboard branches and data centers</h3><p>Request directly in the console with the carrier account you already have. You can also attach to a DX gateway that already has private or transit VIFs.</p></article>
+        <article class="feature"><p class="ft">Operations</p><h3>Two support channels</h3><p>AWS Support covers the AWS side, and the partner supports its network. You can create up to two per partner (per account).</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="compare" aria-labelledby="compare-h">
+    <div class="wrap">
+      <p class="tag">Comparison</p>
+      <h2 id="compare-h">How it differs from Direct Connect and VPN</h2>
+      <p class="lede">Both Interconnect services are managed layers that run on Direct Connect infrastructure and the DX gateway. Instead of handling ports, VIFs and BGP yourself, you consume capacity pre-arranged with the partner as an object.</p>
+      <div class="tbl-wrap">
+        <table class="cmp tight">
+          <caption class="sr-only">Interconnect – multicloud, Interconnect – last mile, Direct Connect and Site-to-Site VPN over the internet compared</caption>
+          <thead><tr><th scope="col">Item</th><th scope="col"><span class="mk" aria-hidden="true"></span>multicloud</th><th scope="col"><span class="mk lm" aria-hidden="true"></span>last mile</th><th scope="col">Direct Connect</th><th scope="col">S2S VPN (internet)</th></tr></thead>
+          <tbody>
+            <tr><td class="row-h">Connects</td><td data-k="multicloud">VPCs in another CSP</td><td data-k="last mile">Branches and data centers on the partner network</td><td data-k="Direct Connect">Customer or partner circuits brought to a DX location</td><td data-k="S2S VPN">Customer gateway reachable over the internet</td></tr>
+            <tr><td class="row-h">Setup work</td><td data-k="multicloud">Create + accept the key in the CSP console</td><td data-k="last mile">Create + accept the key in the partner portal</td><td data-k="Direct Connect">Port request, LOA-CFA, cross-connect, VIF creation</td><td data-k="S2S VPN">Create the VPN connection, configure IPsec on customer device</td></tr>
+            <tr><td class="row-h">Routing</td><td data-k="multicloud">BGP, VLAN, ASN automatic</td><td data-k="last mile">BGP, VLAN, ASN automatic</td><td data-k="Direct Connect">Configure eBGP yourself per VIF</td><td data-k="S2S VPN">Configure static routes or BGP yourself</td></tr>
+            <tr><td class="row-h">Redundancy</td><td data-k="multicloud">Default: 2+ facilities, 4 connections, ECMP</td><td data-k="last mile">Default: 2 sites, 4 connections, ECMP, 99.99% SLA</td><td data-k="Direct Connect">You design it (Resiliency Toolkit)</td><td data-k="S2S VPN">2 tunnels per connection; device redundancy is up to you</td></tr>
+            <tr><td class="row-h">Encryption</td><td data-k="multicloud">MACsec on AWS–CSP segment by default</td><td data-k="last mile">MACsec on AWS–partner segment by default</td><td data-k="Direct Connect">Optional MACsec on supported dedicated connections</td><td data-k="S2S VPN">IPsec end to end</td></tr>
+            <tr><td class="row-h">Bandwidth</td><td data-k="multicloud">List per pair, changed without downtime</td><td data-k="last mile">1–100 Gbps in 7 steps, changed without downtime</td><td data-k="Direct Connect">Dedicated 1–400 Gbps, hosted 50 Mbps–25 Gbps</td><td data-k="S2S VPN">Per-tunnel limit, depends on internet quality</td></tr>
+            <tr><td class="row-h">Pricing model</td><td data-k="multicloud">Hourly rate by bandwidth × tier, no per-GB charge</td><td data-k="last mile">Hourly rate by bandwidth × tier, no per-GB charge</td><td data-k="Direct Connect">Port hours + per-GB DTO</td><td data-k="S2S VPN">Connection hours + internet DTO</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">MACsec protects the L2 segment between AWS devices and the partner's devices. If you need end-to-end confidentiality from the VPC to the partner subnet, add IPsec or application-layer encryption.</p>
+    </div>
+  </section>
+
+  <section id="start" aria-labelledby="start-h">
+    <div class="wrap">
+      <p class="tag">Getting started</p>
+      <h2 id="start-h">Creation steps for each service</h2>
+      <p class="lede">Both start in the Direct Connect console, under different menus. Whichever side creates the connection first, provisioning completes automatically once the other side accepts with the activation key.</p>
+      <div class="cols2">
+        <div class="col">
+          <p class="ft"><span class="mk" aria-hidden="true"></span>multicloud</p>
+          <h3>DX console › AWS Interconnect</h3>
+          <ol class="flow">
+            <li><span><b>Design</b> · Choose between VGW/TGW (local Region) and Cloud WAN (global), and check for IP range overlaps.</span></li>
+            <li><span><b>Create new multicloud Interconnect</b> · Choose the partner CSP card (previews are marked Preview).</span></li>
+            <li><span><b>Location · speed</b> · Enter the AWS local Region, partner Region, bandwidth, DX gateway and partner ID.</span></li>
+            <li><span><b>Accept</b> · Enter the issued activation key on the CSP side. If the CSP created it first, enter the key in <b>Accept multicloud Interconnect</b>.</span></li>
+            <li><span><b>Start for free</b> · “AWS Interconnect - multicloud - Free Tier” in the DX console preselects 500 Mbps. Check the partner CSP's quota first.</span></li>
+          </ol>
+        </div>
+        <div class="col lm">
+          <p class="ft"><span class="mk lm" aria-hidden="true"></span>last mile</p>
+          <h3>DX console › Last mile Interconnect</h3>
+          <ol class="flow">
+            <li><span><b>Prepare</b> · Partner sign-up, site CPE connected to the partner network, and a DX gateway (you can also create it during setup).</span></li>
+            <li><span><b>Create new last mile Interconnect</b> · Choose the partner (e.g. Lumen) and the nearest Interconnect metro; the connected Region is shown.</span></li>
+            <li><span><b>Speed · ID</b> · Enter the bandwidth (1–100 Gbps), DX gateway and partner account ID.</span></li>
+            <li><span><b>Accept</b> · Enter the activation key in the partner portal. If the partner created it first, enter the key in <b>Accept last mile Interconnect</b>.</span></li>
+            <li><span><b>Automatic setup</b> · Four connections, BGP, VLAN, ASN and MACsec are configured and attached to the DX gateway.</span></li>
+          </ol>
+        </div>
+      </div>
+      <p class="note">Both: each Interconnect gets one CloudWatch Network Synthetic Monitor at no extra cost to measure latency and packet loss, and you can alarm on the bandwidth utilization (%) metric.</p>
+    </div>
+  </section>
+
+  <section id="pricing" aria-labelledby="pricing-h">
+    <div class="wrap">
+      <p class="tag">Pricing</p>
+      <h2 id="pricing-h">What you pay for</h2>
+      <p class="lede">Each service has its own price list. The structure is the same: a single hourly rate set by bandwidth and an automatically assigned tier (1–5), with no per-GB transfer charge. Billing runs from creation to deletion in one-hour increments (rounded up).</p>
+      <div class="tbl-wrap">
+        <table class="cmp tight">
+          <caption class="sr-only">AWS Interconnect charges by service</caption>
+          <thead><tr><th scope="col">Item</th><th scope="col"><span class="mk" aria-hidden="true"></span>multicloud</th><th scope="col"><span class="mk lm" aria-hidden="true"></span>last mile</th></tr></thead>
+          <tbody>
+            <tr><td class="row-h">Tier assignment</td><td data-k="multicloud">VPC traffic source Region ↔ Interconnect local Region. The highest tier among the paths in use applies</td><td data-k="last mile">Interconnect metro ↔ farthest AWS Region attached to the DX gateway</td></tr>
+            <tr><td class="row-h">Cloud WAN caveat</td><td data-k="Both services" colspan="2">If CNEs are in multiple Regions, the highest-tier CNE sets the tier. Example: an ap-southeast-1 CNE attached to a us-east-1 (or NY metro) Interconnect makes it Tier 4, not Tier 1</td></tr>
+            <tr><td class="row-h">Free Tier</td><td data-k="multicloud">One Tier 1 500 Mbps connection (per Region, per GA CSP). Cannot be converted to paid</td><td data-k="last mile">None</td></tr>
+            <tr><td class="row-h">Preview</td><td data-k="multicloud">Azure preview: free, one per Region, 1 Gbps</td><td data-k="last mile">AT&amp;T gated preview: not listed separately on the pricing page</td></tr>
+            <tr><td class="row-h">Partner-side charges</td><td data-k="multicloud">Billed separately by the partner CSP</td><td data-k="last mile">Circuit charges billed separately by the carrier</td></tr>
+            <tr><td class="row-h">Pricing page</td><td data-k="multicloud"><a href="https://aws.amazon.com/interconnect/multicloud/pricing/" target="_blank" rel="noopener">Interconnect - multicloud pricing</a></td><td data-k="last mile"><a href="https://aws.amazon.com/interconnect/lastmile/pricing/" target="_blank" rel="noopener">Interconnect - last mile pricing</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">Transit Gateway and Cloud WAN attachment and data processing charges are billed separately by each service. If a remote-Region TGW comes in by peering with the local-Region TGW, inter-Region transfer charges also apply.</p>
+    </div>
+  </section>
+
+  <section class="cta" aria-labelledby="cta-h">
+    <div class="wrap">
+      <p class="tag">Next step</p>
+      <h2 id="cta-h">Partner is a cloud? multicloud. A carrier? last mile.</h2>
+      <p class="lede">With multicloud, validate the path first on the 500 Mbps Free Tier; with last mile, request a connection right away with your existing carrier account. For dedicated on-premises circuits see <a href="../direct-connect/">Direct Connect</a>, for hub design see <a href="../transit-gateway/">Transit Gateway</a> and <a href="../cloud-wan/">Cloud WAN</a>, and for quick temporary connectivity see <a href="../site-to-site-vpn/">Site-to-Site VPN</a>.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="https://aws.amazon.com/interconnect/multicloud/" target="_blank" rel="noopener">multicloud page</a>
+        <a class="btn btn-primary" href="https://aws.amazon.com/interconnect/lastmile/" target="_blank" rel="noopener">last mile page</a>
+        <a class="btn btn-ghost" href="https://docs.aws.amazon.com/interconnect/latest/userguide/what-is-interconnect.html" target="_blank" rel="noopener">Read the User Guide</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a href="../">← AWS Networking Services Portfolio</a>
+    <span>An introduction to AWS Interconnect (as of October 2026). Partner status and supported Regions change often; check the official documentation.</span>
+    <a href="https://docs.aws.amazon.com/interconnect/latest/userguide/region-availability.html" target="_blank" rel="noopener">Region availability docs</a>
+  </div>
+</footer>
+
+</body>
+</html>

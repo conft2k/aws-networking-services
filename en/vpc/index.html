@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Amazon VPC Overview</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+body{margin:0}img{max-width:100%}[hidden]{display:none!important}
+
+/* Layout: a cross-connect work order. Cool steel paper, navy ink, Amazon orange as the one accent; section tags read like fiber labels. */
+:root{
+  --bg:#EEF1F4; --surface:#FFFFFF; --sunken:#E3E8ED;
+  --ink:#14202E; --ink-2:#44515F; --ink-3:#5A6672;
+  --line:#CDD5DD; --line-2:#B4BFCA;
+  --fiber:#FF9900;          /* Amazon orange — fills only */
+  --fiber-ink:#B35C00;      /* orange-derived, AA on light surfaces */
+  --fiber-soft:#FFF0D9;
+  --on-fiber:#14202E;
+  --trace:#2E7D9A;          /* secondary line color for diagram paths */
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --maxw:1120px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--fiber-ink);outline-offset:3px;border-radius:2px}
+.skip-link{position:absolute;left:16px;top:-60px;background:var(--fiber);color:var(--on-fiber);padding:8px 14px;font-weight:700;z-index:50;text-decoration:none}
+.skip-link:focus{top:12px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.wrap{max-width:var(--maxw);margin:0 auto;padding-inline:24px}
+section{padding-block:88px;border-top:1px solid var(--line)}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.25}
+h2{font-size:clamp(26px,3.4vw,36px);font-weight:700;letter-spacing:-.01em}
+h3{font-size:18px;font-weight:700}
+p{margin:0}
+.lede{color:var(--ink-2);max-width:62ch;margin-top:14px}
+.num{font-family:var(--display);font-variant-numeric:tabular-nums lining-nums}
+.mono{font-family:var(--mono)}
+
+/* fiber label: the section tag */
+.tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-bottom:14px}
+.tag::before{content:"";width:22px;height:8px;background:var(--fiber);border-radius:1px}
+
+/* nav */
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:60px}
+.brand{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.02em;text-decoration:none;text-transform:uppercase}
+.brand span{color:var(--fiber-ink)}
+.navlinks{display:flex;gap:22px;font-size:14px;align-items:center}
+.navlinks a{text-decoration:none;color:var(--ink-2)}
+.navlinks a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;font-weight:700;font-size:15px;text-decoration:none;border-radius:4px;border:1px solid transparent;transition:transform .15s ease,background .15s ease}
+.btn-primary{background:var(--fiber);color:var(--on-fiber)}
+.btn-primary:hover{transform:translateY(-1px)}
+.btn-ghost{border-color:var(--line-2);color:var(--ink)}
+.btn-ghost:hover{background:var(--sunken)}
+.navlinks .btn{min-height:38px;padding:0 14px;font-size:14px;color:var(--on-fiber)}
+
+/* hero */
+.hero{padding-block:72px 64px;border-top:0}
+.hero-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:56px;align-items:center}
+.eyebrow{font-family:var(--mono);font-size:13px;color:var(--fiber-ink);letter-spacing:.04em}
+.hero h1{font-size:clamp(34px,5vw,56px);font-weight:700;letter-spacing:-.02em;margin-top:16px}
+.hero h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--fiber) 62%,var(--fiber) 90%,transparent 90%);padding-inline:2px}
+.hero .lede{font-size:18px}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+
+/* hero visual: port faceplate */
+.faceplate{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px}
+.faceplate-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.ports{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+.port{border:1px solid var(--line);border-radius:4px;padding:14px 14px 12px;background:var(--sunken);display:flex;flex-direction:column;gap:2px}
+.port .num{font-size:40px;font-weight:600;line-height:1}
+.port .num small{font-size:18px;color:var(--ink-2);margin-left:2px}
+.port .optic{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+.port .led{width:8px;height:8px;border-radius:50%;background:var(--fiber);align-self:flex-end;margin-top:-6px;animation:blink 2.4s ease-in-out infinite}
+.port:nth-child(2) .led{animation-delay:.6s}.port:nth-child(3) .led{animation-delay:1.2s}.port:nth-child(4) .led{animation-delay:1.8s}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.faceplate-foot{margin-top:14px;font-size:13px;color:var(--ink-2)}
+
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:56px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.chip{padding:18px 20px;border-left:1px solid var(--line);min-width:0}
+.chip:first-child{border-left:0}
+.chip .num{font-size:34px;font-weight:600;line-height:1.1}
+.chip p{font-size:13.5px;color:var(--ink-2);margin-top:4px}
+
+/* value */
+.split{display:grid;grid-template-columns:1fr 1.4fr;gap:56px}
+.pillars{display:grid;gap:0;border-top:1px solid var(--line-2)}
+.pillar{display:grid;grid-template-columns:120px 1fr;gap:20px;padding-block:22px;border-bottom:1px solid var(--line)}
+.pillar .k{font-family:var(--display);font-size:22px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--fiber-ink)}
+.pillar p{color:var(--ink-2);margin-top:6px}
+
+/* stack (L1/L2/L3) */
+.stack{margin-top:40px;display:grid;gap:10px}
+.layer{display:grid;grid-template-columns:96px 1fr 1.2fr;gap:24px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px 24px}
+.layer .lv{font-family:var(--display);font-size:44px;font-weight:700;line-height:.9}
+.layer .lv small{display:block;font-family:var(--mono);font-size:11px;font-weight:400;color:var(--ink-3);letter-spacing:.06em;margin-top:8px;text-transform:uppercase}
+.layer p{color:var(--ink-2);margin-top:6px;font-size:15px}
+.specs{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+.specs code{font-family:var(--mono);font-size:12.5px;background:var(--sunken);border:1px solid var(--line);padding:3px 8px;border-radius:3px;color:var(--ink)}
+
+/* features */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:40px}
+.feature{background:var(--surface);padding:26px 24px;min-width:0}
+.feature .ft{font-family:var(--mono);font-size:11.5px;color:var(--fiber-ink);letter-spacing:.06em;text-transform:uppercase}
+.feature h3{margin-top:8px}
+.feature p{color:var(--ink-2);font-size:15px;margin-top:8px}
+
+/* table */
+.tbl-wrap{margin-top:36px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:14px 18px;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--sunken)}
+tbody tr:last-child td{border-bottom:0}
+td.row-h{font-weight:700;width:22%}
+td .num{font-size:18px;font-weight:600}
+
+/* architecture */
+.arch{margin-top:36px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px}
+.arch-scroll{overflow-x:auto}
+.arch svg{display:block;width:100%;min-width:860px;height:auto}
+.arch-hint{display:none;font-size:13px;color:var(--ink-3);margin-top:10px}
+svg .box{fill:var(--sunken);stroke:var(--line-2)}
+svg .zone{fill:none;stroke:var(--line-2);stroke-dasharray:4 4}
+svg .t{fill:var(--ink);font-family:var(--sans);font-size:14px;font-weight:700}
+svg .s{fill:var(--ink-3);font-family:var(--mono);font-size:11px}
+svg .z{fill:var(--ink-2);font-family:var(--mono);font-size:11px;letter-spacing:.08em}
+svg .fiber{stroke:var(--fiber);stroke-width:5;fill:none;stroke-linecap:round}
+svg .path{stroke:var(--trace);stroke-width:2;fill:none}
+svg .site{stroke:var(--fiber-ink);stroke-width:2;fill:none;stroke-dasharray:6 5}
+svg .lbl{fill:var(--trace);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .lbl2{fill:var(--fiber-ink);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .dot{fill:var(--fiber)}
+svg .ah-tr{fill:var(--trace)}
+svg .ah-fi{fill:var(--fiber)}
+svg .ah-fk{fill:var(--fiber-ink)}
+.legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--ink-2)}
+.legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--fiber)}
+.legend i.p{border-top:2px solid var(--trace)}
+.legend i.s{border-top:2px dashed var(--fiber-ink)}
+.legend i.dir{position:relative;width:26px}
+.legend i.dir::after{content:"";position:absolute;right:-3px;top:-7px;border-left:8px solid var(--fiber);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.legend i.p.dir::after{top:-6px;border-left-color:var(--trace)}
+.legend i.s.dir::after{top:-6px;border-left-color:var(--fiber-ink)}
+
+/* steps */
+.steps{list-style:none;padding:0;margin:40px 0 0;display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:4px solid var(--fiber)}
+.steps li{padding:20px 18px 0 0;min-width:0}
+.steps .num{font-size:15px;font-weight:600;color:var(--fiber-ink);letter-spacing:.06em}
+.steps h3{font-size:16px;margin-top:6px}
+.steps p{font-size:14px;color:var(--ink-2);margin-top:6px}
+
+/* resiliency */
+.res{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:36px}
+.res-card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:26px}
+.res-card .num{font-size:52px;font-weight:700;line-height:1}
+.res-card .num small{font-size:20px;color:var(--ink-2)}
+.res-card h3{margin-top:10px}
+.res-card p{color:var(--ink-2);font-size:15px;margin-top:6px}
+.res-card.max{border-color:var(--fiber);box-shadow:inset 0 4px 0 var(--fiber)}
+
+/* cta */
+.cta{text-align:center}
+.cta h2{max-width:22ch;margin:0 auto}
+.cta .lede{margin:14px auto 0}
+.cta .cta-row{justify-content:center}
+footer{border-top:1px solid var(--line);padding-block:28px;font-size:13px;color:var(--ink-3)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+
+@media (max-width:1024px){
+  .hero-grid,.split{grid-template-columns:1fr;gap:40px}
+  .features{grid-template-columns:repeat(2,1fr)}
+  .steps{grid-template-columns:repeat(2,1fr);border-top:0;gap:0 24px}
+  .steps li{border-top:4px solid var(--fiber);padding-bottom:24px}
+  .layer{grid-template-columns:80px 1fr}
+  .layer .specs{grid-column:2}
+  .chips{grid-template-columns:repeat(2,1fr)}
+  .chip:nth-child(3){border-left:0}
+  .chip:nth-child(n+3){border-top:1px solid var(--line)}
+}
+@media (max-width:640px){
+  .wrap{padding-inline:18px}
+  section{padding-block:60px}
+  .navlinks a:not(.btn){display:none}
+  .features,.res{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr}
+  .pillar{grid-template-columns:1fr;gap:0}
+  .layer{grid-template-columns:1fr;gap:12px}
+  .layer .specs{grid-column:auto}
+  .cta-row .btn{width:100%}
+  .arch-hint{display:block}
+  table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  table,tbody,tr,td{display:block;width:100%}
+  tr{border-bottom:1px solid var(--line);padding:14px 16px}
+  tbody tr:last-child{border-bottom:0}
+  td{border:0;padding:3px 0}
+  td.row-h{width:100%;font-size:16px;padding-bottom:6px}
+  td[data-k]::before{content:attr(data-k);display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+
+/* ---- service-specific ---- */
+/* VPC: hero subnet plan (tier x AZ) + route table object */
+.plan{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px;min-width:0}
+.plan-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.plan-vpc{margin-top:14px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.plan-vpc code{font-family:var(--mono);font-size:12px;background:var(--fiber-soft);border:1px solid var(--fiber);padding:2px 8px;border-radius:3px;color:var(--ink)}
+.subgrid{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,1fr);gap:6px;margin-top:14px;align-items:stretch}
+.subgrid .h{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);padding:0 2px}
+.subgrid .tier{font-family:var(--display);font-size:18px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;display:flex;align-items:center;padding-right:6px}
+.sn{background:var(--sunken);border:1px solid var(--line);border-radius:4px;padding:9px 12px;min-width:0}
+.sn .c{display:block;font-family:var(--mono);font-size:12.5px;font-weight:500;color:var(--ink);overflow-wrap:anywhere}
+.sn .r{display:block;font-family:var(--mono);font-size:11px;color:var(--ink-3);overflow-wrap:anywhere}
+.sn.pub{box-shadow:inset 3px 0 0 var(--fiber)}
+.sn.pri{box-shadow:inset 3px 0 0 var(--trace)}
+.plan-foot{margin-top:14px;font-size:13px;color:var(--ink-2)}
+
+.matrix-wrap{margin-top:36px;display:grid;grid-template-columns:1.25fr 1fr;gap:24px;align-items:start}
+.rtb{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px;min-width:0}
+.rtb-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.rtb-assoc{margin-top:14px;display:flex;flex-wrap:wrap;gap:6px}
+.rtb-assoc code{font-family:var(--mono);font-size:12px;background:var(--fiber-soft);border:1px solid var(--fiber);padding:2px 8px;border-radius:3px;color:var(--ink)}
+.routes{margin-top:14px;border:1px solid var(--line);border-radius:4px;background:var(--sunken);overflow:hidden}
+.route{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px 14px;border-top:1px solid var(--line);font-family:var(--mono);font-size:12.5px;min-width:0}
+.route:first-child{border-top:0}
+.route .cidr{font-weight:500;color:var(--ink);overflow-wrap:anywhere}
+.route .att{color:var(--ink-2);overflow-wrap:anywhere}
+.badge{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:3px;white-space:nowrap}
+.badge.loc{border:1px solid var(--trace);color:var(--trace)}
+.badge.gw{background:var(--fiber);color:var(--on-fiber)}
+.badge.ep{border:1px solid var(--fiber-ink);color:var(--fiber-ink)}
+.rtb-foot{margin-top:14px;font-size:13px;color:var(--ink-2)}
+.explain{display:grid;gap:12px}
+.ex{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px 22px}
+.ex .k{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ex p{color:var(--ink-2);font-size:15px;margin-top:8px}
+.result{margin-top:16px;padding:16px 20px;border-left:4px solid var(--fiber);background:var(--surface);border-radius:0 6px 6px 0;color:var(--ink-2);font-size:15px}
+.result strong{color:var(--ink)}
+.subhead{margin-top:56px;font-size:22px}
+@media (max-width:1024px){
+  .matrix-wrap{grid-template-columns:1fr}
+}
+@media (max-width:640px){
+  .plan,.rtb{padding:16px}
+  .subgrid .tier{font-size:15px}
+  .sn{padding:8px 9px}
+  .sn .c{font-size:11.5px}
+  .route{grid-template-columns:minmax(0,1fr) auto;row-gap:2px;padding:10px 12px}
+  .route .att{grid-column:1;grid-row:2}
+  .route .badge{grid-row:1 / span 2;grid-column:2}
+  .chip .num{font-size:24px}
+}
+
+/* nav: keep links on one line, show only CTA below 960px */
+.brand,.navlinks a{white-space:nowrap}
+@media (max-width:960px){.navlinks a:not(.btn){display:none}}
+
+/* Korean line breaking: never split a word mid-syllable */
+h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
+</style>
+<link rel="stylesheet" href="../../assets/site.css?v=16">
+<script src="../../assets/site.js?v=16"></script>
+</head>
+<body>
+
+
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<nav aria-label="Main menu">
+  <div class="wrap">
+    <a class="brand" href="#top">Amazon <span>VPC</span></a>
+    <div class="navlinks">
+      <a href="../">Service portfolio</a>
+      <a href="#routing">Routing</a>
+      <a href="#features">Features</a>
+      <a href="#filter">SG · NACL</a>
+      <a href="#arch">Architecture</a>
+      <a href="#pricing">Pricing</a>
+      <a class="btn btn-primary" href="#start">Get started</a>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+  <header class="hero" id="top">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">Amazon Virtual Private Cloud · Isolated virtual network</p>
+          <h1>Draw your network on AWS with <em>your own IP ranges</em></h1>
+          <p class="lede">Amazon VPC is a logically isolated virtual network within AWS. You choose CIDR blocks, carve subnets in each Availability Zone, and use route tables and gateways to decide where traffic goes. Every other AWS networking service runs on top of it.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="#routing">See the routing model</a>
+            <a class="btn btn-ghost" href="#arch">See the architecture</a>
+          </div>
+        </div>
+
+        <div class="plan" aria-label="Example design: 2 Availability Zones, 3 subnet tiers">
+          <div class="plan-head"><span>Subnet plan · 3 tiers × 2 AZ</span><span>ap-northeast-2</span></div>
+          <div class="plan-vpc"><code>vpc 10.0.0.0/16</code><code>2001:db8:1234:1a00::/56</code></div>
+          <div class="subgrid" role="table" aria-label="Subnets by tier and Availability Zone">
+            <span class="h" role="columnheader"></span><span class="h" role="columnheader">AZ a</span><span class="h" role="columnheader">AZ c</span>
+            <span class="tier" role="rowheader">Public</span>
+            <span class="sn pub" role="cell"><span class="c">10.0.0.0/24</span><span class="r">0/0 → igw</span></span>
+            <span class="sn pub" role="cell"><span class="c">10.0.1.0/24</span><span class="r">0/0 → igw</span></span>
+            <span class="tier" role="rowheader">App</span>
+            <span class="sn pri" role="cell"><span class="c">10.0.16.0/20</span><span class="r">0/0 → nat-a</span></span>
+            <span class="sn pri" role="cell"><span class="c">10.0.32.0/20</span><span class="r">0/0 → nat-c</span></span>
+            <span class="tier" role="rowheader">Data</span>
+            <span class="sn" role="cell"><span class="c">10.0.64.0/24</span><span class="r">local · vpce-s3</span></span>
+            <span class="sn" role="cell"><span class="c">10.0.65.0/24</span><span class="r">local · vpce-s3</span></span>
+          </div>
+          <p class="plan-foot">A subnet belongs to one Availability Zone. Place a subnet for each role in every AZ and separate tiers with route tables.</p>
+        </div>
+      </div>
+
+      <div class="chips" role="list">
+        <div class="chip" role="listitem"><span class="num">/16 – /28</span><p>IPv4 CIDR block size (IPv6: /44 – /60, default /56)</p></div>
+        <div class="chip" role="listitem"><span class="num">5</span><p>IPv4 addresses AWS reserves in each subnet</p></div>
+        <div class="chip" role="listitem"><span class="num">100 Gbps</span><p>NAT gateway automatic scaling bandwidth</p></div>
+        <div class="chip" role="listitem"><span class="num">Free</span><p>Charge for VPCs, subnets, and route tables themselves</p></div>
+      </div>
+    </div>
+  </header>
+
+  <section id="why" aria-labelledby="why-h">
+    <div class="wrap split">
+      <div>
+        <p class="tag">Why Amazon VPC</p>
+        <h2 id="why-h">The starting point for every AWS network</h2>
+        <p class="lede">Every resource that needs a private network, from EC2, RDS, and EKS to Lambda VPC connectivity, places an ENI in a subnet inside a VPC. Get the addressing, routing, and access control right once, and later hybrid connectivity and multi-VPC growth become much easier.</p>
+      </div>
+      <div class="pillars">
+        <div class="pillar"><span class="k">Isolate</span><div><h3>A network isolated per account and Region</h3><p>A VPC belongs to one Region and is separated from other VPCs by default. You choose private ranges that don't overlap with on-premises.</p></div></div>
+        <div class="pillar"><span class="k">Route</span><div><h3>The route table is the policy</h3><p>The route table associated with each subnet decides whether traffic goes to an IGW, NAT, endpoint, peering connection, or TGW.</p></div></div>
+        <div class="pillar"><span class="k">Control</span><div><h3>Two layers of filtering</h3><p>Apply stateful security groups to ENIs and stateless network ACLs at subnet boundaries. Lock down the whole account with Block Public Access.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="routing" aria-labelledby="routing-h">
+    <div class="wrap">
+      <p class="tag">Route tables</p>
+      <h2 id="routing-h">The route table defines what a subnet is</h2>
+      <p class="lede">There is no "public subnet" setting. If the default route points to an internet gateway, the subnet is public; if it points to a NAT gateway or there is none, it is private. Below is an example route table for a private app-tier subnet.</p>
+      <div class="matrix-wrap">
+        <div class="rtb" aria-label="Example route table for a private app subnet">
+          <div class="rtb-head"><span>rtb-app-a · not main</span><span>longest prefix match</span></div>
+          <div class="rtb-assoc"><code>subnet-app-a 10.0.16.0/20</code></div>
+          <div class="routes" role="table" aria-label="Routes">
+            <div class="route" role="row"><span class="cidr" role="cell">10.0.0.0/16</span><span class="att" role="cell">local</span><span class="badge loc" role="cell">local</span></div>
+            <div class="route" role="row"><span class="cidr" role="cell">0.0.0.0/0</span><span class="att" role="cell">nat-0a1b · AZ a</span><span class="badge gw" role="cell">NAT</span></div>
+            <div class="route" role="row"><span class="cidr" role="cell">::/0</span><span class="att" role="cell">eigw-0c2d</span><span class="badge gw" role="cell">EIGW</span></div>
+            <div class="route" role="row"><span class="cidr" role="cell">pl-78a54011 (S3)</span><span class="att" role="cell">vpce-0e3f · gateway</span><span class="badge ep" role="cell">VPCE</span></div>
+            <div class="route" role="row"><span class="cidr" role="cell">10.20.0.0/16</span><span class="att" role="cell">pcx-0f4a · peer VPC</span><span class="badge ep" role="cell">PCX</span></div>
+            <div class="route" role="row"><span class="cidr" role="cell">172.16.0.0/12</span><span class="att" role="cell">tgw-01b2 · on-premises</span><span class="badge ep" role="cell">TGW</span></div>
+          </div>
+          <p class="rtb-foot">When a destination matches several routes, the most specific prefix wins. The local route can't be deleted.</p>
+        </div>
+        <div class="explain">
+          <div class="ex"><div class="k"><span class="badge loc">local</span><h3>Traffic inside the VPC always flows</h3></div><p>A local route for the entire VPC CIDR is added to every route table automatically. To block traffic between subnets, use security groups or NACLs, not routing.</p></div>
+          <div class="ex"><div class="k"><span class="badge gw">IGW · NAT</span><h3>Two ways out to the internet</h3></div><p>An IGW handles two-way traffic for resources with public IPs; a NAT gateway handles only outbound IPv4 from private resources. For outbound-only IPv6, use an egress-only IGW.</p></div>
+          <div class="ex"><div class="k"><span class="badge ep">VPCE · PCX · TGW</span><h3>Private paths</h3></div><p>Gateway endpoints attach through prefix list routes; peering and Transit Gateway attach through CIDR routes. Interface endpoints connect through DNS and ENIs, not routes.</p></div>
+        </div>
+      </div>
+      <p class="result"><strong>Design tip:</strong> Split route tables per AZ by default. Each AZ's private subnets should point to the NAT gateway in the same AZ so that one AZ failure doesn't cut internet egress for the others.</p>
+    </div>
+  </section>
+
+  <section id="features" aria-labelledby="features-h">
+    <div class="wrap">
+      <p class="tag">Features</p>
+      <h2 id="features-h">Main features</h2>
+      <div class="features">
+        <article class="feature"><p class="ft">Internet gateway</p><h3>IGW and egress-only IGW</h3><p>An IGW is a horizontally scaled gateway, one per VPC, that performs 1:1 NAT for public IPv4 addresses. An egress-only IGW allows only outbound IPv6 and blocks inbound connection initiation.</p></article>
+        <article class="feature"><p class="ft">NAT gateway</p><h3>Managed NAT</h3><p>Starts at 5 Gbps and scales automatically to 100 Gbps, with up to 8 IPv4 addresses (55,000 simultaneous connections per destination per address). Comes in public and private types and supports NAT64. Regional mode is created per VPC without a public subnet, expands automatically to AZs where workloads run, and uses up to 32 IPs per AZ. Private NAT is available only in zonal mode.</p></article>
+        <article class="feature"><p class="ft">VPC peering</p><h3>VPC peering</h3><p>Connects two VPCs 1:1 over private IPs. It can cross accounts and Regions, but transitive routing isn't supported and overlapping CIDRs can't be connected. To interconnect many VPCs, use <a href="../transit-gateway/">Transit Gateway</a>.</p></article>
+        <article class="feature"><p class="ft">VPC endpoints</p><h3>Gateway and interface endpoints</h3><p>Reach S3 and DynamoDB through free gateway endpoints, and other AWS services and SaaS through <a href="../privatelink/">PrivateLink</a>-based interface endpoints, without traversing the internet.</p></article>
+        <article class="feature"><p class="ft">IPAM</p><h3>VPC IP Address Manager</h3><p>Divides your organization's IP space into pools, allocates them to accounts and Regions, and monitors overlap and utilization. Also covers BYOIP, Amazon-provided contiguous IPv6 blocks, and Public IP Insights.</p></article>
+        <article class="feature"><p class="ft">Block Public Access</p><h3>VPC BPA</h3><p>Authoritatively blocks IGW and EIGW routes per Region. Bidirectional mode blocks both directions; ingress-only mode blocks only inbound and allows NAT and EIGW outbound. Exempt only the VPCs or subnets that need it with exclusions.</p></article>
+        <article class="feature"><p class="ft">Encryption Controls</p><h3>VPC Encryption Controls</h3><p>Monitors and enforces encryption in transit for traffic within and between VPCs. In monitor mode, find plaintext flows with the encryption-status field in Flow Logs; in enforce mode, creating resources that don't support encryption is blocked. Only designated resources such as IGWs and NAT can be exclusions.</p></article>
+        <article class="feature"><p class="ft">Route Server</p><h3>VPC Route Server</h3><p>Peers over BGP (optionally with BFD) with firewall and router appliances in the VPC and dynamically installs the best routes into subnet and IGW route tables. Routes fail over on appliance failure without scripts.</p></article>
+        <article class="feature"><p class="ft">VPC sharing</p><h3>Subnet sharing and SG reuse</h3><p>Share subnets with other accounts in your organization through AWS RAM so several accounts use one VPC. Security groups can be associated with other VPCs in the same account and Region through VPC associations, or shared with participant accounts of a shared VPC.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="filter" aria-labelledby="filter-h">
+    <div class="wrap">
+      <p class="tag">Security groups vs NACLs</p>
+      <h2 id="filter-h">Security groups and network ACLs: what goes where</h2>
+      <p class="lede">The two filters aren't substitutes; they're layers you stack. Use security groups for fine-grained allow policies and network ACLs for coarse blocking at subnet boundaries.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">Security groups compared with network ACLs</caption>
+          <thead><tr><th scope="col">Item</th><th scope="col">Security group</th><th scope="col">Network ACL</th></tr></thead>
+          <tbody>
+          <tr><td class="row-h">Applies to</td><td data-k="Security group">ENIs (instances, endpoints, load balancers, and so on)</td><td data-k="Network ACL">Subnets. Applies to every resource in the subnet</td></tr>
+          <tr><td class="row-h">State</td><td data-k="Security group">Stateful. Responses to allowed requests pass regardless of rules</td><td data-k="Network ACL">Stateless. Response traffic (ephemeral ports) must also be allowed explicitly</td></tr>
+          <tr><td class="row-h">Rule types</td><td data-k="Security group">Allow only</td><td data-k="Network ACL">Both allow and deny</td></tr>
+          <tr><td class="row-h">Evaluation</td><td data-k="Security group">All rules are evaluated together; traffic is allowed if any rule matches</td><td data-k="Network ACL">Rules are evaluated from the lowest number; the first match applies</td></tr>
+          <tr><td class="row-h">Can reference</td><td data-k="Security group">CIDRs, prefix lists, other security groups</td><td data-k="Network ACL">CIDRs</td></tr>
+          <tr><td class="row-h">Reuse scope</td><td data-k="Security group">The VPC it was created in by default. Can be associated with other VPCs in the same Region through VPC associations</td><td data-k="Network ACL">Associated only with subnets in one VPC</td></tr>
+          <tr><td class="row-h">Default behavior</td><td data-k="Security group">A new security group has no inbound rules and allows all outbound</td><td data-k="Network ACL">The default NACL allows all; a new custom NACL denies all until you add rules</td></tr>
+          <tr><td class="row-h">Main use</td><td data-k="Security group">Least-privilege traffic between workloads. Express tier-to-tier allows with SG references</td><td data-k="Network ACL">Blocking specific ranges, guardrails between subnet tiers</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="result"><strong>Design tip:</strong> Security group references (for example, App SG → DB SG on 5432) keep the policy intact when IPs change. When you tighten NACLs, don't forget the ephemeral port range for return traffic.</p>
+    </div>
+  </section>
+
+  <section id="arch" aria-labelledby="arch-h">
+    <div class="wrap">
+      <p class="tag">Reference architecture</p>
+      <h2 id="arch-h">Three-tier VPC across two AZs</h2>
+      <p class="lede">Each tier has one subnet per AZ, and each AZ's app subnet egresses through the NAT gateway in the same AZ. S3 traffic uses a gateway endpoint and other AWS service APIs use interface endpoints, so both stay on private paths.</p>
+      <figure class="arch">
+        <div class="arch-scroll">
+          <svg viewBox="0 0 980 530" role="img" aria-labelledby="arch-title arch-desc">
+            <title id="arch-title">Amazon VPC reference architecture</title>
+            <desc id="arch-desc">An internet gateway is attached to VPC 10.0.0.0/16 in the Seoul Region. The VPC spans Availability Zones a and c, each with public, app, and data subnets. The public subnets hold NAT gateways and ALB nodes and connect to the internet gateway. App subnets send outbound traffic to the NAT gateway in the same AZ and reach AWS service APIs through interface endpoints. Data subnets reach S3 through a gateway endpoint. The VPC connects to other VPCs and on-premises through peering or Transit Gateway.</desc>
+            <defs>
+              <marker id="ar-vpc-tr" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-tr" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-vpc-fk" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-fk" d="M0 0 L10 5 L0 10 z"/></marker>
+            </defs>
+            <rect class="box" x="300" y="10" width="160" height="40" rx="4"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Internet_48_Light.svg" x="310" y="18" width="24" height="24"/>
+            <text class="t" x="394" y="35" text-anchor="middle">Internet</text>
+
+            <rect class="zone" x="10" y="70" width="960" height="450" rx="6"/>
+            <image href="../../assets/aws-icons/Region_32.svg" x="10" y="70" width="22" height="22"/>
+            <text class="z" x="40" y="86">AWS · SEOUL REGION</text>
+            <rect class="zone" x="30" y="100" width="700" height="405" rx="6"/>
+            <image href="../../assets/aws-icons/Virtual-private-cloud-VPC_32.svg" x="30" y="100" width="22" height="22"/>
+            <text class="z" x="60" y="116">VPC 10.0.0.0/16</text>
+
+            <rect class="zone" x="50" y="140" width="320" height="345" rx="6"/>
+            <text class="z" x="64" y="160">AZ a</text>
+            <rect class="zone" x="390" y="140" width="320" height="345" rx="6"/>
+            <text class="z" x="404" y="160">AZ c</text>
+
+            <rect class="box" x="320" y="82" width="120" height="40" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-VPC_Internet-Gateway_48.svg" x="328" y="90" width="24" height="24"/>
+            <text class="t" x="392" y="107" text-anchor="middle">IGW</text>
+
+            <rect class="box" x="70" y="170" width="280" height="70" rx="4"/>
+            <image href="../../assets/aws-icons/Public-subnet_32.svg" x="80" y="191" width="28" height="28"/>
+            <text class="t" x="118" y="198">Public 10.0.0.0/24</text><text class="s" x="118" y="220">NAT gateway · ALB node</text>
+            <rect class="box" x="70" y="280" width="280" height="70" rx="4"/>
+            <image href="../../assets/aws-icons/Private-subnet_32.svg" x="80" y="301" width="28" height="28"/>
+            <text class="t" x="118" y="308">App 10.0.16.0/20</text><text class="s" x="118" y="330">EC2 · EKS node · SG app</text>
+            <rect class="box" x="70" y="390" width="280" height="70" rx="4"/>
+            <image href="../../assets/aws-icons/Private-subnet_32.svg" x="80" y="411" width="28" height="28"/>
+            <text class="t" x="118" y="418">Data 10.0.64.0/24</text><text class="s" x="118" y="440">RDS · SG db · NACL data</text>
+
+            <rect class="box" x="410" y="170" width="280" height="70" rx="4"/>
+            <image href="../../assets/aws-icons/Public-subnet_32.svg" x="420" y="191" width="28" height="28"/>
+            <text class="t" x="458" y="198">Public 10.0.1.0/24</text><text class="s" x="458" y="220">NAT gateway · ALB node</text>
+            <rect class="box" x="410" y="280" width="280" height="70" rx="4"/>
+            <image href="../../assets/aws-icons/Private-subnet_32.svg" x="420" y="301" width="28" height="28"/>
+            <text class="t" x="458" y="308">App 10.0.32.0/20</text><text class="s" x="458" y="330">EC2 · EKS node · SG app</text>
+            <rect class="box" x="410" y="390" width="280" height="70" rx="4"/>
+            <image href="../../assets/aws-icons/Private-subnet_32.svg" x="420" y="411" width="28" height="28"/>
+            <text class="t" x="458" y="418">Data 10.0.65.0/24</text><text class="s" x="458" y="440">RDS · SG db · NACL data</text>
+
+            <rect class="box" x="750" y="160" width="210" height="60" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-VPC_Peering-Connection_48.svg" x="759" y="176" width="28" height="28"/>
+            <text class="t" x="796" y="186">Other VPC · on-prem</text><text class="s" x="796" y="206">pcx · tgw routes</text>
+            <rect class="box" x="750" y="285" width="210" height="60" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-VPC_Endpoints_48.svg" x="759" y="301" width="28" height="28"/>
+            <text class="t" x="796" y="311">AWS service APIs</text><text class="s" x="796" y="331">interface endpoint</text>
+            <rect class="box" x="750" y="395" width="210" height="60" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_Amazon-Simple-Storage-Service_48.svg" x="759" y="411" width="28" height="28"/>
+            <text class="t" x="796" y="421">Amazon S3</text><text class="s" x="796" y="441">gateway endpoint</text>
+
+            <path class="fiber" d="M380 50 V82"/>
+            <path class="fiber" d="M355 122 C355 150 210 140 210 170"/>
+            <path class="fiber" d="M405 122 C405 150 550 140 550 170"/>
+
+            <path class="site" d="M210 280 V242" marker-end="url(#ar-vpc-fk)"/>
+            <text class="lbl2" x="220" y="265">0/0 → nat-a</text>
+            <path class="site" d="M550 280 V242" marker-end="url(#ar-vpc-fk)"/>
+            <text class="lbl2" x="560" y="265">0/0 → nat-c</text>
+
+            <path class="path" d="M730 190 H750"/>
+            <path class="path" d="M690 315 H748" marker-end="url(#ar-vpc-tr)"/>
+            <path class="path" d="M690 425 H748" marker-end="url(#ar-vpc-tr)"/>
+          </svg>
+        </div>
+        <figcaption class="legend">
+          <span><i></i>Internet path (IGW)</span>
+          <span><i class="s dir"></i>NAT outbound (app → NAT, outbound only)</span>
+          <span><i class="p dir"></i>AWS service calls through endpoints (VPC → service)</span>
+          <span><i class="p"></i>Peering · TGW (bidirectional)</span>
+        </figcaption>
+        <p class="arch-hint">On narrow screens, swipe the diagram sideways.</p>
+      </figure>
+    </div>
+  </section>
+
+  <section id="start" aria-labelledby="start-h">
+    <div class="wrap">
+      <p class="tag">Getting started</p>
+      <h2 id="start-h">Steps to design a VPC</h2>
+      <ol class="steps">
+        <li><span class="num">STEP 1</span><h3>Plan addressing</h3><p>Choose CIDRs that don't overlap with on-premises or other VPCs. For multiple accounts and Regions, allocate from IPAM pools.</p></li>
+        <li><span class="num">STEP 2</span><h3>Create the VPC and subnets</h3><p>Create tiered subnets in two or more AZs. The console's "VPC and more" option creates them all at once.</p></li>
+        <li><span class="num">STEP 3</span><h3>Gateways and routing</h3><p>Create an IGW and per-AZ NAT gateways (or a regional NAT gateway), and associate a route table with each subnet.</p></li>
+        <li><span class="num">STEP 4</span><h3>Filters and endpoints</h3><p>Split security groups by tier, then add an S3 gateway endpoint and the interface endpoints you need.</p></li>
+        <li><span class="num">STEP 5</span><h3>Guardrails and visibility</h3><p>Prevent unintended internet exposure with Block Public Access, and verify paths with Flow Logs and Reachability Analyzer.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="pricing" aria-labelledby="pricing-h">
+    <div class="wrap">
+      <p class="tag">Pricing</p>
+      <h2 id="pricing-h">Cost components</h2>
+      <p class="lede">VPCs, subnets, route tables, IGWs, security groups, and NACLs themselves are free. Costs come from components such as NAT gateways, public IPv4 addresses, endpoints, IPAM, and Encryption Controls, and from data transfer.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">Amazon VPC-related charges</caption>
+          <thead><tr><th scope="col">Charge</th><th scope="col">Billing basis</th><th scope="col">Notes</th></tr></thead>
+          <tbody>
+          <tr><td class="row-h">NAT gateway</td><td data-k="Billing basis">NAT gateway hours + GB processed (regional mode bills hours for each AZ it expands into)</td><td data-k="Notes">Partial hours are billed as full hours. Processing charges apply regardless of source or destination, and standard data transfer charges are separate. Routing S3 and DynamoDB traffic through gateway endpoints reduces processing charges.</td></tr>
+          <tr><td class="row-h">Public IPv4 addresses</td><td data-k="Billing basis">Per address per hour</td><td data-k="Notes">Includes EC2 auto-assigned public IPs, Elastic IPs (in use or idle), and public IPs created by managed services. Private IPv4 and BYOIP addresses aren't charged. The EC2 Free Tier includes 750 hours of public IPv4.</td></tr>
+          <tr><td class="row-h">IPAM</td><td data-k="Billing basis">Free tier at no cost · Advanced tier billed per active managed IP per hour</td><td data-k="Notes">The Free tier covers a single Region and single account and provides BYOIP, Public IP Insights, private IPv6 management, and more. Private IPv4 management, cross-account pool sharing, and IP history auditing require the Advanced tier. IPs not attached to an ENI aren't charged.</td></tr>
+          <tr><td class="row-h">Encryption Controls</td><td data-k="Billing basis">Per non-empty VPC per hour in monitor or enforce mode</td><td data-k="Notes">VPCs attached to a transit gateway with Encryption Support enabled are charged even without Encryption Controls turned on (once per VPC per hour).</td></tr>
+          <tr><td class="row-h">VPC endpoints</td><td data-k="Billing basis">Gateway endpoints free · Interface endpoints billed per AZ per hour + GB processed</td><td data-k="Notes">Interface endpoint charges are billed as <a href="../privatelink/">AWS PrivateLink</a> charges.</td></tr>
+          <tr><td class="row-h">Data transfer</td><td data-k="Billing basis">GB across AZs, across Regions, and out to the internet</td><td data-k="Notes">Private IP traffic within the same AZ is free. VPC peering transfer within the same AZ is also free; cross-AZ and cross-Region transfer is charged.</td></tr>
+          <tr><td class="row-h">Network analysis</td><td data-k="Billing basis">Reachability Analyzer analyses · Network Access Analyzer EC2 instance ENIs analyzed · Traffic Mirroring session ENI hours</td><td data-k="Notes">Flow Logs are billed as ingestion and storage charges in CloudWatch Logs, S3, or Data Firehose.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="lede" style="font-size:14px">Rates vary by Region and usage. See the <a href="https://aws.amazon.com/vpc/pricing/" target="_blank" rel="noopener">Amazon VPC pricing page</a> for current rates.</p>
+    </div>
+  </section>
+
+  <section class="cta" aria-labelledby="cta-h">
+    <div class="wrap">
+      <p class="tag">Next step</p>
+      <h2 id="cta-h">Decide addressing and routing together in your first design</h2>
+      <p class="lede">Bring your target Regions and number of AZs, on-premises ranges, internet exposure scope, and the list of VPCs to connect, and we'll review the CIDR plan and subnet and routing design together.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="https://aws.amazon.com/vpc/" target="_blank" rel="noopener">Open the service page</a>
+        <a class="btn btn-ghost" href="https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html" target="_blank" rel="noopener">Read the user guide</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a href="../">← AWS Networking Services Portfolio</a>
+    <span>Amazon VPC overview. Quotas and feature availability may vary by Region; check the official documentation.</span>
+    <a href="https://docs.aws.amazon.com/vpc/latest/userguide/amazon-vpc-limits.html" target="_blank" rel="noopener">Amazon VPC quotas</a>
+  </div>
+</footer>
+
+</body>
+</html>

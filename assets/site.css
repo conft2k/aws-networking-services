@@ -86,3 +86,6 @@ html.presenting main>.slide.slide-on{top:46px}
 html.presenting main>.slide.slide-on{padding:10px 0 24px}
 html.presenting main>.slide.slide-on>.wrap{margin:0;max-width:var(--maxw,1120px)}
 html.presenting .present-title{left:24px}
+.lang-btn{gap:4px;padding:0 9px}
+.lang-btn span{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.04em}
+.tool-btn[hidden]{display:none}

@@ -1,0 +1,643 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AWS WAF Overview</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+body{margin:0}img{max-width:100%}[hidden]{display:none!important}
+
+/* Layout: a cross-connect work order. Cool steel paper, navy ink, Amazon orange as the one accent; section tags read like fiber labels. */
+:root{
+  --bg:#EEF1F4; --surface:#FFFFFF; --sunken:#E3E8ED;
+  --ink:#14202E; --ink-2:#44515F; --ink-3:#5A6672;
+  --line:#CDD5DD; --line-2:#B4BFCA;
+  --fiber:#FF9900;          /* Amazon orange — fills only */
+  --fiber-ink:#B35C00;      /* orange-derived, AA on light surfaces */
+  --fiber-soft:#FFF0D9;
+  --on-fiber:#14202E;
+  --trace:#2E7D9A;          /* secondary line color for diagram paths */
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --maxw:1120px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--fiber-ink);outline-offset:3px;border-radius:2px}
+.skip-link{position:absolute;left:16px;top:-60px;background:var(--fiber);color:var(--on-fiber);padding:8px 14px;font-weight:700;z-index:50;text-decoration:none}
+.skip-link:focus{top:12px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.wrap{max-width:var(--maxw);margin:0 auto;padding-inline:24px}
+section{padding-block:88px;border-top:1px solid var(--line)}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.25}
+h2{font-size:clamp(26px,3.4vw,36px);font-weight:700;letter-spacing:-.01em}
+h3{font-size:18px;font-weight:700}
+p{margin:0}
+.lede{color:var(--ink-2);max-width:62ch;margin-top:14px}
+.num{font-family:var(--display);font-variant-numeric:tabular-nums lining-nums}
+.mono{font-family:var(--mono)}
+
+/* fiber label: the section tag */
+.tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-bottom:14px}
+.tag::before{content:"";width:22px;height:8px;background:var(--fiber);border-radius:1px}
+
+/* nav */
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:60px}
+.brand{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.02em;text-decoration:none;text-transform:uppercase}
+.brand span{color:var(--fiber-ink)}
+.navlinks{display:flex;gap:22px;font-size:14px;align-items:center}
+.navlinks a{text-decoration:none;color:var(--ink-2)}
+.navlinks a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;font-weight:700;font-size:15px;text-decoration:none;border-radius:4px;border:1px solid transparent;transition:transform .15s ease,background .15s ease}
+.btn-primary{background:var(--fiber);color:var(--on-fiber)}
+.btn-primary:hover{transform:translateY(-1px)}
+.btn-ghost{border-color:var(--line-2);color:var(--ink)}
+.btn-ghost:hover{background:var(--sunken)}
+.navlinks .btn{min-height:38px;padding:0 14px;font-size:14px;color:var(--on-fiber)}
+
+/* hero */
+.hero{padding-block:72px 64px;border-top:0}
+.hero-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:56px;align-items:center}
+.eyebrow{font-family:var(--mono);font-size:13px;color:var(--fiber-ink);letter-spacing:.04em}
+.hero h1{font-size:clamp(34px,5vw,56px);font-weight:700;letter-spacing:-.02em;margin-top:16px}
+.hero h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--fiber) 62%,var(--fiber) 90%,transparent 90%);padding-inline:2px}
+.hero .lede{font-size:18px}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+
+/* hero visual: port faceplate */
+.faceplate{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px}
+.faceplate-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.ports{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+.port{border:1px solid var(--line);border-radius:4px;padding:14px 14px 12px;background:var(--sunken);display:flex;flex-direction:column;gap:2px}
+.port .num{font-size:40px;font-weight:600;line-height:1}
+.port .num small{font-size:18px;color:var(--ink-2);margin-left:2px}
+.port .optic{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+.port .led{width:8px;height:8px;border-radius:50%;background:var(--fiber);align-self:flex-end;margin-top:-6px;animation:blink 2.4s ease-in-out infinite}
+.port:nth-child(2) .led{animation-delay:.6s}.port:nth-child(3) .led{animation-delay:1.2s}.port:nth-child(4) .led{animation-delay:1.8s}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.faceplate-foot{margin-top:14px;font-size:13px;color:var(--ink-2)}
+
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:56px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.chip{padding:18px 20px;border-left:1px solid var(--line);min-width:0}
+.chip:first-child{border-left:0}
+.chip .num{font-size:34px;font-weight:600;line-height:1.1}
+.chip p{font-size:13.5px;color:var(--ink-2);margin-top:4px}
+
+/* value */
+.split{display:grid;grid-template-columns:1fr 1.4fr;gap:56px}
+.pillars{display:grid;gap:0;border-top:1px solid var(--line-2)}
+.pillar{display:grid;grid-template-columns:120px 1fr;gap:20px;padding-block:22px;border-bottom:1px solid var(--line)}
+.pillar .k{font-family:var(--display);font-size:22px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--fiber-ink)}
+.pillar p{color:var(--ink-2);margin-top:6px}
+
+/* stack (L1/L2/L3) */
+.stack{margin-top:40px;display:grid;gap:10px}
+.layer{display:grid;grid-template-columns:96px 1fr 1.2fr;gap:24px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px 24px}
+.layer .lv{font-family:var(--display);font-size:44px;font-weight:700;line-height:.9}
+.layer .lv small{display:block;font-family:var(--mono);font-size:11px;font-weight:400;color:var(--ink-3);letter-spacing:.06em;margin-top:8px;text-transform:uppercase}
+.layer p{color:var(--ink-2);margin-top:6px;font-size:15px}
+.specs{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+.specs code{font-family:var(--mono);font-size:12.5px;background:var(--sunken);border:1px solid var(--line);padding:3px 8px;border-radius:3px;color:var(--ink)}
+
+/* features */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:40px}
+.feature{background:var(--surface);padding:26px 24px;min-width:0}
+.feature .ft{font-family:var(--mono);font-size:11.5px;color:var(--fiber-ink);letter-spacing:.06em;text-transform:uppercase}
+.feature h3{margin-top:8px}
+.feature p{color:var(--ink-2);font-size:15px;margin-top:8px}
+
+/* table */
+.tbl-wrap{margin-top:36px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:14px 18px;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--sunken)}
+tbody tr:last-child td{border-bottom:0}
+td.row-h{font-weight:700;width:22%}
+td .num{font-size:18px;font-weight:600}
+
+/* architecture */
+.arch{margin-top:36px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px}
+.arch-scroll{overflow-x:auto}
+.arch svg{display:block;width:100%;min-width:860px;height:auto}
+.arch-hint{display:none;font-size:13px;color:var(--ink-3);margin-top:10px}
+svg .box{fill:var(--sunken);stroke:var(--line-2)}
+svg .zone{fill:none;stroke:var(--line-2);stroke-dasharray:4 4}
+svg .t{fill:var(--ink);font-family:var(--sans);font-size:14px;font-weight:700}
+svg .s{fill:var(--ink-3);font-family:var(--mono);font-size:11px}
+svg .z{fill:var(--ink-2);font-family:var(--mono);font-size:11px;letter-spacing:.08em}
+svg .fiber{stroke:var(--fiber);stroke-width:5;fill:none;stroke-linecap:round}
+svg .path{stroke:var(--trace);stroke-width:2;fill:none}
+svg .site{stroke:var(--fiber-ink);stroke-width:2;fill:none;stroke-dasharray:6 5}
+svg .lbl{fill:var(--trace);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .lbl2{fill:var(--fiber-ink);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .dot{fill:var(--fiber)}
+.legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--ink-2)}
+.legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--fiber)}
+.legend i.p{border-top:2px solid var(--trace)}
+.legend i.s{border-top:2px dashed var(--fiber-ink)}
+
+/* steps */
+.steps{list-style:none;padding:0;margin:40px 0 0;display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:4px solid var(--fiber)}
+.steps li{padding:20px 18px 0 0;min-width:0}
+.steps .num{font-size:15px;font-weight:600;color:var(--fiber-ink);letter-spacing:.06em}
+.steps h3{font-size:16px;margin-top:6px}
+.steps p{font-size:14px;color:var(--ink-2);margin-top:6px}
+
+/* resiliency */
+.res{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:36px}
+.res-card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:26px}
+.res-card .num{font-size:52px;font-weight:700;line-height:1}
+.res-card .num small{font-size:20px;color:var(--ink-2)}
+.res-card h3{margin-top:10px}
+.res-card p{color:var(--ink-2);font-size:15px;margin-top:6px}
+.res-card.max{border-color:var(--fiber);box-shadow:inset 0 4px 0 var(--fiber)}
+
+/* cta */
+.cta{text-align:center}
+.cta h2{max-width:22ch;margin:0 auto}
+.cta .lede{margin:14px auto 0}
+.cta .cta-row{justify-content:center}
+footer{border-top:1px solid var(--line);padding-block:28px;font-size:13px;color:var(--ink-3)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+
+@media (max-width:1024px){
+  .hero-grid,.split{grid-template-columns:1fr;gap:40px}
+  .features{grid-template-columns:repeat(2,1fr)}
+  .steps{grid-template-columns:repeat(2,1fr);border-top:0;gap:0 24px}
+  .steps li{border-top:4px solid var(--fiber);padding-bottom:24px}
+  .layer{grid-template-columns:80px 1fr}
+  .layer .specs{grid-column:2}
+  .chips{grid-template-columns:repeat(2,1fr)}
+  .chip:nth-child(3){border-left:0}
+  .chip:nth-child(n+3){border-top:1px solid var(--line)}
+}
+@media (max-width:640px){
+  .wrap{padding-inline:18px}
+  section{padding-block:60px}
+  .navlinks a:not(.btn){display:none}
+  .features,.res{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr}
+  .pillar{grid-template-columns:1fr;gap:0}
+  .layer{grid-template-columns:1fr;gap:12px}
+  .layer .specs{grid-column:auto}
+  .cta-row .btn{width:100%}
+  .arch-hint{display:block}
+  table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  table,tbody,tr,td{display:block;width:100%}
+  tr{border-bottom:1px solid var(--line);padding:14px 16px}
+  tbody tr:last-child{border-bottom:0}
+  td{border:0;padding:3px 0}
+  td.row-h{width:100%;font-size:16px;padding-bottom:6px}
+  td[data-k]::before{content:attr(data-k);display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+
+/* ---- service-specific ---- */
+/* hero visual: web ACL evaluation ladder */
+.acl{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px;min-width:0}
+.acl-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.req{margin-top:14px;border:1px dashed var(--line-2);border-radius:4px;padding:10px 14px;font-family:var(--mono);font-size:12px;color:var(--ink-2);overflow-wrap:anywhere}
+.req b{color:var(--ink);font-weight:500}
+.ladder{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:0}
+.ladder li{display:grid;grid-template-columns:34px 1fr auto;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line);min-width:0}
+.ladder .pr{font-family:var(--display);font-size:20px;font-weight:700;color:var(--ink-3);line-height:1}
+.ladder .rn{font-weight:700;font-size:14px;display:block}
+.ladder .rd{display:block;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);overflow-wrap:anywhere}
+.ladder .lab{display:inline-block;margin-top:3px;font-family:var(--mono);font-size:11px;color:var(--trace);overflow-wrap:anywhere}
+.act{font-family:var(--mono);font-size:11px;border:1px solid var(--line-2);padding:1px 7px;border-radius:3px;color:var(--ink-2);background:var(--sunken);white-space:nowrap}
+.act.hit{background:var(--fiber);border-color:var(--fiber);color:var(--on-fiber);font-weight:500}
+.ladder li.on .pr{color:var(--fiber-ink)}
+.ladder li.on{box-shadow:inset 3px 0 0 var(--fiber);padding-left:8px}
+.ladder li.skip{opacity:.55}
+.acl-foot{margin-top:12px;font-size:13px;color:var(--ink-2)}
+
+/* rule JSON block + checks */
+.policy{display:grid;grid-template-columns:1.35fr 1fr;gap:40px;margin-top:36px;align-items:start}
+.code{background:var(--sunken);border:1px solid var(--line);border-radius:6px;min-width:0;margin:0}
+.code-head{display:flex;justify-content:space-between;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.code pre{margin:0;padding:16px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.7;color:var(--ink)}
+.code .a{color:var(--fiber-ink);font-weight:500}
+.code .k{color:var(--trace)}
+.code .c{color:var(--ink-3)}
+.checks{list-style:none;margin:0;padding:0;display:grid;gap:0;border-top:1px solid var(--line-2)}
+.checks li{padding:18px 0;border-bottom:1px solid var(--line);min-width:0}
+.checks h3{font-size:16px}
+.checks h3 code{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--fiber-ink)}
+.checks p{color:var(--ink-2);font-size:15px;margin-top:4px}
+
+.cmp-tbl td.y{font-family:var(--mono);font-size:13px;color:var(--fiber-ink);font-weight:500}
+.note{margin-top:18px;font-size:14px;color:var(--ink-2);max-width:72ch}
+svg .edge{fill:var(--fiber-soft);stroke:var(--fiber)}
+svg .usr{stroke:var(--ink-3);stroke-width:2;fill:none;stroke-dasharray:3 4}
+svg .atk{stroke:#C2410C;stroke-width:2;fill:none;stroke-dasharray:6 5}
+svg .lbl3{fill:#C2410C;font-family:var(--mono);font-size:11px;font-weight:500}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) svg .atk{stroke:#FB923C}:root:not([data-theme="light"]) svg .lbl3{fill:#FB923C}}
+:root[data-theme="dark"] svg .atk{stroke:#FB923C}:root[data-theme="dark"] svg .lbl3{fill:#FB923C}
+.legend i.u{border-top:2px dashed var(--ink-3)}
+.legend i.a{border-top:2px dashed #C2410C}
+
+@media (max-width:1024px){
+  .policy{grid-template-columns:1fr}
+}
+@media (max-width:640px){
+  .acl{padding:18px}
+  .ladder li{grid-template-columns:28px 1fr}
+  .ladder .act{grid-column:2;justify-self:start}
+}
+
+/* nav: keep links on one line, show only CTA below 960px */
+.navlinks a{white-space:nowrap}
+@media (max-width:960px){.navlinks a:not(.btn){display:none}}
+
+/* Korean line breaking: never split a word mid-syllable */
+h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
+svg .ah-fiber{fill:var(--fiber)}
+svg .ah-trace{fill:var(--trace)}
+svg .ah-site{fill:var(--fiber-ink)}
+svg .ah-usr{fill:var(--ink-3)}
+svg .ah-atk{fill:#C2410C}
+.legend i.dir{position:relative;width:26px}
+.legend i.dir::after{content:"";position:absolute;right:-3px;top:-7px;border-left:8px solid var(--fiber);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.legend i.p.dir::after,.legend i.s.dir::after,.legend i.u.dir::after,.legend i.a.dir::after{top:-6px}
+.legend i.p.dir::after{border-left-color:var(--trace)}
+.legend i.s.dir::after{border-left-color:var(--fiber-ink)}
+.legend i.u.dir::after{border-left-color:var(--ink-3)}
+.legend i.a.dir::after{border-left-color:#C2410C}
+</style>
+<link rel="stylesheet" href="../../assets/site.css?v=16">
+<script src="../../assets/site.js?v=16"></script>
+</head>
+<body>
+
+
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<nav aria-label="Main menu">
+  <div class="wrap">
+    <a class="brand" href="#top">AWS <span>WAF</span></a>
+    <div class="navlinks">
+      <a href="../">Service portfolio</a>
+      <a href="#rules">Rules &amp; labels</a>
+      <a href="#features">Key features</a>
+      <a href="#resources">Protected resources</a>
+      <a href="#arch">Architecture</a>
+      <a href="#pricing">Pricing</a>
+      <a class="btn btn-primary" href="#start">Get started</a>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+  <header class="hero" id="top">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">AWS WAF · Web application firewall · L7</p>
+          <h1>Inspects HTTP requests and decides <em>in rule order</em></h1>
+          <p class="lede">AWS WAF is a managed web application firewall that inspects HTTP(S) requests sent to resources such as CloudFront, ALB, and API Gateway. You stack rules in a web ACL by priority, and each request is handled with one of Allow, Block, Count, CAPTCHA, or Challenge.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="#rules">See rule structure</a>
+            <a class="btn btn-ghost" href="#arch">See architecture</a>
+          </div>
+        </div>
+
+        <div class="acl" aria-label="Example of a web ACL evaluating a single request">
+          <div class="acl-head"><span>web ACL · priority order</span><span>default: Allow</span></div>
+          <p class="req"><b>POST /api/login</b> · 203.0.113.7 · UA: python-requests</p>
+          <ol class="ladder">
+            <li><span class="pr num">0</span><span><span class="rn">IP set · allowlist</span><span class="rd">Corporate CIDRs</span></span><span class="act">no match</span></li>
+            <li><span class="pr num">1</span><span><span class="rn">AWSManagedRulesCommonRuleSet</span><span class="rd">Core rule set · OWASP-class risks</span></span><span class="act">no match</span></li>
+            <li class="on"><span class="pr num">2</span><span><span class="rn">AWSManagedRulesBotControlRuleSet</span><span class="rd">rule action override: Count</span><span class="lab">+ awswaf:managed:aws:bot-control:bot:category:http_library</span></span><span class="act">Count</span></li>
+            <li class="on"><span class="pr num">3</span><span><span class="rn">block-bot-label</span><span class="rd">label match → label added by an earlier rule</span></span><span class="act hit">Block</span></li>
+            <li class="skip"><span class="pr num">4</span><span><span class="rn">rate-limit-per-ip</span><span class="rd">Not evaluated · after a terminating action</span></span><span class="act">—</span></li>
+          </ol>
+          <p class="acl-foot">Count only adds labels and moves on to the next rule. Block ends evaluation and returns a 403.</p>
+        </div>
+      </div>
+
+      <div class="chips" role="list">
+        <div class="chip" role="listitem"><span class="num">5</span><p>Rule actions (Allow · Block · Count · CAPTCHA · Challenge)</p></div>
+        <div class="chip" role="listitem"><span class="num">1,500 WCU</span><p>Capacity included in the base web ACL price (up to 5,000)</p></div>
+        <div class="chip" role="listitem"><span class="num">9</span><p>Associable resource types</p></div>
+        <div class="chip" role="listitem"><span class="num">3</span><p>Log destinations (CloudWatch Logs · S3 · Firehose)</p></div>
+      </div>
+    </div>
+  </header>
+
+  <section id="why" aria-labelledby="why-h">
+    <div class="wrap split">
+      <div>
+        <p class="tag">Why AWS WAF</p>
+        <h2 id="why-h">When decisions must be based on request content, not ports</h2>
+        <p class="lede">Security groups and <a href="../network-firewall/">Network Firewall</a> look at addresses, ports, and flows. SQL injection, credential stuffing, and scraping bots happen inside legitimate HTTPS sessions, so you need an L7 layer that examines headers, query strings, bodies, and client behavior.</p>
+      </div>
+      <div class="pillars">
+        <div class="pillar"><span class="k">Inline</span><div><h3>A firewall attached to the service</h3><p>No separate appliance or routing changes: associate a web ACL with a resource such as a CloudFront distribution or ALB, and inspection starts immediately.</p></div></div>
+        <div class="pillar"><span class="k">Managed</span><div><h3>Move fast with managed rules</h3><p>Use AWS Managed Rules and AWS Marketplace rule groups to block common web exploits, low-reputation IPs, and bots first, then layer custom rules on top.</p></div></div>
+        <div class="pillar"><span class="k">Observe</span><div><h3>Observe with Count first</h3><p>Add rules in Count mode, check for false positives with CloudWatch metrics, sampled requests, and full logs, then switch them to Block.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="rules" aria-labelledby="rules-h">
+    <div class="wrap">
+      <p class="tag">Rules · labels</p>
+      <h2 id="rules-h">Rules are JSON statements; labels carry decisions forward</h2>
+      <p class="lede">Below is a rate-based rule that limits requests per IP on the login path, excluding requests that carry the corporate-IP label. Using labels added by earlier rules as conditions in later rules lets you split rules into small pieces and combine them.</p>
+      <div class="policy">
+        <figure class="code">
+          <div class="code-head"><span>rate-limit-login.json</span><span>wafv2 Rule</span></div>
+<pre><code>{
+  <span class="k">"Name"</span>: "rate-limit-login",
+  <span class="k">"Priority"</span>: 4,
+  <span class="k">"Statement"</span>: {
+    <span class="k">"RateBasedStatement"</span>: {
+      <span class="k">"Limit"</span>: 100,
+      <span class="k">"EvaluationWindowSec"</span>: 300,
+      <span class="k">"AggregateKeyType"</span>: "IP",
+      <span class="k">"ScopeDownStatement"</span>: { <span class="k">"AndStatement"</span>: { <span class="k">"Statements"</span>: [
+        { <span class="k">"ByteMatchStatement"</span>: { "SearchString": "/api/login",
+            "FieldToMatch": { "UriPath": {} }, "PositionalConstraint": "STARTS_WITH",
+            "TextTransformations": [{ "Priority": 0, "Type": "LOWERCASE" }] } },
+        { <span class="k">"NotStatement"</span>: { "Statement": { <span class="k">"LabelMatchStatement"</span>: {
+            "Scope": "LABEL", "Key": "corp:trusted-ip" } } } }
+      ] } }
+    }
+  },
+  <span class="k">"Action"</span>: { <span class="a">"Block"</span>: {} },  <span class="c">// Allow is not supported</span>
+  <span class="k">"VisibilityConfig"</span>: { "SampledRequestsEnabled": true,
+    "CloudWatchMetricsEnabled": true, "MetricName": "rate-limit-login" }
+}</code></pre>
+          <figcaption class="sr-only">Example AWS WAF rule that applies a per-IP rate limit to the login path and excludes the trusted label</figcaption>
+        </figure>
+        <ol class="checks" aria-label="How AWS WAF evaluates rules">
+          <li><h3>Evaluated in priority order <code>Priority</code></h3><p>A web ACL evaluates rules from the lowest number up. It stops at a terminating action such as Allow or Block; if nothing matches, the web ACL default action applies.</p></li>
+          <li><h3>Count and labels <code>Label</code></h3><p>Count is a non-terminating action that records the match and moves on to the next rule. Labels added by rules and managed rule groups can be referenced by later rules in the same web ACL with <span class="mono">LabelMatchStatement</span>.</p></li>
+          <li><h3>Rate-based rule <code>60–600s</code></h3><p>Choose an evaluation window of 60, 120, 300, or 600 seconds; the minimum limit is 10. Requests are aggregated by combining keys such as IP, forwarded IP, headers, query arguments, and label namespaces. It is meant to curb high request rates, not to enforce precise quotas.</p></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" aria-labelledby="features-h">
+    <div class="wrap">
+      <p class="tag">Features</p>
+      <h2 id="features-h">Key features</h2>
+      <div class="features">
+        <article class="feature"><p class="ft">Managed rules</p><h3>AWS Managed Rules</h3><p>Use versioned rule groups such as Core rule set, Known bad inputs, SQL database, and IP reputation. Override the action of individual rules in a group, or narrow their scope with a scope-down statement.</p></article>
+        <article class="feature"><p class="ft">Bot Control</p><h3>Bot detection and management</h3><p>The Common level classifies self-identifying bots and labels them; the Targeted level also catches bots that hide their identity, using browser interrogation and behavioral analysis. Useful bots such as search engines are allowed after verification.</p></article>
+        <article class="feature"><p class="ft">Fraud Control</p><h3>ATP · ACFP</h3><p>ATP detects credential stuffing and account takeover attempts on login pages; ACFP detects fake account creation on sign-up pages. Decisions use compromised-credential checks and session-level aggregation.</p></article>
+        <article class="feature"><p class="ft">CAPTCHA · Challenge</p><h3>Human and browser verification</h3><p>CAPTCHA asks the user to solve a puzzle; Challenge silently checks the browser environment. On success, an AWS WAF token is issued and the client isn't asked again during the immunity time.</p></article>
+        <article class="feature"><p class="ft">App integration</p><h3>Client integration SDKs</h3><p>With the JavaScript, iOS, and Android SDKs, clients acquire a token in advance and attach it to requests. SDK integration is recommended to get the full benefit of Bot Control Targeted and Fraud Control.</p></article>
+        <article class="feature"><p class="ft">Logging</p><h3>Full request logs</h3><p>Send web ACL logs to CloudWatch Logs, Amazon S3, or Amazon Data Firehose. Destination names must start with <span class="mono">aws-waf-logs-</span>; use field redaction and log filtering to reduce volume.</p></article>
+        <article class="feature"><p class="ft">L7 DDoS</p><h3>Anti-DDoS managed rule group</h3><p><span class="mono">AWSManagedRulesAntiDDoSRuleSet</span> learns a per-resource traffic baseline and detects L7 DDoS within seconds. Low-suspicion requests are mitigated with a silent Challenge and high-suspicion requests with Block. It is a paid rule group.</p></article>
+        <article class="feature"><p class="ft">AI traffic</p><h3>AI bot and agent management</h3><p>Bot Control classifies AI crawlers and agents and shows them in the AI activity dashboard. Bots verified with Web Bot Auth signatures are allowed by default, and on CloudFront you can also charge with HTTP 402 through AI traffic monetization.</p></article>
+        <article class="feature"><p class="ft">Request handling</p><h3>Label forwarding and normalization</h3><p>Dynamic label interpolation inserts label namespaces, client IP, and JA3 · JA4 fingerprints into custom headers or response bodies with a single rule. Pre-parse text transformation normalizes query strings before parsing to prevent evasion.</p></article>
+      </div>
+      <p class="note">Custom responses: specify a status code, headers, and body on a Block action to return a custom response, and with Allow or Count you can insert custom headers into requests forwarded to the origin.</p>
+    </div>
+  </section>
+
+  <section id="resources" aria-labelledby="resources-h">
+    <div class="wrap">
+      <p class="tag">Protected resources</p>
+      <h2 id="resources-h">Resources you can associate a web ACL with</h2>
+      <p class="lede">One web ACL can be associated with multiple resources of the same scope, but each resource can have only one web ACL. Create web ACLs for CloudFront in the global scope, and all others in the same Region as the resource.</p>
+      <div class="stack">
+        <div class="layer">
+          <span class="lv">Edge<small>Global scope</small></span>
+          <div><h3><a href="../cloudfront/">Amazon CloudFront</a> · AWS Amplify</h3><p>Requests are inspected at edge locations, so attack traffic never reaches the origin. The CloudFront body inspection limit is 16 KB by default and can be raised to 64 KB.</p></div>
+          <div class="specs"><code>CloudFront distribution</code><code>Amplify app</code><code>scope: CLOUDFRONT</code></div>
+        </div>
+        <div class="layer">
+          <span class="lv">LB · API<small>Regional</small></span>
+          <div><h3><a href="../elastic-load-balancing/">ALB</a> · <a href="../api-gateway/">API Gateway</a> · AppSync</h3><p>Protects Regional entry points directly. The body inspection limit is fixed at 8 KB for ALB and AppSync; for API Gateway REST APIs it is 16 KB by default and can be increased.</p></div>
+          <div class="specs"><code>Application Load Balancer</code><code>API Gateway REST API</code><code>AppSync GraphQL API</code></div>
+        </div>
+        <div class="layer">
+          <span class="lv">App<small>Regional</small></span>
+          <div><h3>Cognito · App Runner · Verified Access · AgentCore Gateway</h3><p>Apply the same rules in front of user pool sign-in endpoints, containerized web services, zero trust application access, and agent tool gateways.</p></div>
+          <div class="specs"><code>Cognito user pool</code><code>App Runner service</code><code>Verified Access instance</code><code>Bedrock AgentCore Gateway</code></div>
+        </div>
+      </div>
+      <p class="note">You can't associate a web ACL directly with an NLB, an API Gateway HTTP API, or an EC2 Elastic IP. Protect such entry points by placing CloudFront in front, or with <a href="../shield/">Shield Advanced</a> and <a href="../network-firewall/">Network Firewall</a>.</p>
+    </div>
+  </section>
+
+  <section id="compare" aria-labelledby="compare-h">
+    <div class="wrap">
+      <p class="tag">Where it fits</p>
+      <h2 id="compare-h">AWS WAF and neighboring security services</h2>
+      <p class="lede">They work at different layers and inspect different things, so they complement rather than replace each other.</p>
+      <div class="tbl-wrap">
+        <table class="cmp-tbl">
+          <caption class="sr-only">Comparison of AWS WAF, Shield, Network Firewall, and security groups</caption>
+          <thead><tr><th scope="col">Service</th><th scope="col">Layer</th><th scope="col">Inspects</th><th scope="col">Where it attaches</th></tr></thead>
+          <tbody>
+            <tr><td class="row-h">AWS WAF</td><td data-k="Layer" class="y">L7 HTTP(S)</td><td data-k="Inspects">Headers, URI, query, body, cookies, IP · country, request rate, bot signals</td><td data-k="Where it attaches">web ACL associated with resources such as CloudFront, ALB, API Gateway</td></tr>
+            <tr><td class="row-h"><a href="../shield/">AWS Shield</a></td><td data-k="Layer" class="y">L3 · L4 (+ L7 Advanced)</td><td data-k="Inspects">Volumetric and state-exhaustion DDoS. Advanced mitigates L7 with the Anti-DDoS rule group included in the subscription</td><td data-k="Where it attaches">Standard is automatic. Advanced on designated protected resources</td></tr>
+            <tr><td class="row-h"><a href="../network-firewall/">Network Firewall</a></td><td data-k="Layer" class="y">L3 – L7 flows</td><td data-k="Inspects">5-tuple, Suricata signatures, TLS SNI · domains, all protocols</td><td data-k="Where it attaches">Firewall endpoints in the VPC · TGW routing path</td></tr>
+            <tr><td class="row-h">Security groups · NACLs</td><td data-k="Layer" class="y">L3 · L4</td><td data-k="Inspects">IP, port, protocol</td><td data-k="Where it attaches">ENI · subnet</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="arch" aria-labelledby="arch-h">
+    <div class="wrap">
+      <p class="tag">Reference architecture</p>
+      <h2 id="arch-h">Filter at the edge first, and apply one baseline across the organization</h2>
+      <p class="lede">Web traffic is inspected first at CloudFront, which has a global web ACL associated. The Regional API Gateway gets a Regional web ACL. Firewall Manager enforces common rule groups across every account in the organization, and logs from each web ACL are collected in one place.</p>
+      <figure class="arch">
+        <div class="arch-scroll">
+          <svg viewBox="0 0 980 470" role="img" aria-labelledby="arch-title arch-desc">
+            <title id="arch-title">AWS WAF reference architecture</title>
+            <desc id="arch-desc">Users, bots, and attack traffic arrive from the internet. Web traffic is inspected by Managed Rules, Bot Control, and a rate-based rule on a CloudFront distribution with a global-scope web ACL, and blocked requests receive a 403 at the edge. Allowed requests go to the Application Load Balancer and the application in the Region. API calls from the mobile app go to an API Gateway REST API with a Regional-scope web ACL. In the organization management area, the Firewall Manager administrator account uses policies to deploy the first and last rule groups of each account's web ACL; web ACL logs are collected in S3 through Amazon Data Firehose, and CloudWatch metrics are collected alongside.</desc>
+            <defs>
+              <marker id="ar-waf-fiber" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><path class="ah-fiber" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-waf-trace" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-trace" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-waf-site" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-site" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-waf-usr" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-usr" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-waf-atk" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-atk" d="M0 0 L10 5 L0 10 z"/></marker>
+            </defs>
+            <!-- zones -->
+            <rect class="zone" x="10" y="40" width="210" height="270" rx="6"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Internet_48_Light.svg" x="18" y="48" width="22" height="22"/>
+            <text class="z" x="46" y="62">INTERNET</text>
+            <rect class="zone" x="235" y="40" width="255" height="270" rx="6"/>
+            <image href="../../assets/aws-icons/AWS-Cloud_32.svg" x="243" y="48" width="22" height="22"/>
+            <text class="z" x="271" y="62">AWS EDGE · GLOBAL WEB ACL</text>
+            <rect class="zone" x="520" y="40" width="450" height="270" rx="6"/>
+            <image href="../../assets/aws-icons/Region_32.svg" x="528" y="48" width="22" height="22"/>
+            <text class="z" x="556" y="62">REGION · WORKLOAD ACCOUNT</text>
+            <rect class="zone" x="235" y="330" width="735" height="130" rx="6"/>
+
+            <!-- internet -->
+            <rect class="box" x="18" y="84" width="192" height="56" rx="4"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Users_48_Light.svg" x="26" y="100" width="24" height="24"/>
+            <text class="t" x="56" y="108">Users</text><text class="s" x="56" y="127">browser</text>
+            <rect class="box" x="18" y="160" width="192" height="56" rx="4"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Client_48_Light.svg" x="26" y="176" width="24" height="24"/>
+            <text class="t" x="56" y="184">Bots · attacks</text><text class="s" x="56" y="203">scraper · SQLi · flood</text>
+            <rect class="box" x="18" y="236" width="192" height="56" rx="4"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Mobile-client_48_Light.svg" x="26" y="252" width="24" height="24"/>
+            <text class="t" x="56" y="260">Mobile app</text><text class="s" x="56" y="279">WAF SDK token</text>
+
+            <!-- edge -->
+            <rect class="edge" x="248" y="84" width="230" height="132" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_Amazon-CloudFront_48.svg" x="258" y="94" width="28" height="28"/>
+            <image href="../../assets/aws-icons/Arch_AWS-WAF_48.svg" x="258" y="128" width="28" height="28"/>
+            <text class="t" x="294" y="108">CloudFront + web ACL</text>
+            <text class="s" x="294" y="130">0 FMS first rule groups</text>
+            <text class="s" x="294" y="148">1 AWS Managed Rules</text>
+            <text class="s" x="294" y="166">2 Bot Control · CAPTCHA</text>
+            <text class="s" x="294" y="184">3 rate-based · label match</text>
+            <text class="lbl2" x="294" y="206">default action: Allow</text>
+            <text class="lbl3" x="264" y="240">Blocked →</text><text class="lbl3" x="264" y="256">403 at edge</text>
+
+            <path class="usr" d="M210 112 H246" marker-end="url(#ar-waf-usr)"/>
+            <path class="atk" d="M210 188 C228 188 228 170 246 170" marker-end="url(#ar-waf-atk)"/>
+            <path class="usr" d="M210 264 C340 264 420 270 533 270" marker-end="url(#ar-waf-usr)"/>
+
+            <!-- region -->
+            <rect class="box" x="535" y="96" width="195" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Elastic-Load-Balancing_Application-Load-Balancer_48.svg" x="545" y="114" width="28" height="28"/>
+            <text class="t" x="581" y="122">ALB</text><text class="s" x="581" y="142">CloudFront origin</text>
+            <rect class="box" x="774" y="96" width="186" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_Amazon-Elastic-Container-Service_48.svg" x="784" y="114" width="28" height="28"/>
+            <text class="t" x="820" y="122">Application</text><text class="s" x="820" y="142">ECS · EC2</text>
+            <rect class="edge" x="535" y="236" width="195" height="60" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_Amazon-API-Gateway_48.svg" x="541" y="254" width="24" height="24"/>
+            <text class="t" x="571" y="260">API Gateway</text><text class="s" x="571" y="280">REST · regional web ACL</text>
+            <rect class="box" x="774" y="236" width="186" height="60" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_AWS-Lambda_48.svg" x="784" y="252" width="28" height="28"/>
+            <text class="t" x="820" y="260">Lambda</text><text class="s" x="820" y="280">API backend</text>
+
+            <path class="fiber" d="M478 128 H526" marker-end="url(#ar-waf-fiber)"/>
+            <text class="lbl2" x="482" y="114">allowed</text>
+            <path class="path" d="M730 128 H772" marker-end="url(#ar-waf-trace)"/>
+            <path class="path" d="M730 266 H772" marker-end="url(#ar-waf-trace)"/>
+            <text class="lbl" x="400" y="258">API calls</text>
+
+            <!-- organization -->
+            <rect class="box" x="255" y="370" width="220" height="70" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_AWS-Firewall-Manager_48.svg" x="265" y="391" width="28" height="28"/>
+            <text class="t" x="301" y="396">Firewall Manager</text><text class="s" x="301" y="416">AWS WAF policy · org-wide</text>
+            <rect class="box" x="560" y="370" width="170" height="70" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_Amazon-Data-Firehose_48.svg" x="570" y="391" width="28" height="28"/>
+            <text class="t" x="606" y="396">Data Firehose</text><text class="s" x="606" y="416">aws-waf-logs-*</text>
+            <rect class="box" x="774" y="370" width="186" height="70" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_Amazon-Simple-Storage-Service_48.svg" x="784" y="377" width="24" height="24"/>
+            <image href="../../assets/aws-icons/Arch_Amazon-CloudWatch_48.svg" x="784" y="409" width="24" height="24"/>
+            <text class="t" x="816" y="396">S3 · CloudWatch</text><text class="s" x="816" y="416">logs · metrics</text>
+
+            <path class="site" d="M350 370 V218" marker-end="url(#ar-waf-site)"/>
+            <path class="site" d="M475 392 C530 392 560 340 560 298" marker-end="url(#ar-waf-site)"/>
+            <text class="lbl2" x="362" y="300">deploy policy</text>
+            <path class="path" d="M645 330 V368" stroke-dasharray="3 4" marker-end="url(#ar-waf-trace)"/>
+            <path class="path" d="M730 405 H772" marker-end="url(#ar-waf-trace)"/>
+            <text class="lbl" x="655" y="352">logs</text>
+            <rect x="240" y="336" width="262" height="26" fill="var(--surface)"/>
+            <image href="../../assets/aws-icons/AWS-Account_32.svg" x="243" y="338" width="22" height="22"/>
+            <text class="z" x="271" y="352">ORGANIZATION · SECURITY ACCOUNT</text>
+          </svg>
+        </div>
+        <figcaption class="legend">
+          <span><i class="u dir"></i>Client requests</span>
+          <span><i class="a dir"></i>Bot · attack requests (blocked at the edge)</span>
+          <span><i class="dir"></i>Traffic that passed inspection</span>
+          <span><i class="s dir"></i>Firewall Manager policy deployment</span>
+          <span><i class="p dir"></i>In-Region requests · log delivery</span>
+        </figcaption>
+        <p class="arch-hint">On narrow screens, swipe the diagram sideways.</p>
+      </figure>
+    </div>
+  </section>
+
+  <section id="start" aria-labelledby="start-h">
+    <div class="wrap">
+      <p class="tag">Getting started</p>
+      <h2 id="start-h">Steps to deploy your first web ACL</h2>
+      <ol class="steps">
+        <li><span class="num">STEP 1</span><h3>Create a web ACL</h3><p>Choose the scope of the resources to protect (CloudFront or Regional) and set the default action. The new console shows it as a protection pack.</p></li>
+        <li><span class="num">STEP 2</span><h3>Add managed rules</h3><p>Add AWS Managed Rules such as Core rule set and IP reputation, and check WCU usage.</p></li>
+        <li><span class="num">STEP 3</span><h3>Observe with Count</h3><p>Keep rules in Count, enable logging and CloudWatch metrics, find false positives, and create exceptions.</p></li>
+        <li><span class="num">STEP 4</span><h3>Switch to Block</h3><p>Switch verified rules to Block first, then add rate-based rules and Bot Control.</p></li>
+        <li><span class="num">STEP 5</span><h3>Scale to the organization</h3><p>Use Firewall Manager policies to apply common rule groups automatically to all accounts and new resources.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="pricing" aria-labelledby="pricing-h">
+    <div class="wrap">
+      <p class="tag">Pricing</p>
+      <h2 id="pricing-h">Cost components</h2>
+      <p class="lede">You pay for what you use. The basics are monthly charges per web ACL and per rule, plus the number of requests processed; enabling intelligent threat mitigation features and extended options adds charges.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">AWS WAF billing components</caption>
+          <thead><tr><th scope="col">Component</th><th scope="col">Billed by</th><th scope="col">Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="row-h">web ACL</td><td data-k="Billed by">Monthly fee per web ACL</td><td data-k="Notes">Prorated by the hours in use</td></tr>
+            <tr><td class="row-h">Rules</td><td data-k="Billed by">Monthly fee per rule · rule group in a web ACL</td><td data-k="Notes">Each managed rule group counts as one rule</td></tr>
+            <tr><td class="row-h">Requests</td><td data-k="Billed by">Per 1 million requests processed</td><td data-k="Notes">Applies to every request the web ACL inspects</td></tr>
+            <tr><td class="row-h">WCU · extended body inspection</td><td data-k="Billed by">WCUs above 1,500 · body inspection beyond 16 KB</td><td data-k="Notes">Additional WCUs are priced in tiers. If you raise the body limit, extra charges apply only to requests larger than 16 KB</td></tr>
+            <tr><td class="row-h">Bot Control · Fraud Control · DDoS</td><td data-k="Billed by">Monthly subscription + requests · attempts</td><td data-k="Notes">Bot Control is priced per Common · Targeted level (with a free request tier), ATP by login attempts, and ACFP by account creation attempts. The Anti-DDoS rule group is also charged separately</td></tr>
+            <tr><td class="row-h">CAPTCHA · Challenge</td><td data-k="Billed by">Attempts · responses</td><td data-k="Notes">Charged for CAPTCHA puzzles presented and Challenge responses</td></tr>
+            <tr><td class="row-h">Related charges</td><td data-k="Billed by">Billed by other services</td><td data-k="Notes">AWS Marketplace rule group subscriptions, Firewall Manager policies, log destinations (S3 · Firehose, and CloudWatch Logs beyond 500 MB per 1 million requests)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="lede" style="font-size:14px">For resources protected by Shield Advanced, standard AWS WAF charges are included in the subscription (excluding Bot Control, Fraud Control, CAPTCHA, and similar). For CloudFront distributions you can also choose flat-rate pricing plans (launched November 2025) that include AWS WAF and DDoS protection in a monthly fee. Prices are subject to change; check the <a href="https://aws.amazon.com/waf/pricing/" target="_blank" rel="noopener">AWS WAF pricing page</a>.</p>
+    </div>
+  </section>
+
+  <section class="cta" aria-labelledby="cta-h">
+    <div class="wrap">
+      <p class="tag">Next step</p>
+      <h2 id="cta-h">Design a web ACL that fits your service</h2>
+      <p class="lede">Bring a summary of your internet-facing entry points, login and sign-up paths, share of bot traffic, and account structure, and we'll review the rule configuration and the Count → Block transition plan together.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="https://aws.amazon.com/waf/" target="_blank" rel="noopener">Open service page</a>
+        <a class="btn btn-ghost" href="https://docs.aws.amazon.com/waf/latest/developerguide/waf-chapter.html" target="_blank" rel="noopener">Read the Developer Guide</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a href="../">← AWS Networking Services Portfolio</a>
+    <span>AWS WAF overview. Supported resources, quotas, and pricing may change; check the official documentation.</span>
+    <a href="https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups-list.html" target="_blank" rel="noopener">AWS Managed Rules list</a>
+  </div>
+</footer>
+
+</body>
+</html>

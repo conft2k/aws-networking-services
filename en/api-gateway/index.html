@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Amazon API Gateway Overview</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+body{margin:0}img{max-width:100%}[hidden]{display:none!important}
+
+/* Layout: a cross-connect work order. Cool steel paper, navy ink, Amazon orange as the one accent; section tags read like fiber labels. */
+:root{
+  --bg:#EEF1F4; --surface:#FFFFFF; --sunken:#E3E8ED;
+  --ink:#14202E; --ink-2:#44515F; --ink-3:#5A6672;
+  --line:#CDD5DD; --line-2:#B4BFCA;
+  --fiber:#FF9900;          /* Amazon orange — fills only */
+  --fiber-ink:#B35C00;      /* orange-derived, AA on light surfaces */
+  --fiber-soft:#FFF0D9;
+  --on-fiber:#14202E;
+  --trace:#2E7D9A;          /* secondary line color for diagram paths */
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --maxw:1120px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--fiber-ink);outline-offset:3px;border-radius:2px}
+.skip-link{position:absolute;left:16px;top:-60px;background:var(--fiber);color:var(--on-fiber);padding:8px 14px;font-weight:700;z-index:50;text-decoration:none}
+.skip-link:focus{top:12px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.wrap{max-width:var(--maxw);margin:0 auto;padding-inline:24px}
+section{padding-block:88px;border-top:1px solid var(--line)}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.25}
+h2{font-size:clamp(26px,3.4vw,36px);font-weight:700;letter-spacing:-.01em}
+h3{font-size:18px;font-weight:700}
+p{margin:0}
+.lede{color:var(--ink-2);max-width:62ch;margin-top:14px}
+.num{font-family:var(--display);font-variant-numeric:tabular-nums lining-nums}
+.mono{font-family:var(--mono)}
+
+/* fiber label: the section tag */
+.tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-bottom:14px}
+.tag::before{content:"";width:22px;height:8px;background:var(--fiber);border-radius:1px}
+
+/* nav */
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:60px}
+.brand{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.02em;text-decoration:none;text-transform:uppercase}
+.brand span{color:var(--fiber-ink)}
+.navlinks{display:flex;gap:22px;font-size:14px;align-items:center}
+.navlinks a{text-decoration:none;color:var(--ink-2)}
+.navlinks a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;font-weight:700;font-size:15px;text-decoration:none;border-radius:4px;border:1px solid transparent;transition:transform .15s ease,background .15s ease}
+.btn-primary{background:var(--fiber);color:var(--on-fiber)}
+.btn-primary:hover{transform:translateY(-1px)}
+.btn-ghost{border-color:var(--line-2);color:var(--ink)}
+.btn-ghost:hover{background:var(--sunken)}
+.navlinks .btn{min-height:38px;padding:0 14px;font-size:14px;color:var(--on-fiber)}
+
+/* hero */
+.hero{padding-block:72px 64px;border-top:0}
+.hero-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:56px;align-items:center}
+.eyebrow{font-family:var(--mono);font-size:13px;color:var(--fiber-ink);letter-spacing:.04em}
+.hero h1{font-size:clamp(34px,5vw,56px);font-weight:700;letter-spacing:-.02em;margin-top:16px}
+.hero h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--fiber) 62%,var(--fiber) 90%,transparent 90%);padding-inline:2px}
+.hero .lede{font-size:18px}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+
+/* hero visual: port faceplate */
+.faceplate{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px}
+.faceplate-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.ports{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+.port{border:1px solid var(--line);border-radius:4px;padding:14px 14px 12px;background:var(--sunken);display:flex;flex-direction:column;gap:2px}
+.port .num{font-size:40px;font-weight:600;line-height:1}
+.port .num small{font-size:18px;color:var(--ink-2);margin-left:2px}
+.port .optic{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+.port .led{width:8px;height:8px;border-radius:50%;background:var(--fiber);align-self:flex-end;margin-top:-6px;animation:blink 2.4s ease-in-out infinite}
+.port:nth-child(2) .led{animation-delay:.6s}.port:nth-child(3) .led{animation-delay:1.2s}.port:nth-child(4) .led{animation-delay:1.8s}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.faceplate-foot{margin-top:14px;font-size:13px;color:var(--ink-2)}
+
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:56px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.chip{padding:18px 20px;border-left:1px solid var(--line);min-width:0}
+.chip:first-child{border-left:0}
+.chip .num{font-size:34px;font-weight:600;line-height:1.1}
+.chip p{font-size:13.5px;color:var(--ink-2);margin-top:4px}
+
+/* value */
+.split{display:grid;grid-template-columns:1fr 1.4fr;gap:56px}
+.pillars{display:grid;gap:0;border-top:1px solid var(--line-2)}
+.pillar{display:grid;grid-template-columns:120px 1fr;gap:20px;padding-block:22px;border-bottom:1px solid var(--line)}
+.pillar .k{font-family:var(--display);font-size:22px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--fiber-ink)}
+.pillar p{color:var(--ink-2);margin-top:6px}
+
+/* stack (L1/L2/L3) */
+.stack{margin-top:40px;display:grid;gap:10px}
+.layer{display:grid;grid-template-columns:96px 1fr 1.2fr;gap:24px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px 24px}
+.layer .lv{font-family:var(--display);font-size:44px;font-weight:700;line-height:.9}
+.layer .lv small{display:block;font-family:var(--mono);font-size:11px;font-weight:400;color:var(--ink-3);letter-spacing:.06em;margin-top:8px;text-transform:uppercase}
+.layer p{color:var(--ink-2);margin-top:6px;font-size:15px}
+.specs{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+.specs code{font-family:var(--mono);font-size:12.5px;background:var(--sunken);border:1px solid var(--line);padding:3px 8px;border-radius:3px;color:var(--ink)}
+
+/* features */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:40px}
+.feature{background:var(--surface);padding:26px 24px;min-width:0}
+.feature .ft{font-family:var(--mono);font-size:11.5px;color:var(--fiber-ink);letter-spacing:.06em;text-transform:uppercase}
+.feature h3{margin-top:8px}
+.feature p{color:var(--ink-2);font-size:15px;margin-top:8px}
+
+/* table */
+.tbl-wrap{margin-top:36px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:14px 18px;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--sunken)}
+tbody tr:last-child td{border-bottom:0}
+td.row-h{font-weight:700;width:22%}
+td .num{font-size:18px;font-weight:600}
+
+/* architecture */
+.arch{margin-top:36px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px}
+.arch-scroll{overflow-x:auto}
+.arch svg{display:block;width:100%;min-width:860px;height:auto}
+.arch-hint{display:none;font-size:13px;color:var(--ink-3);margin-top:10px}
+svg .box{fill:var(--sunken);stroke:var(--line-2)}
+svg .zone{fill:none;stroke:var(--line-2);stroke-dasharray:4 4}
+svg .t{fill:var(--ink);font-family:var(--sans);font-size:14px;font-weight:700}
+svg .s{fill:var(--ink-3);font-family:var(--mono);font-size:11px}
+svg .z{fill:var(--ink-2);font-family:var(--mono);font-size:11px;letter-spacing:.08em}
+svg .fiber{stroke:var(--fiber);stroke-width:5;fill:none;stroke-linecap:round}
+svg .path{stroke:var(--trace);stroke-width:2;fill:none}
+svg .site{stroke:var(--fiber-ink);stroke-width:2;fill:none;stroke-dasharray:6 5}
+svg .lbl{fill:var(--trace);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .lbl2{fill:var(--fiber-ink);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .dot{fill:var(--fiber)}
+svg .ah-f{fill:var(--fiber)}
+svg .ah-p{fill:var(--trace)}
+svg .ah-s{fill:var(--fiber-ink)}
+.legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--ink-2)}
+.legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--fiber)}
+.legend i.p{border-top:2px solid var(--trace)}
+.legend i.s{border-top:2px dashed var(--fiber-ink)}
+
+/* steps */
+.steps{list-style:none;padding:0;margin:40px 0 0;display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:4px solid var(--fiber)}
+.steps li{padding:20px 18px 0 0;min-width:0}
+.steps .num{font-size:15px;font-weight:600;color:var(--fiber-ink);letter-spacing:.06em}
+.steps h3{font-size:16px;margin-top:6px}
+.steps p{font-size:14px;color:var(--ink-2);margin-top:6px}
+
+/* resiliency */
+.res{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:36px}
+.res-card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:26px}
+.res-card .num{font-size:52px;font-weight:700;line-height:1}
+.res-card .num small{font-size:20px;color:var(--ink-2)}
+.res-card h3{margin-top:10px}
+.res-card p{color:var(--ink-2);font-size:15px;margin-top:6px}
+.res-card.max{border-color:var(--fiber);box-shadow:inset 0 4px 0 var(--fiber)}
+
+/* cta */
+.cta{text-align:center}
+.cta h2{max-width:22ch;margin:0 auto}
+.cta .lede{margin:14px auto 0}
+.cta .cta-row{justify-content:center}
+footer{border-top:1px solid var(--line);padding-block:28px;font-size:13px;color:var(--ink-3)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+
+@media (max-width:1024px){
+  .hero-grid,.split{grid-template-columns:1fr;gap:40px}
+  .features{grid-template-columns:repeat(2,1fr)}
+  .steps{grid-template-columns:repeat(2,1fr);border-top:0;gap:0 24px}
+  .steps li{border-top:4px solid var(--fiber);padding-bottom:24px}
+  .layer{grid-template-columns:80px 1fr}
+  .layer .specs{grid-column:2}
+  .chips{grid-template-columns:repeat(2,1fr)}
+  .chip:nth-child(3){border-left:0}
+  .chip:nth-child(n+3){border-top:1px solid var(--line)}
+}
+@media (max-width:640px){
+  .wrap{padding-inline:18px}
+  section{padding-block:60px}
+  .navlinks a:not(.btn){display:none}
+  .features,.res{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr}
+  .pillar{grid-template-columns:1fr;gap:0}
+  .layer{grid-template-columns:1fr;gap:12px}
+  .layer .specs{grid-column:auto}
+  .cta-row .btn{width:100%}
+  .arch-hint{display:block}
+  table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  table,tbody,tr,td{display:block;width:100%}
+  tr{border-bottom:1px solid var(--line);padding:14px 16px}
+  tbody tr:last-child{border-bottom:0}
+  td{border:0;padding:3px 0}
+  td.row-h{width:100%;font-size:16px;padding-bottom:6px}
+  td[data-k]::before{content:attr(data-k);display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+
+/* ---- service-specific ---- */
+.hero h1,h2,h3{word-break:keep-all}
+.hero-grid>*{min-width:0}
+
+/* hero visual: request inspector */
+.inspect{background:var(--surface);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.inspect-head{display:flex;justify-content:space-between;gap:12px;padding:14px 20px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.inspect pre{margin:0;padding:16px 20px;font-family:var(--mono);font-size:12.5px;line-height:1.75;color:var(--ink-2);background:var(--sunken);overflow-x:auto;white-space:pre}
+.inspect .m{color:var(--fiber-ink);font-weight:500}
+.inspect .k{color:var(--ink);font-weight:500}
+.checks{display:grid;grid-template-columns:repeat(2,1fr);border-top:1px solid var(--line)}
+.check{padding:12px 16px;border-left:1px solid var(--line);border-top:1px solid var(--line);min-width:0}
+.check:nth-child(odd){border-left:0}
+.check:nth-child(-n+2){border-top:0}
+.check span{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.check b{font-size:14px}
+.check b::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--trace);margin-right:6px;vertical-align:1px}
+.check.ok b::before{background:var(--fiber);animation:blink 2.4s ease-in-out infinite}
+.inspect-foot{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 16px;border-top:1px solid var(--line);font-size:13px;color:var(--ink-2)}
+.status{font-family:var(--mono);font-size:12px;font-weight:500;padding:3px 8px;border-radius:3px;background:var(--fiber);color:var(--on-fiber)}
+.status.warn{background:transparent;border:1px solid var(--line-2);color:var(--ink)}
+
+/* authorization rows reuse .layer with a word label */
+.auth .lv{font-size:32px;text-transform:uppercase}
+.auth .layer{grid-template-columns:120px 1fr 1.2fr}
+
+/* integration types */
+.ints{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:36px}
+.int{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px;min-width:0}
+.int code{font-family:var(--mono);font-size:12px;color:var(--fiber-ink);font-weight:500}
+.int h3{margin-top:8px;font-size:17px}
+.int p{color:var(--ink-2);font-size:14.5px;margin-top:6px}
+
+@media (max-width:1024px){
+  .auth .layer{grid-template-columns:110px 1fr}
+  .ints{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:640px){
+  .inspect pre{font-size:11.5px;padding:16px}
+  .auth .layer{grid-template-columns:1fr}
+  .ints{grid-template-columns:1fr}
+}
+@media (min-width:641px){
+  #types td.row-h{width:15%}
+  #types td:nth-child(2){width:13%;word-break:keep-all}
+}
+
+/* nav: keep links on one line, show only CTA below 960px */
+.navlinks a{white-space:nowrap}
+@media (max-width:960px){.navlinks a:not(.btn){display:none}}
+
+/* line breaking: never split a word mid-syllable */
+h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
+</style>
+<link rel="stylesheet" href="../../assets/site.css?v=16">
+<script src="../../assets/site.js?v=16"></script>
+</head>
+<body>
+
+
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<nav aria-label="Main menu">
+  <div class="wrap">
+    <a class="brand" href="#top">Amazon <span>API Gateway</span></a>
+    <div class="navlinks">
+      <a href="../">Service portfolio</a>
+      <a href="#types">API types</a>
+      <a href="#auth">Authorization</a>
+      <a href="#features">Features</a>
+      <a href="#arch">Private API</a>
+      <a href="#pricing">Pricing</a>
+      <a class="btn btn-primary" href="#start">Get started</a>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+  <header class="hero" id="top">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">Amazon API Gateway · Managed API front door</p>
+          <h1>Authorize and control every API call <em>at a single point</em></h1>
+          <p class="lede">API Gateway is the front door for REST, HTTP, and WebSocket APIs. It authorizes requests, throttles traffic that exceeds limits, and forwards calls to Lambda or to services inside a VPC. You can also build private APIs that are callable only from within a VPC.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="#types">Compare API types</a>
+            <a class="btn btn-ghost" href="#arch">See the private API design</a>
+          </div>
+        </div>
+
+        <div class="inspect" aria-label="Example of API request processing">
+          <div class="inspect-head"><span>Request · prod stage</span><span>HTTP API</span></div>
+<pre><span class="m">GET</span> <span class="k">/orders/42</span> HTTP/1.1
+Host: api.example.com
+Authorization: Bearer eyJhbGciOi...
+Accept: application/json</pre>
+          <div class="checks">
+            <div class="check ok"><span>Authorizer</span><b>JWT verified</b></div>
+            <div class="check ok"><span>Throttling</span><b>Within limits</b></div>
+            <div class="check"><span>Route</span><b class="mono">GET /orders/{id}</b></div>
+            <div class="check"><span>Integration</span><b>VPC link → ALB</b></div>
+          </div>
+          <div class="inspect-foot"><span class="status">200 OK</span><span>Over the limit</span><span class="status warn">429 Too Many Requests</span></div>
+        </div>
+      </div>
+
+      <div class="chips" role="list">
+        <div class="chip" role="listitem"><span class="num">99.95%</span><p>Monthly availability SLA</p></div>
+        <div class="chip" role="listitem"><span class="num">10,000</span><p>Default requests per second per account per Region (adjustable)</p></div>
+        <div class="chip" role="listitem"><span class="num">10 MB</span><p>Maximum REST and HTTP API payload (excluding REST response streaming)</p></div>
+        <div class="chip" role="listitem"><span class="num">2 h</span><p>Maximum WebSocket connection duration</p></div>
+      </div>
+    </div>
+  </header>
+
+  <section id="why" aria-labelledby="why-h">
+    <div class="wrap split">
+      <div>
+        <p class="tag">Why API Gateway</p>
+        <h2 id="why-h">More APIs call for a common gateway</h2>
+        <p class="lede">When every service implements its own authorization, throttling, and logging, policies drift apart and operational overhead grows. Apply common policies at the gateway and let backends focus on business logic.</p>
+      </div>
+      <div class="pillars">
+        <div class="pillar"><span class="k">Secure</span><div><h3>Authorize at the gateway</h3><p>Verify callers with IAM, a Lambda authorizer, Cognito, or JWT before requests reach the backend.</p></div></div>
+        <div class="pillar"><span class="k">Control</span><div><h3>Traffic limits</h3><p>Apply token bucket limits per account, per stage and method, and per client.</p></div></div>
+        <div class="pillar"><span class="k">Private</span><div><h3>Private paths</h3><p>Expose APIs only to VPCs and on-premises networks through interface VPC endpoints, and reach private backends through VPC links.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="types" aria-labelledby="types-h">
+    <div class="wrap">
+      <p class="tag">API types</p>
+      <h2 id="types-h">REST, HTTP, WebSocket API</h2>
+      <p class="lede">HTTP APIs offer a reduced feature set at a lower price, while REST APIs include management features such as private endpoints, API keys, caching, and AWS WAF. Use WebSocket APIs for two-way real-time communication.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">Comparison of API Gateway API types</caption>
+          <thead><tr><th scope="col">Type</th><th scope="col">Communication model</th><th scope="col">Authorization</th><th scope="col">Key features</th><th scope="col">Best for</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="row-h">REST API</td>
+              <td data-k="Communication model">Request · response</td>
+              <td data-k="Authorization">IAM, Cognito user pool, Lambda authorizer, resource policy</td>
+              <td data-k="Key features">Edge-optimized · Regional · Private endpoints, API keys and usage plans, caching, AWS WAF, request validation, canary deployments, response streaming</td>
+              <td data-k="Best for">Private APIs, per-client limits, fine-grained request transformation</td>
+            </tr>
+            <tr>
+              <td class="row-h">HTTP API</td>
+              <td data-k="Communication model">Request · response</td>
+              <td data-k="Authorization">IAM, JWT authorizer (including Cognito), Lambda authorizer</td>
+              <td data-k="Key features">Regional endpoint, automatic deployments, AWS Cloud Map private integration</td>
+              <td data-k="Best for">Simple proxy APIs in front of Lambda or HTTP backends</td>
+            </tr>
+            <tr>
+              <td class="row-h">WebSocket API</td>
+              <td data-k="Communication model">Persistent two-way connection</td>
+              <td data-k="Authorization">IAM, Lambda authorizer ($connect route)</td>
+              <td data-k="Key features">$connect · $disconnect · $default routes, route selection expression, server push via @connections</td>
+              <td data-k="Best for">Chat, notifications, real-time dashboards</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="auth" aria-labelledby="auth-h">
+    <div class="wrap">
+      <p class="tag">Authorization</p>
+      <h2 id="auth-h">Three ways to verify callers</h2>
+      <p class="lede">Choose based on whether the caller is a workload with AWS credentials or an app holding a user token.</p>
+      <div class="stack auth">
+        <div class="layer">
+          <span class="lv">IAM<small>SigV4</small></span>
+          <div><h3>IAM permissions</h3><p>IAM policies evaluate requests that callers sign with SigV4. REST APIs can also restrict source VPCs, VPC endpoints, and accounts with a resource policy.</p></div>
+          <div class="specs"><code>SigV4</code><code>IAM policy</code><code>Resource policy</code><code>aws:SourceVpce</code></div>
+        </div>
+        <div class="layer">
+          <span class="lv">Lambda<small>Custom</small></span>
+          <div><h3>Lambda authorizer</h3><p>A Lambda function inspects a token in a header or query string and returns whether to allow the request. Use it for in-house authentication schemes or JWT validation on REST APIs.</p></div>
+          <div class="specs"><code>Token</code><code>Request parameters</code><code>REST · HTTP · WebSocket</code></div>
+        </div>
+        <div class="layer">
+          <span class="lv">JWT<small>OIDC</small></span>
+          <div><h3>Cognito · JWT authorizer</h3><p>REST APIs use a Cognito user pool authorizer; HTTP APIs use a JWT authorizer. The HTTP API JWT authorizer validates tokens from OIDC issuers, including Cognito.</p></div>
+          <div class="specs"><code>Cognito user pool</code><code>JWT issuer</code><code>Audience</code><code>Scopes</code></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" aria-labelledby="features-h">
+    <div class="wrap">
+      <p class="tag">Features</p>
+      <h2 id="features-h">Key features</h2>
+      <div class="features">
+        <article class="feature"><p class="ft">Private endpoint</p><h3>Private API</h3><p>A REST API that can be called only through an execute-api interface VPC endpoint. Traffic never traverses the internet, and on-premises clients can call it over Direct Connect.</p></article>
+        <article class="feature"><p class="ft">Private domain</p><h3>Private custom domain</h3><p>Give a private API an internal domain name managed with an ACM certificate. Share it with other accounts through AWS RAM; consumer accounts associate it with their VPC endpoints.</p></article>
+        <article class="feature"><p class="ft">Throttling</p><h3>Tiered limits</h3><p>Rate and burst limits apply at the AWS Region, account, stage and method, and client levels. Requests over the limit receive a 429 response.</p></article>
+        <article class="feature"><p class="ft">API management</p><h3>Usage plan · API key</h3><p>On REST APIs, identify clients with API keys and set per-client request limits and usage quotas per period.</p></article>
+        <article class="feature"><p class="ft">Custom domain</p><h3>Custom domains · mTLS</h3><p>Map multiple APIs and stages to a domain such as api.example.com. Both REST and HTTP APIs can verify client certificates with mutual TLS. REST APIs can split requests across APIs and stages with header-based routing rules, and can also apply mTLS to backend integrations with an ACM certificate.</p></article>
+        <article class="feature"><p class="ft">Private integration</p><h3>VPC link</h3><p>Both REST and HTTP APIs connect directly to an ALB in private subnets through VPC link v2, and NLBs are also supported. HTTP APIs can also route to services registered in AWS Cloud Map.</p></article>
+        <article class="feature"><p class="ft">Streaming</p><h3>REST API response streaming</h3><p>Stream responses from Lambda, HTTP proxy, and private integrations to clients as they are generated. Time to first byte improves, integration timeouts extend up to 15 minutes, and responses can exceed 10 MB.</p></article>
+        <article class="feature"><p class="ft">Developer portal</p><h3>API Gateway Portals</h3><p>A managed developer portal that discovers the APIs in your account, generates documentation, and publishes them to internal and external developers grouped as PortalProducts. It provides access control and usage analytics based on CloudWatch RUM.</p></article>
+        <article class="feature"><p class="ft">AI agents</p><h3>MCP proxy</h3><p>Connect existing REST APIs to Amazon Bedrock AgentCore Gateway and expose them as MCP-compatible endpoints. AI agents discover and call the APIs as tools without any application changes.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="integrations" aria-labelledby="int-h">
+    <div class="wrap">
+      <p class="tag">Integration types</p>
+      <h2 id="int-h">How requests reach the backend</h2>
+      <p class="lede">Integration types for REST APIs. Proxy types pass requests and responses through unchanged; non-proxy types transform them with mappings.</p>
+      <div class="ints">
+        <article class="int"><code>AWS_PROXY</code><h3>Lambda proxy</h3><p>Passes the entire request to a Lambda function. This is the recommended way to invoke Lambda.</p></article>
+        <article class="int"><code>HTTP_PROXY</code><h3>HTTP proxy</h3><p>Passes requests and responses to and from an HTTP endpoint unchanged. Use it with a VPC link for private backends.</p></article>
+        <article class="int"><code>AWS · HTTP</code><h3>Mapped integration</h3><p>Calls an AWS service action or an HTTP endpoint, with integration request and response mappings that you define.</p></article>
+        <article class="int"><code>MOCK</code><h3>Mock</h3><p>API Gateway responds without calling a backend. Use it for testing and parallel development.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="arch" aria-labelledby="arch-h">
+    <div class="wrap">
+      <p class="tag">Reference architecture</p>
+      <h2 id="arch-h">A private API open only to VPCs and on-premises</h2>
+      <p class="lede">The private REST API is called only through an execute-api interface endpoint, and a resource policy specifies which VPC endpoints are allowed. On-premises clients come in over Direct Connect and resolve names through a Resolver inbound endpoint.</p>
+      <figure class="arch">
+        <div class="arch-scroll">
+          <svg viewBox="0 0 980 440" role="img" aria-labelledby="arch-title arch-desc">
+            <title id="arch-title">API Gateway private API reference architecture</title>
+            <desc id="arch-desc">On-premises corporate clients connect to the consumer VPC over Direct Connect and resolve the API name through a Route 53 Resolver inbound endpoint. Applications in the consumer VPC and on-premises clients call the private REST API through an execute-api interface endpoint. The private REST API accepts requests only from VPC endpoints allowed by its resource policy, and either proxies to a Lambda function or forwards through a VPC link to an ALB or NLB in private subnets.</desc>
+            <defs>
+              <marker id="ar-apigw-f" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" orient="auto"><path class="ah-f" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-apigw-p" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-p" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-apigw-s" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-s" d="M0 0 L10 5 L0 10 z"/></marker>
+            </defs>
+            <!-- zones -->
+            <rect class="zone" x="10" y="40" width="180" height="380" rx="6"/>
+            <image href="../../assets/aws-icons/Corporate-data-center_32.svg" x="18" y="48" width="22" height="22"/>
+            <text class="z" x="46" y="62">ON-PREMISES</text>
+            <rect class="zone" x="210" y="40" width="760" height="380" rx="6"/>
+            <image href="../../assets/aws-icons/Region_32.svg" x="218" y="48" width="22" height="22"/>
+            <text class="z" x="246" y="62">AWS REGION</text>
+            <rect class="zone" x="230" y="80" width="250" height="320" rx="6"/>
+            <image href="../../assets/aws-icons/Virtual-private-cloud-VPC_32.svg" x="238" y="86" width="20" height="20"/>
+            <text class="z" x="264" y="100">CONSUMER VPC</text>
+            <rect class="zone" x="500" y="80" width="220" height="320" rx="6"/>
+            <text class="z" x="514" y="100">API GATEWAY</text>
+            <rect class="zone" x="740" y="80" width="220" height="320" rx="6"/>
+            <text class="z" x="754" y="100">BACKEND</text>
+
+            <!-- on-prem -->
+            <rect class="box" x="20" y="190" width="156" height="64" rx="4"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Client_48_Light.svg" x="28" y="210" width="24" height="24"/><text class="t" x="58" y="218">Corp client</text><text class="s" x="58" y="238">Corporate DNS</text>
+
+            <!-- consumer vpc -->
+            <rect class="box" x="244" y="112" width="226" height="56" rx="4"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Generic-Application_48_Light.svg" x="254" y="128" width="24" height="24"/><text class="t" x="286" y="136">Application</text><text class="s" x="286" y="154">10.0.1.0/24</text>
+            <rect class="box" x="244" y="190" width="226" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-VPC_Endpoints_48.svg" x="254" y="210" width="24" height="24"/><text class="t" x="286" y="218">Interface endpoint</text><text class="s" x="286" y="238">execute-api · Private DNS</text>
+            <rect class="box" x="244" y="300" width="226" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-Route-53_Resolver_48.svg" x="254" y="320" width="24" height="24"/><text class="t" x="286" y="328">Resolver inbound</text><text class="s" x="286" y="348">On-prem name resolution</text>
+
+            <!-- api gateway -->
+            <rect class="box" x="515" y="190" width="190" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_Amazon-API-Gateway_48.svg" x="525" y="208" width="28" height="28"/><text class="t" x="561" y="218">Private REST API</text><text class="s" x="561" y="238">aws:SourceVpce policy</text>
+            <rect class="box" x="515" y="300" width="190" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_Amazon-API-Gateway_48.svg" x="525" y="318" width="28" height="28"/><text class="t" x="561" y="328">VPC link</text><text class="s" x="561" y="348">VPC link v2</text>
+
+            <!-- backend -->
+            <rect class="box" x="755" y="112" width="190" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Res_AWS-Lambda_Lambda-Function_48.svg" x="765" y="130" width="28" height="28"/><text class="t" x="801" y="140">Lambda</text><text class="s" x="801" y="160">AWS_PROXY</text>
+            <rect class="box" x="755" y="300" width="190" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_Elastic-Load-Balancing_48.svg" x="765" y="318" width="28" height="28"/><text class="t" x="801" y="328">ALB · NLB</text><text class="s" x="801" y="348">Private subnets</text>
+
+            <!-- links -->
+            <path class="fiber" d="M176 222 H241" marker-end="url(#ar-apigw-f)"/>
+            <text class="lbl2" x="182" y="212">DX</text>
+            <path class="site" d="M100 254 V332 H242" marker-end="url(#ar-apigw-s)"/>
+            <text class="lbl2" x="108" y="300">DNS query</text>
+            <path class="path" d="M355 168 V188" marker-end="url(#ar-apigw-p)"/>
+            <path class="path" d="M470 222 H513" marker-end="url(#ar-apigw-p)"/>
+            <text class="lbl" x="474" y="212">HTTPS</text>
+            <path class="path" d="M705 210 C730 210 728 144 753 144" marker-end="url(#ar-apigw-p)"/>
+            <path class="path" d="M610 254 V298" marker-end="url(#ar-apigw-p)"/>
+            <path class="path" d="M705 332 H753" marker-end="url(#ar-apigw-p)"/>
+          </svg>
+        </div>
+        <figcaption class="legend">
+          <span><i></i>Direct Connect (on-premises calls)</span>
+          <span><i class="p"></i>API call path</span>
+          <span><i class="s"></i>DNS query</span>
+          <span>→ Arrows: request and query direction (responses return along the same path)</span>
+        </figcaption>
+        <p class="arch-hint">On narrow screens, swipe the diagram sideways.</p>
+      </figure>
+    </div>
+  </section>
+
+  <section id="start" aria-labelledby="start-h">
+    <div class="wrap">
+      <p class="tag">Getting started</p>
+      <h2 id="start-h">Steps to launch a private API</h2>
+      <ol class="steps">
+        <li><span class="num">STEP 1</span><h3>Create the endpoint</h3><p>Create an execute-api interface endpoint in the consumer VPC and allow port 443 in its security group.</p></li>
+        <li><span class="num">STEP 2</span><h3>Create the private API</h3><p>Create a REST API with the Private endpoint type.</p></li>
+        <li><span class="num">STEP 3</span><h3>Resource policy</h3><p>Specify the allowed VPC endpoints with the aws:SourceVpce condition.</p></li>
+        <li><span class="num">STEP 4</span><h3>Integrate · deploy</h3><p>Attach a Lambda or VPC link integration to each method and deploy to a stage.</p></li>
+        <li><span class="num">STEP 5</span><h3>Test calls</h3><p>Call the API from inside the VPC; on-premises clients resolve its name through the Resolver inbound endpoint.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="pricing" aria-labelledby="pricing-h">
+    <div class="wrap">
+      <p class="tag">Pricing</p>
+      <h2 id="pricing-h">Cost components</h2>
+      <p class="lede">API Gateway has no minimum fees or commitments. Cost is based on API calls received, WebSocket messages and connection minutes, and data transferred out. How the Free Tier applies depends on when the account was created.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">API Gateway billing items</caption>
+          <thead><tr><th scope="col">Billing item</th><th scope="col">Billing basis</th><th scope="col">Notes</th></tr></thead>
+          <tbody>
+          <tr><td class="row-h">REST API calls</td><td data-k="Billing basis">Per million API calls received, tiered by usage</td><td data-k="Notes">Free Tier-eligible accounts get 1 million calls per month free. With response streaming, each 10 MB of response counts as one request.</td></tr>
+          <tr><td class="row-h">HTTP API calls</td><td data-k="Billing basis">Per million API calls received</td><td data-k="Notes">Fewer features than REST APIs at a lower unit price. Free Tier-eligible accounts get 1 million calls per month free.</td></tr>
+          <tr><td class="row-h">WebSocket API</td><td data-k="Billing basis">Per million messages sent and received (metered in 32 KB increments) plus connection minutes</td><td data-k="Notes">Control frames such as ping and pong are not metered.</td></tr>
+          <tr><td class="row-h">API cache</td><td data-k="Billing basis">Hourly rate by the selected REST API stage cache size</td><td data-k="Notes">Applies only to stages with caching enabled.</td></tr>
+          <tr><td class="row-h">Portal</td><td data-k="Billing basis">Monthly fee per portal (includes 10 PortalProducts), plus a monthly fee per additional PortalProduct</td><td data-k="Notes">Prorated for partial months.</td></tr>
+          <tr><td class="row-h">Data transfer</td><td data-k="Billing basis">Per GB of data transferred out, at EC2 data transfer rates</td><td data-k="Notes">Private APIs incur no data transfer out (DTO) charges from AWS.</td></tr>
+          <tr><td class="row-h">Private API endpoint</td><td data-k="Billing basis">Hourly rate per AZ for the execute-api interface VPC endpoint, plus per GB of data processed</td><td data-k="Notes">Billed by AWS PrivateLink.</td></tr>
+          <tr><td class="row-h">Related services</td><td data-k="Billing basis">Lambda invocations, CloudWatch Logs, AWS WAF</td><td data-k="Notes">Billed separately by each service.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="lede" style="font-size:14px">Rates vary by Region and usage. See the <a href="https://aws.amazon.com/api-gateway/pricing/" target="_blank" rel="noopener">API Gateway pricing page</a> for current rates.</p>
+    </div>
+  </section>
+
+  <section class="cta" aria-labelledby="cta-h">
+    <div class="wrap">
+      <p class="tag">Next step</p>
+      <h2 id="cta-h">Let's design the right gateway for your APIs</h2>
+      <p class="lede">Bring your callers, exposure scope, expected traffic, and backend locations, and we will review API types, authorization, and network paths together.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="https://aws.amazon.com/api-gateway/" target="_blank" rel="noopener">Open the service page</a>
+        <a class="btn btn-ghost" href="https://docs.aws.amazon.com/apigateway/latest/developerguide/welcome.html" target="_blank" rel="noopener">Read the Developer Guide</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a href="../">← AWS Networking Services Portfolio</a>
+    <span>Amazon API Gateway overview. Feature support, quotas, and pricing vary by Region and API type; check the official documentation.</span>
+    <a href="https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-private-apis.html" target="_blank" rel="noopener">Private API documentation</a>
+  </div>
+</footer>
+
+</body>
+</html>

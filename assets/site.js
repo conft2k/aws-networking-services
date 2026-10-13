@@ -5,6 +5,45 @@
   var SELF = (document.currentScript && document.currentScript.src) || '';
   var root = document.documentElement;
 
+  /* ---------- language (ko / en) ---------- */
+  var LKEY = 'ans-lang', EN = (root.lang || '').toLowerCase().indexOf('en') === 0;
+  var ROOT = (function () { try { return new URL('../', SELF || location.href).href; } catch (e) { return '/'; } })();
+  function counterpart() {            // same page in the other language
+    var here = location.href.split('#')[0].split('?')[0];
+    var rel = here.indexOf(ROOT) === 0 ? here.slice(ROOT.length) : '';
+    if (EN) rel = rel.replace(/^en\//, '');
+    return ROOT + (EN ? '' : 'en/') + rel + location.search + location.hash;
+  }
+  (function autoLang() {               // first visit: follow the browser language; an explicit choice wins
+    var pref = null; try { pref = localStorage.getItem(LKEY); } catch (e) {}
+    var wantEN;
+    if (pref === 'ko' || pref === 'en') wantEN = pref === 'en';
+    else {
+      var nl = ((navigator.languages && navigator.languages[0]) || navigator.language || 'ko').toLowerCase();
+      wantEN = nl.indexOf('ko') !== 0;
+    }
+    if (wantEN === EN || !/^https?:/.test(location.protocol)) return;
+    // switch only if the other-language page exists, so a missing translation never ends in a 404
+    var target = counterpart();
+    try {
+      fetch(target.split('#')[0].split('?')[0], { method: 'HEAD', cache: 'no-cache' })
+        .then(function (r) { if (r.ok) location.replace(target); }).catch(function () {});
+    } catch (e) {}
+  })();
+  var T = EN ? {
+    theme: { system: 'Theme: system', light: 'Theme: light', dark: 'Theme: dark' },
+    search: 'Search services', menu: 'Service menu', site: 'Site menu', open: 'Open menu (/)', empty: 'No matching services.',
+    pricing: 'Pricing', priceThis: 'Pricing for this service', priceAll: 'Pricing by service',
+    present: 'Presentation mode (P)', ctrl: 'Presentation controls', first: 'First slide (Home)', last: 'Last slide (End)',
+    prev: 'Previous slide', next: 'Next slide', close: 'Exit presentation (Esc)', lang: '한국어로 보기', langCode: 'KO'
+  } : {
+    theme: { system: '테마: 시스템 설정', light: '테마: 라이트', dark: '테마: 다크' },
+    search: '서비스 검색', menu: '서비스 메뉴', site: '사이트 메뉴', open: '메뉴 열기 (/)', empty: '일치하는 서비스가 없습니다.',
+    pricing: '가격표', priceThis: '이 서비스의 가격표 보기', priceAll: '서비스별 가격표 보기',
+    present: '발표 모드 (P)', ctrl: '발표 컨트롤', first: '처음 슬라이드 (Home)', last: '마지막 슬라이드 (End)',
+    prev: '이전 슬라이드', next: '다음 슬라이드', close: '발표 종료 (Esc)', lang: 'View in English', langCode: 'EN'
+  };
+
   function readTheme() {
     try { return localStorage.getItem(KEY) || 'system'; } catch (e) { return 'system'; }
   }
@@ -24,9 +63,10 @@
     prev: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>',
     next: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>',
     menu: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>',
+    lang: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h9M7.5 3v2M5 5c.9 3.2 3 5.6 6 7M10 5c-.9 3.2-3 5.6-6 7"/><path d="M13 21l4-9 4 9M14.3 18h5.4"/></svg>',
     close: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>'
   };
-  var LABEL = { system: '테마: 시스템 설정', light: '테마: 라이트', dark: '테마: 다크' };
+  var LABEL = T.theme;
   var ORDER = ['system', 'light', 'dark'];
 
   function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
@@ -131,31 +171,31 @@
     drawer.querySelector('.mempty').hidden = any;
   }
   function buildMenu(tools) {
-    var base = siteRoot(), here = location.href.split('#')[0].split('?')[0];
+    var base = siteRoot(), lb = base + (EN ? 'en/' : ''), here = location.href.split('#')[0].split('?')[0];
     function isCur(href) { return here === href || here === href + 'index.html'; }
     function item(slug, name) {
-      var href = base + slug + '/';
+      var href = lb + slug + '/';
       return '<a class="mi" href="' + href + '" data-k="' + (name + ' ' + slug).toLowerCase() + '"' + (isCur(href) ? ' aria-current="page"' : '') + '>' +
         '<img src="' + base + 'assets/icons/' + slug + '.svg" width="20" height="20" alt="" aria-hidden="true"><span>' + name + '</span></a>';
     }
-    var home = base, pricing = base + 'pricing/';
+    var home = lb, pricing = lb + 'pricing/';
     var html =
       '<div class="mtop">' +
         '<label class="msearch"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>' +
-        '<input type="search" placeholder="서비스 검색" aria-label="서비스 검색" autocomplete="off"><kbd>/</kbd></label>' +
+        '<input type="search" placeholder="' + T.search + '" aria-label="' + T.search + '" autocomplete="off"><kbd>/</kbd></label>' +
         '<a class="mquick" href="' + home + '"' + (isCur(home) ? ' aria-current="page"' : '') + '><img src="' + base + 'assets/icons/aws.svg" width="18" height="18" alt="" aria-hidden="true">AWS Networking Services</a>' +
-        '<a class="mquick" href="' + pricing + '"' + (isCur(pricing) ? ' aria-current="page"' : '') + '><img src="' + base + 'assets/icons/pricing.svg" width="16" height="16" alt="" aria-hidden="true">가격표</a>' +
+        '<a class="mquick" href="' + pricing + '"' + (isCur(pricing) ? ' aria-current="page"' : '') + '><img src="' + base + 'assets/icons/pricing.svg" width="16" height="16" alt="" aria-hidden="true">' + T.pricing + '</a>' +
       '</div>' +
-      '<div class="mgrid" role="navigation" aria-label="서비스 메뉴">' + [[0, 1, 3], [2], [4, 5]].map(function (col) {
+      '<div class="mgrid" role="navigation" aria-label="' + T.menu + '">' + [[0, 1, 3], [2], [4, 5]].map(function (col) {
         // masonry columns: cards keep their natural height, columns are balanced by item count
         return '<div class="mcol">' + col.map(function (gi) {
           var g = MENU[gi];
           return '<section class="mcard" data-area="' + AREA_KEY[gi] + '"><p class="mg">' + g[0] + '</p>' + g[1].map(function (x) { return item(x[0], x[1]); }).join('') + '</section>';
         }).join('') + '</div>';
-      }).join('') + '<p class="mempty" hidden>일치하는 서비스가 없습니다.</p></div>';
+      }).join('') + '<p class="mempty" hidden>' + T.empty + '</p></div>';
     drawer = document.createElement('div');
     drawer.className = 'drawer'; drawer.id = 'site-menu'; drawer.hidden = true; drawer.tabIndex = -1;
-    drawer.setAttribute('role', 'dialog'); drawer.setAttribute('aria-label', '사이트 메뉴');
+    drawer.setAttribute('role', 'dialog'); drawer.setAttribute('aria-label', T.site);
     drawer.innerHTML = html;
     search = drawer.querySelector('.msearch input');
     search.addEventListener('input', function () { filterMenu(search.value); });
@@ -165,7 +205,7 @@
     scrim = document.createElement('div'); scrim.className = 'drawer-scrim'; scrim.hidden = true;
     scrim.addEventListener('click', closeMenu);
     document.body.appendChild(scrim); document.body.appendChild(drawer);
-    menuBtn = btn('menu-btn', '메뉴 열기 (/)', ICONS.menu);
+    menuBtn = btn('menu-btn', T.open, ICONS.menu);
     menuBtn.setAttribute('aria-controls', 'site-menu'); menuBtn.setAttribute('aria-expanded', 'false');
     menuBtn.addEventListener('click', function () { drawer.hidden ? openMenu() : closeMenu(); });
     var wrap = document.querySelector('nav .wrap'), brand = wrap && wrap.querySelector('.brand');
@@ -175,13 +215,18 @@
       left.appendChild(menuBtn); if (brand) left.appendChild(brand);
       wrap.appendChild(tools);              // theme + presentation stay at the right end of the top bar
       // PRICING: jumps to this service's tab on the price table (not shown on the price table itself)
-      var slug = (here.slice(base.length).split('/')[0] || '');
+      var slug = (here.slice(lb.length).split('/')[0] || '');
       if (slug !== 'pricing') {
         var tab = PRICE_TAB[slug], pa = document.createElement('a');
-        pa.className = 'pricing-btn'; pa.href = base + 'pricing/' + (tab ? '#' + tab : '');
-        pa.textContent = 'Pricing'; pa.title = tab ? '이 서비스의 가격표 보기' : '서비스별 가격표 보기';
+        pa.className = 'pricing-btn'; pa.href = lb + 'pricing/' + (tab ? '#' + tab : '');
+        pa.textContent = 'Pricing'; pa.title = tab ? T.priceThis : T.priceAll;
         tools.insertBefore(pa, tools.firstChild);
       }
+      // language switch: same page in the other language; remembers the choice
+      var lg = btn('lang-btn', T.lang, ICONS.lang + '<span>' + T.langCode + '</span>');
+      lg.addEventListener('click', function () { try { localStorage.setItem(LKEY, EN ? 'ko' : 'en'); } catch (e) {} location.href = counterpart(); });
+      tools.insertBefore(lg, tools.querySelector('.theme-btn'));
+      if (/^https?:/.test(location.protocol)) { lg.hidden = true; fetch(counterpart().split('#')[0].split('?')[0], { method: 'HEAD', cache: 'no-cache' }).then(function (r) { lg.hidden = !r.ok; }).catch(function () {}); }
     }
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && !drawer.hidden) { e.preventDefault(); closeMenu(); return; }
@@ -210,7 +255,7 @@
       applyTheme(t);
       [tbtn, theme2].forEach(function (b) { b.innerHTML = ICONS[t]; b.title = LABEL[t]; b.setAttribute('aria-label', LABEL[t]); });
     });
-    var pbtn = btn('present-btn', '발표 모드 (P)', ICONS.present);
+    var pbtn = btn('present-btn', T.present, ICONS.present);
     pbtn.addEventListener('click', function () { closeMenu(); enter(); });
     tools.appendChild(tbtn); tools.appendChild(pbtn);
     if (navlinks) navlinks.remove();          // top bar keeps only the menu button and the brand
@@ -218,17 +263,17 @@
 
     // presenter control bar
     bar = document.createElement('div'); bar.className = 'present-bar'; bar.hidden = true;
-    bar.setAttribute('role', 'toolbar'); bar.setAttribute('aria-label', '발표 컨트롤');
+    bar.setAttribute('role', 'toolbar'); bar.setAttribute('aria-label', T.ctrl);
     progress = document.createElement('i'); progress.className = 'present-progress';
     var brandEl = document.querySelector('nav .brand');
     var tag = document.createElement('div'); tag.className = 'present-title'; tag.setAttribute('aria-hidden', 'true');
     tag.innerHTML = brandEl ? brandEl.innerHTML : esc(document.title);
     document.body.appendChild(tag);
-    var first = btn('', '처음 슬라이드 (Home)', ICONS.first), last = btn('', '마지막 슬라이드 (End)', ICONS.last);
-    var prev = btn('', '이전 슬라이드', ICONS.prev), next = btn('', '다음 슬라이드', ICONS.next);
+    var first = btn('', T.first, ICONS.first), last = btn('', T.last, ICONS.last);
+    var prev = btn('', T.prev, ICONS.prev), next = btn('', T.next, ICONS.next);
     first.addEventListener('click', function () { show(0); });
     last.addEventListener('click', function () { show(slides.length - 1); });
-    var close = btn('', '발표 종료 (Esc)', ICONS.close);
+    var close = btn('', T.close, ICONS.close);
     theme2.addEventListener('click', function () { tbtn.click(); });
     counter = document.createElement('span'); counter.className = 'present-count';
     prev.addEventListener('click', function () { show(cur - 1); });
