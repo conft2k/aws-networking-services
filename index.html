@@ -237,7 +237,10 @@ a.jack:hover{border-color:var(--fiber)}
 .lay-h,.col-h{font-family:var(--display);font-size:20px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;line-height:1.1;margin-bottom:12px}
 .lay-h{text-align:center}
 .col-h{text-align:center}
-.stackmap>*{box-shadow:inset 0 3px 0 var(--fiber)}
+.stackmap>*{box-shadow:inset 0 4px 0 var(--bar,var(--fiber))}
+.sec{--bar:#F2A7AE}.app{--bar:#C7B8EA}.edge{--bar:#A6D4EC}.conn{--bar:#A9DEC4}.fnd{--bar:#F6CDA2}.obs{--bar:#F1DE94}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .sec{--bar:#C9727C}:root:not([data-theme="light"]) .app{--bar:#9D88CF}:root:not([data-theme="light"]) .edge{--bar:#6FA9C8}:root:not([data-theme="light"]) .conn{--bar:#6FB596}:root:not([data-theme="light"]) .fnd{--bar:#CF9C67}:root:not([data-theme="light"]) .obs{--bar:#C5B060}}
+:root[data-theme="dark"] .sec{--bar:#C9727C}:root[data-theme="dark"] .app{--bar:#9D88CF}:root[data-theme="dark"] .edge{--bar:#6FA9C8}:root[data-theme="dark"] .conn{--bar:#6FB596}:root[data-theme="dark"] .fnd{--bar:#CF9C67}:root[data-theme="dark"] .obs{--bar:#C5B060}
 .lay .jacks.row{justify-content:center}
 @media (max-width:1024px){
   .stackmap{grid-template-columns:1fr 1fr;grid-template-areas:"app app" "edge edge" "conn conn" "fnd fnd" "sec obs"}

@@ -510,6 +510,101 @@ app.example.com.	60	IN	A	<span class="v">198.51.100.20</span></pre>
     </div>
   </section>
 
+  <section id="arch-global" aria-labelledby="arch-global-h">
+    <div class="wrap">
+      <p class="tag">Reference architecture · Global Resolver</p>
+      <h2 id="arch-global-h">어디서든 같은 anycast 주소로 묻는 Global Resolver</h2>
+      <p class="lede">지점, 데이터센터, 원격 사용자가 VPN이나 Resolver 엔드포인트 없이 인터넷으로 같은 anycast IP 두 개에 질의합니다. 질의는 직접 고른 2개 이상의 리전 중 가장 가까운 곳에서 처리되고, 그 리전이 멈추면 다음으로 가까운 리전이 같은 주소로 받습니다. 각 리전은 클라이언트를 인증한 뒤 DNS view의 필터링 규칙을 적용하고, view에 연결된 사설 호스팅 영역이나 퍼블릭 DNS로 해석합니다.</p>
+      <figure class="arch">
+        <div class="arch-scroll">
+          <svg viewBox="0 0 980 470" role="img" aria-labelledby="argl-title argl-desc">
+            <title id="argl-title">Route 53 Global Resolver 레퍼런스 아키텍처</title>
+            <desc id="argl-desc">지점 사무실, 온프레미스 데이터센터, 원격 사용자가 인터넷을 거쳐 Global Resolver의 anycast IP 주소 두 개로 Do53, DoT, DoH 질의를 보냅니다. anycast 라우팅은 질의를 배포된 리전 중 가장 가까운 리전으로 보내고, 그 리전을 쓸 수 없으면 다음으로 가까운 리전으로 보냅니다. 각 리전의 Global Resolver는 access token 또는 IP 기반 access source로 클라이언트를 인증하고, DNS view의 필터링 규칙으로 질의를 ALLOW, BLOCK, ALERT 처리한 뒤, view에 연결된 사설 호스팅 영역 또는 인터넷의 퍼블릭 DNS로 해석합니다. 질의 로그는 observability 리전의 CloudWatch Logs, S3, Data Firehose로 보냅니다.</desc>
+            <defs>
+              <marker id="gah" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-in" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="gah-log" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto"><path style="fill:var(--ink-3)" d="M0 0 L10 5 L0 10 z"/></marker>
+            </defs>
+            <!-- zones -->
+            <rect class="zone" x="10" y="40" width="172" height="400" rx="6"/>
+            <text class="z" x="20" y="62">CLIENT LOCATIONS</text>
+            <rect class="zone" x="360" y="40" width="610" height="400" rx="6"/>
+            <image href="../assets/aws-icons/AWS-Cloud_32.svg" x="368" y="48" width="22" height="22"/>
+            <text class="z" x="396" y="62">AWS CLOUD · 리전 2개 이상에 배포</text>
+            <rect class="zone" x="372" y="80" width="190" height="160" rx="6"/>
+            <image href="../assets/aws-icons/Region_32.svg" x="380" y="86" width="20" height="20"/>
+            <text class="z" x="406" y="100">AWS REGION A</text>
+            <rect class="zone" x="372" y="262" width="190" height="160" rx="6"/>
+            <image href="../assets/aws-icons/Region_32.svg" x="380" y="268" width="20" height="20"/>
+            <text class="z" x="406" y="282">AWS REGION B</text>
+            <rect class="zone" x="594" y="80" width="362" height="250" rx="6"/>
+            <text class="z" x="606" y="100">DNS VIEW · 모든 리전에 같은 구성</text>
+
+            <!-- clients -->
+            <rect class="box" x="18" y="80" width="156" height="76" rx="4"/>
+            <image class="ic-gen" href="../assets/aws-icons/Res_Office-building_48_Light.svg" x="26" y="106" width="24" height="24"/><text class="t" x="56" y="104">지점 사무실</text><text class="s" x="56" y="124">Access source</text><text class="s" x="56" y="142">Do53·DoT·DoH</text>
+            <rect class="box" x="18" y="190" width="156" height="76" rx="4"/>
+            <image class="ic-gen" href="../assets/aws-icons/Res_Servers_48_Light.svg" x="26" y="216" width="24" height="24"/><text class="t" x="56" y="214">데이터센터</text><text class="s" x="56" y="234">Access source</text><text class="s" x="56" y="252">공인 IP·CIDR</text>
+            <rect class="box" x="18" y="300" width="156" height="76" rx="4"/>
+            <image class="ic-gen" href="../assets/aws-icons/Res_Users_48_Light.svg" x="26" y="326" width="24" height="24"/><text class="t" x="56" y="324">원격 사용자</text><text class="s" x="56" y="344">Access token</text><text class="s" x="56" y="362">DoH·DoT</text>
+
+            <!-- anycast -->
+            <text class="lbl" x="272" y="170" text-anchor="middle">① 인터넷으로 질의</text>
+            <rect class="box" x="208" y="180" width="128" height="120" rx="4"/>
+            <image class="ic-gen" href="../assets/aws-icons/Res_Internet_48_Light.svg" x="260" y="190" width="24" height="24"/>
+            <text class="t" x="272" y="238" text-anchor="middle">Anycast IP</text>
+            <text class="s" x="272" y="258" text-anchor="middle">주소 2개</text>
+            <text class="s" x="272" y="276" text-anchor="middle">IPv4 · IPv6</text>
+            <text class="s" x="272" y="292" text-anchor="middle">위치 무관 동일</text>
+            <text class="lbl" x="272" y="322" text-anchor="middle">② 가장 가까운 리전</text>
+            <text class="lbl" x="272" y="340" text-anchor="middle">장애 시 다음 리전</text>
+
+            <!-- regional instances -->
+            <rect class="box" x="384" y="114" width="166" height="96" rx="4"/>
+            <image href="../assets/aws-icons/Res_Amazon-Route-53_Resolver_48.svg" x="392" y="138" width="28" height="28"/><text class="t" x="428" y="140">Global Resolver</text><text class="s" x="428" y="162">인증 → 정책</text><text class="s" x="428" y="180">→ 해석 → 로그</text>
+            <rect class="box" x="384" y="296" width="166" height="96" rx="4"/>
+            <image href="../assets/aws-icons/Res_Amazon-Route-53_Resolver_48.svg" x="392" y="320" width="28" height="28"/><text class="t" x="428" y="322">Global Resolver</text><text class="s" x="428" y="344">인증 → 정책</text><text class="s" x="428" y="362">→ 해석 → 로그</text>
+
+            <!-- DNS view contents -->
+            <rect class="box" x="608" y="112" width="336" height="60" rx="4"/>
+            <image href="../assets/aws-icons/Res_Amazon-Route-53_Resolver-DNS-Firewall_48.svg" x="616" y="128" width="28" height="28"/><text class="t" x="652" y="136">DNS 필터링 규칙</text><text class="s" x="652" y="156">ALLOW·BLOCK·ALERT · 도메인 목록 · DGA·터널링</text>
+            <rect class="box" x="608" y="184" width="336" height="60" rx="4"/>
+            <image href="../assets/aws-icons/Res_Amazon-Route-53-Hosted-Zone_48.svg" x="616" y="200" width="28" height="28"/><text class="t" x="652" y="208">Private hosted zone</text><text class="s" x="652" y="228">view에 연결 · 리전별 연결 없이 해석</text>
+            <rect class="box" x="608" y="256" width="336" height="60" rx="4"/>
+            <image class="ic-gen" href="../assets/aws-icons/Res_Internet_48_Light.svg" x="618" y="274" width="24" height="24"/><text class="t" x="652" y="280">퍼블릭 도메인</text><text class="s" x="652" y="300">인터넷 재귀 해석 · DNSSEC 검증</text>
+
+            <!-- logs -->
+            <rect class="box" x="608" y="352" width="336" height="72" rx="4"/>
+            <image href="../assets/aws-icons/Res_Amazon-Route-53_Resolver-Query-Logging_48.svg" x="616" y="374" width="28" height="28"/><text class="t" x="652" y="374">Query logs (OCSF)</text><text class="s" x="652" y="394">observability 리전으로 전달</text><text class="s" x="652" y="412">CloudWatch Logs · S3 · Data Firehose</text>
+
+            <!-- query paths -->
+            <path class="q-in" d="M174 118 C192 118 190 206 207 206" marker-end="url(#gah)"/>
+            <path class="q-in" d="M174 228 H207" marker-end="url(#gah)"/>
+            <path class="q-in" d="M174 338 C192 338 190 274 207 274" marker-end="url(#gah)"/>
+            <path class="q-in" d="M336 214 C362 214 358 162 383 162" marker-end="url(#gah)"/>
+            <path class="q-in" style="stroke-dasharray:6 5" d="M336 266 C362 266 358 344 383 344" marker-end="url(#gah)"/>
+            <!-- region -> view bus -->
+            <path class="q-in" d="M550 162 H578 M550 344 H578 M578 142 V344"/>
+            <path class="q-in" d="M578 142 H607" marker-end="url(#gah)"/>
+            <path class="q-in" d="M578 214 H607" marker-end="url(#gah)"/>
+            <path class="q-in" d="M578 286 H607" marker-end="url(#gah)"/>
+            <text class="lbl" x="583" y="136">③</text>
+            <text class="lbl" x="583" y="208">④</text>
+            <text class="lbl" x="583" y="280">④</text>
+            <path class="assoc" d="M550 380 H606" marker-end="url(#gah-log)"/>
+            <text class="lbl" x="560" y="372" style="fill:var(--ink-3)">⑤</text>
+          </svg>
+        </div>
+        <figcaption class="legend">
+          <span><i class="p dir"></i>DNS 질의 방향 (클라이언트 → Global Resolver)</span>
+          <span><i class="p" style="border-top-style:dashed"></i>리전 장애 시 같은 anycast IP로 페일오버</span>
+          <span><i class="a"></i>질의 로그 전달</span>
+          <span>③ 인증 후 정책 평가 · ④ 사설/퍼블릭 해석 · 응답은 같은 경로로 돌아옵니다.</span>
+        </figcaption>
+        <p class="arch-hint">좁은 화면에서는 다이어그램을 좌우로 밀어서 보세요.</p>
+      </figure>
+    </div>
+  </section>
+
   <section id="start" aria-labelledby="start-h">
     <div class="wrap">
       <p class="tag">Getting started</p>
