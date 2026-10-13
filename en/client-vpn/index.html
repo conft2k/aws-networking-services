@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Client VPN Overview</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+body{margin:0}img{max-width:100%}[hidden]{display:none!important}
+
+/* Layout: a cross-connect work order. Cool steel paper, navy ink, Amazon orange as the one accent; section tags read like fiber labels. */
+:root{
+  --bg:#EEF1F4; --surface:#FFFFFF; --sunken:#E3E8ED;
+  --ink:#14202E; --ink-2:#44515F; --ink-3:#5A6672;
+  --line:#CDD5DD; --line-2:#B4BFCA;
+  --fiber:#FF9900;          /* Amazon orange — fills only */
+  --fiber-ink:#B35C00;      /* orange-derived, AA on light surfaces */
+  --fiber-soft:#FFF0D9;
+  --on-fiber:#14202E;
+  --trace:#2E7D9A;          /* secondary line color for diagram paths */
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --maxw:1120px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--fiber-ink);outline-offset:3px;border-radius:2px}
+.skip-link{position:absolute;left:16px;top:-60px;background:var(--fiber);color:var(--on-fiber);padding:8px 14px;font-weight:700;z-index:50;text-decoration:none}
+.skip-link:focus{top:12px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.wrap{max-width:var(--maxw);margin:0 auto;padding-inline:24px}
+section{padding-block:88px;border-top:1px solid var(--line)}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.25}
+h2{font-size:clamp(26px,3.4vw,36px);font-weight:700;letter-spacing:-.01em}
+h3{font-size:18px;font-weight:700}
+p{margin:0}
+.lede{color:var(--ink-2);max-width:62ch;margin-top:14px}
+.num{font-family:var(--display);font-variant-numeric:tabular-nums lining-nums}
+.mono{font-family:var(--mono)}
+
+/* fiber label: the section tag */
+.tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-bottom:14px}
+.tag::before{content:"";width:22px;height:8px;background:var(--fiber);border-radius:1px}
+
+/* nav */
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:60px}
+.brand{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.02em;text-decoration:none;text-transform:uppercase}
+.brand span{color:var(--fiber-ink)}
+.navlinks{display:flex;gap:22px;font-size:14px;align-items:center}
+.navlinks a{text-decoration:none;color:var(--ink-2)}
+.navlinks a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;font-weight:700;font-size:15px;text-decoration:none;border-radius:4px;border:1px solid transparent;transition:transform .15s ease,background .15s ease}
+.btn-primary{background:var(--fiber);color:var(--on-fiber)}
+.btn-primary:hover{transform:translateY(-1px)}
+.btn-ghost{border-color:var(--line-2);color:var(--ink)}
+.btn-ghost:hover{background:var(--sunken)}
+.navlinks .btn{min-height:38px;padding:0 14px;font-size:14px;color:var(--on-fiber)}
+
+/* hero */
+.hero{padding-block:72px 64px;border-top:0}
+.hero-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:56px;align-items:center}
+.eyebrow{font-family:var(--mono);font-size:13px;color:var(--fiber-ink);letter-spacing:.04em}
+.hero h1{font-size:clamp(34px,5vw,56px);font-weight:700;letter-spacing:-.02em;margin-top:16px}
+.hero h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--fiber) 62%,var(--fiber) 90%,transparent 90%);padding-inline:2px}
+.hero .lede{font-size:18px}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+
+/* hero visual: port faceplate */
+.faceplate{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px}
+.faceplate-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.ports{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+.port{border:1px solid var(--line);border-radius:4px;padding:14px 14px 12px;background:var(--sunken);display:flex;flex-direction:column;gap:2px}
+.port .num{font-size:40px;font-weight:600;line-height:1}
+.port .num small{font-size:18px;color:var(--ink-2);margin-left:2px}
+.port .optic{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+.port .led{width:8px;height:8px;border-radius:50%;background:var(--fiber);align-self:flex-end;margin-top:-6px;animation:blink 2.4s ease-in-out infinite}
+.port:nth-child(2) .led{animation-delay:.6s}.port:nth-child(3) .led{animation-delay:1.2s}.port:nth-child(4) .led{animation-delay:1.8s}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.faceplate-foot{margin-top:14px;font-size:13px;color:var(--ink-2)}
+
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:56px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.chip{padding:18px 20px;border-left:1px solid var(--line);min-width:0}
+.chip:first-child{border-left:0}
+.chip .num{font-size:34px;font-weight:600;line-height:1.1}
+.chip p{font-size:13.5px;color:var(--ink-2);margin-top:4px}
+
+/* value */
+.split{display:grid;grid-template-columns:1fr 1.4fr;gap:56px}
+.pillars{display:grid;gap:0;border-top:1px solid var(--line-2)}
+.pillar{display:grid;grid-template-columns:120px 1fr;gap:20px;padding-block:22px;border-bottom:1px solid var(--line)}
+.pillar .k{font-family:var(--display);font-size:22px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--fiber-ink)}
+.pillar p{color:var(--ink-2);margin-top:6px}
+
+/* stack (L1/L2/L3) */
+.stack{margin-top:40px;display:grid;gap:10px}
+.layer{display:grid;grid-template-columns:96px 1fr 1.2fr;gap:24px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px 24px}
+.layer .lv{font-family:var(--display);font-size:44px;font-weight:700;line-height:.9}
+.layer .lv small{display:block;font-family:var(--mono);font-size:11px;font-weight:400;color:var(--ink-3);letter-spacing:.06em;margin-top:8px;text-transform:uppercase}
+.layer p{color:var(--ink-2);margin-top:6px;font-size:15px}
+.specs{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+.specs code{font-family:var(--mono);font-size:12.5px;background:var(--sunken);border:1px solid var(--line);padding:3px 8px;border-radius:3px;color:var(--ink)}
+
+/* features */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:40px}
+.feature{background:var(--surface);padding:26px 24px;min-width:0}
+.feature .ft{font-family:var(--mono);font-size:11.5px;color:var(--fiber-ink);letter-spacing:.06em;text-transform:uppercase}
+.feature h3{margin-top:8px}
+.feature p{color:var(--ink-2);font-size:15px;margin-top:8px}
+
+/* table */
+.tbl-wrap{margin-top:36px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:14px 18px;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--sunken)}
+tbody tr:last-child td{border-bottom:0}
+td.row-h{font-weight:700;width:22%}
+td .num{font-size:18px;font-weight:600}
+
+/* architecture */
+.arch{margin-top:36px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px}
+.arch-scroll{overflow-x:auto}
+.arch svg{display:block;width:100%;min-width:860px;height:auto}
+.arch-hint{display:none;font-size:13px;color:var(--ink-3);margin-top:10px}
+svg .box{fill:var(--sunken);stroke:var(--line-2)}
+svg .zone{fill:none;stroke:var(--line-2);stroke-dasharray:4 4}
+svg .t{fill:var(--ink);font-family:var(--sans);font-size:14px;font-weight:700}
+svg .s{fill:var(--ink-3);font-family:var(--mono);font-size:11px}
+svg .z{fill:var(--ink-2);font-family:var(--mono);font-size:11px;letter-spacing:.08em}
+svg .fiber{stroke:var(--fiber);stroke-width:5;fill:none;stroke-linecap:round}
+svg .path{stroke:var(--trace);stroke-width:2;fill:none}
+svg .site{stroke:var(--fiber-ink);stroke-width:2;fill:none;stroke-dasharray:6 5}
+svg .lbl{fill:var(--trace);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .lbl2{fill:var(--fiber-ink);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .dot{fill:var(--fiber)}
+svg .ah-p{fill:var(--trace)}
+svg .ah-f{fill:var(--fiber)}
+svg .ah-s{fill:var(--fiber-ink)}
+.legend i.dir{position:relative;width:26px}
+.legend i.dir::after{content:"";position:absolute;right:-3px;top:-6px;border-left:8px solid var(--trace);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.legend i.f.dir::after{top:-7px;border-left-color:var(--fiber)}
+.legend i.t.dir::after{top:-6.5px;border-left-color:var(--fiber)}
+.legend i.s.dir::after{border-left-color:var(--fiber-ink)}
+.legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--ink-2)}
+.legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--fiber)}
+.legend i.p{border-top:2px solid var(--trace)}
+.legend i.s{border-top:2px dashed var(--fiber-ink)}
+
+/* steps */
+.steps{list-style:none;padding:0;margin:40px 0 0;display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:4px solid var(--fiber)}
+.steps li{padding:20px 18px 0 0;min-width:0}
+.steps .num{font-size:15px;font-weight:600;color:var(--fiber-ink);letter-spacing:.06em}
+.steps h3{font-size:16px;margin-top:6px}
+.steps p{font-size:14px;color:var(--ink-2);margin-top:6px}
+
+/* resiliency */
+.res{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:36px}
+.res-card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:26px}
+.res-card .num{font-size:52px;font-weight:700;line-height:1}
+.res-card .num small{font-size:20px;color:var(--ink-2)}
+.res-card h3{margin-top:10px}
+.res-card p{color:var(--ink-2);font-size:15px;margin-top:6px}
+.res-card.max{border-color:var(--fiber);box-shadow:inset 0 4px 0 var(--fiber)}
+
+/* cta */
+.cta{text-align:center}
+.cta h2{max-width:22ch;margin:0 auto}
+.cta .lede{margin:14px auto 0}
+.cta .cta-row{justify-content:center}
+footer{border-top:1px solid var(--line);padding-block:28px;font-size:13px;color:var(--ink-3)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+
+@media (max-width:1024px){
+  .hero-grid,.split{grid-template-columns:1fr;gap:40px}
+  .features{grid-template-columns:repeat(2,1fr)}
+  .steps{grid-template-columns:repeat(2,1fr);border-top:0;gap:0 24px}
+  .steps li{border-top:4px solid var(--fiber);padding-bottom:24px}
+  .layer{grid-template-columns:80px 1fr}
+  .layer .specs{grid-column:2}
+  .chips{grid-template-columns:repeat(2,1fr)}
+  .chip:nth-child(3){border-left:0}
+  .chip:nth-child(n+3){border-top:1px solid var(--line)}
+}
+@media (max-width:640px){
+  .wrap{padding-inline:18px}
+  section{padding-block:60px}
+  .navlinks a:not(.btn){display:none}
+  .features,.res{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr}
+  .pillar{grid-template-columns:1fr;gap:0}
+  .layer{grid-template-columns:1fr;gap:12px}
+  .layer .specs{grid-column:auto}
+  .cta-row .btn{width:100%}
+  .arch-hint{display:block}
+  table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  table,tbody,tr,td{display:block;width:100%}
+  tr{border-bottom:1px solid var(--line);padding:14px 16px}
+  tbody tr:last-child{border-bottom:0}
+  td{border:0;padding:3px 0}
+  td.row-h{width:100%;font-size:16px;padding-bottom:6px}
+  td[data-k]::before{content:attr(data-k);display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+
+/* ---- service-specific ---- */
+/* hero visual: client connection profile */
+.profile{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px;min-width:0}
+.profile-head{display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.conn{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:4px;background:var(--sunken)}
+.conn b{font-family:var(--display);font-size:26px;font-weight:600;line-height:1.1}
+.conn .state{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+.conn .state::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--fiber);animation:blink 2.4s ease-in-out infinite}
+.pf{margin:12px 0 0}
+.pf div{display:grid;grid-template-columns:110px 1fr;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);align-items:baseline}
+.pf dt{font-family:var(--mono);font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em}
+.pf dd{margin:0;display:flex;flex-wrap:wrap;gap:4px;min-width:0;font-size:14px}
+.pf code{font-family:var(--mono);font-size:11.5px;padding:1px 6px;border:1px solid var(--line);border-radius:3px;background:var(--sunken);color:var(--ink)}
+.pf code.on{background:var(--fiber-soft);border-color:var(--fiber)}
+.profile-foot{margin-top:12px;font-size:13px;color:var(--ink-2)}
+/* auth options */
+.auth{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:40px}
+.auth-card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:24px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.auth-card .k{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--fiber-ink)}
+.auth-card p{color:var(--ink-2);font-size:15px}
+.auth-card .specs{margin-top:auto;padding-top:8px}
+.auth-card.base{border-color:var(--fiber);box-shadow:inset 0 4px 0 var(--fiber)}
+.combo{margin-top:16px;display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:16px 20px;border:1px dashed var(--line-2);border-radius:6px;font-size:15px;color:var(--ink-2)}
+.combo strong{color:var(--ink)}
+.combo code{font-family:var(--mono);font-size:12.5px;background:var(--sunken);border:1px solid var(--line);padding:3px 8px;border-radius:3px;color:var(--ink)}
+/* authorization rule evaluation */
+.rules{margin-top:36px;display:grid;grid-template-columns:1.1fr 1fr;gap:24px;align-items:start}
+.rule-box{background:var(--surface);border:1px solid var(--line);border-radius:6px;overflow:hidden;min-width:0}
+.rule-box .hd{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--sunken);padding:10px 16px;border-bottom:1px solid var(--line)}
+.rule{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;padding:11px 16px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:13px;align-items:center}
+.rule:last-child{border-bottom:0}
+.rule .g{color:var(--ink-2)}
+.rule .ok{font-size:11px;padding:2px 8px;border-radius:3px;background:var(--fiber-soft);border:1px solid var(--fiber);color:var(--ink)}
+.rule .no{font-size:11px;padding:2px 8px;border-radius:3px;border:1px solid var(--line-2);color:var(--ink-2)}
+.notes{list-style:none;margin:0;padding:0;display:grid;gap:0;border-top:1px solid var(--line-2)}
+.notes li{padding:16px 0;border-bottom:1px solid var(--line);color:var(--ink-2);font-size:15px}
+.notes li strong{display:block;color:var(--ink);font-size:16px;margin-bottom:4px}
+svg .tls{stroke:var(--fiber);stroke-width:3;fill:none;stroke-linecap:round}
+.legend i.t{border-top:3px solid var(--fiber)}
+@media (max-width:1024px){
+  .rules{grid-template-columns:1fr}
+}
+@media (max-width:640px){
+  .auth{grid-template-columns:1fr}
+  .pf div{grid-template-columns:1fr;gap:4px}
+  .profile{padding:18px}
+  .rule{grid-template-columns:1fr auto;gap:4px 12px}
+  .rule .g{grid-column:1}
+  .rule .ok,.rule .no{grid-column:2;grid-row:1 / span 2}
+}
+
+/* nav: keep links on one line, show only CTA below 960px */
+.navlinks a{white-space:nowrap}
+@media (max-width:960px){.navlinks a:not(.btn){display:none}}
+
+/* Korean line breaking: never split a word mid-syllable */
+h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
+</style>
+<link rel="stylesheet" href="../../assets/site.css?v=17">
+<script src="../../assets/site.js?v=17"></script>
+</head>
+<body>
+
+
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<nav aria-label="Main menu">
+  <div class="wrap">
+    <a class="brand" href="#top">AWS <span>Client VPN</span></a>
+    <div class="navlinks">
+      <a href="../">Service portfolio</a>
+      <a href="#auth">Authentication</a>
+      <a href="#authz">Authorization</a>
+      <a href="#features">Features</a>
+      <a href="#arch">Architecture</a>
+      <a href="#pricing">Pricing</a>
+      <a class="btn btn-primary" href="#start">Get started</a>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+  <header class="hero" id="top">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">AWS Client VPN · Managed remote access</p>
+          <h1>From anywhere, <em>only authenticated users</em> reach the networks they need</h1>
+          <p class="lede">AWS Client VPN is a managed VPN for reaching AWS and on-premises resources with an OpenVPN-based client. Users authenticate with certificates, Active Directory or a SAML 2.0 IdP, and access is scoped by user group and destination CIDR. There are no VPN servers to run or scale.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="#start">See the setup steps</a>
+            <a class="btn btn-ghost" href="#arch">View the architecture</a>
+          </div>
+        </div>
+
+        <div class="profile" aria-label="Example Client VPN endpoint configuration">
+          <div class="profile-head"><span>Client VPN endpoint</span><span>OpenVPN · TLS</span></div>
+          <div class="conn"><b>cvpn-endpoint</b><span class="state">available</span></div>
+          <dl class="pf">
+            <div><dt>Authentication</dt><dd><code class="on">Mutual cert</code><code>Active Directory</code><code class="on">SAML 2.0</code></dd></div>
+            <div><dt>Transport</dt><dd><code class="on">UDP</code><code>TCP</code><code class="on">443</code><code>1194</code></dd></div>
+            <div><dt>Client CIDR</dt><dd><code>10.100.0.0/22</code></dd></div>
+            <div><dt>Split tunnel</dt><dd><code class="on">enabled</code></dd></div>
+            <div><dt>Pushed routes</dt><dd><code>10.0.0.0/16</code><code>172.16.0.0/24</code></dd></div>
+            <div><dt>Target</dt><dd><code>VPC subnets</code><code>Transit Gateway</code></dd></div>
+          </dl>
+          <p class="profile-foot">Highlighted values are the settings chosen in this example. The transport protocol can't be changed after the endpoint is created.</p>
+        </div>
+      </div>
+
+      <div class="chips" role="list">
+        <div class="chip" role="listitem"><span class="num">99.9%</span><p>Monthly uptime SLA per Region</p></div>
+        <div class="chip" role="listitem"><span class="num">3</span><p>Authentication methods (certificate · AD · SAML)</p></div>
+        <div class="chip" role="listitem"><span class="num">443 · 1194</span><p>Supported ports, TCP · UDP</p></div>
+        <div class="chip" role="listitem"><span class="num">/22–/12</span><p>Client IPv4 CIDR size range</p></div>
+      </div>
+    </div>
+  </header>
+
+  <section id="why" aria-labelledby="why-h">
+    <div class="wrap split">
+      <div>
+        <p class="tag">Why Client VPN</p>
+        <h2 id="why-h">Manage remote access like any other cloud resource</h2>
+        <p class="lede">Running your own VPN appliances means handling capacity planning, patching and redundancy yourself. Client VPN scales with the number of users and ties authentication and access control to your existing identity system.</p>
+      </div>
+      <div class="pillars">
+        <div class="pillar"><span class="k">Managed</span><div><h3>No servers to run</h3><p>Create an endpoint and associate subnets or a transit gateway. AWS manages capacity as the number of users changes.</p></div></div>
+        <div class="pillar"><span class="k">Identity</span><div><h3>Use your existing identity system</h3><p>Use Active Directory through AWS Directory Service or a SAML 2.0 IdP, and keep your IdP's MFA.</p></div></div>
+        <div class="pillar"><span class="k">Scoped</span><div><h3>Per-group access scope</h3><p>Authorization rules define which networks each group can reach. Destinations without a rule are blocked by default.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="auth" aria-labelledby="auth-h">
+    <div class="wrap">
+      <p class="tag">Authentication</p>
+      <h2 id="auth-h">Three authentication methods</h2>
+      <p class="lede">With any method, the server certificate must be in AWS Certificate Manager (ACM) in the same Region as the endpoint. Certificate-based authentication can be combined with user-based authentication.</p>
+      <div class="auth">
+        <article class="auth-card base">
+          <span class="k">Certificate-based</span>
+          <h3>Mutual authentication</h3>
+          <p>Authenticates devices with client certificates. Block lost devices with a certificate revocation list. This method is also required to evaluate device posture with a client connect handler.</p>
+          <div class="specs"><code>ACM</code><code>CRL 20,000 entries</code></div>
+        </article>
+        <article class="auth-card">
+          <span class="k">User-based</span>
+          <h3>Active Directory</h3>
+          <p>Authenticates with user credentials from a directory connected to AWS Directory Service. The directory must be in the same account as the endpoint.</p>
+          <div class="specs"><code>AWS Directory Service</code><code>MFA</code><code>AD groups</code></div>
+        </article>
+        <article class="auth-card">
+          <span class="k">User-based</span>
+          <h3>SAML 2.0 federation</h3>
+          <p>Federates with an external IdP such as Okta through an IAM SAML identity provider for SSO. Users connect with the AWS provided client.</p>
+          <div class="specs"><code>SAML 2.0</code><code>IAM SAML provider</code><code>SSO</code></div>
+        </article>
+      </div>
+      <p class="combo"><strong>Supported combinations</strong><code>Mutual + Active Directory</code><code>Mutual + SAML</code>When both are configured, users must pass both to connect.</p>
+    </div>
+  </section>
+
+  <section id="authz" aria-labelledby="authz-h">
+    <div class="wrap">
+      <p class="tag">Authorization rules</p>
+      <h2 id="authz-h">Decide who can go where</h2>
+      <p class="lede">An authorization rule pairs a destination CIDR with a group ID (or all users). You can only create allow rules, and the most specific prefix wins.</p>
+      <div class="rules">
+        <div class="rule-box" role="group" aria-label="Example authorization rule evaluation">
+          <div class="hd">Authorization rules · longest prefix match</div>
+          <div class="rule"><span>10.0.0.0/16</span><span class="g">group: dev</span><span class="ok">allow</span></div>
+          <div class="rule"><span>10.0.2.119/32</span><span class="g">group: managers</span><span class="ok">allow</span></div>
+          <div class="rule"><span>172.16.0.0/24</span><span class="g">all users</span><span class="ok">allow</span></div>
+          <div class="rule"><span>0.0.0.0/0</span><span class="g">group: managers</span><span class="ok">allow</span></div>
+          <div class="rule"><span>No-rule destination</span><span class="g">groups other than managers</span><span class="no">deny</span></div>
+        </div>
+        <ul class="notes">
+          <li><strong>Deny by default</strong>Without authorization rules, no destination is reachable. Add rules first after creating the endpoint.</li>
+          <li><strong>Most specific rule wins</strong>In the example above, the 10.0.2.119/32 rule is open only to managers, so the dev group can't reach that host even though it's inside 10.0.0.0/16.</li>
+          <li><strong>0.0.0.0/0 is evaluated last</strong>It means any destination not defined by another rule and is evaluated last regardless of creation order.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" aria-labelledby="features-h">
+    <div class="wrap">
+      <p class="tag">Features</p>
+      <h2 id="features-h">Key features</h2>
+      <div class="features">
+        <article class="feature"><p class="ft">Routing</p><h3>Split tunnel</h3><p>When enabled, only the routes in the endpoint route table are pushed to clients, so only that traffic goes through the tunnel. Off by default, sending all traffic through the tunnel.</p></article>
+        <article class="feature"><p class="ft">Visibility</p><h3>Connection logs</h3><p>Send connection attempts, connections and terminations to Amazon CloudWatch Logs for usage analysis and incident investigation.</p></article>
+        <article class="feature"><p class="ft">Custom logic</p><h3>Client connect handler</h3><p>A Lambda function allows or denies the connection after authentication and before authorization rules are evaluated. The function name must start with AWSClientVPN- and the timeout is 30 seconds.</p></article>
+        <article class="feature"><p class="ft">Device posture</p><h3>Device posture checks</h3><p>Evaluate Cedar-based policies using data from CrowdStrike, Jamf or JumpCloud device trust providers, at connection time and every 5 minutes during the session. Validate first in shadow mode, which logs without blocking. Requires AWS provided client 6.2.0 or later.</p></article>
+        <article class="feature"><p class="ft">Distribution</p><h3>Self-service portal</h3><p>Users download the AWS provided client and the endpoint configuration file from the portal themselves, so you don't have to distribute configuration files. Client 6.x also supports a CLI and administrator profile controls.</p></article>
+        <article class="feature"><p class="ft">Session</p><h3>Session control · login banner</h3><p>Set the maximum session duration (8, 10, 12 or 24 hours; 24 by default) and reconnect behavior on expiry, plus a banner (up to 1,400 characters) shown at connection.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="targets" aria-labelledby="targets-h">
+    <div class="wrap">
+      <p class="tag">Target network</p>
+      <h2 id="targets-h">VPC subnet association vs. Transit Gateway attachment</h2>
+      <p class="lede">Choose one connection method when you create the endpoint. The two can't be mixed on one endpoint.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">VPC subnet association vs. Transit Gateway attachment</caption>
+          <thead><tr><th scope="col">Method</th><th scope="col">Reach</th><th scope="col">Client IP</th><th scope="col">Access control</th><th scope="col">Best for</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="row-h">VPC subnet association<br><span class="mono" style="font-size:12px;font-weight:400;color:var(--ink-3)">Subnet association</span></td>
+              <td data-k="Reach">The associated VPC and networks routed from it</td>
+              <td data-k="Client IP">SNAT to the endpoint network interface address</td>
+              <td data-k="Access control">Authorization rules and security groups</td>
+              <td data-k="Best for">Remote access centered on one VPC</td>
+            </tr>
+            <tr>
+              <td class="row-h">Transit Gateway attachment<br><span class="mono" style="font-size:12px;font-weight:400;color:var(--ink-3)">client-vpn attachment</span></td>
+              <td data-k="Reach">Multiple VPCs and on-premises networks attached to a transit gateway in the same Region</td>
+              <td data-k="Client IP">Original client IP preserved, no SNAT</td>
+              <td data-k="Access control">Network-based authorization rules (no security groups)</td>
+              <td data-k="Best for">Reaching many VPCs without a transit VPC and tracking traffic per user</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="arch" aria-labelledby="arch-h">
+    <div class="wrap">
+      <p class="tag">Reference architecture</p>
+      <h2 id="arch-h">From remote users to VPCs and on-premises</h2>
+      <p class="lede">Users establish a TLS tunnel to the endpoint with an OpenVPN-based client, and the endpoint authenticates them against an IdP or directory. An endpoint attached to a transit gateway sends traffic to multiple VPCs and on-premises while preserving the original client IP.</p>
+      <figure class="arch">
+        <div class="arch-scroll">
+          <svg viewBox="0 0 980 430" role="img" aria-labelledby="arch-title arch-desc">
+            <title id="arch-title">Client VPN reference architecture</title>
+            <desc id="arch-desc">Laptops of home and traveling users connect over the internet to a Client VPN endpoint through TLS tunnels. The endpoint authenticates users with a SAML IdP or Active Directory and sends connection logs to CloudWatch Logs. The endpoint is attached to a transit gateway and sends traffic to VPC A, VPC B, and on-premises through the transit gateway's Direct Connect or Site-to-Site VPN attachments.</desc>
+            <defs>
+              <marker id="ar-cv-t" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" orient="auto"><path class="ah-f" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-cv-s" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-s" d="M0 0 L10 5 L0 10 z"/></marker>
+            </defs>
+            <rect class="zone" x="10" y="40" width="190" height="370" rx="6"/>
+            <text class="z" x="24" y="62">REMOTE USERS</text>
+            <rect class="zone" x="230" y="40" width="740" height="370" rx="6"/>
+            <image href="../../assets/aws-icons/Region_32.svg" x="230" y="40" width="24" height="24"/>
+            <text class="z" x="262" y="56">AWS REGION</text>
+
+            <rect class="box" x="24" y="110" width="166" height="64" rx="4"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Client_48_Light.svg" x="32" y="128" width="28" height="28"/>
+            <text class="t" x="66" y="138">Home user</text><text class="s" x="66" y="158">Client VPN client</text>
+            <rect class="box" x="24" y="250" width="166" height="64" rx="4"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Client_48_Light.svg" x="32" y="268" width="28" height="28"/>
+            <text class="t" x="66" y="278">Traveling user</text><text class="s" x="66" y="298">OpenVPN client</text>
+
+            <rect class="box" x="280" y="180" width="200" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_AWS-Client-VPN_48.svg" x="288" y="198" width="28" height="28"/>
+            <text class="t" x="324" y="208">Client VPN endpoint</text><text class="s" x="324" y="228">client CIDR /22</text>
+
+            <rect class="box" x="280" y="80" width="200" height="56" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_AWS-Directory-Service_48.svg" x="288" y="94" width="28" height="28"/>
+            <text class="t" x="324" y="104">SAML IdP · AD</text><text class="s" x="324" y="122">User authentication</text>
+            <rect class="box" x="280" y="300" width="200" height="56" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-CloudWatch_Logs_48.svg" x="288" y="314" width="28" height="28"/>
+            <text class="t" x="324" y="324">CloudWatch Logs</text><text class="s" x="324" y="342">Connection logs</text>
+
+            <rect class="box" x="560" y="180" width="190" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_AWS-Transit-Gateway_48.svg" x="568" y="198" width="28" height="28"/>
+            <text class="t" x="604" y="208">Transit Gateway</text><text class="s" x="604" y="228">client-vpn attachment</text>
+
+            <rect class="box" x="785" y="80" width="175" height="60" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-VPC_Virtual-private-cloud-VPC_48.svg" x="793" y="96" width="28" height="28"/>
+            <text class="t" x="829" y="106">VPC A</text><text class="s" x="829" y="126">10.0.0.0/16</text>
+            <rect class="box" x="785" y="182" width="175" height="60" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-VPC_Virtual-private-cloud-VPC_48.svg" x="793" y="198" width="28" height="28"/>
+            <text class="t" x="829" y="208">VPC B</text><text class="s" x="829" y="228">10.1.0.0/16</text>
+            <rect class="box" x="785" y="284" width="175" height="60" rx="4"/>
+            <image href="../../assets/aws-icons/Res_AWS-Transit-Gateway_Attachment_48.svg" x="793" y="300" width="28" height="28"/>
+            <text class="t" x="829" y="310">On-prem routes</text><text class="s" x="829" y="330">DX · VPN attach.</text>
+
+            <path class="tls" d="M190 142 C240 142 230 204 278 204" marker-end="url(#ar-cv-t)"/>
+            <path class="tls" d="M190 282 C240 282 230 222 278 222" marker-end="url(#ar-cv-t)"/>
+            <text class="lbl2" x="204" y="184">TLS</text>
+            <text class="lbl2" x="204" y="246">UDP</text><text class="lbl2" x="204" y="260">443</text>
+
+            <path class="site" d="M380 180 V138" marker-end="url(#ar-cv-s)"/>
+            <path class="site" d="M380 244 V298" marker-end="url(#ar-cv-s)"/>
+
+            <path class="path" d="M480 212 H560"/>
+            <text class="lbl" x="486" y="204">Src IP kept</text>
+            <path class="path" d="M750 202 C768 202 768 110 785 110"/>
+            <path class="path" d="M750 212 H785"/>
+            <path class="path" d="M750 222 C768 222 768 314 785 314"/>
+            <text class="lbl" x="560" y="290">TGW route tables</text>
+          </svg>
+        </div>
+        <figcaption class="legend">
+          <span><i class="t dir"></i>Client TLS tunnel (user to endpoint)</span>
+          <span><i class="s dir"></i>Authentication requests · connection log delivery</span>
+          <span><i class="p"></i>Attachment · routing</span>
+        </figcaption>
+        <p class="arch-hint">On narrow screens, swipe the diagram sideways.</p>
+      </figure>
+    </div>
+  </section>
+
+  <section id="start" aria-labelledby="start-h">
+    <div class="wrap">
+      <p class="tag">Getting started</p>
+      <h2 id="start-h">How to set up an endpoint</h2>
+      <ol class="steps">
+        <li><span class="num">STEP 1</span><h3>Prepare authentication</h3><p>Put the server certificate in ACM, and prepare client certificates, a directory or a SAML provider.</p></li>
+        <li><span class="num">STEP 2</span><h3>Create the endpoint</h3><p>Set the client CIDR, transport protocol, split tunnel and connection logging.</p></li>
+        <li><span class="num">STEP 3</span><h3>Associate the target network</h3><p>Associate VPC subnets, or wait until the Transit Gateway attachment is available.</p></li>
+        <li><span class="num">STEP 4</span><h3>Authorization rules · routes</h3><p>Add per-group authorization rules and destination routes, and make sure the VPC has a return route to the client CIDR.</p></li>
+        <li><span class="num">STEP 5</span><h3>Distribute the client</h3><p>Export the configuration file or enable the self-service portal, and share instructions with users.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="pricing" aria-labelledby="pricing-h">
+    <div class="wrap">
+      <p class="tag">Pricing</p>
+      <h2 id="pricing-h">What you pay for</h2>
+      <p class="lede">You're billed hourly for the number of target networks associated with the endpoint and the number of concurrently active client connections. Logging, Lambda and data transfer are added at each service's rates.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">AWS Client VPN charges</caption>
+          <thead><tr><th scope="col">Charge</th><th scope="col">Billed by</th><th scope="col">Notes</th></tr></thead>
+          <tbody>
+          <tr><td class="row-h">Endpoint association</td><td data-k="Billed by">Per hour for each target network association</td><td data-k="Notes">IPv6 and dual-stack endpoints have the same rate as IPv4.</td></tr>
+          <tr><td class="row-h">Client connections</td><td data-k="Billed by">Per hour for each active VPN connection</td><td data-k="Notes">Scales with the number of connected users.</td></tr>
+          <tr><td class="row-h">Data transfer</td><td data-k="Billed by">Data transfer out (DTO) from EC2 to the internet</td><td data-k="Notes">Sending internet traffic through a full tunnel increases this cost.</td></tr>
+          <tr><td class="row-h">Public IPv4 addresses</td><td data-k="Billed by">Public IPv4 addresses used by client connection tunnels</td><td data-k="Notes">Standard public IPv4 address rates apply (see the VPC pricing page).</td></tr>
+          <tr><td class="row-h">Connection logs</td><td data-k="Billed by">CloudWatch Logs log group usage</td><td data-k="Notes">Billed at CloudWatch rates.</td></tr>
+          <tr><td class="row-h">Client connect handler</td><td data-k="Billed by">Lambda function invocations</td><td data-k="Notes">Billed at AWS Lambda rates.</td></tr>
+          <tr><td class="row-h">Transit Gateway attachment</td><td data-k="Billed by">Standard Transit Gateway rates</td><td data-k="Notes">The Transit Gateway integration itself has no additional charge.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="lede" style="font-size:14px">Rates vary by Region and usage. For current rates, see the <a href="https://aws.amazon.com/vpn/pricing/" target="_blank" rel="noopener">AWS VPN pricing page</a>.</p>
+    </div>
+  </section>
+
+  <section class="cta" aria-labelledby="cta-h">
+    <div class="wrap">
+      <p class="tag">Next step</p>
+      <h2 id="cta-h">Design remote access for your organization</h2>
+      <p class="lede">Bring your user count, the IdP or directory you use and the networks users need to reach, and we'll review authentication and authorization rule design together.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="https://aws.amazon.com/vpn/client-vpn/" target="_blank" rel="noopener">Open the service page</a>
+        <a class="btn btn-ghost" href="https://docs.aws.amazon.com/vpn/latest/clientvpn-admin/what-is.html" target="_blank" rel="noopener">Read the Administrator Guide</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a href="../">← AWS Networking Services Portfolio</a>
+    <span>An introduction to AWS Client VPN. Feature support and pricing vary by Region; check the official documentation.</span>
+    <a href="https://docs.aws.amazon.com/vpn/latest/clientvpn-admin/limits.html" target="_blank" rel="noopener">Quotas docs</a>
+  </div>
+</footer>
+
+</body>
+</html>
