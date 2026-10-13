@@ -1,0 +1,1810 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AWS Networking Pricing</title>
+<meta name="description" content="Per-service pricing tables for the full AWS networking portfolio (Application, Edge and Hybrid Networking, Foundation, Network Security, Network Observability), based on the AWS Price List API">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+body{margin:0}img{max-width:100%}[hidden]{display:none!important}
+
+/* Layout: a cross-connect work order. Cool steel paper, navy ink, Amazon orange as the one accent; section tags read like fiber labels. */
+:root{
+  --bg:#EEF1F4; --surface:#FFFFFF; --sunken:#E3E8ED;
+  --ink:#14202E; --ink-2:#44515F; --ink-3:#5A6672;
+  --line:#CDD5DD; --line-2:#B4BFCA;
+  --fiber:#FF9900;          /* Amazon orange — fills only */
+  --fiber-ink:#B35C00;      /* orange-derived, AA on light surfaces */
+  --fiber-soft:#FFF0D9;
+  --on-fiber:#14202E;
+  --trace:#2E7D9A;          /* secondary line color for diagram paths */
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --maxw:1120px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--fiber-ink);outline-offset:3px;border-radius:2px}
+.skip-link{position:absolute;left:16px;top:-60px;background:var(--fiber);color:var(--on-fiber);padding:8px 14px;font-weight:700;z-index:50;text-decoration:none}
+.skip-link:focus{top:12px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.wrap{max-width:var(--maxw);margin:0 auto;padding-inline:24px}
+section{padding-block:88px;border-top:1px solid var(--line)}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.25}
+h2{font-size:clamp(26px,3.4vw,36px);font-weight:700;letter-spacing:-.01em}
+h3{font-size:18px;font-weight:700}
+p{margin:0}
+.lede{color:var(--ink-2);max-width:62ch;margin-top:14px}
+.num{font-family:var(--display);font-variant-numeric:tabular-nums lining-nums}
+.mono{font-family:var(--mono)}
+
+/* fiber label: the section tag */
+.tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-bottom:14px}
+.tag::before{content:"";width:22px;height:8px;background:var(--fiber);border-radius:1px}
+
+/* nav */
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:60px}
+.brand{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.02em;text-decoration:none;text-transform:uppercase}
+.brand span{color:var(--fiber-ink)}
+.navlinks{display:flex;gap:22px;font-size:14px;align-items:center}
+.navlinks a{text-decoration:none;color:var(--ink-2)}
+.navlinks a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;font-weight:700;font-size:15px;text-decoration:none;border-radius:4px;border:1px solid transparent;transition:transform .15s ease,background .15s ease}
+.btn-primary{background:var(--fiber);color:var(--on-fiber)}
+.btn-primary:hover{transform:translateY(-1px)}
+.btn-ghost{border-color:var(--line-2);color:var(--ink)}
+.btn-ghost:hover{background:var(--sunken)}
+.navlinks .btn{min-height:38px;padding:0 14px;font-size:14px;color:var(--on-fiber)}
+
+/* hero */
+.hero{padding-block:64px 48px;border-top:0}
+.hero-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:56px;align-items:center}
+.eyebrow{font-family:var(--mono);font-size:13px;color:var(--fiber-ink);letter-spacing:.04em}
+.hero h1{font-size:clamp(34px,5vw,56px);font-weight:700;letter-spacing:-.02em;margin-top:16px}
+.hero h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--fiber) 62%,var(--fiber) 90%,transparent 90%);padding-inline:2px}
+.hero .lede{font-size:18px}
+
+/* table */
+.tbl-wrap{margin-top:20px;border:1px solid var(--line);border-radius:6px;background:var(--surface);overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:14px 18px;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--sunken)}
+tbody tr:last-child td,tbody tr:last-child th{border-bottom:0}
+
+footer{border-top:1px solid var(--line);padding-block:28px;font-size:13px;color:var(--ink-3)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+
+@media (max-width:1024px){
+  .hero-grid{grid-template-columns:1fr;gap:32px}
+}
+@media (max-width:640px){
+  .wrap{padding-inline:16px}
+  section{padding-block:48px}
+  .navlinks a:not(.btn){display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+
+/* nav: keep links on one line, show only CTA below 960px */
+.navlinks a{white-space:nowrap}
+@media (max-width:960px){.navlinks a:not(.btn){display:none}}
+
+/* Korean line breaking: never split a word mid-syllable */
+h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
+
+/* ---- pricing page ---- */
+.stamp{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px 22px}
+.stamp-head{display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.stamp .big{font-family:var(--display);font-size:40px;font-weight:600;line-height:1.1;margin-top:10px;font-variant-numeric:tabular-nums}
+.stamp .big small{font-size:18px;color:var(--ink-2);margin-left:6px}
+.stamp dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:14px 0 0;font-size:13px}
+.stamp dt{font-family:var(--mono);color:var(--ink-2)}
+.stamp dd{margin:0;font-family:var(--mono);color:var(--ink);text-align:right;white-space:nowrap}
+.stamp-foot{margin-top:12px;font-size:13px;color:var(--ink-2)}
+.facts{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.facts span{font-family:var(--mono);font-size:12.5px;background:var(--surface);border:1px solid var(--line);padding:4px 10px;border-radius:3px;color:var(--ink-2)}
+.facts b{color:var(--ink);font-weight:500}
+
+#prices{padding-block:40px 88px;scroll-margin-top:60px}
+.toolbar{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:center;justify-content:space-between}
+.tablist{display:flex;flex-wrap:wrap;gap:4px;padding:4px;background:var(--sunken);border:1px solid var(--line);border-radius:8px;max-width:100%;width:max-content}
+.tablist button{flex:none;appearance:none;background:transparent;border:1px solid transparent;border-radius:6px;padding:10px 16px;font:500 14px/1.2 var(--sans);color:var(--ink-2);cursor:pointer;white-space:nowrap;transition:background-color .15s ease,color .15s ease}
+.tablist button:hover{color:var(--ink);background:color-mix(in srgb,var(--surface) 55%,transparent)}
+.tablist button[aria-selected="true"]{color:var(--ink);font-weight:700;background:var(--surface);border-color:var(--line-2);box-shadow:inset 0 -3px 0 var(--fiber),0 1px 2px rgba(0,0,0,.06)}
+.tablist button:focus-visible{outline:2px solid var(--fiber);outline-offset:1px}
+@media (max-width:640px){.tablist{width:auto}.tablist button{padding:9px 12px;font-size:13.5px}}
+/* tab groups: one labeled segmented cluster per service area; clusters wrap as whole units, never scroll */
+.tabgroups{display:flex;flex-wrap:wrap;gap:14px 18px;align-items:flex-end;min-width:0;max-width:100%}
+.tgroup{display:flex;flex-direction:column;gap:6px;min-width:0;max-width:100%}
+.tgroup-label{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);padding-left:2px;white-space:nowrap}
+.tgroup-label::before{content:"";width:14px;height:6px;border-radius:1px;background:var(--g,var(--line-2))}
+/* area colors: same pastel tokens as the landing panel */
+.tgroup[data-area="app"],.areatabs .at[data-area="app"]{--g:#C7B8EA}.tgroup[data-area="edge"],.areatabs .at[data-area="edge"]{--g:#A6D4EC}.tgroup[data-area="hybrid"],.areatabs .at[data-area="hybrid"]{--g:#A9DEC4}.tgroup[data-area="fnd"],.areatabs .at[data-area="fnd"]{--g:#F6CDA2}.tgroup[data-area="sec"],.areatabs .at[data-area="sec"]{--g:#F2A7AE}.tgroup[data-area="obs"],.areatabs .at[data-area="obs"]{--g:#F1DE94}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .tgroup[data-area="app"],:root:not([data-theme="light"]) .areatabs .at[data-area="app"]{--g:#9D88CF}:root:not([data-theme="light"]) .tgroup[data-area="edge"],:root:not([data-theme="light"]) .areatabs .at[data-area="edge"]{--g:#6FA9C8}:root:not([data-theme="light"]) .tgroup[data-area="hybrid"],:root:not([data-theme="light"]) .areatabs .at[data-area="hybrid"]{--g:#6FB596}:root:not([data-theme="light"]) .tgroup[data-area="fnd"],:root:not([data-theme="light"]) .areatabs .at[data-area="fnd"]{--g:#CF9C67}:root:not([data-theme="light"]) .tgroup[data-area="sec"],:root:not([data-theme="light"]) .areatabs .at[data-area="sec"]{--g:#C9727C}:root:not([data-theme="light"]) .tgroup[data-area="obs"],:root:not([data-theme="light"]) .areatabs .at[data-area="obs"]{--g:#C5B060}}
+:root[data-theme="dark"] .tgroup[data-area="app"],:root[data-theme="dark"] .areatabs .at[data-area="app"]{--g:#9D88CF}:root[data-theme="dark"] .tgroup[data-area="edge"],:root[data-theme="dark"] .areatabs .at[data-area="edge"]{--g:#6FA9C8}:root[data-theme="dark"] .tgroup[data-area="hybrid"],:root[data-theme="dark"] .areatabs .at[data-area="hybrid"]{--g:#6FB596}:root[data-theme="dark"] .tgroup[data-area="fnd"],:root[data-theme="dark"] .areatabs .at[data-area="fnd"]{--g:#CF9C67}:root[data-theme="dark"] .tgroup[data-area="sec"],:root[data-theme="dark"] .areatabs .at[data-area="sec"]{--g:#C9727C}:root[data-theme="dark"] .tgroup[data-area="obs"],:root[data-theme="dark"] .areatabs .at[data-area="obs"]{--g:#C5B060}
+@media (max-width:640px){.tabgroups{flex-direction:column;align-items:stretch;gap:12px;width:100%}}
+/* two-level tabs: area segmented bar, then underline sub-tabs of the chosen area only */
+.areatabs .at{display:inline-flex;align-items:center;gap:8px}
+.areatabs .at::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--g,var(--line-2))}
+.areatabs .at[aria-selected="true"]{box-shadow:inset 0 -3px 0 var(--g),0 1px 2px rgba(0,0,0,.06)}
+.toolbar .areatabs{flex:0 0 auto}
+.toolbar .tabgroups{display:block;flex:1 0 100%;margin-top:10px}
+#prices .toolbar{flex-wrap:wrap}
+.tgroup{display:block}.tgroup[hidden]{display:none}
+.tgroup-label{display:none}
+.subtabs{display:flex;flex-wrap:wrap;gap:2px 6px;border-bottom:1px solid var(--line-2);padding:0 4px}
+.subtabs button{appearance:none;background:transparent;border:0;border-bottom:3px solid transparent;margin-bottom:-1px;padding:11px 12px 9px;font:500 14px/1.2 var(--sans);color:var(--ink-2);cursor:pointer;white-space:nowrap}
+.subtabs button:hover{color:var(--ink)}
+.subtabs button[aria-selected="true"]{color:var(--ink);font-weight:700;border-bottom-color:var(--g,var(--fiber))}
+.subtabs button:focus-visible{outline:2px solid var(--fiber);outline-offset:-2px;border-radius:4px}
+.subtabs{overflow:visible}
+/* compact two rows: area pills in one row, service underline tabs below */
+.areatabs.tablist{display:flex;flex-wrap:wrap;gap:6px;padding:0;background:none;border:0;border-radius:0;width:auto}
+.areatabs .at{padding:7px 13px 7px 11px;border:1px solid var(--line);border-radius:999px;background:var(--surface);font-size:13.5px;font-weight:500;color:var(--ink-2)}
+.areatabs .at:hover{border-color:var(--g);color:var(--ink);background:var(--surface)}
+.areatabs .at[aria-selected="true"]{background:color-mix(in srgb,var(--g) 32%,var(--surface));border-color:var(--g);color:var(--ink);font-weight:700;box-shadow:none}
+.areatabs .at::before{width:8px;height:8px}
+.toolbar .tabgroups{margin-top:8px}
+.subtabs button{padding:9px 12px 8px}
+@media (max-width:640px){.areatabs .at{padding:6px 10px 6px 9px;font-size:12.5px}}
+.srcbadge{display:inline-block;margin-left:6px;padding:1px 7px;border:1px solid var(--line-2);border-radius:3px;font-family:var(--mono);font-size:11px;color:var(--fiber-ink);background:var(--fiber-soft);white-space:nowrap}
+.panel td.t{font-family:var(--mono);font-size:13px}
+.panel td .sub{display:block;color:var(--ink-3);font-size:12px}
+.search{display:flex;align-items:center;gap:8px;margin-top:20px}
+.search label{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.search input,.sel select{height:40px;min-width:0;width:260px;max-width:100%;padding:0 12px;border:1px solid var(--line-2);border-radius:4px;background:var(--surface);color:var(--ink);font:400 15px var(--sans)}
+.search input:focus-visible,.sel select:focus-visible{outline:2px solid var(--fiber-ink);outline-offset:1px}
+.search .count{font-size:13px;color:var(--ink-3)}
+.panel{padding-top:36px;min-width:0}
+.panel-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 20px;align-items:flex-end}
+.panel-head .src{font-family:var(--mono);font-size:12px;color:var(--ink-3)}
+.panel h3{margin-top:44px}
+.panel h3 + .lede{margin-top:6px;font-size:15px}
+.dims{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:24px}
+.dims div{background:var(--surface);padding:16px 18px;min-width:0}
+.dims .k{font-family:var(--mono);font-size:11.5px;color:var(--fiber-ink);letter-spacing:.06em;text-transform:uppercase}
+.dims p{font-size:14.5px;color:var(--ink-2);margin-top:4px}
+.panel table{font-size:14px}
+.panel th,.panel td{padding:9px 14px;white-space:nowrap}
+.panel thead th{font-size:11px;vertical-align:bottom;white-space:normal;min-width:84px}
+.panel thead th.l{min-width:0}
+.panel td.n,.panel thead th.n{text-align:left;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.panel td.n{font-size:13.5px}
+.panel table.mx th,.panel table.mx td{padding:8px 9px}
+.panel table.mx thead th{min-width:0}
+.panel table.mx td.n{font-size:13px}
+.panel td.m{color:var(--ink-2)}
+.panel td.na{color:var(--ink-3)}
+.panel td.hi{background:var(--fiber-soft)}
+.panel tbody th{font-weight:500;background:var(--surface)}
+.panel tbody th .c{display:block;font-family:var(--mono);font-size:11px;color:var(--ink-3);font-weight:400;line-height:1.3}
+.panel tbody tr:hover td,.panel tbody tr:hover th{background:var(--sunken)}
+.panel tr.geo th{background:var(--sunken);font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);padding-block:6px}
+.panel .cap{margin-top:20px;padding:11px 14px;font-size:13px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-bottom:0;border-radius:6px 6px 0 0}
+.panel .cap b{color:var(--ink);font-weight:700}
+.panel .tbl-wrap.has-cap{margin-top:0;border-radius:0 0 6px 6px}
+details.more .cap{margin:0;border:0;border-bottom:1px solid var(--line);border-radius:0}
+/* sticky first column inside the horizontal scroller */
+.tbl-wrap thead th:first-child,.tbl-wrap tbody th{position:sticky;left:0;z-index:1}
+.tbl-wrap thead th:first-child{background:var(--sunken)}
+.tbl-wrap tbody th{box-shadow:1px 0 0 var(--line)}
+.notes{margin:14px 0 0;padding-left:18px;font-size:13.5px;color:var(--ink-2)}
+.notes li{margin-top:4px}
+.notes code,.lede code,.dims code{font-family:var(--mono);font-size:12.5px;background:var(--sunken);border:1px solid var(--line);padding:1px 5px;border-radius:3px;color:var(--ink)}
+.official{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+.sel{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:16px}
+.sel label{font-size:14px;color:var(--ink-2)}
+details.more{margin-top:16px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+details.more>summary{cursor:pointer;padding:12px 16px;font-size:14px;font-weight:500;color:var(--ink)}
+details.more>summary:focus-visible{outline-offset:-2px}
+details.more[open]>summary{border-bottom:1px solid var(--line)}
+details.more .tbl-wrap{margin:0;border:0;border-radius:0}
+details.more .inner{padding:4px 16px 14px;font-size:13.5px;color:var(--ink-2)}
+details.more .inner dt{font-family:var(--mono);font-size:12px;color:var(--ink);margin-top:10px}
+details.more .inner dd{margin:2px 0 0}
+.status{margin-top:28px;padding:22px;border:1px dashed var(--line-2);border-radius:6px;background:var(--surface);color:var(--ink-2)}
+.status b{color:var(--ink)}
+.status code{font-family:var(--mono);font-size:13px}
+.empty-row td{color:var(--ink-3);text-align:center!important}
+@media (max-width:640px){
+  .hero{padding-block:40px 32px}
+  .hero .lede{font-size:16px}
+  .stamp .big{font-size:32px}
+  .search{flex-wrap:wrap}
+  .search input,.sel select{width:100%}
+  .panel th,.panel td{padding:8px 10px}
+  .stamp dl{font-size:12px;gap:4px 10px}
+}
+@media print{.toolbar,.search,.official{display:none}}
+html.presenting #prices .tablist{position:static}
+.panel thead th .gk{display:block;font-family:var(--sans);font-size:13px;font-weight:700;letter-spacing:0;text-transform:none;color:var(--ink);white-space:nowrap}
+.panel thead th .gs{display:block;font-family:var(--sans);font-size:11px;font-weight:400;letter-spacing:0;text-transform:none;color:var(--ink-3);line-height:1.35;white-space:normal;min-width:7em;max-width:11em}
+.panel thead th .c{display:block;font-family:var(--mono);font-size:10.5px;color:var(--ink-3);font-weight:400}
+.panel thead th .corner{display:flex;flex-direction:column;gap:2px;font-family:var(--mono);font-size:11px;white-space:nowrap}
+.panel thead th .corner span:last-child{color:var(--fiber-ink)}
+.panel thead th{vertical-align:bottom}
+</style>
+<link rel="stylesheet" href="../../assets/site.css?v=17">
+<script src="../../assets/site.js?v=17"></script>
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<nav aria-label="Main menu">
+  <div class="wrap">
+    <a class="brand" href="../">AWS <span>Networking Pricing</span></a>
+    <div class="navlinks">
+      <a href="../">AWS Networking Services Portfolio</a>
+      <a class="btn btn-primary" href="#prices">View pricing</a>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+  <header class="hero" id="top">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">AWS Price List API · On-Demand · USD</p>
+          <h1>AWS Networking Services <em>Pricing</em></h1>
+          <p class="lede">On-Demand rates from the AWS Price List API (bulk), organized by service. All amounts are in US dollars (USD) and exclude tax. Use these tables to compare Regions and estimate monthly costs; for quotes, check the <a href="https://calculator.aws/" target="_blank" rel="noopener">AWS Pricing Calculator</a>.</p>
+          <div class="facts">
+            <span>Monthly = hourly × <b>730</b> hours</span>
+            <span><b id="f-regions">–</b> Regions · commercial only</span>
+            <span>Excludes China · GovCloud</span>
+          </div>
+        </div>
+        <aside class="stamp" aria-labelledby="stamp-h">
+          <div class="stamp-head"><span id="stamp-h">Price List published</span><span>UTC</span></div>
+          <p class="big" id="stamp-date">Loading…</p>
+          <dl id="stamp-offers"></dl>
+          <p class="stamp-foot" id="stamp-foot"></p>
+        </aside>
+      </div>
+    </div>
+  </header>
+
+  <section id="prices" aria-label="Pricing by service">
+    <div class="wrap">
+      <div class="toolbar">
+        <!-- one tablist per service area; arrow keys move across all tabs in order (see script) -->
+        <div class="areatabs tablist" role="tablist" aria-label="Service areas" id="areatabs">
+          <button role="tab" class="at" data-area="app" id="at-app" aria-controls="sub-app" aria-selected="true" tabindex="0">Application Networking</button>
+          <button role="tab" class="at" data-area="edge" id="at-edge" aria-controls="sub-edge" aria-selected="false" tabindex="-1">Edge Networking</button>
+          <button role="tab" class="at" data-area="hybrid" id="at-hybrid" aria-controls="sub-hybrid" aria-selected="false" tabindex="-1">Hybrid Networking</button>
+          <button role="tab" class="at" data-area="fnd" id="at-fnd" aria-controls="sub-fnd" aria-selected="false" tabindex="-1">Foundation</button>
+          <button role="tab" class="at" data-area="sec" id="at-sec" aria-controls="sub-sec" aria-selected="false" tabindex="-1">Network Security</button>
+          <button role="tab" class="at" data-area="obs" id="at-obs" aria-controls="sub-obs" aria-selected="false" tabindex="-1">Network Observability</button>
+        </div>
+        <div class="tabgroups" id="tabgroups">
+          <div class="tgroup" data-area="app" id="sub-app" role="tabpanel" aria-labelledby="at-app">
+            <span class="tgroup-label" aria-hidden="true">Application Networking</span>
+            <div class="subtabs" role="tablist" aria-label="Application Networking services">
+              <button role="tab" id="tab-elb" aria-controls="elb" aria-selected="true" tabindex="0">Elastic Load Balancing</button>
+              <button role="tab" id="tab-lattice" aria-controls="lattice" aria-selected="false" tabindex="-1">VPC Lattice</button>
+              <button role="tab" id="tab-apigw" aria-controls="apigw" aria-selected="false" tabindex="-1">API Gateway</button>
+            </div>
+          </div>
+          <div class="tgroup" data-area="edge" id="sub-edge" role="tabpanel" aria-labelledby="at-edge">
+            <span class="tgroup-label" aria-hidden="true">Edge Networking</span>
+            <div class="subtabs" role="tablist" aria-label="Edge Networking services">
+              <button role="tab" id="tab-cloudfront" aria-controls="cloudfront" aria-selected="false" tabindex="-1">CloudFront</button>
+              <button role="tab" id="tab-ga" aria-controls="ga" aria-selected="false" tabindex="-1">Global Accelerator</button>
+            </div>
+          </div>
+          <div class="tgroup" data-area="hybrid" id="sub-hybrid" role="tabpanel" aria-labelledby="at-hybrid">
+            <span class="tgroup-label" aria-hidden="true">Hybrid Networking</span>
+            <div class="subtabs" role="tablist" aria-label="Hybrid Networking services">
+              <button role="tab" id="tab-tgw" aria-controls="tgw" aria-selected="false" tabindex="-1">Transit Gateway</button>
+              <button role="tab" id="tab-cloudwan" aria-controls="cloudwan" aria-selected="false" tabindex="-1">Cloud WAN</button>
+              <button role="tab" id="tab-privatelink" aria-controls="privatelink" aria-selected="false" tabindex="-1">PrivateLink</button>
+              <button role="tab" id="tab-dx" aria-controls="dx" aria-selected="false" tabindex="-1">Direct Connect</button>
+              <button role="tab" id="tab-interconnect" aria-controls="interconnect" aria-selected="false" tabindex="-1">Interconnect</button>
+              <button role="tab" id="tab-s2svpn" aria-controls="s2svpn" aria-selected="false" tabindex="-1">Site-to-Site VPN</button>
+              <button role="tab" id="tab-clientvpn" aria-controls="clientvpn" aria-selected="false" tabindex="-1">Client VPN</button>
+            </div>
+          </div>
+          <div class="tgroup" data-area="fnd" id="sub-fnd" role="tabpanel" aria-labelledby="at-fnd">
+            <span class="tgroup-label" aria-hidden="true">Foundation</span>
+            <div class="subtabs" role="tablist" aria-label="Foundation services">
+              <button role="tab" id="tab-vpc" aria-controls="vpc" aria-selected="false" tabindex="-1">Amazon VPC</button>
+              <button role="tab" id="tab-route53" aria-controls="route53" aria-selected="false" tabindex="-1">Route 53</button>
+            </div>
+          </div>
+          <div class="tgroup" data-area="sec" id="sub-sec" role="tabpanel" aria-labelledby="at-sec">
+            <span class="tgroup-label" aria-hidden="true">Network Security</span>
+            <div class="subtabs" role="tablist" aria-label="Network Security services">
+              <button role="tab" id="tab-nfw" aria-controls="nfw" aria-selected="false" tabindex="-1">Network Firewall</button>
+              <button role="tab" id="tab-waf" aria-controls="waf" aria-selected="false" tabindex="-1">AWS WAF</button>
+              <button role="tab" id="tab-shield" aria-controls="shield" aria-selected="false" tabindex="-1">AWS Shield</button>
+              <button role="tab" id="tab-fms" aria-controls="fms" aria-selected="false" tabindex="-1">Firewall Manager</button>
+            </div>
+          </div>
+          <div class="tgroup" data-area="obs" id="sub-obs" role="tabpanel" aria-labelledby="at-obs">
+            <span class="tgroup-label" aria-hidden="true">Network Observability</span>
+            <div class="subtabs" role="tablist" aria-label="Network Observability services">
+              <button role="tab" id="tab-flowlogs" aria-controls="flowlogs" aria-selected="false" tabindex="-1">VPC Flow Logs</button>
+              <button role="tab" id="tab-reachability" aria-controls="reachability" aria-selected="false" tabindex="-1">Reachability Analyzer</button>
+              <button role="tab" id="tab-netmgr" aria-controls="netmgr" aria-selected="false" tabindex="-1">Network Manager</button>
+              <button role="tab" id="tab-nfm" aria-controls="nfm" aria-selected="false" tabindex="-1">Network Flow Monitor</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="search">
+        <label for="rq">Search Regions</label>
+        <input id="rq" type="search" placeholder="e.g. Seoul, Tokyo, us-east-1" autocomplete="off">
+        <span class="count" id="rq-count" aria-live="polite"></span>
+      </div>
+
+      <div id="status" class="status" role="status">Loading pricing data (<code>data.json</code>)…</div>
+
+      <!-- Elastic Load Balancing -->
+      <div class="panel" role="tabpanel" id="elb" aria-labelledby="tab-elb">
+        <div class="panel-head"><h2>Elastic Load Balancing</h2><span class="src" data-src="AWSELB"></span></div>
+        <p class="lede">You pay for each hour a load balancer runs (partial hours count as a full hour) and for the capacity units (LCUs) it uses. Each hour, LCUs are charged on a single dimension: the one with the highest usage. Only Classic Load Balancer charges per GB of data processed instead of LCUs.</p>
+        <div class="dims">
+          <div><span class="k">ALB · LCU</span><p>The highest of four dimensions: new connections, active connections, processed bytes and rule evaluations.</p></div>
+          <div><span class="k">NLB · NLCU</span><p>Three dimensions: new connections/flows, active connections/flows and processed bytes. TCP, UDP and TLS traffic are calculated separately and added together.</p></div>
+          <div><span class="k">GWLB · GLCU</span><p>Three dimensions: new connections/flows, active connections/flows and processed bytes. The hourly charge applies per AZ.</p></div>
+          <div><span class="k">LCU Reservation</span><p>Reserved LCUs are billed hourly whether used or not; usage above the reservation is billed at the regular LCU rate.</p></div>
+        </div>
+        <div data-render="elb"></div>
+        <div class="official">
+          <a class="btn btn-ghost" href="https://aws.amazon.com/elasticloadbalancing/pricing/" target="_blank" rel="noopener">Official pricing page</a>
+        </div>
+      </div>
+
+      <!-- VPC Lattice -->
+      <div class="panel" role="tabpanel" id="lattice" aria-labelledby="tab-lattice" hidden>
+        <div class="panel-head"><h2>VPC Lattice</h2><span class="src" data-src="AmazonVPC"></span></div>
+        <p class="lede">A VPC Lattice service is billed on three components: an hourly charge per service, a per-GB data processing charge, and a charge for the number of requests (HTTP/HTTPS listeners) or TCP connections (TLS listeners). VPC resources (resource configurations) attached to a service network have their own hourly per-resource charge and per-GB processing charge.</p>
+        <div class="dims">
+          <div><span class="k">Service hour</span><p>Charged for every hour (including partial hours) a VPC Lattice service is provisioned.</p></div>
+          <div><span class="k">Data processing</span><p>Per GB of requests received and responses sent by the service combined. No separate cross-AZ data transfer charge applies.</p></div>
+          <div><span class="k">Requests · Connections</span><p>The first 300,000 per service per hour are free (Always Free); only usage above that is charged per million.</p></div>
+          <div><span class="k">VPC resource</span><p>Consumers pay an hourly charge per resource added to a service network plus tiered per-GB processing; providers pay per GB processed by the Resource Gateway.</p></div>
+        </div>
+        <div data-render="lattice"></div>
+        <div class="official">
+          <a class="btn btn-ghost" href="https://aws.amazon.com/vpc/lattice/pricing/" target="_blank" rel="noopener">Official pricing page</a>
+        </div>
+      </div>
+
+      <!-- API Gateway -->
+      <div class="panel" role="tabpanel" id="apigw" aria-labelledby="tab-apigw" hidden>
+        <div class="panel-head"><h2>API Gateway</h2><span class="src" data-src="AmazonApiGateway"></span></div>
+        <p class="lede">Each API type is billed per request. REST APIs and HTTP APIs are charged on requests received; WebSocket APIs on messages sent and received plus connection minutes. Rates are tiered and drop as monthly usage grows. Enabling caching on a REST API adds an hourly charge by cache size.</p>
+        <div class="dims"><div><span class="k">REST API</span><p>Per million API calls received. Rates change at 333 million, 1 billion and 20 billion calls per month.</p></div><div><span class="k">HTTP API</span><p>Per million requests, metered in 512 KB increments. The rate drops above 300 million requests per month.</p></div><div><span class="k">WebSocket</span><p>Messages (per million, in 32 KB increments) and connection minutes (per million) are charged separately.</p></div><div><span class="k">Cache</span><p>Hourly charge by REST API stage cache size (0.5–237 GB).</p></div></div>
+        <div data-render="apigw"></div>
+        <div class="official">
+          <a class="btn btn-ghost" href="https://aws.amazon.com/api-gateway/pricing/" target="_blank" rel="noopener">Official pricing page</a>
+        </div>
+      </div>
+
+      <!-- CloudFront -->
+      <div class="panel" role="tabpanel" id="cloudfront" aria-labelledby="tab-cloudfront" hidden>
+        <div class="panel-head"><h2>CloudFront</h2><span class="src" data-src="AmazonCloudFront"></span><span class="src" data-src="CloudFrontPlans"></span></div>
+        <p class="lede">CloudFront charges for data transferred out from edge locations to viewers (DTO) and for the number of HTTP/HTTPS requests. Rates depend on the geographic group of the edge location that served the request and on monthly volume, not on the Region. Flat-rate plans with a fixed monthly price regardless of usage are also available.</p>
+        <div class="dims"><div><span class="k">Data transfer out</span><p>Per GB, edge → internet. Seven tiers per geographic group; the first 1 TB per month across all groups is free.</p></div><div><span class="k">Requests</span><p>HTTP and HTTPS requests are counted separately per 10,000. The first 10 million per month are free.</p></div><div><span class="k">Origin</span><p>Edge → origin transfer (uploads such as POST and PUT) has its own per-GB rate. Transfer from AWS origins to the edge is free.</p></div><div><span class="k">Flat-rate plan</span><p>A fixed monthly price per distribution that bundles CDN, WAF, DDoS protection, Route 53 DNS and more, with no overage charges.</p></div></div>
+        <div data-render="cloudfront"></div>
+        <div class="official">
+          <a class="btn btn-ghost" href="https://aws.amazon.com/cloudfront/pricing/pay-as-you-go/" target="_blank" rel="noopener">Official pricing page (pay-as-you-go)</a>
+          <a class="btn btn-ghost" href="https://aws.amazon.com/cloudfront/pricing/" target="_blank" rel="noopener">Official pricing page (flat-rate)</a>
+        </div>
+      </div>
+
+      <!-- Global Accelerator -->
+      <div class="panel" role="tabpanel" id="ga" aria-labelledby="tab-ga" hidden>
+        <div class="panel-head"><h2>Global Accelerator</h2><span class="src" data-src="AWSGlobalAccelerator"></span></div>
+        <p class="lede">Each accelerator incurs a fixed hourly fee, and traffic incurs a per-GB DT-Premium on top of standard data transfer rates. DT-Premium is charged only in the direction with more traffic each hour (the dominant direction).</p>
+        <div class="dims">
+          <div><span class="k">Fixed fee</span><p>Charged for every hour (including partial hours) an accelerator exists, regardless of Region.</p></div>
+          <div><span class="k">DT-Premium</span><p>Determined by the combination of the Region group hosting the endpoint and the edge location group the client connects to.</p></div>
+        </div>
+        <div data-render="ga"></div>
+        <div class="official">
+          <a class="btn btn-ghost" href="https://aws.amazon.com/global-accelerator/pricing/" target="_blank" rel="noopener">Official pricing page</a>
+        </div>
+      </div>
+
+      <!-- Transit Gateway -->
+      <div class="panel" role="tabpanel" id="tgw" aria-labelledby="tab-tgw" hidden>
+        <div class="panel-head"><h2>Transit Gateway</h2><span class="src" data-src="AmazonVPC"></span></div>
+        <p class="lede">An hourly charge per attachment plus a per-GB data processing charge for traffic sent to the transit gateway. The transit gateway itself has no charge; inter-Region traffic over a peering attachment also incurs EC2 inter-Region data transfer charges.</p>
+        <div class="dims">
+          <div><span class="k">Attachment hour</span><p>VPC, VPN, Direct Connect gateway, Connect and peering attachments all share the same rate (exceptions in the notes).</p></div>
+          <div><span class="k">Data processing</span><p>Based on traffic entering the transit gateway from an attachment. Traffic arriving over a peering attachment has no processing charge.</p></div>
+          <div><span class="k">Multicast</span><p>Data processing is charged for every GB received by multicast receiver instances.</p></div>
+        </div>
+        <div data-render="tgw"></div>
+        <div class="official">
+          <a class="btn btn-ghost" href="https://aws.amazon.com/transit-gateway/pricing/" target="_blank" rel="noopener">Official pricing page</a>
+        </div>
+      </div>
+
+      <!-- Cloud WAN -->
+      <div class="panel" role="tabpanel" id="cloudwan" aria-labelledby="tab-cloudwan" hidden>
+        <div class="panel-head"><h2>Cloud WAN</h2><span class="src" data-src="AWSCloudWAN"></span></div>
+        <p class="lede">Made up of an hourly Core Network Edge (CNE) charge, hourly attachment and peering charges, and a per-GB data processing charge. Standard data transfer charges for inter-Region, internet and Direct Connect segments apply separately.</p>
+        <div class="dims">
+          <div><span class="k">Core Network Edge</span><p>Charged hourly for each Region (edge location) included in the core network policy.</p></div>
+          <div><span class="k">Attachment · Peering</span><p>Charged hourly per VPC, Connect, Site-to-Site VPN and Transit Gateway peering attachment.</p></div>
+          <div><span class="k">Data processing</span><p>Charged per GB of traffic sent from VPC and VPN attachments into Cloud WAN.</p></div>
+        </div>
+        <div data-render="cloudwan"></div>
+        <div class="official">
+          <a class="btn btn-ghost" href="https://aws.amazon.com/cloud-wan/pricing/" target="_blank" rel="noopener">Official pricing page</a>
+        </div>
+      </div>
+
+      <!-- PrivateLink -->
+      <div class="panel" role="tabpanel" id="privatelink" aria-labelledby="tab-privatelink" hidden>
+        <div class="panel-head"><h2>PrivateLink</h2><span class="src" data-src="AmazonVPC"></span></div>
+        <p class="lede">An interface endpoint is charged hourly for each AZ it is deployed in, and processed data is charged per GB in tiers based on monthly volume per Region. Gateway Load Balancer endpoints have their own rates.</p>
+        <div class="dims">
+          <div><span class="k">Interface endpoint</span><p>Charged hourly per endpoint × number of AZs. Deploying in 3 AZs costs three times as much.</p></div>
+          <div><span class="k">Data processing</span><p>Tiers apply to the combined volume of all interface endpoints in the Region.</p></div>
+          <div><span class="k">GWLB endpoint</span><p>Per endpoint hour + per GB processed. The Gateway Load Balancer behind it is billed separately.</p></div>
+        </div>
+        <div data-render="privatelink"></div>
+        <div class="official">
+          <a class="btn btn-ghost" href="https://aws.amazon.com/privatelink/pricing/" target="_blank" rel="noopener">Official pricing page</a>
+        </div>
+      </div>
+
+      <!-- Direct Connect -->
+      <div class="panel" role="tabpanel" id="dx" aria-labelledby="tab-dx" hidden>
+        <div class="panel-head"><h2>Direct Connect</h2><span class="src" data-src="AWSDirectConnect"></span></div>
+        <p class="lede">There are two charges: port hours and data transfer out (DTO). Port hours are billed while the connection is available, and only locations in Japan have different rates. DTO applies only to traffic leaving an AWS Region toward a Direct Connect location; inbound traffic is free.</p>
+        <div class="dims">
+          <div><span class="k">Port hour</span><p>Dedicated connections are provisioned by AWS, Hosted connections by a Direct Connect Partner. Partial hours count as a full hour.</p></div>
+          <div><span class="k">Data transfer out</span><p>The per-GB rate is set by the combination of the source Region and the geographic group of the DX location. Private VIF and public VIF rates are the same.</p></div>
+          <div><span class="k">SiteLink</span><p>VIFs with SiteLink enabled add an hourly per-VIF charge and a per-GB charge for transfer between DX locations.</p></div>
+        </div>
+        <div data-render="dx"></div>
+        <div class="official">
+          <a class="btn btn-ghost" href="https://aws.amazon.com/directconnect/pricing/" target="_blank" rel="noopener">Official pricing page</a>
+        </div>
+      </div>
+
+      <!-- AWS Interconnect -->
+      <div class="panel" role="tabpanel" id="interconnect" aria-labelledby="tab-interconnect" hidden>
+        <div class="panel-head"><h2>AWS Interconnect</h2><span class="src" data-src="AWSInterconnect"></span></div>
+        <p class="lede">Each Interconnect connection is billed hourly based on the bandwidth you choose and a pricing tier (1–5) that is determined automatically. There is no per-GB data transfer charge. For multicloud, the other cloud (Google Cloud, OCI) bills its side separately.</p>
+        <div class="dims"><div><span class="k">Tier</span><p>For multicloud, set by the AWS Region the traffic originates from and the interconnect's local Region; for last mile, by the distance between the Interconnect metro and the farthest AWS Region. Only the single highest tier applies.</p></div><div><span class="k">Hourly</span><p>Billed in 1-hour increments (rounded up) from when the connection is created until it is deleted.</p></div><div><span class="k">With Cloud WAN</span><p>Attaching a Direct Connect gateway to a Cloud WAN core network raises the tier based on the farthest CNE.</p></div></div>
+        <div data-render="interconnect"></div>
+        <div class="official">
+          <a class="btn btn-ghost" href="https://aws.amazon.com/interconnect/multicloud/pricing/" target="_blank" rel="noopener">Official pricing page (multicloud)</a>
+          <a class="btn btn-ghost" href="https://aws.amazon.com/interconnect/lastmile/pricing/" target="_blank" rel="noopener">Official pricing page (last mile)</a>
+        </div>
+      </div>
+
+      <!-- Site-to-Site VPN -->
+      <div class="panel" role="tabpanel" id="s2svpn" aria-labelledby="tab-s2svpn" hidden>
+        <div class="panel-head"><h2>Site-to-Site VPN</h2><span class="src" data-src="AmazonVPC"></span></div>
+        <p class="lede">Site-to-Site VPN is billed primarily per VPN connection hour, and traffic leaving through the VPN follows EC2 data transfer rates. Accelerated VPN adds the fixed fee of two Global Accelerators per connection plus DT-Premium.</p>
+        <div class="dims"><div><span class="k">VPN connection</span><p>Billed per connection, each with two tunnels. Standard (up to 1.25 Gbps per tunnel) and Large (5 Gbps per tunnel) have different rates.</p></div><div><span class="k">Accelerated VPN</span><p>VPN connection + Global Accelerator fixed fee × 2 + DT-Premium (per GB). Non-accelerated VPNs have no Global Accelerator charges.</p></div><div><span class="k">VPN Concentrator</span><p>Attach multiple sites to one Concentrator; Concentrator hours and site hours are billed separately.</p></div></div>
+        <div data-render="s2svpn"></div>
+        <div class="official">
+          <a class="btn btn-ghost" href="https://aws.amazon.com/vpn/pricing/" target="_blank" rel="noopener">Official pricing page</a>
+        </div>
+      </div>
+
+      <!-- Client VPN -->
+      <div class="panel" role="tabpanel" id="clientvpn" aria-labelledby="tab-clientvpn" hidden>
+        <div class="panel-head"><h2>Client VPN</h2><span class="src" data-src="AmazonVPC"></span></div>
+        <p class="lede">Client VPN charges for subnet association hours on the endpoint plus active client connection hours. Traffic leaving through the VPN incurs EC2 data transfer charges.</p>
+        <div class="dims"><div><span class="k">Endpoint association</span><p>Hourly charge per subnet associated with the Client VPN endpoint.</p></div><div><span class="k">Connection</span><p>Hourly charge per concurrently connected client.</p></div></div>
+        <div data-render="clientvpn"></div>
+        <div class="official">
+          <a class="btn btn-ghost" href="https://aws.amazon.com/vpn/pricing/" target="_blank" rel="noopener">Official pricing page</a>
+        </div>
+      </div>
+
+      <!-- Amazon VPC -->
+      <div class="panel" role="tabpanel" id="vpc" aria-labelledby="tab-vpc" hidden>
+        <div class="panel-head"><h2>Amazon VPC</h2><span class="src" data-src="AmazonVPC"></span><span class="src" data-src="AWSDataTransfer"></span><span class="src" data-src="NATGatewayPage"></span></div>
+        <p class="lede">The VPC itself is free; charges apply to features used inside it, such as NAT gateways, public IPv4 addresses, IPAM, Traffic Mirroring and Encryption Controls, and to data transfer. Inter-Region, cross-AZ and internet data transfer rates are also collected in this tab.</p>
+        <div class="dims"><div><span class="k">NAT gateway</span><p>Billed for the hours the gateway exists and the GB it processes. A regional NAT gateway is charged hourly for each active AZ.</p></div><div><span class="k">Public IPv4</span><p>Hourly charge per public IPv4 address, whether in use or idle. Elastic IPs are charged the same way.</p></div><div><span class="k">IPAM</span><p>The Free Tier is free; the Advanced Tier is charged hourly per active IP address managed by IPAM.</p></div><div><span class="k">Data transfer</span><p>Inter-Region transfer is paid by the source Region; cross-AZ transfer is charged per GB in each direction. Data transfer into AWS (DTI) is free.</p></div></div>
+        <div data-render="vpc"></div>
+        <div class="official">
+          <a class="btn btn-ghost" href="https://aws.amazon.com/vpc/pricing/" target="_blank" rel="noopener">Official pricing page (VPC)</a>
+          <a class="btn btn-ghost" href="https://aws.amazon.com/ec2/pricing/on-demand/#Data_Transfer" target="_blank" rel="noopener">Official pricing page (data transfer)</a>
+        </div>
+      </div>
+
+      <!-- Route 53 -->
+      <div class="panel" role="tabpanel" id="route53" aria-labelledby="tab-route53" hidden>
+        <div class="panel-head"><h2>Route 53</h2><span class="src" data-src="AmazonRoute53"></span></div>
+        <p class="lede">Route 53 is billed primarily on monthly hosted zone charges, the number of DNS queries and the number of health checks. VPC-side features (Resolver endpoints, Resolver DNS Firewall and Profiles) are priced per Region. Domain registration prices vary by TLD; see the list on the official pricing page.</p>
+        <div class="dims"><div><span class="k">Hosted zone</span><p>Monthly charge per zone (not prorated). The rate drops after the first 25 zones. Zones with more than 10,000 records incur a monthly charge per additional record.</p></div><div><span class="k">Queries</span><p>Per million, by routing policy. Above 1 billion per month the rate is halved. Queries to alias records that point to AWS resources are free.</p></div><div><span class="k">Health check</span><p>AWS endpoints and other endpoints have different rates; options such as HTTPS and string matching cost extra per feature.</p></div><div><span class="k">Resolver</span><p>An hourly charge per endpoint ENI plus a charge per million queries through the endpoint. Queries resolved directly within the VPC are free.</p></div></div>
+        <div data-render="route53"></div>
+        <div class="official">
+          <a class="btn btn-ghost" href="https://aws.amazon.com/route53/pricing/" target="_blank" rel="noopener">Official pricing page</a>
+        </div>
+      </div>
+
+      <!-- Network Firewall -->
+      <div class="panel" role="tabpanel" id="nfw" aria-labelledby="tab-nfw" hidden>
+        <div class="panel-head"><h2>Network Firewall</h2><span class="src" data-src="AWSNetworkFirewall"></span></div>
+        <p class="lede">You pay an hourly charge for each AZ with a firewall endpoint and a per-GB charge for traffic processed by the endpoint. Using TLS inspection adds an hourly Advanced Inspection charge, and enabling the active threat defense managed rule group adds a per-GB charge.</p>
+        <div class="dims"><div><span class="k">Endpoint</span><p>Hourly charge per Region × AZ. Secondary endpoints that attach the same firewall to another VPC have a lower rate.</p></div><div><span class="k">Traffic processing</span><p>Per GB of traffic through the endpoint, regardless of source or destination.</p></div><div><span class="k">Advanced Inspection</span><p>An additional hourly charge per AZ while TLS inspection is in use. There is no separate per-GB charge.</p></div><div><span class="k">NAT gateway waiver</span><p>For a NAT gateway on the same path, NAT gateway hourly and per-GB charges are waived 1:1 against Network Firewall endpoint hours and GB.</p></div></div>
+        <div data-render="nfw"></div>
+        <div class="official">
+          <a class="btn btn-ghost" href="https://aws.amazon.com/network-firewall/pricing/" target="_blank" rel="noopener">Official pricing page</a>
+        </div>
+      </div>
+
+      <!-- AWS WAF -->
+      <div class="panel" role="tabpanel" id="waf" aria-labelledby="tab-waf" hidden>
+        <div class="panel-head"><h2>AWS WAF</h2><span class="src" data-src="awswaf"></span></div>
+        <p class="lede">You pay a monthly charge (prorated hourly) per web ACL and per rule (rule or rule group), plus a charge per million requests inspected. AWS Managed Rules features such as Bot Control, Fraud Control and Anti-DDoS add their own monthly subscription and request charges.</p>
+        <div class="dims"><div><span class="k">Web ACL · Rule</span><p>A monthly charge for each web ACL and each rule or rule group. In rule groups you create, each rule inside is also counted.</p></div><div><span class="k">Requests</span><p>Per million requests inspected by the web ACL. The rate rises above the default 1,500 WCUs or when you raise the body inspection limit.</p></div><div><span class="k">Managed features</span><p>Bot Control, Fraud Control and Anti-DDoS have a monthly subscription per web ACL plus request charges.</p></div><div><span class="k">CAPTCHA · Challenge</span><p>Charged per 10,000 CAPTCHA attempts and per million Challenge responses.</p></div></div>
+        <div data-render="waf"></div>
+        <div class="official">
+          <a class="btn btn-ghost" href="https://aws.amazon.com/waf/pricing/" target="_blank" rel="noopener">Official pricing page</a>
+        </div>
+      </div>
+
+      <!-- AWS Shield -->
+      <div class="panel" role="tabpanel" id="shield" aria-labelledby="tab-shield" hidden>
+        <div class="panel-head"><h2>AWS Shield</h2><span class="src" data-src="AWSShield"></span></div>
+        <p class="lede">Shield Standard applies to all AWS customers at no additional cost. Shield Advanced is a one-year subscription with a monthly fee per payer account, plus usage charges by resource type on data transferred out (DTO) from protected resources.</p>
+        <div class="dims"><div><span class="k">Shield Standard</span><p>Baseline L3/L4 DDoS protection. No sign-up or additional charge.</p></div><div><span class="k">Advanced subscription</span><p>A fixed monthly fee based on the organization's payer account; requires a one-year commitment.</p></div><div><span class="k">Advanced DTO</span><p>Per-GB usage charge on data out of CloudFront and Global Accelerator (global) and ELB and Elastic IP (per Region). Route 53 has no additional charge.</p></div><div><span class="k">WAF included</span><p>WAF web ACLs, rules and requests (default WCU) for protected resources are included in the subscription up to 50 billion requests per month.</p></div></div>
+        <div data-render="shield"></div>
+        <div class="official">
+          <a class="btn btn-ghost" href="https://aws.amazon.com/shield/pricing/" target="_blank" rel="noopener">Official pricing page</a>
+        </div>
+      </div>
+
+      <!-- Firewall Manager -->
+      <div class="panel" role="tabpanel" id="fms" aria-labelledby="tab-fms" hidden>
+        <div class="panel-head"><h2>Firewall Manager</h2><span class="src" data-src="AWSFMS"></span></div>
+        <p class="lede">Firewall Manager charges a monthly fee for each protection policy applied in each Region. WAF web ACLs, Network Firewall endpoints, DNS Firewall rule groups and AWS Config rules created by a policy are billed separately at each service's rates.</p>
+        <div class="dims"><div><span class="k">Policy</span><p>A monthly charge per policy × Region. In most Regions the rate is the same regardless of policy type.</p></div><div><span class="k">Shield Advanced customers</span><p>Firewall Manager policy charges are included for Shield Advanced subscribers (AWS Config rule charges are separate).</p></div><div><span class="k">Related charges</span><p>AWS Config rules and each service resource created by a policy are billed at that service's rates.</p></div></div>
+        <div data-render="fms"></div>
+        <div class="official">
+          <a class="btn btn-ghost" href="https://aws.amazon.com/firewall-manager/pricing/" target="_blank" rel="noopener">Official pricing page</a>
+        </div>
+      </div>
+
+      <!-- VPC Flow Logs -->
+      <div class="panel" role="tabpanel" id="flowlogs" aria-labelledby="tab-flowlogs" hidden>
+        <div class="panel-head"><h2>VPC Flow Logs</h2><span class="src" data-src="AmazonCloudWatch"></span></div>
+        <p class="lede">Creating or enabling a flow log is free; you pay CloudWatch vended logs charges per GB depending on where the logs are delivered (CloudWatch Logs, S3 or Data Firehose), in four tiers based on monthly volume. Storage and query charges of each destination service apply separately.</p>
+        <div class="dims"><div><span class="k">CloudWatch Logs</span><p>Standard and Infrequent Access log classes have different rates. This is the ingestion charge; storage is billed separately.</p></div><div><span class="k">Amazon S3</span><p>Per GB delivered to S3. Enabling Apache Parquet conversion adds a per-GB conversion charge.</p></div><div><span class="k">Data Firehose</span><p>Per GB delivered to Firehose. Firehose's own charges are separate.</p></div></div>
+        <div data-render="flowlogs"></div>
+        <div class="official">
+          <a class="btn btn-ghost" href="https://aws.amazon.com/cloudwatch/pricing/" target="_blank" rel="noopener">Official pricing page (CloudWatch · Vended logs)</a>
+        </div>
+      </div>
+
+      <!-- Reachability Analyzer -->
+      <div class="panel" role="tabpanel" id="reachability" aria-labelledby="tab-reachability" hidden>
+        <div class="panel-head"><h2>Reachability Analyzer</h2><span class="src" data-src="AmazonVPC"></span></div>
+        <p class="lede">Reachability Analyzer charges per path analysis; Network Access Analyzer charges per ENI evaluated in a network access analysis. Both analyze configuration without sending packets, so there are no data transfer charges.</p>
+        <div class="dims"><div><span class="k">Reachability Analyzer</span><p>Charged per path analysis between a source and destination. Re-analyzing the same path counts as another analysis.</p></div><div><span class="k">Network Access Analyzer</span><p>Charged per ENI evaluated in a Network Access Scope analysis.</p></div></div>
+        <div data-render="reachability"></div>
+        <div class="official">
+          <a class="btn btn-ghost" href="https://aws.amazon.com/vpc/pricing/" target="_blank" rel="noopener">Official pricing page (VPC · Network Analysis)</a>
+        </div>
+      </div>
+
+      <!-- Network Manager -->
+      <div class="panel" role="tabpanel" id="netmgr" aria-labelledby="tab-netmgr" hidden>
+        <div class="panel-head"><h2>Network Manager</h2><span class="src">Source: AWS documentation · Price List <a href="https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonCloudWatch/current/region_index.json" target="_blank" rel="noopener">AmazonCloudWatch</a></span></div>
+        <p class="lede">AWS Network Manager has no pricing page of its own. AWS documentation and blogs describe global networks, topology, Route Analyzer and Infrastructure Performance as available at no additional cost. Costs come from the CloudWatch metrics and event processing you integrate, and from underlying services such as Cloud WAN and Transit Gateway.</p>
+        <div class="dims"><div><span class="k">Free</span><p>Global networks, Transit Gateway registration, topology and maps, Route Analyzer, viewing Infrastructure Performance</p></div><div><span class="k">CloudWatch</span><p>Publishing Infrastructure Performance through a CloudWatch subscription incurs CloudWatch custom metric charges per metric.</p></div><div><span class="k">Underlying services</span><p>For Cloud WAN, Transit Gateway, VPN and Direct Connect pricing, see the respective tabs.</p></div></div>
+        <div data-render="netmgr"></div>
+        <div class="official">
+          <a class="btn btn-ghost" href="https://docs.aws.amazon.com/network-manager/latest/infrastructure-performance/what-is-nmip.html" target="_blank" rel="noopener">Infrastructure Performance documentation</a>
+          <a class="btn btn-ghost" href="https://aws.amazon.com/cloudwatch/pricing/" target="_blank" rel="noopener">Official pricing page (CloudWatch metrics)</a>
+        </div>
+      </div>
+
+      <!-- Network Flow Monitor -->
+      <div class="panel" role="tabpanel" id="nfm" aria-labelledby="tab-nfm" hidden>
+        <div class="panel-head"><h2>Network Flow Monitor</h2><span class="src" data-src="AmazonCloudWatch"></span></div>
+        <p class="lede">Network Flow Monitor consists of an hourly charge per resource monitored with the agent (EC2 instances, EKS nodes and so on) plus CloudWatch metric charges for metrics published by monitors. The companion Network Synthetic Monitor is charged hourly per monitored resource.</p>
+        <div class="dims"><div><span class="k">Monitored resource</span><p>Hourly charge per resource whose agent sends flow data. For the first 12 months, 7,300 resource-hours (10 resources) per month are free.</p></div><div><span class="k">Metrics</span><p>Metrics published by monitors are billed at the CloudWatch custom metric rate (per metric per month).</p></div><div><span class="k">Synthetic Monitor</span><p>Hourly charge per monitored resource for monitors that measure on-premises paths with probes.</p></div></div>
+        <div data-render="nfm"></div>
+        <div class="official">
+          <a class="btn btn-ghost" href="https://aws.amazon.com/cloudwatch/pricing/" target="_blank" rel="noopener">Official pricing page (CloudWatch · Network Monitoring)</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a href="../">← AWS Networking Services Portfolio</a>
+    <span>Reference pricing based on the AWS Price List API. Actual charges may vary with usage, discounts and taxes.</span>
+    <a href="https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/index.json" target="_blank" rel="noopener">Price List API index</a>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+  var H = 730;
+  // display names for Region codes: filled from data.json regions[].name (English AWS Region names) on load
+  var KO = {};
+  var GEO = { ap: 'Asia Pacific', me: 'Middle East', af: 'Africa', eu: 'Europe', ca: 'Canada', us: 'United States', la: 'Latin America' };
+  // visual order of the tab bar (areas: application, edge, hybrid, foundation, security, observability)
+  var TABS = ['elb', 'lattice', 'apigw', 'cloudfront', 'ga', 'tgw', 'cloudwan', 'privatelink', 'dx', 'interconnect', 's2svpn', 'clientvpn', 'vpc', 'route53', 'nfw', 'waf', 'shield', 'fms', 'flowlogs', 'reachability', 'netmgr', 'nfm'];
+  // old hashes keep working
+  var ALIAS = { dt: 'vpc', vpn: 's2svpn' };
+  var DEFAULT_TAB = 'elb';
+  var D, REG = {}, rendered = {};
+
+  /* ---------- formatting ---------- */
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function usd(v) {
+    if (v === null || v === undefined || (Array.isArray(v) && !v.length)) return null;
+    if (Array.isArray(v)) return v.map(usd).join(' / ');
+    var s = v.toFixed(v !== 0 && Math.abs(v) < 0.01 ? 8 : 4).replace(/0+$/, '');
+    var dec = (s.split('.')[1] || '');
+    if (dec.length < 2) s = v.toFixed(2);
+    var p = s.split('.');
+    p[0] = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return '$' + p.join('.');
+  }
+  function month(v) {
+    if (v === null || v === undefined || Array.isArray(v)) return null;
+    return '$' + (v * H).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function size(gb) {
+    if (gb >= 1048576) return (gb / 1048576) + ' PB';
+    if (gb >= 1024) return (gb / 1024) + ' TB';
+    return gb + ' GB';
+  }
+  function tierLabel(t, i, all) {
+    if (i === 0) return 'First ' + size(t[1]);
+    if (t[1] === null) return 'Over ' + size(t[0]);
+    return size(t[0]) + '–' + size(t[1]);
+  }
+  function speed(s) { return s.replace(/(\d+)G$/, '$1 Gbps').replace(/(\d+)M$/, '$1 Mbps'); }
+  function utc(iso) { return iso ? iso.replace('T', ' ').replace(/:\d\dZ$/, '').replace('Z', '') : '–'; }
+
+  /* ---------- table builders ---------- */
+  function cell(v, cls) {
+    if (v === null || v === undefined) return '<td class="n na">—</td>';
+    return '<td class="n' + (cls ? ' ' + cls : '') + '">' + v + '</td>';
+  }
+  function regionTh(code) {
+    var r = REG[code] || { name: code };
+    return '<th scope="row" title="' + esc(r.name) + '">' + esc(KO[code] || r.name) + '<span class="c">' + esc(code) + '</span></th>';
+  }
+  function searchKey(code) { var r = REG[code] || {}; return (code + ' ' + (r.name || '') + ' ' + (KO[code] || '')).toLowerCase(); }
+  // labels for location/edge groups used as matrix columns
+  var GK = {
+    US: ['United States', 'excl. Hawaii'], HI: ['Hawaii', ''], CA: ['Canada', ''], EU: ['Europe', ''], JP: ['Japan', ''],
+    AP1: ['Asia 1', 'Korea · Hong Kong · Singapore · Taiwan · Malaysia · Thailand'], ID: ['Indonesia', ''], PH: ['Philippines', ''], IN: ['India', ''], VN: ['Vietnam', ''],
+    SAMX: ['South America · Mexico', ''], AUNZ: ['Australia · New Zealand', ''], ME: ['Middle East', 'incl. Israel · Türkiye'], AF: ['Africa', ''],
+    USA: ['United States', ''], HAWAII: ['Hawaii', ''], CANADA: ['Canada', ''], EUROPE: ['Europe', ''], JAPAN: ['Japan', ''],
+    'HKG-MNL-ICN-SIN-TPE': ['Asia', 'Hong Kong · Manila · Seoul · Singapore · Taipei'], 'SOUTH-ASIA': ['Indonesia', 'Jakarta'], PHILIPPINES: ['Philippines', ''], INDIA: ['India', ''],
+    AUSTRALIA: ['Australia', ''], 'SOUTH-AMERICA': ['South America', ''], AFRICA: ['Africa', ''],
+    NA: ['North America', 'United States · Mexico · Canada'], AP: ['Asia Pacific', 'excl. India · Philippines · Thailand · Vietnam · Korea · Australia'], KR: ['Korea', ''], AU: ['Australia · New Zealand', ''], SA: ['South America', ''], ZA: ['Africa', 'South Africa · Kenya · Nigeria']
+  };
+  GK.IN_GA = ['India etc.', 'India · Philippines · Thailand · Vietnam'];
+  function gkey(id, ga) { return ga && id === 'IN' ? 'IN_GA' : (ga && id === 'ME' ? 'ME_GA' : id); }
+  GK.ME_GA = ['Middle East', ''];
+  GK.EU_GA = ['Europe', 'incl. Israel · Türkiye'];
+  function colH(id, ga) {
+    var k = ga && id === 'EU' ? 'EU_GA' : gkey(id, ga), v = GK[k];
+    if (!v) return esc(id);
+    return '<span class="gk">' + esc(v[0]) + '</span>' + (v[1] ? '<span class="gs">' + esc(v[1]) + '</span>' : '') + '<span class="c">' + esc(id) + '</span>';
+  }
+  function rowH(id, ga) {
+    var k = ga && id === 'EU' ? 'EU_GA' : gkey(id, ga), v = GK[k];
+    return v ? th(esc(v[0]), esc(id)) : th(esc(id));
+  }
+  function corner(rowLabel, colLabel) { return '<span class="corner"><span>' + rowLabel + ' ↓</span><span>' + colLabel + ' →</span></span>'; }
+  function table(o) {
+    // o: {caption, head:[{h, n?}], rows:[{r?:code, th?:html, cells:[html]}], geo?:bool}
+    // the visible caption sits outside the horizontal scroller so it never scrolls off-screen;
+    // the real <caption> stays for assistive technology
+    var h = (o.caption ? '<p class="cap" aria-hidden="true">' + o.caption + '</p>' : '') +
+      '<div class="tbl-wrap' + (o.caption ? ' has-cap' : '') + '"' + (o.label ? ' role="region" tabindex="0" aria-label="' + esc(o.label) + '"' : '') + '><table' + (o.mx ? ' class="mx"' : '') + '>';
+    if (o.caption) h += '<caption class="sr-only">' + o.caption + '</caption>';
+    h += '<thead><tr>' + o.head.map(function (c, i) {
+      return '<th scope="col" class="' + (i && c.n !== false ? 'n' : 'l') + '"' + (c.title ? ' title="' + esc(c.title) + '"' : '') + '>' + c.h + '</th>';
+    }).join('') + '</tr></thead><tbody>';
+    var lastGeo = null, ncol = o.head.length;
+    o.rows.forEach(function (row) {
+      if (row.r && o.geo !== false) {
+        var g = (REG[row.r] || {}).geo;
+        if (g && g !== lastGeo) { h += '<tr class="geo" data-geo="' + g + '"><th scope="rowgroup" colspan="' + ncol + '">' + esc(GEO[g] || g) + '</th></tr>'; lastGeo = g; }
+      }
+      h += '<tr' + (row.r ? ' data-r="' + esc(searchKey(row.r)) + '"' : '') + '>' + (row.th || regionTh(row.r)) + row.cells.join('') + '</tr>';
+    });
+    h += '<tr class="empty-row" hidden><td colspan="' + ncol + '">No Regions match your search.</td></tr>';
+    return h + '</tbody></table></div>';
+  }
+  function notes(items) { items = items.filter(Boolean); return items.length ? '<ul class="notes">' + items.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>' : ''; }
+  function sub(title, lede) { return '<h3>' + title + '</h3>' + (lede ? '<p class="lede">' + lede + '</p>' : ''); }
+  function th(text, extra) { return '<th scope="row">' + text + (extra ? '<span class="c">' + extra + '</span>' : '') + '</th>'; }
+
+  /* ---------- Direct Connect ---------- */
+  function renderDX() {
+    var x = D.dx, out = '';
+    function portRows(list) {
+      return list.map(function (p) {
+        return { th: th(speed(p.speed), p.locs + ' locations'), cells: [cell(usd(p.other)), cell(month(p.other), 'm'), cell(usd(p.japan)), cell(month(p.japan), 'm')] };
+      });
+    }
+    var head = [{ h: 'Port speed' }, { h: 'Hourly<br>excl. Japan' }, { h: 'Monthly<br>excl. Japan' }, { h: 'Hourly<br>Japan' }, { h: 'Monthly<br>Japan' }];
+    out += sub('Dedicated connection port hours', null);
+    out += table({ caption: '<b>Dedicated connection</b> hourly port rates. An empty Japan column means that speed is not offered at Japan locations.', head: head, rows: portRows(x.dedicated), label: 'Dedicated connection pricing' });
+    out += sub('Hosted connection port hours', null);
+    out += table({ caption: '<b>Hosted connection</b> hourly port rates. Speeds of 1 Gbps and above are offered only by some Direct Connect Partners.', head: head, rows: portRows(x.hosted), label: 'Hosted connection pricing' });
+
+    // DTO matrix
+    var g = x.dto.groups;
+    out += sub('Data transfer out (DTO) · Region → DX location', 'Per-GB rates. Rows are the AWS Region where traffic originates; columns are the geographic group of the Direct Connect location where traffic exits. Locations in the same geography as the Region (e.g. Seoul Region → Korea locations, AP1) are the cheapest.');
+    out += table({
+      caption: '<b>Data transfer out</b> $/GB. Rows are the AWS Region where traffic originates; columns are the geography of the DX location where traffic exits.',
+      head: [{ h: corner('FROM Region', 'TO DX location') }].concat(g.map(function (c) { return { h: colH(c.id), title: c.desc }; })),
+      rows: x.dto.rows.map(function (r) { return { r: r.r, cells: r.v.map(function (v) { return cell(usd(v)); }) }; }),
+      label: 'Direct Connect data transfer matrix', mx: true
+    });
+    var mixed = x.dto.mixed.map(function (m) {
+      var vals = Object.keys(m.values).map(function (k) { return usd(+k) + ' (' + m.values[k] + ' locations)'; }).join(', ');
+      return '<code>' + esc(m.r) + '</code> → ' + esc(m.g) + ': rates differ within the group. The table shows the most common value; actual values are ' + vals + '.';
+    });
+    var re = Object.keys(x.dto.reassigned);
+    out += notes([
+      'The Price List has rates per <code>source Region × DX location</code>. This table groups each location into the column groups of the official pricing page (US, HI, CA, EU, JP, AP1 …). A location\'s country comes from the port product attribute in the Price List (<code>country</code>); where its rate pattern matches another group, it was moved to that group' + (re.length ? ' (' + re.map(esc).join(', ') + ')' : '') + '.',
+      'An empty cell (—) means the Price List has no SKU for that Region → location group.',
+      'For flat-rate VIFs (<code>Private/Public Flat Rate</code>), DTO is $0.00/GB in the Price List.'
+    ].concat(mixed));
+    out += '<details class="more"><summary>Show DX locations by group</summary><div class="inner"><dl>' + g.map(function (c) {
+      return '<dt>' + esc(c.label) + ' · ' + esc(c.desc) + ' (' + c.members.length + ')</dt><dd>' + (c.members.length ? c.members.map(esc).join(' · ') : 'None') + '</dd>';
+    }).join('') + '</dl></div></details>';
+
+    // SiteLink
+    var s = x.sitelink;
+    out += sub('SiteLink', 'Each SiteLink-enabled VIF costs ' + usd(s.vifHour[0]) + ' per hour (' + month(s.vifHour[0]) + ' per month), and transfer between DX locations is charged per GB as below. Rows are the group of the location where traffic enters; columns are the group of the location where it exits.');
+    out += table({
+      caption: '<b>SiteLink data transfer</b> $/GB (FROM location group → TO location group)',
+      head: [{ h: corner('FROM location', 'TO location') }].concat(s.dst.map(function (c) { return { h: colH(c) }; })),
+      rows: s.rows.map(function (r) { return { th: rowH(r.from), cells: r.v.map(function (v) { return cell(usd(v)); }) }; }),
+      geo: false, label: 'SiteLink data transfer matrix', mx: true
+    });
+    out += notes([
+      'FROM groups are the Price List attribute <code>sitelinkOriginPopGroup</code> as is. TO groups are formed from per-location rate patterns.' + (function () { var miss = s.groups.filter(function (g) { return s.dst.indexOf(g) < 0; }); return miss.length ? ' ' + miss.map(esc).join(' · ') + ' has no locations grouped as a destination, so it is omitted from the columns.' : ''; })(),
+      s.mixed.length ? 'Combinations with different rates within a group: ' + s.mixed.map(function (m) {
+        return esc(m.from) + ' → ' + esc(m.to) + ' (' + Object.keys(m.values).map(function (k) { return usd(+k) + '×' + m.values[k]; }).join(', ') + ')';
+      }).join('; ') + '. The table shows the most common value.' : ''
+    ]);
+    out += '<details class="more"><summary>Show locations by SiteLink TO group</summary><div class="inner"><dl>' + s.dst.map(function (c) {
+      var m = s.members[c] || []; return '<dt>' + esc(c) + ' (' + m.length + ')</dt><dd>' + m.map(esc).join(' · ') + '</dd>';
+    }).join('') + '</dl></div></details>';
+
+    // Flat-rate
+    if (x.flatRate && x.flatRate.length) {
+      var speeds = [], tiers = [];
+      x.flatRate.forEach(function (f) { var k = f.speed + (f.pair ? '-Pair' : ''); if (speeds.indexOf(k) < 0) speeds.push(k); if (tiers.indexOf(f.tier) < 0) tiers.push(f.tier); });
+      tiers.sort();
+      out += sub('Flat-rate ports', 'The Price List includes flat-rate port products with DTO included (<code>FlatRatePortUsage</code>) by tier. Tier criteria and eligibility are not in the Price List; check the official documentation or your AWS account team.');
+      out += table({
+        caption: '<b>Flat-rate</b> hourly port rates (monthly in parentheses)',
+        head: [{ h: 'Port' }].concat(tiers.map(function (t) { return { h: t }; })),
+        rows: speeds.map(function (k) {
+          return { th: th(speed(k.replace('-Pair', '')) + (k.indexOf('Pair') > 0 ? ' × 2 (Pair)' : '')), cells: tiers.map(function (t) {
+            var f = x.flatRate.filter(function (z) { return z.speed + (z.pair ? '-Pair' : '') === k && z.tier === t; })[0];
+            return f ? cell(usd(f.h) + '<br><span style="color:var(--ink-3)">' + month(f.h) + '</span>') : cell(null);
+          }) };
+        }),
+        geo: false, label: 'Flat-rate port pricing'
+      });
+    }
+    return out;
+  }
+
+  /* ---------- Cloud WAN ---------- */
+  function renderCW() {
+    var rows = D.cloudwan, hasDx = rows.some(function (r) { return r.dx != null; });
+    var head = [{ h: 'Region' }, { h: 'CNE<br>hourly' }, { h: 'CNE<br>monthly' }, { h: 'VPC att.<br>hourly' }, { h: 'VPC att.<br>monthly' }, { h: 'Connect<br>hourly' }, { h: 'VPN att.<br>hourly' }, { h: 'TGW peering<br>hourly' }];
+    if (hasDx) head.push({ h: 'DX att.<br>hourly' });
+    head.push({ h: 'Data processing<br>$/GB' });
+    var out = sub('Pricing by Region', null) + table({
+      caption: '<b>Cloud WAN</b> pricing by Region. att. = attachment',
+      head: head,
+      rows: rows.map(function (r) {
+        var c = [cell(usd(r.cne)), cell(month(r.cne), 'm'), cell(usd(r.vpc)), cell(month(r.vpc), 'm'), cell(usd(r.connect)), cell(usd(r.vpn)), cell(usd(r.peer))];
+        if (hasDx) c.push(cell(usd(r.dx)));
+        c.push(cell(usd(r.gb)));
+        return { r: r.r, cells: c };
+      }), label: 'Cloud WAN pricing'
+    });
+    var se = rows.filter(function (r) { return r.r === 'ap-northeast-2'; })[0];
+    out += notes([
+      se ? 'Monthly example (Seoul): 1 CNE + 3 VPC attachments = ' + month(se.cne + 3 * se.vpc) + ' + ' + usd(se.gb) + ' per GB of data processed.' : '',
+      'Inter-Region traffic through Cloud WAN and traffic out to the internet or Direct Connect incur standard data transfer charges separately (see the <a href="#vpc">Amazon VPC tab</a>).',
+      hasDx ? 'Direct Connect gateway attachment rates are published in the Price List for only some Regions (empty = no SKU).' : '',
+      'Cloud WAN pricing is published for ' + rows.length + ' Regions. Regions not listed have no SKU in the Price List.'
+    ]);
+    return out;
+  }
+
+  /* ---------- Transit Gateway ---------- */
+  function renderTGW() {
+    var rows = D.tgw;
+    var out = sub('Pricing by Region', null) + table({
+      caption: '<b>Transit Gateway</b> pricing by Region',
+      head: [{ h: 'Region' }, { h: 'Attachment<br>hourly' }, { h: 'Attachment<br>monthly' }, { h: 'Data processing<br>$/GB' }, { h: 'Multicast received<br>$/GB' }],
+      rows: rows.map(function (r) { return { r: r.r, cells: [cell(usd(r.h)), cell(month(r.h), 'm'), cell(usd(r.gb)), cell(usd(r.mc))] }; }),
+      label: 'Transit Gateway pricing'
+    });
+    var se = rows.filter(function (r) { return r.r === 'ap-northeast-2'; })[0];
+    var ex = (D.notes || []).filter(function (n) { return /^TGW /.test(n); }).map(function (n) {
+      var m = /^TGW (\S+): .*\{'TransitGateway(\w+)': ([\d.]+)\}/.exec(n);
+      return m ? 'In <code>' + esc(m[1]) + '</code>, the ' + esc(m[2]) + ' attachment costs ' + usd(+m[3]) + ' per hour, unlike other types.' : esc(n);
+    });
+    out += notes([
+      se ? 'Monthly example (Seoul): 10 VPC attachments + 2 VPN attachments = ' + month(12 * se.h) + ', plus ' + usd(se.gb) + ' per GB processed.' : '',
+      'Site-to-Site VPN attachments also incur VPN connection charges (<a href="#s2svpn">Site-to-Site VPN tab</a>).'
+    ].concat(ex));
+    return out;
+  }
+
+  /* ---------- EC2 data transfer ---------- */
+  function renderDT() {
+    var x = D.dt, out = '';
+    var opts = x.regions.map(function (c) { return '<option value="' + c + '"' + (c === 'ap-northeast-2' ? ' selected' : '') + '>' + esc((KO[c] || REG[c].name) + ' (' + c + ')') + '</option>'; }).join('');
+    out += sub('Inter-Region data transfer', 'Choose a source Region to see the per-GB rate to every destination Region. Data transferred into the receiving Region (DTI) is free. Transit Gateway peering, VPC peering and Cloud WAN inter-Region segments follow these rates too.');
+    out += '<div class="sel"><label for="dt-from">FROM Region</label><select id="dt-from">' + opts + '</select></div><div id="dt-one"></div>';
+    // full matrix
+    var head = [{ h: corner('FROM Region', 'TO Region') }].concat(x.regions.map(function (c) { return { h: '<span class="gk">' + esc(KO[c] || REG[c].name) + '</span><span class="c">' + esc(c) + '</span>', title: REG[c].name }; }));
+    out += '<details class="more"><summary>Show full matrix (' + x.regions.length + ' × ' + x.regions.length + ', $/GB)</summary>' + table({
+      caption: '<b>Inter-Region data transfer out</b> $/GB. Rows = source Region, columns = destination Region',
+      head: head,
+      rows: x.regions.map(function (f, i) { return { r: f, cells: x.matrix[i].map(function (v, j) { return i === j ? '<td class="n na">·</td>' : cell(usd(v)); }) }; }),
+      label: 'Full inter-Region data transfer matrix', mx: true
+    }) + '</details>';
+
+    // intra-region + IPv4
+    var ip = {}; x.ipv4.forEach(function (r) { ip[r.r] = r; });
+    out += sub('Cross-AZ transfer within a Region', null);
+    out += table({
+      caption: '<b>Cross-AZ</b> data transfer $/GB (charged on both the sending and receiving side)',
+      head: [{ h: 'Region' }, { h: 'Cross-AZ<br>$/GB · per direction' }, { h: '1 TB round trip across AZs<br>effective cost' }],
+      rows: x.intra.map(function (r) {
+        return { r: r.r, cells: [cell(usd(r.regional)), cell(r.regional == null ? null : '$' + (2 * 1024 * r.regional).toFixed(2), 'm')] };
+      }), label: 'Cross-AZ data transfer pricing'
+    });
+    out += notes([
+      'The cross-AZ rate is the Price List <code>DataTransfer-Regional-Bytes</code> (regional data transfer). Both the sender and the receiver are charged, so 1 GB across AZs effectively costs twice the rate. Transfer through a public IPv4/Elastic IP within the same Region has the same rate.',
+      'The Price List also contains <code>DataTransfer-xAZ-In/Out-Bytes</code> usage types, but their rate is $0.00. Actual cross-AZ billing uses the regional rate above.',
+      'Public IPv4 address pricing is in the IP address management table above.'
+    ]);
+
+    // internet DTO
+    if (x.internet.length) {
+      var t0 = x.internet[0].t;
+      out += sub('Data transfer out from AWS to the internet (DTO)', 'Tiers apply based on monthly volume. Data transferred in from the internet to AWS (DTI) is free.');
+      out += table({
+        caption: '<b>Data transfer out to internet</b> $/GB (monthly tiers)',
+        head: [{ h: 'Region' }].concat(t0.map(function (t, i) { return { h: tierLabel(t, i, t0) }; })),
+        rows: x.internet.map(function (r) { return { r: r.r, cells: r.t.map(function (t) { return cell(usd(t[2])); }) }; }),
+        label: 'Internet data transfer pricing'
+      });
+      out += notes(['The first 100 GB per month, aggregated across all Regions, is free (Price List <code>Global-DataTransfer-Out-Bytes</code>, 0–100 GB $0). The first tier in the table applies to usage beyond the free amount.']);
+    }
+    return out;
+  }
+  function renderDTOne() {
+    var x = D.dt, sel = document.getElementById('dt-from'); if (!sel) return;
+    var i = x.regions.indexOf(sel.value);
+    document.getElementById('dt-one').innerHTML = table({
+      caption: 'Inter-Region transfer out of <b>' + esc((KO[sel.value] || REG[sel.value].name)) + '</b> (' + esc(sel.value) + ') $/GB',
+      head: [{ h: 'TO Region' }, { h: '$/GB' }, { h: 'Per 1 TB' }],
+      rows: x.regions.map(function (t, j) { return i === j ? null : { r: t, cells: [cell(usd(x.matrix[i][j])), cell(x.matrix[i][j] == null ? null : '$' + (x.matrix[i][j] * 1024).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), 'm')] }; }).filter(Boolean),
+      label: 'Inter-Region transfer pricing from the selected Region'
+    });
+    applyFilter();
+  }
+
+  /* ---------- VPN ---------- */
+  function renderS2S() {
+    var rows = D.vpn, fee = D.ga.fixed, out = '';
+    out += sub('Pricing by Region', null);
+    out += table({
+      caption: '<b>Site-to-Site VPN</b> hourly connection rates. Accelerated adds the Global Accelerator fixed fee of ' + usd(fee) + ' × 2 (excluding DT-Premium).',
+      head: [{ h: 'Region' }, { h: 'VPN connection<br>hourly' }, { h: 'VPN connection<br>monthly' }, { h: 'Accelerated<br>monthly fixed' }, { h: 'Large 5 Gbps<br>hourly' }, { h: 'Large 5 Gbps<br>monthly' }, { h: 'Concentrator<br>hourly' }, { h: 'Concentrator<br>per site hour' }],
+      rows: rows.map(function (r) {
+        return { r: r.r, cells: [cell(usd(r.std)), cell(month(r.std), 'm'), cell(r.std == null ? null : month(r.std + 2 * fee), 'm'), cell(usd(r.large)), cell(month(r.large), 'm'), cell(usd(r.conc)), cell(usd(r.site))] };
+      }), label: 'Site-to-Site VPN pricing'
+    });
+    out += notes([
+      'Traffic from the VPN to on premises follows EC2 internet data transfer rates (<a href="#vpc">Amazon VPC tab</a>).',
+      'Accelerated VPN = VPN connection + fixed fee for 2 Global Accelerators + DT-Premium (matrix in the Global Accelerator tab). When attached to a transit gateway, the TGW attachment charge is added as well.',
+      'Large (5 Gbps tunnels) and VPN Concentrator are the Price List <code>vpnType</code> values as is. An empty cell means there is no SKU in that Region.'
+    ]);
+    return out;
+  }
+  function renderCVPN() {
+    var rows = D.vpn, out = '';
+    out += sub('Pricing by Region', null);
+    out += table({
+      caption: '<b>Client VPN</b> hourly endpoint association and hourly client connection rates',
+      head: [{ h: 'Region' }, { h: 'Association<br>hourly' }, { h: 'Association<br>monthly' }, { h: 'Connection<br>hourly' }],
+      rows: rows.filter(function (r) { return r.cvEp != null || r.cvConn != null; }).map(function (r) {
+        return { r: r.r, cells: [cell(usd(r.cvEp)), cell(month(r.cvEp), 'm'), cell(usd(r.cvConn))] };
+      }), label: 'Client VPN pricing'
+    });
+    var se = rows.filter(function (r) { return r.r === 'ap-northeast-2'; })[0];
+    out += notes([se && se.cvEp != null ? 'Monthly example (Seoul): 2 subnets associated + 20 users connected 8 hours a day for 22 days = 2 × ' + month(se.cvEp) + ' + 20 × 8 × 22 × ' + usd(se.cvConn) + ' = $' + (2 * se.cvEp * H + 20 * 8 * 22 * se.cvConn).toFixed(2) + '.' : '', 'An association is one subnet associated with the Client VPN endpoint. Associating 2 subnets for high availability doubles the charge.', 'Traffic leaving through Client VPN to the internet or other Regions incurs EC2 data transfer charges (<a href="#vpc">Amazon VPC tab</a>).']);
+    return out;
+  }
+
+  /* ---------- Global Accelerator ---------- */
+  function renderGA() {
+    var x = D.ga, out = '';
+    out += sub('Fixed fee', null);
+    out += table({
+      caption: '<b>Fixed fee</b> per accelerator',
+      head: [{ h: 'Item' }, { h: 'Hourly' }, { h: 'Monthly' }],
+      rows: [{ th: th('Accelerator fixed fee'), cells: [cell(usd(x.fixed)), cell(month(x.fixed), 'm')] }],
+      geo: false, label: 'Global Accelerator fixed fee'
+    });
+    var g = x.groups;
+    out += sub('DT-Premium', 'Per-GB rate on dominant-direction traffic. Rows are the AWS Region group hosting the endpoint; columns are the edge location group the client connects to.');
+    out += table({
+      caption: '<b>DT-Premium</b> $/GB (FROM Region group → TO edge location group)',
+      head: [{ h: corner('FROM Region group', 'TO edge location group') }].concat(g.map(function (c) { return { h: colH(c.id, true), title: c.desc }; })),
+      rows: x.rows.map(function (r) {
+        var gg = g.filter(function (c) { return c.id === r.from; })[0];
+        return { th: rowH(r.from, true), cells: r.v.map(function (v) { return cell(usd(v)); }) };
+      }),
+      geo: false, label: 'Global Accelerator DT-Premium matrix', mx: true
+    });
+    out += notes([
+      'Values are from the Price List <code>Dominant</code> products for <code>Out</code> and <code>Internet</code> clients. The In direction and AWS client values are identical for every combination, and the non-dominant direction is $0.',
+      'Column group coverage (per the official pricing page): ' + g.map(function (c) { return '<b>' + esc(c.label) + '</b> ' + esc(c.desc); }).join(' · '),
+      'Standard data transfer charges (EC2 internet DTO, <a href="#vpc">Amazon VPC tab</a>) apply separately on top of DT-Premium.',
+      (function () {
+        var kr = (x.rows.filter(function (r) { return r.from === 'KR'; })[0] || { v: [null] }).v[0];
+        if (kr == null) return '';
+        var dt = 1024 * kr;
+        return 'Monthly example: fixed fee for 1 accelerator ' + month(x.fixed) + ' + 1 TB (1,024 GB) from a Seoul Region endpoint to North American clients × ' + usd(kr) + ' = $' + (x.fixed * H + dt).toFixed(2) + ' (standard data transfer charges extra).';
+      })()
+    ]);
+    return out;
+  }
+
+  /* ---------- PrivateLink ---------- */
+  function renderPL() {
+    var rows = D.privatelink, out = '';
+    var t0 = (rows[0] && rows[0].epGb) || [];
+    out += sub('Interface endpoint', null);
+    out += table({
+      caption: '<b>Interface endpoint</b> hourly rate per AZ and data processing tiers ($/GB)',
+      head: [{ h: 'Region' }, { h: 'Endpoint·AZ<br>hourly' }, { h: 'Endpoint·AZ<br>monthly' }].concat(t0.map(function (t, i) { return { h: 'Processing ' + tierLabel(t, i, t0) }; })).concat([{ h: 'Resource endpoint<br>hourly' }, { h: 'Remote Region (provider)<br>hourly' }]),
+      rows: rows.map(function (r) {
+        var tc = t0.map(function (t, i) { return cell(usd(r.epGb && r.epGb[i] ? r.epGb[i][2] : null)); });
+        return { r: r.r, cells: [cell(usd(r.ep)), cell(month(r.ep), 'm')].concat(tc).concat([cell(usd(r.res)), cell(usd(r.remote))]) };
+      }), label: 'Interface endpoint pricing'
+    });
+    out += notes([
+      'Monthly example (Seoul): 1 interface endpoint deployed in 3 AZs = ' + (function () { var s = rows.filter(function (r) { return r.r === 'ap-northeast-2'; })[0]; return s ? month(3 * s.ep) : '—'; })() + ' + per GB processed.',
+      'Resource endpoints (for accessing VPC resources) are charged hourly per resource, with the same processing tiers as interface endpoints.',
+      'The remote Region rate is an hourly charge paid by a service provider with cross-Region PrivateLink enabled, for each active remote Region. Consumers incur inter-Region data transfer charges.'
+    ]);
+    out += sub('Gateway Load Balancer endpoint', null);
+    out += table({
+      caption: '<b>GWLB endpoint</b> hourly and processing rates',
+      head: [{ h: 'Region' }, { h: 'GWLBE<br>hourly' }, { h: 'GWLBE<br>monthly' }, { h: 'Data processing<br>$/GB' }],
+      rows: rows.filter(function (r) { return r.gwlbe != null; }).map(function (r) { return { r: r.r, cells: [cell(usd(r.gwlbe)), cell(month(r.gwlbe), 'm'), cell(usd(r.gwlbeGb))] }; }),
+      label: 'GWLB endpoint pricing'
+    });
+    out += notes(['The Gateway Load Balancer itself (GWLB hours and GLCUs) is billed under Elastic Load Balancing (<a href="#elb">Elastic Load Balancing tab</a>).']);
+    return out;
+  }
+
+  /* ---------- Elastic Load Balancing ---------- */
+  function renderELB() {
+    var rows = D.elb.rows, out = '';
+    out += sub('ALB · NLB · GWLB', null);
+    out += table({
+      caption: '<b>Application · Network · Gateway Load Balancer</b> hourly rates and hourly capacity unit (LCU · NLCU · GLCU) rates. The GWLB hourly rate is per AZ.',
+      head: [{ h: 'Region' }, { h: 'ALB<br>hourly' }, { h: 'ALB<br>monthly' }, { h: 'ALB LCU<br>hourly' }, { h: 'NLB<br>hourly' }, { h: 'NLB<br>monthly' }, { h: 'NLB NLCU<br>hourly' }, { h: 'GWLB·AZ<br>hourly' }, { h: 'GWLB·AZ<br>monthly' }, { h: 'GWLB GLCU<br>hourly' }],
+      rows: rows.map(function (r) {
+        return { r: r.r, cells: [cell(usd(r.alb_h)), cell(month(r.alb_h), 'm'), cell(usd(r.alb_lcu)), cell(usd(r.nlb_h)), cell(month(r.nlb_h), 'm'), cell(usd(r.nlb_lcu)), cell(usd(r.gwlb_h)), cell(month(r.gwlb_h), 'm'), cell(usd(r.gwlb_lcu))] };
+      }), label: 'ALB NLB GWLB pricing'
+    });
+    var se = rows.filter(function (r) { return r.r === 'ap-northeast-2'; })[0];
+    out += notes([
+      se ? 'Monthly example (Seoul): 1 ALB averaging 2 LCUs per hour = ' + month(se.alb_h) + ' + 2 × ' + usd(se.alb_lcu) + ' × 730 = $' + ((se.alb_h + 2 * se.alb_lcu) * H).toFixed(2) + '.' : '',
+      'GWLB hourly charges apply for each AZ where the GWLB is deployed. Gateway Load Balancer endpoint charges in front of it are in the PrivateLink tab.',
+      'Traffic from a load balancer to the internet, other AZs or other Regions incurs EC2 data transfer charges separately.'
+    ]);
+
+    out += sub('Usage included in one LCU', 'Based on hourly averages. Each dimension is divided by the value below, and the largest resulting LCU count is billed.');
+    out += table({
+      caption: '<b>LCU · NLCU · GLCU</b> capacity per unit by dimension (per the official pricing page)',
+      head: [{ h: 'Dimension' }, { h: 'ALB<br>LCU', n: false }, { h: 'NLB TCP<br>NLCU', n: false }, { h: 'NLB UDP<br>NLCU', n: false }, { h: 'NLB TLS<br>NLCU', n: false }, { h: 'GWLB<br>GLCU', n: false }],
+      rows: [
+        ['New connections · flows', '25 per second', '800 per second', '400 flows per second', '50 per second', '600 per second'],
+        ['Active connections · flows', '3,000 per minute<br>(mTLS 1,500)', '100,000', '50,000 flows', '3,000', '60,000'],
+        ['Processed bytes', '1 GB per hour<br>(Lambda targets 0.4 GB)', '1 GB per hour', '1 GB per hour', '1 GB per hour', '1 GB per hour'],
+        ['Rule evaluations', '1,000 per second<br>(first 10 rules free)', '—', '—', '—', '—']
+      ].map(function (x) { return { th: th(x[0]), cells: x.slice(1).map(function (v) { return '<td>' + v + '</td>'; }) }; }),
+      geo: false, label: 'LCU capacity by dimension'
+    });
+    out += notes([
+      'ALB rule evaluations = request rate × (rules processed − 10 free). With 10 or fewer rules, this dimension is not counted.',
+      '25 new connections per second for ALB HTTPS listeners assumes certificates of RSA 2K or smaller / ECDSA 256 or smaller. Larger keys follow separate values in the official FAQ.',
+      'NLB calculates TCP, UDP and TLS listener traffic separately and adds them together. Active connections for NLB and GWLB are concurrent connections sampled per minute.'
+    ]);
+
+    var hasRes = function (r) { return r.alb_res != null || r.nlb_res != null || r.gwlb_res != null || r.alb_ts != null; };
+    out += sub('LCU Reservation and mTLS Trust Store', null);
+    out += table({
+      caption: '<b>LCU Reservation</b> hourly rate per reserved LCU and <b>ALB Trust Store</b> (mutual TLS) hourly rate. Empty = no SKU in that Region',
+      head: [{ h: 'Region' }, { h: 'ALB reserved LCU<br>hourly' }, { h: 'NLB reserved LCU<br>hourly' }, { h: 'GWLB reserved LCU<br>hourly' }, { h: 'Trust Store<br>hourly' }, { h: 'Trust Store<br>monthly' }],
+      rows: rows.filter(hasRes).map(function (r) {
+        return { r: r.r, cells: [cell(usd(r.alb_res)), cell(usd(r.nlb_res)), cell(usd(r.gwlb_res)), cell(usd(r.alb_ts)), cell(month(r.alb_ts), 'm')] };
+      }), label: 'LCU Reservation and Trust Store pricing'
+    });
+    var nRes = rows.filter(function (r) { return r.nlb_res != null; }).length, gRes = rows.filter(function (r) { return r.gwlb_res != null; }).length;
+    out += notes([
+      'Reserved LCUs are billed hourly for the reserved amount; if actual usage exceeds the reservation, the excess is added at the regular LCU rate. Example: reserving 3,000 LCUs on an NLB in us-east-1 and using 3,500 costs $0.0225 + 3,000 × $0.006 + 500 × $0.006 per hour.',
+      'In the Price List, NLB reserved LCU SKUs exist in only ' + nRes + ' Regions and GWLB reserved LCU SKUs in only ' + gRes + ' Regions (ALB in all Regions).',
+      'The Trust Store charge is an hourly rate per Trust Store while a mutual TLS Trust Store is associated with an ALB. With mTLS, the active connection capacity of an ALB LCU drops to 1,500 per minute.'
+    ]);
+
+    out += sub('Classic Load Balancer', null);
+    out += table({
+      caption: '<b>Classic Load Balancer</b> hourly rate and per-GB rate for data processed',
+      head: [{ h: 'Region' }, { h: 'CLB<br>hourly' }, { h: 'CLB<br>monthly' }, { h: 'Data processing<br>$/GB' }],
+      rows: rows.filter(function (r) { return r.clb_h != null; }).map(function (r) { return { r: r.r, cells: [cell(usd(r.clb_h)), cell(month(r.clb_h), 'm'), cell(usd(r.clb_gb))] }; }),
+      label: 'Classic Load Balancer pricing'
+    });
+    var idle = rows.filter(function (r) { return r.clb_idle != null || r.alb_idle != null; });
+    out += notes([
+      'Classic Load Balancer is a previous-generation product. ALB or NLB is recommended for new workloads.',
+      idle.length ? 'The Price List has the <code>IdleProvisionedLBCapacity</code> usage type (idle provisioned capacity, Classic ' + usd(idle[0].clb_idle) + ' · ALB ' + usd(idle[0].alb_idle) + ' / IdleLCU-Hr) only in ' + idle.map(function (r) { return '<code>' + esc(r.r) + '</code>'; }).join(', ') + '. It does not appear on the official pricing page, so it is omitted from the table.' : '',
+      'ALB on Outposts pricing is a per-Outposts-location product, so it is omitted from this table.'
+    ]);
+    return out;
+  }
+
+  /* ---------- VPC Lattice ---------- */
+  function renderLattice() {
+    var x = D.lattice, rows = x.rows, out = '';
+    var fr = x.freePerHour || {}, frq = (fr.req || 0).toLocaleString('en-US'), fcn = (fr.conn || 0).toLocaleString('en-US');
+    var svc = rows.filter(function (r) { return r.svc != null; });
+    out += sub('VPC Lattice service', null);
+    out += table({
+      caption: '<b>VPC Lattice service</b> hourly rate per service, data processed $/GB, and rate per million requests/connections (beyond the free amount per hour)',
+      head: [{ h: 'Region' }, { h: 'Service<br>hourly' }, { h: 'Service<br>monthly' }, { h: 'Data processing<br>$/GB' }, { h: 'HTTP requests<br>per million' }, { h: 'TCP connections (TLS)<br>per million' }],
+      rows: svc.map(function (r) { return { r: r.r, cells: [cell(usd(r.svc)), cell(month(r.svc), 'm'), cell(usd(r.gb)), cell(usd(r.reqM)), cell(usd(r.connM))] }; }),
+      label: 'VPC Lattice service pricing'
+    });
+    var us = rows.filter(function (r) { return r.r === 'us-east-1'; })[0];
+    out += notes([
+      'HTTP requests are charged only on HTTP/HTTPS listeners and TCP connections only on TLS (passthrough) listeners. Each service gets ' + frq + ' requests and ' + fcn + ' TCP connections free per hour (Always Free Tier), which are subtracted from that hour\'s usage.',
+      'The Price List publishes per-request rates (e.g. Seoul $0.00000013 per request); these were converted to per-million rates.',
+      us ? 'Monthly example (us-east-1): 1 service processing 1 million requests and 1 GB per hour = ' + month(us.svc) + ' + 730 GB × ' + usd(us.gb) + ' + 0.7 × ' + usd(us.reqM) + ' × 730 = $' + ((us.svc + us.gb + 0.7 * us.reqM) * H).toFixed(2) + '.' : '',
+      'VPC associations and service network endpoints have no additional charge.'
+    ]);
+
+    var t0 = (rows.filter(function (r) { return r.resGb; })[0] || {}).resGb || [];
+    out += sub('VPC resource (resource configuration)', 'Pricing for accessing VPC resources added to a service network. Resources in Oracle Database@AWS (ODB) networks are published as a separate usage type.');
+    out += table({
+      caption: '<b>VPC resource</b> Consumer: hourly rate per resource in the service network and processing tiers ($/GB). Provider: Resource Gateway processing $/GB',
+      head: [{ h: 'Region' }, { h: 'Resource<br>hourly' }, { h: 'Resource<br>monthly' }, { h: 'ODB resource<br>hourly' }].concat(t0.map(function (t, i) { return { h: 'Consumer processing<br>' + tierLabel(t, i, t0) }; })).concat([{ h: 'Provider processing<br>$/GB' }]),
+      rows: rows.map(function (r) {
+        var tc = t0.map(function (t, i) { return cell(usd(r.resGb && r.resGb[i] ? r.resGb[i][2] : null)); });
+        return { r: r.r, cells: [cell(usd(r.res)), cell(month(r.res), 'm'), cell(usd(r.resOdb))].concat(tc).concat([cell(usd(r.provGb))]) };
+      }), label: 'VPC resource pricing'
+    });
+    var odbOnly = rows.filter(function (r) { return r.svc == null; });
+    out += notes([
+      'Consumer processing tiers apply to the combined monthly volume of all resources accessed in the Region. They are the same tiers as PrivateLink resource endpoints (resource endpoint hourly rates are in the PrivateLink tab).',
+      'ODB resource = Price List <code>VpcLattice-Service-Network-ODB-Resource-Hours</code>: the hourly resource rate for accessing an Oracle Database@AWS ODB network resource through a service network. It is not listed separately on the official Lattice pricing page.',
+      odbOnly.length ? odbOnly.map(function (r) { return '<code>' + esc(r.r) + '</code>'; }).join(', ') + ' has only the ODB resource rate in the Price List, with no Lattice service or VPC resource SKUs.' : ''
+    ]);
+    return out;
+  }
+
+  /* ---------- shared helpers for the newer tabs ---------- */
+  function findR(rows, code) { return (rows || []).filter(function (r) { return r.r === code; })[0]; }
+  function tv(tl, i) { return tl && tl[i] ? tl[i][2] : null; }
+  // compact English counts: 333M, 1B, 7,300
+  function koN(n) {
+    if (n === null || n === undefined) return '';
+    if (n >= 1e9) return (n / 1e9).toLocaleString('en-US', { maximumFractionDigits: 3 }) + 'B';
+    if (n >= 1e6) return (n / 1e6).toLocaleString('en-US', { maximumFractionDigits: 3 }) + 'M';
+    return n.toLocaleString('en-US');
+  }
+  function tierN(t, i, unit) {
+    unit = unit || '';
+    if (i === 0) return 'First ' + koN(t[1]) + unit;
+    if (t[1] === null) return 'Over ' + koN(t[0]) + unit;
+    return koN(t[0]) + '–' + koN(t[1]) + unit;
+  }
+  function hm(v) { return v == null ? cell(null) : cell(usd(v) + '<span class="sub">' + month(v) + '/mo</span>'); }
+  function m730(v) { return v == null ? null : month(v); }
+  function srcPage(txt) { return '<span class="srcbadge">' + txt + '</span>'; }
+  function tierHeads(t0, prefix, fmt) { return (t0 || []).map(function (t, i) { return { h: (prefix ? prefix + '<br>' : '') + fmt(t, i) }; }); }
+  function tierCells(tl, n) { var c = []; for (var i = 0; i < n; i++) c.push(cell(usd(tv(tl, i)))); return c; }
+  function first(rows, key) { var x = (rows || []).filter(function (r) { return r[key] && r[key].length; })[0]; return x ? x[key] : []; }
+  function same(rows, key) { var v = {}; (rows || []).forEach(function (r) { v[JSON.stringify(r[key])] = 1; }); return Object.keys(v).length === 1; }
+
+  /* ---------- API Gateway ---------- */
+  function renderAPIGW() {
+    var x = D.apigw, rows = x.rows, out = '';
+    var tr = first(rows, 'rest'), th_ = first(rows, 'http'), tw = first(rows, 'wsMsg');
+    out += sub('REST API · HTTP API requests', 'Rates per million requests, applied in tiers based on cumulative monthly requests.');
+    out += table({
+      caption: '<b>REST API · HTTP API</b> rate per million requests (monthly tiers)',
+      head: [{ h: 'Region' }].concat(tierHeads(tr, 'REST', function (t, i) { return tierN(t, i, ''); })).concat(tierHeads(th_, 'HTTP', function (t, i) { return tierN(t, i, ''); })),
+      rows: rows.map(function (r) { return { r: r.r, cells: tierCells(r.rest, tr.length).concat(tierCells(r.http, th_.length)) }; }),
+      label: 'API Gateway REST and HTTP request pricing'
+    });
+    var se = findR(rows, 'ap-northeast-2');
+    out += notes([
+      se ? 'Monthly example (Seoul): 100 million HTTP API requests = 100 × ' + usd(tv(se.http, 0)) + ' = $' + (100 * tv(se.http, 0)).toFixed(2) + '; the same volume on a REST API costs $' + (100 * tv(se.rest, 0)).toFixed(2) + '.' : '',
+      'HTTP API requests are metered in 512 KB increments (a 1.2 MB request = 3 requests). The Price List has no 12-month free tier, so none is reflected in the table.',
+      'Data out of API Gateway incurs EC2 internet data transfer charges separately (Amazon VPC tab).'
+    ]);
+    out += sub('WebSocket API', null);
+    out += table({
+      caption: '<b>WebSocket API</b> rate per million messages (32 KB increments) and per million connection minutes',
+      head: [{ h: 'Region' }].concat(tierHeads(tw, 'Messages', function (t, i) { return tierN(t, i, ''); })).concat([{ h: 'Connection minutes<br>per million' }]),
+      rows: rows.map(function (r) { return { r: r.r, cells: tierCells(r.wsMsg, tw.length).concat([cell(usd(r.wsMin))]) }; }),
+      label: 'API Gateway WebSocket pricing'
+    });
+    out += sub('REST API cache', 'Hourly rates by cache size; the second line is the monthly rate (× 730).');
+    out += table({
+      caption: '<b>API cache</b> hourly rate by size (second line = monthly)',
+      head: [{ h: 'Region' }].concat(x.cacheSizes.map(function (c) { return { h: c + ' GB' }; })),
+      rows: rows.map(function (r) { return { r: r.r, cells: r.cache.map(hm) }; }),
+      label: 'API Gateway cache pricing'
+    });
+    if (rows.some(function (r) { return r.portal != null; })) {
+      out += sub('API Gateway Portals', null);
+      out += table({
+        caption: '<b>Portals</b> monthly rate per portal and per API product published to a portal',
+        head: [{ h: 'Region' }, { h: 'Portal<br>monthly' }, { h: 'Portal product<br>monthly' }],
+        rows: rows.filter(function (r) { return r.portal != null; }).map(function (r) { return { r: r.r, cells: [cell(usd(r.portal)), cell(usd(r.portalProduct))] }; }),
+        label: 'API Gateway Portals pricing'
+      });
+      out += notes(['Monthly rates of the Price List usage types <code>APIGateway-Portal-Months</code> and <code>APIGateway-Portal-Product-Months</code>.']);
+    }
+    return out;
+  }
+
+  /* ---------- CloudFront ---------- */
+  var CFG = { US: ['United States', 'US'], CA: ['Canada', 'CA'], EU: ['Europe', 'EU'], ZA: ['South Africa', 'ZA'], ME: ['Middle East', 'ME'], SA: ['South America', 'SA'], JP: ['Japan', 'JP'], AU: ['Australia', 'AU'], AP: ['Asia Pacific', 'AP'], IN: ['India', 'IN'] };
+  function cfTh(id) { var v = CFG[id] || [id, id]; return th(esc(v[0]), esc(v[1])); }
+  function renderCF() {
+    var x = D.cloudfront, out = '', T = x.dtoTiers, fr = x.free || {};
+    out += sub('Data transfer out to the internet (DTO)', 'Per-GB rates by edge location geographic group, applied in tiers based on monthly volume.');
+    out += table({
+      caption: '<b>Data transfer out to internet</b> $/GB (geographic group × monthly tiers)',
+      head: [{ h: 'Edge geographic group' }].concat(T.map(function (t, i) { return { h: tierLabel(t, i, T) }; })),
+      rows: x.edge.map(function (e) { return { th: cfTh(e.id), cells: tierCells(e.dto, T.length) }; }),
+      geo: false, label: 'CloudFront data transfer pricing'
+    });
+    out += notes([
+      'The first ' + size(fr.dtoGb || 1024) + ' per month across all geographic groups is free (Price List <code>Global-DataTransfer-Out-Bytes</code>). The official pricing page shows this as “first 1 TB free, next 9 TB …”.',
+      'Group names are the Price List <code>fromLocation</code> values. The official pricing page combines United States · Canada into one column as “United States, Mexico, Canada”, South Africa · Middle East as “South Africa, Kenya, Nigeria, Egypt, and Middle East”, and Asia Pacific as “Hong Kong, Indonesia, Philippines, Singapore, South Korea, Taiwan, Thailand, Malaysia, and Vietnam”.'
+    ]);
+    out += sub('Requests and transfer to origin', null);
+    out += table({
+      caption: '<b>Requests</b> rate per 10,000 and <b>edge → origin</b> transfer $/GB',
+      head: [{ h: 'Edge geographic group' }, { h: 'HTTP requests<br>per 10,000' }, { h: 'HTTPS requests<br>per 10,000' }, { h: 'Field-Level Encryption<br>per 10,000' }, { h: 'Edge → origin<br>$/GB' }],
+      rows: x.edge.map(function (e) { return { th: cfTh(e.id), cells: [cell(usd(e.http)), cell(usd(e.https)), cell(usd(e.fle)), cell(usd(e.origin))] }; }),
+      geo: false, label: 'CloudFront request pricing'
+    });
+    out += notes([
+      'The first ' + koN(fr.req || 1e7) + ' HTTP and HTTPS requests per month are free (Price List <code>Global-Requests-Tier1</code>).',
+      'Field-Level Encryption requests are an additional charge on top of the HTTPS request rate (Price List <code>Requests-HTTPS-Proxy-FLE</code>).',
+      'Data fetched from AWS origins (S3, EC2, ELB and so on) to the edge is free. “Edge → origin” in the table is the rate for traffic sent from the edge to the origin, such as POST and PUT.'
+    ]);
+    if (x.originShield && x.originShield.length) {
+      out += sub('Origin Shield', 'Rate per 10,000 requests in the Region where Origin Shield is enabled. No additional data transfer charge applies.');
+      out += table({
+        caption: '<b>Origin Shield</b> rate per 10,000 requests by Region',
+        head: [{ h: 'Origin Shield Region' }, { h: 'Requests<br>per 10,000' }],
+        rows: x.originShield.map(function (r) { return { r: r.r, cells: [cell(usd(r.req))] }; }),
+        label: 'Origin Shield pricing'
+      });
+    }
+    var m = x.misc || {};
+    out += sub('Edge compute and add-on features', null);
+    out += table({
+      caption: '<b>CloudFront Functions · KeyValueStore · Lambda@Edge</b> and other add-on feature rates (same worldwide)',
+      head: [{ h: 'Item' }, { h: 'Price' }, { h: 'Free usage', n: false }],
+      rows: [
+        ['CloudFront Functions invocations', usd(m.fnM) + ' / 1M invocations', fr.fn ? koN(fr.fn) + ' per month' : '—'],
+        ['KeyValueStore reads', usd(m.kvsReadM) + ' / 1M reads', fr.kvs ? koN(fr.kvs) + ' per month' : '—'],
+        ['KeyValueStore API calls', usd(m.kvsApi * 1000) + ' / 1,000 calls', '—'],
+        ['Lambda@Edge requests', usd(m.lambdaReqM) + ' / 1M requests', '—'],
+        ['Lambda@Edge duration', usd(m.lambdaGbS) + ' / GB-second', '—'],
+        ['Invalidation', usd(m.inval) + ' / path', fr.inval ? koN(fr.inval) + ' paths per month' : '—'],
+        ['Real-time logs', usd(m.rtlogM) + ' / 1M log lines', '—'],
+        ['Dedicated IP custom SSL certificate', usd(m.cert) + ' / certificate · month', '—']
+      ].map(function (r) { return { th: th(r[0]), cells: [cell(r[1]), '<td>' + r[2] + '</td>'] }; }),
+      geo: false, label: 'CloudFront add-on feature pricing'
+    });
+    out += notes(['Anycast Static IPs are omitted because the Price List (flat monthly rate per IP list) and the official pricing page (hourly rate per IPv4 address) use different billing units. Check the official pricing page.']);
+    if (x.plans && x.plans.length) {
+      out += sub('Flat-rate pricing plan', 'A fixed monthly price per distribution with no overage charges. If usage exceeds the allowance, performance may be throttled instead of charges being added.');
+      out += table({
+        caption: '<b>CloudFront flat-rate plans</b> (Price List <code>CloudFrontPlans</code>)',
+        head: [{ h: 'Plan' }, { h: 'Monthly price' }, { h: 'Request allowance<br>monthly' }, { h: 'Data transfer allowance<br>monthly' }, { h: 'S3 storage credit' }],
+        rows: x.plans.map(function (p) {
+          return { th: th(esc(p.code.replace(/^Premium-/, 'Premium ').replace(/-/g, ' / '))), cells: [cell(usd(p.usd)), cell(koN(p.req) + ' requests'), cell(size(p.gb)), cell(size(p.s3Gb))] };
+        }),
+        geo: false, label: 'CloudFront flat-rate plan'
+      });
+      out += notes(['Premium includes 500 million requests · 50 TB by default, and the Price List has separate Premium levels with larger allowances. The overage policy of every plan is <code>NO_OVERAGE_THROTTLE</code> (no overage charges).', 'For the features included in each plan (number of WAF rules, bot management, logs and so on), see the official pricing page (flat-rate).']);
+    }
+    return out;
+  }
+
+  /* ---------- Interconnect ---------- */
+  function renderIC() {
+    var x = D.interconnect, out = '';
+    function priceTable(t, cap, label) {
+      return table({
+        caption: cap,
+        head: [{ h: 'Bandwidth' }].concat(t.tiers.map(function (k) { return { h: k.replace('Tier', 'Tier ') }; })),
+        rows: t.rows.map(function (r) { return { th: th(speed(r.bw)), cells: r.v.map(function (v) { return v === 0 ? cell('Free') : hm(v); }) }; }),
+        geo: false, label: label
+      });
+    }
+    out += sub('Interconnect – multicloud', 'Hourly rate per connection (second line = monthly), set by bandwidth and tier. The other cloud\'s charges are billed separately.');
+    out += priceTable(x.mc, '<b>multicloud</b> hourly rate by bandwidth × tier (empty = no product in the Price List)', 'Interconnect multicloud pricing');
+    out += notes([
+      '500 Mbps is the Free Tier interconnect, free for one per cloud provider per Region (official pricing page).',
+      'Google Cloud and OCI rates are the same. The per-GB data transfer rate is published as $0.00 in the Price List.',
+      'The official pricing page example shows 10 Gbps Tier 4 = $51.78 per hour, but the Price List has no Tier 4 or 5 products for 10 Gbps and above. Check this combination with your AWS account team.'
+    ]);
+    var pt = x.mc.partners;
+    out += sub('multicloud tier table', 'Rows are the AWS Region where traffic originates; columns are the interconnect\'s local Region (other cloud · Region). When multiple Regions are used, the highest tier applies.');
+    out += table({
+      caption: '<b>multicloud</b> tier by source Region → local Region',
+      head: [{ h: corner('FROM Region', 'TO local Region') }].concat(pt.map(function (p) { var a = p.k.split('|'); return { h: '<span class="gk">' + esc(a[0] === 'GCP' ? 'Google Cloud' : a[0]) + '</span><span class="gs">' + esc(KO[a[1]] || p.name) + '</span><span class="c">' + esc(a[1]) + '</span>' }; })),
+      rows: x.mc.pairs.map(function (r) { return { r: r.r, cells: r.t.map(function (t) { return t ? '<td class="n' + (t === 'Tier1' ? ' hi' : '') + '">' + t.replace('Tier', 'T') + '</td>' : cell(null); }) }; }),
+      label: 'Interconnect multicloud tier mapping', mx: true
+    });
+    out += notes(['Column Regions are the AWS Region code (<code>toregionname</code>) and name (<code>interconnectRegionName</code>) from the Price List. <code>GCP</code> Singapore appearing as <code>ap-south-1</code> is as published in the Price List.']);
+
+    out += sub('Interconnect – last mile', 'Hourly rate per connection including the carrier circuit (second line = monthly).');
+    out += priceTable(x.lm, '<b>last mile</b> hourly rate by bandwidth × tier', 'Interconnect last mile pricing');
+    var homes = Object.keys(x.homes).filter(function (k) { return x.mc.partners.every(function (p) { return p.k.split('|')[0] !== k; }); });
+    out += notes([
+      (x.lm.differs.length ? 'In the Price List, some 1 Gbps last mile products (one side of ' + homes.map(function (k) { return k + ' metro'; }).join(' · ') + ') are published at $0.00. The table shows the non-zero value.' : ''),
+      'Interconnect metros: ' + x.lm.metros.map(function (m) { return '<code>' + esc(m) + '</code> (' + esc((x.homes[m] || []).join(', ')) + ')'; }).join(', ') + '. Parentheses list the AWS Regions where the products are published.'
+    ]);
+    out += sub('last mile tier table', 'Rows are the AWS Regions attached to the Direct Connect gateway; columns are Interconnect metros.');
+    out += table({
+      caption: '<b>last mile</b> tier by AWS Region × metro',
+      head: [{ h: corner('AWS Region', 'metro') }].concat(x.lm.metros.map(function (m) { return { h: esc(m) }; })),
+      rows: x.lm.pairs.map(function (r) { return { r: r.r, cells: x.lm.metros.map(function (m) { var t = r.t[m]; return t ? '<td class="n' + (t === 'Tier1' ? ' hi' : '') + '">' + t.replace('Tier', 'T') + '</td>' : cell(null); }) }; }),
+      label: 'Interconnect last mile tier mapping'
+    });
+    return out;
+  }
+
+  /* ---------- Amazon VPC ---------- */
+  function renderVPC() {
+    var x = D.vpc, out = '';
+    var nat = x.nat, hasP = nat.some(function (r) { return r.pbw != null; });
+    out += sub('NAT gateway ' + srcPage('Official pricing page data'), 'NAT gateway pricing lives in the Price List AmazonEC2 offer (about 9 GB across Region files), so it is taken from the data file used by the official VPC pricing page.');
+    var head = [{ h: 'Region' }, { h: 'NAT gateway<br>hourly' }, { h: 'NAT gateway<br>monthly' }, { h: 'Data processing<br>$/GB' }, { h: 'Regional NAT<br>per AZ hour' }, { h: 'Regional NAT<br>per AZ month' }, { h: 'Regional NAT<br>$/GB' }];
+    if (hasP) head = head.concat([{ h: 'Provisioned bandwidth<br>per Gbps hour' }, { h: 'Provisioned<br>processing $/GB' }]);
+    out += table({
+      caption: '<b>NAT gateway</b> hourly rate and per-GB processing rate. Source: aws.amazon.com/vpc/pricing data (<code>ec2/natgateway.json</code>)',
+      head: head,
+      rows: nat.map(function (r) {
+        var c = [cell(usd(r.h)), cell(m730(r.h), 'm'), cell(usd(r.gb)), cell(usd(r.rh)), cell(m730(r.rh), 'm'), cell(usd(r.rgb))];
+        if (hasP) c = c.concat([cell(usd(r.pbw)), cell(usd(r.pbwGb))]);
+        return { r: r.r, cells: c };
+      }), label: 'NAT gateway pricing'
+    });
+    var se = findR(nat, 'ap-northeast-2');
+    out += notes([
+      se ? 'Monthly example (Seoul): one NAT gateway in each of 3 AZs processing 1 TB per month = 3 × ' + month(se.h) + ' + 1,024 × ' + usd(se.gb) + ' = $' + (3 * se.h * H + 1024 * se.gb).toFixed(2) + ' (internet DTO extra).' : '',
+      'A regional NAT gateway is charged hourly for each active AZ, and the charge drops automatically when fewer AZs are active.',
+      hasP ? 'The provisioned bandwidth columns have values only for Regions whose official data file contains the key (<code>Per hour and per Gbps charge for NAT Gateways with provisioned bandwidth</code>).' : '',
+      'NAT gateways on the same path as Network Firewall have their hourly and per-GB charges waived (Network Firewall tab).',
+      'Traffic through a NAT gateway to the internet or other AZs incurs the data transfer charges below separately.'
+    ]);
+
+    var ex = x.extra, ip = {}; (D.dt.ipv4 || []).forEach(function (r) { ip[r.r] = r; });
+    out += sub('IP address management', null);
+    out += table({
+      caption: '<b>Public IPv4</b> hourly rate per address and <b>IPAM Advanced Tier</b> hourly rate per active IP',
+      head: [{ h: 'Region' }, { h: 'IPv4 in use<br>hourly' }, { h: 'IPv4 in use<br>monthly' }, { h: 'IPv4 idle<br>hourly' }, { h: 'Amazon contiguous IPv4 block<br>per IP hour' }, { h: 'IPAM Advanced<br>per active IP hour' }, { h: 'IPAM Advanced<br>per active IP month' }],
+      rows: ex.map(function (r) { var p = ip[r.r] || {}; return { r: r.r, cells: [cell(usd(p.inuse)), cell(m730(p.inuse), 'm'), cell(usd(p.idle)), cell(usd(r.v4block)), cell(usd(r.ipam)), cell(m730(r.ipam), 'm')] }; }),
+      label: 'IP address pricing'
+    });
+    out += notes([
+      'The IPAM Free Tier (single Region and single account, BYOIP and Amazon-provided contiguous IPv6, Public IP Insights) is free. Managing multiple Regions or accounts, or private IPv4, requires the Advanced Tier.',
+      'The Amazon contiguous IPv4 block rate is an hourly charge per IP in an Amazon-provided contiguous public IPv4 block received through an IPAM pool (Price List <code>PublicIPv4:ContiguousBlock</code>).',
+      'Public IPv4 is charged per address regardless of the service using it, such as EC2, Elastic IP, NAT gateways or load balancers.'
+    ]);
+    out += sub('Encryption Controls · Traffic Mirroring · Route Server', null);
+    out += table({
+      caption: 'Hourly rates for <b>VPC Encryption Controls</b> (per non-empty VPC), <b>Traffic Mirroring</b> (per mirrored ENI) and <b>Route Server endpoints</b>',
+      head: [{ h: 'Region' }, { h: 'Encryption Controls<br>per VPC hour' }, { h: 'Encryption Controls<br>per VPC month' }, { h: 'Traffic Mirroring<br>per session ENI hour' }, { h: 'Traffic Mirroring<br>monthly' }, { h: 'Route Server endpoint<br>hourly' }, { h: 'Route Server endpoint<br>monthly' }],
+      rows: ex.map(function (r) { return { r: r.r, cells: [cell(usd(r.enc)), cell(m730(r.enc), 'm'), cell(usd(r.mirror)), cell(m730(r.mirror), 'm'), cell(usd(r.rs)), cell(m730(r.rs), 'm')] }; }),
+      label: 'VPC add-on feature pricing'
+    });
+    out += notes([
+      'Encryption Controls is an hourly charge per VPC with ENIs, regardless of monitor or enforce mode. VPCs attached to a transit gateway with encryption support enabled are charged even without Encryption Controls turned on.',
+      'Traffic Mirroring is charged until the session is deleted. Transfer charges for mirrored traffic are separate.'
+    ]);
+    return out + renderDT();
+  }
+
+  /* ---------- Route 53 ---------- */
+  function renderR53() {
+    var g = D.route53.global, rows = D.route53.rows, out = '';
+    var z = g.zone || [];
+    out += sub('Hosted zones · records · Traffic Flow', null);
+    out += table({
+      caption: '<b>Route 53</b> global monthly rates',
+      head: [{ h: 'Item' }, { h: 'Price' }],
+      rows: [
+        ['Hosted zone (first ' + (z[0] ? z[0][1] : 25) + ')', usd(tv(z, 0)) + ' / zone · month'],
+        ['Hosted zone (additional)', usd(tv(z, 1)) + ' / zone · month'],
+        ['Records (beyond 10,000 per zone)', usd(g.records) + ' / record · month'],
+        ['Traffic Flow policy record', usd(g.flow) + ' / policy record · month'],
+        ['IP-based routing CIDR blocks (beyond ' + koN(g.cidr && g.cidr[0] ? g.cidr[0][1] : 1000) + ')', usd(tv(g.cidr, 1)) + ' / block · month']
+      ].map(function (r) { return { th: th(r[0]), cells: [cell(r[1])] }; }),
+      geo: false, label: 'Route 53 hosted zone pricing'
+    });
+    var Q = [['std', 'Standard (simple · weighted · failover · multivalue)'], ['lbr', 'Latency-based routing'], ['geo', 'Geolocation'], ['geoprox', 'Geoproximity'], ['ip', 'IP-based routing']];
+    var q0 = (g.q || {}).std || [];
+    out += sub('DNS queries', 'Rate per million queries answered by public hosted zones. Queries to private hosted zones are free.');
+    out += table({
+      caption: '<b>DNS queries</b> rate per million by routing policy',
+      head: [{ h: 'Query type' }].concat(q0.map(function (t, i) { return { h: tierN(t, i, '') }; })).concat([{ h: 'Alias to AWS resource' }]),
+      rows: Q.map(function (k) { var t = (g.q || {})[k[0]]; return { th: th(esc(k[1])), cells: tierCells(t, q0.length).concat([cell(usd((g.qAlias || {})[k[0]]))]) }; }),
+      geo: false, label: 'Route 53 query pricing'
+    });
+    out += notes(['Queries are free when an alias record points to an AWS resource such as ELB, CloudFront, API Gateway, VPC endpoints, S3 website endpoints or Global Accelerator (Price List <code>Intra-AWS-*-Queries</code> = $0).']);
+    out += sub('Health check', null);
+    out += table({
+      caption: '<b>Health checks</b> monthly rate per health check',
+      head: [{ h: 'Type' }, { h: 'AWS endpoint' }, { h: 'Non-AWS endpoint' }],
+      rows: [
+        { th: th('Basic health check', 'incl. calculated · metric-based'), cells: [cell(usd(paidOf(g.hcAws))), cell(usd(tv(g.hcExt, 0)))] },
+        { th: th('Optional features (per feature)', 'HTTPS · string matching · fast interval · latency measurement'), cells: [cell(usd(tv(g.hcOptAws, 0))), cell(usd(tv(g.hcOptExt, 0)))] }
+      ], geo: false, label: 'Route 53 health check pricing'
+    });
+    out += notes([(g.hcAws && g.hcAws[0] && g.hcAws[0][2] === 0 ? 'Up to ' + g.hcAws[0][1] + ' basic health checks on AWS endpoints per account are free. ' : '') + 'Health checks on ELB and S3 website endpoints are free.']);
+
+    var tq = first(rows, 'q');
+    out += sub('Resolver endpoint', 'Pricing for inbound and outbound endpoints used for DNS resolution between on premises and VPCs.');
+    out += table({
+      caption: '<b>Route 53 Resolver</b> hourly rate per endpoint ENI and rate per million queries through the endpoint',
+      head: [{ h: 'Region' }, { h: 'Endpoint ENI<br>hourly' }, { h: 'Endpoint ENI<br>monthly' }, { h: 'DoH endpoint ENI<br>hourly' }].concat(tierHeads(tq, 'Queries', function (t, i) { return tierN(t, i, ''); })),
+      rows: rows.map(function (r) { return { r: r.r, cells: [cell(usd(r.eni)), cell(m730(r.eni), 'm'), cell(usd(r.eniDoh))].concat(tierCells(r.q, tq.length)) }; }),
+      label: 'Route 53 Resolver pricing'
+    });
+    var se = findR(rows, 'ap-northeast-2');
+    out += notes([se ? 'Monthly example (Seoul): inbound and outbound endpoints with 2 ENIs each = 4 × ' + month(se.eni) + ' = $' + (4 * se.eni * H).toFixed(2) + ', with queries at ' + usd(tv(se.q, 0)) + ' per million.' : '', 'An endpoint requires at least 2 ENIs (IP addresses). Resolver on Outposts is published in the Price List at ' + usd(se ? se.outpost : null) + ' per hour (second-generation Outposts rack).']);
+    var tf = first(rows, 'fwQ');
+    out += sub('Resolver DNS Firewall · Profiles', null);
+    out += table({
+      caption: '<b>DNS Firewall</b> query, domain and Advanced rates and <b>Route 53 Profiles</b> rates',
+      head: [{ h: 'Region' }].concat(tierHeads(tf, 'DNS FW queries', function (t, i) { return tierN(t, i, ''); })).concat([{ h: 'Domain names<br>monthly' }, { h: 'DNS FW Advanced<br>per VPC association hour' }, { h: 'DNS FW Advanced<br>monthly' }, { h: 'Profiles base<br>hourly' }, { h: 'Profiles base<br>monthly' }, { h: 'Profile-VPC association<br>hourly beyond 100' }]),
+      rows: rows.map(function (r) { return { r: r.r, cells: tierCells(r.fwQ, tf.length).concat([cell(usd(r.fwDomain)), cell(usd(r.fwAdv)), cell(m730(r.fwAdv), 'm'), cell(usd(r.profBase)), cell(m730(r.profBase), 'm'), cell(usd(r.profAssoc))]) }; }),
+      label: 'DNS Firewall and Profiles pricing'
+    });
+    out += notes(['The DNS Firewall domain charge is a monthly rate (prorated hourly) per domain in domain lists you create; AWS managed domain lists have no domain charge.', 'The Profiles base rate includes up to 100 Profile-VPC associations per account per Region; each additional association adds an hourly charge.']);
+    if (g.gr) {
+      var gr = g.gr;
+      out += sub('Global Resolver', null);
+      out += table({
+        caption: '<b>Route 53 Global Resolver</b> hourly Region rates and query rates',
+        head: [{ h: 'Item' }, { h: 'With DNS filtering' }, { h: 'Without DNS filtering' }],
+        rows: [
+          { th: th('Base Regions (first 2, bundled)', 'Price List rate is per Region'), cells: [cell(usd(gr.BaseRegionsWithFiltering) + ' × 2 = ' + usd(2 * gr.BaseRegionsWithFiltering) + '/hour'), cell(usd(gr.BaseRegionsWithoutFiltering) + ' × 2 = ' + usd(2 * gr.BaseRegionsWithoutFiltering) + '/hour')] },
+          { th: th('Each additional Region'), cells: [cell(usd(gr.AdditionalRegionsWithFiltering) + '/hour'), cell(usd(gr.AdditionalRegionsWithoutFiltering) + '/hour')] },
+          { th: th('Queries (beyond 1 billion per deployment per month)'), cells: [cell(usd(tv(gr.Queries, 1)) + ' / 1M queries'), cell(usd(tv(gr.Queries, 1)) + ' / 1M queries')] }
+        ], geo: false, label: 'Global Resolver pricing'
+      });
+    }
+    out += notes(['Domain registration, renewal and transfer prices vary by TLD and are not in the Price List. Check the TLD list on the official pricing page.', 'DNS query logging itself is free; charges apply for the CloudWatch Logs, S3 or Firehose destination receiving the logs.']);
+    return out;
+  }
+  function paidOf(tl) { for (var i = 0; tl && i < tl.length; i++) if (tl[i][2]) return tl[i][2]; return null; }
+
+  /* ---------- Network Firewall ---------- */
+  function renderNFW() {
+    var rows = D.nfw, out = '';
+    out += sub('Pricing by Region', null);
+    out += table({
+      caption: '<b>Network Firewall</b> hourly endpoint rate (per AZ) and per-GB processing rate',
+      head: [{ h: 'Region' }, { h: 'Endpoint<br>hourly' }, { h: 'Endpoint<br>monthly' }, { h: 'Traffic processing<br>$/GB' }, { h: 'Secondary endpoint<br>hourly' }, { h: 'Secondary<br>monthly' }, { h: 'Advanced Inspection<br>additional hourly' }, { h: 'Advanced Inspection<br>monthly' }, { h: 'Active threat defense<br>additional $/GB' }],
+      rows: rows.map(function (r) { return { r: r.r, cells: [cell(usd(r.ep)), cell(m730(r.ep), 'm'), cell(usd(r.gb)), cell(usd(r.sec)), cell(m730(r.sec), 'm'), cell(usd(r.adv)), cell(m730(r.adv), 'm'), cell(usd(r.atp))] }; }),
+      label: 'Network Firewall pricing'
+    });
+    var diffTgw = rows.filter(function (r) { return r.tgwGb != null && r.tgwGb !== r.gb; });
+    var se = findR(rows, 'ap-northeast-2');
+    out += notes([
+      se ? 'Monthly example (Seoul): endpoints in 2 AZs inspecting 1 TB per month = 2 × ' + month(se.ep) + ' + 1,024 × ' + usd(se.gb) + ' = $' + (2 * se.ep * H + 1024 * se.gb).toFixed(2) + '.' : '',
+      'Advanced Inspection is an hourly charge added to the endpoint rate when TLS inspection is used. The Price List Advanced Inspection per-GB rate (<code>Advanced-Inspection-Traffic-GB-Processed</code>) is $0.00.',
+      'The processing rate for firewalls attached directly to a transit gateway (<code>Traffic-Bytes-Processed-Transit-Gateway</code>) is the same as the regular processing rate' + (diffTgw.length ? ', except in ' + diffTgw.map(function (r) { return r.r; }).join(', ') : '') + '.',
+      'NAT gateway waiver: for NAT gateways on the same path as Network Firewall in the same account and Region, NAT gateway hourly and per-GB charges are waived to the extent of Network Firewall endpoint hours and GB processed (both primary and secondary endpoints).',
+      'Managed rule groups from AWS Marketplace partners add seller charges.'
+    ]);
+    return out;
+  }
+
+  /* ---------- WAF ---------- */
+  function renderWAF() {
+    var x = D.waf, g = x.global, out = '';
+    function cells(r) {
+      return [cell(usd(r.acl)), cell(usd(r.rule)), cell(usd(r.req)), cell(usd(r.bot)), cell(usd(paidOf(r.botReq))), cell(usd(paidOf(r.botTReq))), cell(usd(r.fraud)), cell(usd(r.ddos)), cell(usd(r.ddosReq)), cell(usd(r.captcha)), cell(usd(r.challenge))];
+    }
+    var rows = (g ? [{ th: th('CloudFront (global)', 'Global'), cells: cells(g) }] : []).concat(x.rows.map(function (r) { return { r: r.r, cells: cells(r) }; }));
+    out += sub('Base charges and managed features', null);
+    out += table({
+      caption: '<b>AWS WAF</b> monthly rates (prorated hourly) and request rates. Bot Control request rates apply beyond the free amount',
+      head: [{ h: 'Region' }, { h: 'Web ACL<br>monthly' }, { h: 'Rule<br>monthly' }, { h: 'Requests<br>per million' }, { h: 'Bot Control<br>monthly' }, { h: 'Bot Common<br>per million' }, { h: 'Bot Targeted<br>per million' }, { h: 'Fraud Control<br>monthly' }, { h: 'Anti-DDoS<br>monthly' }, { h: 'Anti-DDoS requests<br>per million' }, { h: 'CAPTCHA<br>per 10,000' }, { h: 'Challenge<br>per million' }],
+      rows: rows, label: 'AWS WAF pricing'
+    });
+    var b = g || x.rows[0] || {};
+    out += notes([
+      'Request charges are free for the first ' + koN(b.botReq && b.botReq[0] ? b.botReq[0][1] : 1e7) + ' requests per month for Bot Control Common and ' + koN(b.botTReq && b.botTReq[0] ? b.botTReq[0][1] : 1e6) + ' for Targeted. The monthly subscription applies per web ACL.',
+      'Monthly example (same conditions as Case A on the official page): 1 web ACL + 19 rules you create + 10 million requests = ' + usd(b.acl) + ' + 19 × ' + usd(b.rule) + ' + 10 × ' + usd(b.req) + ' = $' + (b.acl + 19 * b.rule + 10 * b.req).toFixed(2) + '.',
+      'Adding a managed rule group to a web ACL incurs the monthly Rule charge per rule group. AWS Marketplace rule groups add seller charges.'
+    ]);
+    var w = b.wcu || {}, wk = Object.keys(w).sort(function (a, c) { return a - c; });
+    out += sub('Raising WCU and body inspection limits', 'Going beyond the defaults (1,500 WCUs, default body inspection limit) changes the request rate as follows. The rates are the same in all Regions' + (same(x.rows, 'wcu') ? '' : ' (with some Regional exceptions)') + '.');
+    out += table({
+      caption: '<b>Request</b> rate per million by web ACL WCU limit and body inspection size',
+      head: [{ h: 'Setting' }, { h: 'Requests<br>per million' }],
+      rows: [{ th: th('Default (≤ 1,500 WCU)'), cells: [cell(usd(b.req))] }].concat(wk.map(function (k) { return { th: th('≤ ' + (+k).toLocaleString('en-US') + ' WCU'), cells: [cell(usd(w[k]))] }; }))
+        .concat([['b32', 'Body inspection +16 KB (32 KB level)'], ['b48', 'Body inspection +32 KB (48 KB level)'], ['b64', 'Body inspection +48 KB (64 KB level)']].map(function (k) { return { th: th(k[1], 'added to the request rate'), cells: [cell(usd(b[k[0]]))] }; })),
+      geo: false, label: 'WAF WCU and body inspection pricing'
+    });
+    out += notes(['The Price List rate for each WCU level is the full request rate at that level. The official pricing page describes this as “an additional $0.20 per million requests for every 500 WCUs above 1,500, and an additional $0.30 for every 16 KB above the default body limit”.']);
+    if (b.fraudReq) {
+      out += sub('Fraud Control request charges', 'Monthly tiers based on the combined requests analyzed by Account Takeover Prevention and Account Creation Fraud Prevention.');
+      out += table({
+        caption: '<b>Fraud Control</b> rate per million requests analyzed (+ ' + usd(b.fraud) + ' per web ACL per month)',
+        head: [{ h: 'Monthly requests' }, { h: 'Per million' }, { h: 'Per 1,000' }],
+        rows: b.fraudReq.map(function (t, i) { return { th: th(tierN(t, i, ' requests')), cells: [cell(t[2] ? usd(t[2]) : 'Free'), cell(t[2] ? usd(t[2] / 1000) : '—')] }; }),
+        geo: false, label: 'Fraud Control pricing'
+      });
+    }
+    out += notes([
+      'For web ACLs on resources protected by Shield Advanced, web ACL, rule and basic request charges are included in the Shield Advanced subscription up to ' + koN(b.shieldFreeReq || 5e10) + ' requests per payer per month (Price List <code>ShieldProtected-*</code> = $0). Bot and Fraud Control, CAPTCHA, and charges for WCU or body limits above the default still apply.',
+      'WAF Classic rates (<code>WebACL</code>, <code>Rule</code>, <code>Request</code>) remain in the Price List but match current rates, so they are omitted from the table.'
+    ]);
+    return out;
+  }
+
+  /* ---------- Shield ---------- */
+  function renderShield() {
+    var x = D.shield, g = x.global, out = '';
+    out += sub('Subscription', null);
+    out += table({
+      caption: '<b>AWS Shield</b> subscription pricing',
+      head: [{ h: 'Item' }, { h: 'Shield Standard', n: false }, { h: 'Shield Advanced', n: false }],
+      rows: [
+        { th: th('Monthly fee'), cells: ['<td>Free</td>', '<td class="n">' + usd(g.monthly) + ' / payer account · month</td>'] },
+        { th: th('Commitment'), cells: ['<td>None</td>', '<td>1 year</td>'] },
+        { th: th('DTO usage fees'), cells: ['<td>None</td>', '<td>See table below (per GB by resource type)</td>'] },
+        { th: th('WAF requests'), cells: ['<td>Regular WAF pricing</td>', '<td>Up to 50 billion per month included for protected resources</td>'] }
+      ], geo: false, label: 'Shield subscription'
+    });
+    out += notes(['The monthly fee is the Price List <code>Shield-Monthly-Fee</code>. The commitment, included WAF requests and Shield Response Team terms are per the official pricing page; SRT support requires Business or Enterprise Support.']);
+    var T = (g.cf || []).map(function (t) { return [Math.round(t[0] / 1024) * 1024, t[1] == null ? null : Math.round(t[1] / 1024) * 1024]; });
+    out += sub('Shield Advanced data transfer out (DTO) usage fees · global', 'Per-GB rates for data out of protected CloudFront distributions and Global Accelerator (monthly tiers).');
+    out += table({
+      caption: '<b>Shield Advanced DTO</b> $/GB · CloudFront, Global Accelerator',
+      head: [{ h: 'Resource' }].concat(T.map(function (t, i) { return { h: tierLabel(t, i, T) }; })),
+      rows: [['cf', 'CloudFront'], ['ga', 'Global Accelerator']].map(function (k) { return { th: th(k[1]), cells: tierCells(g[k[0]], T.length) }; }),
+      geo: false, label: 'Shield Advanced global DTO'
+    });
+    var t0 = first(x.rows, 'elb');
+    out += sub('Shield Advanced data transfer out (DTO) usage fees · Regional', 'Per-GB rates for data out of protected ELB and Elastic IPs (EC2 · NLB).');
+    out += table({
+      caption: '<b>Shield Advanced DTO</b> $/GB · Elastic Load Balancing, Elastic IP',
+      head: [{ h: 'Region' }].concat(tierHeads(t0, 'ELB', function (t, i) { return tierLabel(t, i, t0); })).concat(tierHeads(t0, 'Elastic IP', function (t, i) { return tierLabel(t, i, t0); })),
+      rows: x.rows.map(function (r) { return { r: r.r, cells: tierCells(r.elb, t0.length).concat(tierCells(r.eip, t0.length)) }; }),
+      label: 'Shield Advanced Regional DTO'
+    });
+    out += notes(['Protecting Route 53 hosted zones has no DTO usage fee. These fees are added to each service\'s regular data transfer charges.', 'For usage above 5 PB, and for ELB and EIP usage above 1 PB, the official pricing page directs you to contact AWS.']);
+    return out;
+  }
+
+  /* ---------- Firewall Manager ---------- */
+  var FMSL = { waf: 'AWS WAF', wafClassic: 'WAF Classic', shield: 'Shield Advanced', sg: 'Security group (common)', sgContent: 'Security group (content audit)', sgUsage: 'Security group (usage audit)', nacl: 'Network ACL', nfw: 'Network Firewall', nfwImport: 'Network Firewall (import)', dnsfw: 'DNS Firewall', paloalto: 'Palo Alto Cloud NGFW', fortinet: 'Fortinet' };
+  function renderFMS() {
+    var x = D.fms, out = '';
+    function modeOf(r) { var c = {}; x.types.forEach(function (t) { if (r[t] != null) c[r[t]] = (c[r[t]] || 0) + 1; }); return +Object.keys(c).sort(function (a, b) { return c[b] - c[a]; })[0]; }
+    function exc(r, m) { return x.types.filter(function (t) { return r[t] != null && r[t] !== m; }).map(function (t) { return FMSL[t] + ' ' + usd(r[t]); }).join(', '); }
+    var rows = (x.global ? [{ th: th('CloudFront (global)', 'Global'), r0: x.global }] : []).concat(x.rows.map(function (r) { return { r: r.r, r0: r }; }));
+    out += sub('Policy pricing by Region', null);
+    out += table({
+      caption: '<b>Firewall Manager</b> monthly rate per protection policy per Region',
+      head: [{ h: 'Region' }, { h: 'Per policy<br>monthly' }, { h: 'Exceptions by policy type', n: false }, { h: 'Third-party firewall policies', n: false }],
+      rows: rows.map(function (o) {
+        var m = modeOf(o.r0), e = exc(o.r0, m), tp = ['paloalto', 'fortinet'].filter(function (t) { return o.r0[t] != null; }).map(function (t) { return FMSL[t]; }).join(', ');
+        return { r: o.r, th: o.th, cells: [cell(usd(m)), '<td>' + (e || '—') + '</td>', '<td>' + (tp || '—') + '</td>'] };
+      }), label: 'Firewall Manager pricing'
+    });
+    out += notes([
+      'Policy types: ' + x.types.map(function (t) { return FMSL[t]; }).join(', ') + '. Most Regions have the same rate regardless of type; some Regions are higher than $100.',
+      'Firewall Manager policy charges are included for Shield Advanced subscribers (official pricing page). In the Price List, Shield policies are published at the same rate as other policies.',
+      'AWS Config rules, WAF web ACLs and rules, Network Firewall endpoints and DNS Firewall rule groups created by Firewall Manager are billed at each service\'s rates.'
+    ]);
+    return out;
+  }
+
+  /* ---------- VPC Flow Logs ---------- */
+  function renderFL() {
+    var rows = D.cloudwatch.rows.filter(function (r) { return r.cw || r.s3; }), out = '';
+    var t0 = first(rows, 'cw');
+    function tl(t, i) { return tierLabel(t, i, t0); }
+    out += sub('Delivering to CloudWatch Logs', null);
+    out += table({
+      caption: '<b>Vended logs → CloudWatch Logs</b> ingestion $/GB (monthly tiers). Standard / Infrequent Access log classes',
+      head: [{ h: 'Region' }].concat(tierHeads(t0, 'Standard', tl)).concat(tierHeads(t0, 'Infrequent Access', tl)),
+      rows: rows.map(function (r) { return { r: r.r, cells: tierCells(r.cw, t0.length).concat(tierCells(r.ia, t0.length)) }; }),
+      label: 'Flow Logs CloudWatch Logs pricing'
+    });
+    out += sub('Delivering to S3 · Data Firehose', null);
+    out += table({
+      caption: '<b>Vended logs → S3 / Data Firehose</b> delivery $/GB (monthly tiers) and S3 Parquet conversion $/GB',
+      head: [{ h: 'Region' }].concat(tierHeads(t0, 'S3', tl)).concat([{ h: 'Parquet conversion<br>$/GB' }]).concat(tierHeads(t0, 'Firehose', tl)),
+      rows: rows.map(function (r) { return { r: r.r, cells: tierCells(r.s3, t0.length).concat([cell(usd(r.parquet))]).concat(tierCells(r.fh, t0.length)) }; }),
+      label: 'Flow Logs S3 and Firehose pricing'
+    });
+    var se = findR(rows, 'ap-northeast-2');
+    out += notes([
+      se ? 'Monthly example (Seoul): sending 500 GB of flow logs to CloudWatch Logs Standard = 500 × ' + usd(tv(se.cw, 0)) + ' = $' + (500 * tv(se.cw, 0)).toFixed(2) + '; sending them to S3 = $' + (500 * tv(se.s3, 0)).toFixed(2) + ' (storage extra).' : '',
+      'Price List usage types: <code>VendedLog-Bytes</code> (CloudWatch Logs Standard), <code>VendedLogIA-Bytes</code> (Infrequent Access), <code>S3-Egress-Bytes</code>, <code>FH-Egress-Bytes</code>, <code>S3-Egress-InputBytes</code> (Parquet conversion). Tiers apply to the combined vended logs usage in the Region.',
+      'CloudWatch Logs storage and Logs Insights queries, S3 storage and requests, and Firehose processing are billed separately at each service\'s rates. WAF and CloudFront logs have separate rates.'
+    ]);
+    return out;
+  }
+
+  /* ---------- Reachability Analyzer ---------- */
+  function renderRA() {
+    var rows = D.vpc.extra.filter(function (r) { return r.ra != null || r.naa != null; }), out = '';
+    out += sub('Pricing by Region', null);
+    out += table({
+      caption: '<b>Reachability Analyzer</b> rate per analysis and <b>Network Access Analyzer</b> rate per ENI analyzed',
+      head: [{ h: 'Region' }, { h: 'Reachability Analyzer<br>per analysis' }, { h: 'Network Access Analyzer<br>per ENI' }],
+      rows: rows.map(function (r) { return { r: r.r, cells: [cell(usd(r.ra)), cell(usd(r.naa))] }; }),
+      label: 'Reachability Analyzer pricing'
+    });
+    var se = findR(rows, 'ap-northeast-2');
+    out += notes([
+      se ? 'Monthly example (Seoul): 200 path analyses = 200 × ' + usd(se.ra) + ' = $' + (200 * se.ra).toFixed(2) + '; 5 Network Access Analyzer analyses on an account with 1,000 ENIs = 5,000 × ' + usd(se.naa) + ' = $' + (5000 * se.naa).toFixed(2) + '.' : '',
+      'Price List usage types: <code>Analysis-Runs</code> (Reachability Analyzer), <code>NetworkInterface-Assessment</code> (Network Access Analyzer).'
+    ]);
+    return out;
+  }
+
+  /* ---------- Network Manager ---------- */
+  function renderNM() {
+    var out = '';
+    out += sub('Free vs. paid', null);
+    out += table({
+      caption: '<b>AWS Network Manager</b> billing by feature (based on AWS documentation and blogs; no dedicated pricing page)',
+      head: [{ h: 'Feature' }, { h: 'Price', n: false }, { h: 'Basis', n: false }],
+      rows: [
+        ['Global network, Transit Gateway registration, topology · maps · dashboards', 'No additional cost', 'AWS blog: “Network Manager is free of charge”'],
+        ['Route Analyzer', 'No additional cost', 'AWS blog: “Free to use as part of AWS Transit Gateway Network Manager”'],
+        ['Viewing Infrastructure Performance', 'No additional cost', 'Documentation: “There is no cost associated with using Infrastructure Performance”'],
+        ['Infrastructure Performance CloudWatch subscription', 'CloudWatch custom metric charges', 'Documentation and blog: CloudWatch Metrics charges per published Region/AZ pair metric'],
+        ['Network Manager events', 'EventBridge and target service charges', 'AWS default events are free in EventBridge; processing targets (Lambda and so on) are charged'],
+        ['Cloud WAN, Transit Gateway, VPN, Direct Connect', 'Each service\'s pricing', 'See the respective tabs']
+      ].map(function (r) { return { th: th(esc(r[0])), cells: ['<td>' + esc(r[1]) + '</td>', '<td>' + esc(r[2]) + '</td>'] }; }),
+      geo: false, label: 'Network Manager billing breakdown'
+    });
+    var rows = D.cloudwatch.rows.filter(function (r) { return r.metric; }), t0 = first(rows, 'metric');
+    out += sub('CloudWatch custom metric pricing', 'Applies to Infrastructure Performance subscriptions and Network Flow Monitor metrics. A monthly rate per metric (prorated hourly), tiered by the number of metrics per account and Region.');
+    out += table({
+      caption: '<b>CloudWatch metrics</b> monthly rate per metric (tiered by monthly metric count)',
+      head: [{ h: 'Region' }].concat(t0.map(function (t, i) { return { h: tierN(t, i, ' metrics') }; })),
+      rows: rows.map(function (r) { return { r: r.r, cells: tierCells(r.metric, t0.length) }; }),
+      label: 'CloudWatch metric pricing'
+    });
+    out += notes(['The first ' + (D.cloudwatch.global.metricFree || 10) + ' metrics per month are free under the CloudWatch free tier (Price List <code>Global-CW:MetricMonitorUsage</code>).', 'The home Region of Network Manager is US West (Oregon), and events are also delivered to EventBridge in that Region.']);
+    return out;
+  }
+
+  /* ---------- Network Flow Monitor ---------- */
+  function renderNFM() {
+    var rows = D.cloudwatch.rows.filter(function (r) { return r.nfm != null || r.nm != null; }), out = '';
+    out += sub('Pricing by Region', null);
+    out += table({
+      caption: '<b>Network Flow Monitor</b> hourly rate per monitored resource and <b>Network Synthetic Monitor</b> hourly rate per monitored resource',
+      head: [{ h: 'Region' }, { h: 'Flow Monitor<br>per resource hour' }, { h: 'Flow Monitor<br>per resource month' }, { h: 'Synthetic Monitor<br>per resource hour' }, { h: 'Synthetic Monitor<br>monthly' }],
+      rows: rows.map(function (r) { return { r: r.r, cells: [cell(usd(r.nfm)), cell(m730(r.nfm), 'm'), cell(usd(r.nm)), cell(m730(r.nm), 'm')] }; }),
+      label: 'Network Flow Monitor pricing'
+    });
+    var n = rows.filter(function (r) { return r.nfm != null; }).length, us = findR(rows, 'us-east-1');
+    out += notes([
+      'Free tier: for the first 12 months, ' + koN(D.cloudwatch.global.nfmFreeHours || 7300) + ' resource-hours (10 resources) per month across all accounts are free (Price List <code>Global-CW:NFM-ResourceHours</code>).',
+      us && us.nfm != null ? 'Monthly example (us-east-1, same conditions as the official page example): 30 EC2 instances minus 10 free = 20 × ' + usd(us.nfm) + ' × 720 hours = $' + (20 * us.nfm * 720).toFixed(2) + '; 5 monitors × 5 metrics = 25 × $0.30 = $7.50.' : '',
+      'Network Flow Monitor is published in the Price List for only ' + n + ' Regions (empty = no SKU). Metrics published by monitors are billed at CloudWatch custom metric rates (metrics table in the Network Manager tab).',
+      'The Synthetic Monitor rate is the Price List <code>CWNMHybrid-Paid</code>. Up to 4 on-premises IPs per subnet are included in the base monitored resource.'
+    ]);
+    return out;
+  }
+
+  var RENDER = { elb: renderELB, lattice: renderLattice, apigw: renderAPIGW, cloudfront: renderCF, ga: renderGA, tgw: renderTGW, cloudwan: renderCW, privatelink: renderPL, dx: renderDX, interconnect: renderIC, s2svpn: renderS2S, clientvpn: renderCVPN, vpc: renderVPC, route53: renderR53, nfw: renderNFW, waf: renderWAF, shield: renderShield, fms: renderFMS, flowlogs: renderFL, reachability: renderRA, netmgr: renderNM, nfm: renderNFM };
+
+  /* ---------- tabs ---------- */
+  function select(id, focus) {
+    if (ALIAS[id]) id = ALIAS[id];
+    if (TABS.indexOf(id) < 0) id = DEFAULT_TAB;
+    TABS.forEach(function (t) {
+      var b = document.getElementById('tab-' + t), p = document.getElementById(t), on = t === id;
+      b.setAttribute('aria-selected', on ? 'true' : 'false'); b.tabIndex = on ? 0 : -1; p.hidden = !on;
+    });
+    syncArea(id);
+    if (focus) document.getElementById('tab-' + id).focus();
+    if (D) ensure(id);
+  }
+  var lastInArea = {};
+  function areaOf(id) { var b = document.getElementById('tab-' + id); var g = b && b.closest('.tgroup'); return g ? g.getAttribute('data-area') : null; }
+  function syncArea(id) {
+    var a = areaOf(id); lastInArea[a] = id;
+    document.querySelectorAll('#areatabs .at').forEach(function (b) { var on = b.getAttribute('data-area') === a; b.setAttribute('aria-selected', on ? 'true' : 'false'); b.tabIndex = on ? 0 : -1; });
+    document.querySelectorAll('#tabgroups .tgroup').forEach(function (g) { g.hidden = g.getAttribute('data-area') !== a; });
+  }
+  function firstIn(a) { var b = document.querySelector('#sub-' + a + ' [role="tab"]'); return b ? b.getAttribute('aria-controls') : DEFAULT_TAB; }
+  var at = document.getElementById('areatabs'), AREAS = ['app', 'edge', 'hybrid', 'fnd', 'sec', 'obs'];
+  function goArea(a, focus) {
+    var id = lastInArea[a] || firstIn(a);
+    select(id);
+    try { history.replaceState(null, '', '#' + id); } catch (er) {}
+    if (focus) document.getElementById('at-' + a).focus();
+  }
+  at.addEventListener('click', function (e) { var b = e.target.closest('.at'); if (b) goArea(b.getAttribute('data-area')); });
+  at.addEventListener('keydown', function (e) {
+    var i = AREAS.indexOf(document.activeElement.getAttribute('data-area')), n = null;
+    if (i < 0) return;
+    if (e.key === 'ArrowRight') n = (i + 1) % AREAS.length;
+    else if (e.key === 'ArrowLeft') n = (i - 1 + AREAS.length) % AREAS.length;
+    else if (e.key === 'Home') n = 0;
+    else if (e.key === 'End') n = AREAS.length - 1;
+    if (n === null) return;
+    e.preventDefault(); e.stopPropagation();
+    goArea(AREAS[n], true);
+  });
+  function ensure(id) {
+    if (rendered[id]) { applyFilter(); return; }
+    var host = document.querySelector('#' + id + ' [data-render]');
+    try { host.innerHTML = RENDER[id](); }
+    catch (e) { host.innerHTML = '<div class="status"><b>Could not render this table.</b> ' + esc(e.message) + '</div>'; }
+    rendered[id] = true;
+    if (id === 'vpc') { var s = document.getElementById('dt-from'); if (s) { s.addEventListener('change', renderDTOne); renderDTOne(); } }
+    applyFilter();
+  }
+  var tl = document.getElementById('tabgroups');
+  tl.addEventListener('click', function (e) {
+    var b = e.target.closest('[role="tab"]'); if (!b) return;
+    var id = b.getAttribute('aria-controls');
+    select(id);
+    try { history.replaceState(null, '', '#' + id); } catch (er) { location.hash = id; }
+  });
+  tl.addEventListener('keydown', function (e) {
+    var i = TABS.indexOf(document.activeElement.getAttribute('aria-controls')), n = null;
+    if (i < 0) return;
+    if (e.key === 'ArrowRight') n = (i + 1) % TABS.length;
+    else if (e.key === 'ArrowLeft') n = (i - 1 + TABS.length) % TABS.length;
+    else if (e.key === 'Home') n = 0;
+    else if (e.key === 'End') n = TABS.length - 1;
+    if (n === null) return;
+    e.preventDefault(); e.stopPropagation();          // keep presentation-mode keys from also firing
+    select(TABS[n], true);
+    try { history.replaceState(null, '', '#' + TABS[n]); } catch (er) {}
+  });
+  function fromHash() { var h = location.hash.replace('#', ''); if (ALIAS[h]) { h = ALIAS[h]; try { history.replaceState(null, '', '#' + h); } catch (er) {} } if (TABS.indexOf(h) >= 0) { select(h); return true; } return false; }
+  addEventListener('hashchange', function () {
+    if (fromHash()) { var p = document.getElementById('prices'); if (p && !document.documentElement.classList.contains('presenting')) p.scrollIntoView({ block: 'start' }); }
+  });
+  // in-page links (#dx, #vpc, old #dt …) select the tab
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a[href^="#"]'); if (!a) return;
+    var id = a.getAttribute('href').slice(1);
+    if (ALIAS[id]) id = ALIAS[id];
+    if (TABS.indexOf(id) >= 0) { e.preventDefault(); select(id); try { history.pushState(null, '', '#' + id); } catch (er) {} document.getElementById('prices').scrollIntoView({ block: 'start' }); }
+  }, true);
+
+  /* ---------- region filter ---------- */
+  var q = document.getElementById('rq'), qc = document.getElementById('rq-count');
+  function applyFilter() {
+    var v = (q.value || '').trim().toLowerCase();
+    var panel = document.querySelector('.panel:not([hidden])'); if (!panel) return;
+    var box = document.querySelector('.search'); if (box) box.hidden = !panel.querySelector('tr[data-r]');
+    var shown = 0, total = 0;
+    panel.querySelectorAll('tbody').forEach(function (tb) {
+      var any = false, rows = tb.querySelectorAll('tr[data-r]');
+      if (!rows.length) return;
+      rows.forEach(function (tr) { var ok = !v || tr.getAttribute('data-r').indexOf(v) >= 0; tr.hidden = !ok; if (ok) any = true; });
+      tb.querySelectorAll('tr.geo').forEach(function (g) {
+        var n = g.nextElementSibling, vis = false;
+        while (n && !n.classList.contains('geo') && !n.classList.contains('empty-row')) { if (!n.hidden) vis = true; n = n.nextElementSibling; }
+        g.hidden = !vis;
+      });
+      var em = tb.querySelector('.empty-row'); if (em) em.hidden = any;
+      if (tb.closest('#dt-one') || !tb.closest('details')) { total++; if (any) shown++; }
+    });
+    qc.textContent = v ? (shown ? 'Showing matching Regions only' : 'No matching Regions') : '';
+  }
+  q.addEventListener('input', applyFilter);
+
+  /* ---------- load ---------- */
+  if (fromHash()) {
+    // a tab hash would otherwise scroll to the bare panel; show the tab bar instead
+    var go = function () { if (!document.documentElement.classList.contains('presenting')) document.getElementById('prices').scrollIntoView({ block: 'start' }); };
+    requestAnimationFrame(go); addEventListener('load', go, { once: true });
+  } else select(DEFAULT_TAB);
+  var st = document.getElementById('status');
+  fetch('../../pricing/data.json', { cache: 'no-cache' }).then(function (r) {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  }).then(function (d) {
+    D = d;
+    d.regions.forEach(function (r) { REG[r.code] = r; KO[r.code] = r.name; });
+    document.getElementById('f-regions').textContent = d.regions.length;
+    document.getElementById('stamp-date').innerHTML = esc(utc(d.indexPublicationDate).slice(0, 10)) + '<small>' + esc(utc(d.indexPublicationDate).slice(11)) + '</small>';
+    var OFF = { AWSELB: 'Elastic Load Balancing', AmazonApiGateway: 'API Gateway', AmazonCloudFront: 'CloudFront', CloudFrontPlans: 'CloudFront flat-rate plans', AWSGlobalAccelerator: 'Global Accelerator', AWSDirectConnect: 'Direct Connect', AWSCloudWAN: 'Cloud WAN', AWSInterconnect: 'Interconnect', AmazonVPC: 'VPC (TGW · VPN · PrivateLink · Lattice · IPAM, etc.)', AWSDataTransfer: 'Data Transfer', NATGatewayPage: 'NAT gateway (pricing page data)', AmazonRoute53: 'Route 53', AWSNetworkFirewall: 'Network Firewall', awswaf: 'AWS WAF', AWSShield: 'AWS Shield', AWSFMS: 'Firewall Manager', AmazonCloudWatch: 'CloudWatch (Flow Logs · Flow Monitor)' };
+    document.getElementById('stamp-offers').innerHTML = Object.keys(OFF).map(function (k) {
+      var s = d.sources[k]; return s ? '<dt>' + esc(OFF[k]) + '</dt><dd>' + esc(utc(s.publicationDate)) + '</dd>' : '';
+    }).join('');
+    document.getElementById('stamp-foot').innerHTML = 'The large date is when the Price List index was published; the list shows when the current version of each service (offer) was published. NAT gateway alone shows the publication time of the official pricing page data file. data.json generated: ' + esc(utc(d.generatedAt)) + ' UTC.';
+    document.querySelectorAll('[data-src]').forEach(function (el) {
+      var s = d.sources[el.getAttribute('data-src')];
+      if (s && s.kind === 'page') el.innerHTML = 'NAT gateway: <a href="' + esc(s.page) + '" target="_blank" rel="noopener">official pricing page</a> data · ' + esc(utc(s.publicationDate)) + ' UTC';
+      else if (s) el.innerHTML = 'Price List <a href="' + esc(s.source) + '" target="_blank" rel="noopener">' + esc(el.getAttribute('data-src')) + '</a> · ' + esc(utc(s.publicationDate)) + ' UTC';
+    });
+    st.hidden = true;
+    var cur = TABS.filter(function (t) { return !document.getElementById(t).hidden; })[0] || DEFAULT_TAB;
+    ensure(cur);
+  }).catch(function (e) {
+    st.innerHTML = '<b>Could not load pricing data.</b> <code>pricing/data.json</code> must be served over HTTP (browsers block it when the file is opened directly). Run <code>python3 -m http.server</code> from the repository root and open <code>http://localhost:8000/en/pricing/</code>. (' + esc(e.message) + ')';
+    document.getElementById('stamp-date').textContent = 'No data';
+  });
+})();
+</script>
+</body>
+</html>
