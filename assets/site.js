@@ -224,7 +224,7 @@
         tools.insertBefore(pa, tools.firstChild);
       }
       // language switch: same page in the other language; remembers the choice
-      var lg = btn('lang-btn', T.lang, ICONS.lang + '<span>' + T.langCode + '</span>');
+      var lg = btn('lang-btn', T.lang, '<span>' + T.langCode + '</span>');
       lg.addEventListener('click', function () { try { localStorage.setItem(LKEY, EN ? 'ko' : 'en'); } catch (e) {} location.href = counterpart(); });
       tools.insertBefore(lg, tools.querySelector('.theme-btn'));
       if (/^https?:/.test(location.protocol)) { lg.hidden = true; fetch(counterpart().split('#')[0].split('?')[0], { method: 'HEAD', cache: 'no-cache' }).then(function (r) { lg.hidden = !r.ok; }).catch(function () {}); }
