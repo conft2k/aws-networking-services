@@ -153,6 +153,8 @@ svg .site{stroke:var(--fiber-ink);stroke-width:2;fill:none;stroke-dasharray:6 5}
 svg .lbl{fill:var(--trace);font-family:var(--mono);font-size:11px;font-weight:500}
 svg .lbl2{fill:var(--fiber-ink);font-family:var(--mono);font-size:11px;font-weight:500}
 svg .dot{fill:var(--fiber)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) svg .ic-gen{filter:invert(1)}}
+:root[data-theme="dark"] svg .ic-gen{filter:invert(1)}
 .legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--ink-2)}
 .legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--fiber)}
 .legend i.p{border-top:2px solid var(--trace)}
@@ -388,23 +390,29 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <desc id="arch-desc">온프레미스 라우터가 Direct Connect 로케이션의 크로스커넥트를 거쳐 AWS에 연결됩니다. Private VIF와 Transit VIF는 Direct Connect Gateway로, Public VIF는 Amazon S3 등 공용 서비스로 이어집니다. DX Gateway는 서울 리전의 Transit Gateway와 다른 리전의 Virtual Private Gateway로 연결됩니다. 두 번째 DX 로케이션과는 SiteLink로 연결됩니다.</desc>
             <!-- zones -->
             <rect class="zone" x="10" y="40" width="190" height="380" rx="6"/>
-            <text class="z" x="24" y="62">ON-PREMISES</text>
+            <image href="../assets/aws-icons/Corporate-data-center_32.svg" x="10" y="40" width="24" height="24"/>
+            <text class="z" x="42" y="56">ON-PREMISES</text>
             <rect class="zone" x="230" y="40" width="200" height="380" rx="6"/>
             <text class="z" x="244" y="62">DX LOCATION</text>
             <rect class="zone" x="460" y="40" width="510" height="380" rx="6"/>
-            <text class="z" x="474" y="62">AWS</text>
+            <image href="../assets/aws-icons/AWS-Cloud_32.svg" x="460" y="40" width="24" height="24"/>
+            <text class="z" x="492" y="56">AWS</text>
 
             <!-- on-prem -->
             <rect class="box" x="30" y="100" width="150" height="64" rx="4"/>
-            <text class="t" x="44" y="128">데이터센터</text><text class="s" x="44" y="148">Customer router</text>
+            <image class="ic-gen" href="../assets/aws-icons/Res_Servers_48_Light.svg" x="38" y="120" width="24" height="24"/>
+            <text class="t" x="70" y="128">데이터센터</text><text class="s" x="70" y="148">Customer router</text>
             <rect class="box" x="30" y="296" width="150" height="64" rx="4"/>
-            <text class="t" x="44" y="324">지사</text><text class="s" x="44" y="344">Branch router</text>
+            <image class="ic-gen" href="../assets/aws-icons/Res_Office-building_48_Light.svg" x="38" y="316" width="24" height="24"/>
+            <text class="t" x="70" y="324">지사</text><text class="s" x="70" y="344">Branch router</text>
 
             <!-- dx locations -->
             <rect class="box" x="250" y="100" width="160" height="64" rx="4"/>
-            <text class="t" x="264" y="128">DX 로케이션 A</text><text class="s" x="264" y="148">AWS DX endpoint</text>
+            <image href="../assets/aws-icons/Arch_AWS-Direct-Connect_48.svg" x="258" y="118" width="28" height="28"/>
+            <text class="t" x="296" y="128">DX 로케이션 A</text><text class="s" x="296" y="148">AWS DX endpoint</text>
             <rect class="box" x="250" y="296" width="160" height="64" rx="4"/>
-            <text class="t" x="264" y="324">DX 로케이션 B</text><text class="s" x="264" y="344">AWS DX endpoint</text>
+            <image href="../assets/aws-icons/Arch_AWS-Direct-Connect_48.svg" x="258" y="314" width="28" height="28"/>
+            <text class="t" x="296" y="324">DX 로케이션 B</text><text class="s" x="296" y="344">AWS DX endpoint</text>
 
             <!-- fiber cross-connects -->
             <path class="fiber" d="M180 132 H250"/>
@@ -416,25 +424,29 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
 
             <!-- DXGW -->
             <rect class="box" x="500" y="196" width="170" height="64" rx="4"/>
-            <text class="t" x="514" y="224">DX Gateway</text><text class="s" x="514" y="244">글로벌 리소스</text>
+            <image href="../assets/aws-icons/Res_AWS-Direct-Connect_Gateway_48.svg" x="510" y="214" width="28" height="28"/>
+            <text class="t" x="548" y="224">DX Gateway</text><text class="s" x="548" y="244">글로벌 리소스</text>
 
             <!-- public -->
             <rect class="box" x="500" y="88" width="170" height="64" rx="4"/>
-            <text class="t" x="514" y="116">AWS 공용 서비스</text><text class="s" x="514" y="136">Amazon S3 등</text>
+            <image href="../assets/aws-icons/Arch_Amazon-Simple-Storage-Service_48.svg" x="510" y="106" width="28" height="28"/>
+            <text class="t" x="548" y="116">AWS 공용 서비스</text><text class="s" x="548" y="136">Amazon S3 등</text>
 
             <!-- region targets -->
             <rect class="box" x="760" y="150" width="190" height="64" rx="4"/>
-            <text class="t" x="774" y="178">Transit Gateway</text><text class="s" x="774" y="198">서울 리전 · 다수 VPC</text>
+            <image href="../assets/aws-icons/Arch_AWS-Transit-Gateway_48.svg" x="770" y="168" width="28" height="28"/>
+            <text class="t" x="808" y="178">Transit Gateway</text><text class="s" x="808" y="198">서울 리전 · 다수 VPC</text>
             <rect class="box" x="760" y="250" width="190" height="64" rx="4"/>
-            <text class="t" x="774" y="278">Virtual Private GW</text><text class="s" x="774" y="298">다른 리전 · VPC</text>
+            <image href="../assets/aws-icons/Res_Amazon-VPC_VPN-Gateway_48.svg" x="770" y="268" width="28" height="28"/>
+            <text class="t" x="808" y="278">Virtual Private GW</text><text class="s" x="808" y="298">다른 리전 · VPC</text>
 
             <!-- VIF paths -->
             <path class="path" d="M410 120 H500"/>
             <text class="lbl" x="418" y="112">Public VIF</text>
             <path class="path" d="M410 148 C460 148 450 220 500 220"/>
-            <text class="lbl" x="424" y="186">Transit VIF</text>
+            <text class="lbl" x="418" y="140">Transit VIF</text>
             <path class="path" d="M410 312 C460 312 450 240 500 240"/>
-            <text class="lbl" x="424" y="292">Private VIF</text>
+            <text class="lbl" x="418" y="330">Private VIF</text>
             <path class="path" d="M670 220 C715 220 715 182 760 182"/>
             <path class="path" d="M670 236 C715 236 715 282 760 282"/>
             <text class="lbl" x="680" y="380">BGP로 경로 교환</text>

@@ -453,30 +453,40 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <title id="arch-title">Site-to-Site VPN 레퍼런스 아키텍처</title>
             <desc id="arch-desc">지사의 고객 게이트웨이가 인터넷을 거쳐 Tunnel 1과 Tunnel 2로 서울 리전 Transit Gateway에 연결됩니다. 데이터센터 라우터는 Direct Connect 로케이션의 크로스커넥트와 Transit VIF를 거쳐 DX Gateway로, DX Gateway는 Transit Gateway로 이어집니다. 데이터센터와 Transit Gateway 사이에는 Private IP VPN 터널이 Direct Connect 위로 지나갑니다. Transit Gateway는 VPC A와 VPC B에 연결됩니다.</desc>
             <rect class="zone" x="10" y="40" width="200" height="400" rx="6"/>
-            <text class="z" x="24" y="62">ON-PREMISES</text>
+            <image href="../assets/aws-icons/Corporate-data-center_32.svg" x="10" y="40" width="24" height="24"/>
+            <text class="z" x="42" y="56">ON-PREMISES</text>
             <rect class="zone" x="240" y="40" width="210" height="400" rx="6"/>
             <text class="z" x="254" y="62">TRANSPORT</text>
             <rect class="zone" x="480" y="40" width="490" height="400" rx="6"/>
-            <text class="z" x="494" y="62">AWS · SEOUL REGION</text>
+            <image href="../assets/aws-icons/Region_32.svg" x="480" y="40" width="24" height="24"/>
+            <text class="z" x="512" y="56">AWS · SEOUL REGION</text>
 
             <rect class="box" x="30" y="100" width="160" height="64" rx="4"/>
-            <text class="t" x="44" y="128">지사</text><text class="s" x="44" y="148">Customer gateway</text>
+            <image href="../assets/aws-icons/Res_Amazon-VPC_Customer-Gateway_48.svg" x="38" y="118" width="28" height="28"/>
+            <text class="t" x="74" y="128">지사</text><text class="s" x="74" y="148">Customer gateway</text>
             <rect class="box" x="30" y="300" width="160" height="64" rx="4"/>
-            <text class="t" x="44" y="328">데이터센터</text><text class="s" x="44" y="348">Customer gateway</text>
+            <image href="../assets/aws-icons/Res_Amazon-VPC_Customer-Gateway_48.svg" x="38" y="318" width="28" height="28"/>
+            <text class="t" x="74" y="328">데이터센터</text><text class="s" x="74" y="348">Customer gateway</text>
 
-            <text class="s" x="258" y="92">INTERNET</text>
+            <image class="ic-gen" href="../assets/aws-icons/Res_Internet_48_Light.svg" x="256" y="76" width="20" height="20"/>
+            <text class="s" x="282" y="90">INTERNET</text>
             <rect class="box" x="260" y="300" width="170" height="64" rx="4"/>
-            <text class="t" x="274" y="328">DX 로케이션</text><text class="s" x="274" y="348">AWS DX endpoint</text>
+            <image href="../assets/aws-icons/Arch_AWS-Direct-Connect_48.svg" x="268" y="318" width="28" height="28"/>
+            <text class="t" x="304" y="328">DX 로케이션</text><text class="s" x="304" y="348">AWS DX endpoint</text>
 
-            <rect class="box" x="510" y="196" width="170" height="64" rx="4"/>
-            <text class="t" x="524" y="224">Transit Gateway</text><text class="s" x="524" y="244">VPN · DXGW 어태치먼트</text>
-            <rect class="box" x="510" y="320" width="170" height="64" rx="4"/>
-            <text class="t" x="524" y="348">DX Gateway</text><text class="s" x="524" y="368">글로벌 리소스</text>
+            <rect class="box" x="510" y="196" width="180" height="64" rx="4"/>
+            <image href="../assets/aws-icons/Arch_AWS-Transit-Gateway_48.svg" x="518" y="214" width="28" height="28"/>
+            <text class="t" x="554" y="224">Transit Gateway</text><text class="s" x="554" y="244">VPN · DXGW 어태치먼트</text>
+            <rect class="box" x="510" y="320" width="180" height="64" rx="4"/>
+            <image href="../assets/aws-icons/Res_AWS-Direct-Connect_Gateway_48.svg" x="518" y="338" width="28" height="28"/>
+            <text class="t" x="554" y="348">DX Gateway</text><text class="s" x="554" y="368">글로벌 리소스</text>
 
             <rect class="box" x="790" y="130" width="160" height="64" rx="4"/>
-            <text class="t" x="804" y="158">VPC A</text><text class="s" x="804" y="178">10.0.0.0/16</text>
+            <image href="../assets/aws-icons/Res_Amazon-VPC_Virtual-private-cloud-VPC_48.svg" x="798" y="148" width="28" height="28"/>
+            <text class="t" x="834" y="158">VPC A</text><text class="s" x="834" y="178">10.0.0.0/16</text>
             <rect class="box" x="790" y="262" width="160" height="64" rx="4"/>
-            <text class="t" x="804" y="290">VPC B</text><text class="s" x="804" y="310">10.1.0.0/16</text>
+            <image href="../assets/aws-icons/Res_Amazon-VPC_Virtual-private-cloud-VPC_48.svg" x="798" y="280" width="28" height="28"/>
+            <text class="t" x="834" y="290">VPC B</text><text class="s" x="834" y="310">10.1.0.0/16</text>
 
             <path class="tunnel" d="M190 120 H360 C430 120 440 214 510 214"/>
             <path class="tunnel" d="M190 146 H340 C410 146 430 240 510 240"/>
@@ -487,13 +497,13 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <path class="xc" d="M190 332 H260"/>
             <path class="path" d="M430 342 H510"/>
             <text class="lbl" x="436" y="334">Transit VIF</text>
-            <path class="path" d="M595 320 V260"/>
-            <path class="path" d="M680 218 C735 218 735 162 790 162"/>
-            <path class="path" d="M680 238 C735 238 735 294 790 294"/>
-            <text class="lbl" x="700" y="380">TGW 라우팅 테이블</text>
+            <path class="path" d="M600 320 V260"/>
+            <path class="path" d="M690 218 C740 218 740 162 790 162"/>
+            <path class="path" d="M690 238 C740 238 740 294 790 294"/>
+            <text class="lbl" x="710" y="380">TGW 라우팅 테이블</text>
 
-            <path class="site" d="M110 364 V412 H640 V384"/>
-            <path class="site" d="M640 320 V266"/>
+            <path class="site" d="M110 364 V412 H650 V384"/>
+            <path class="site" d="M650 320 V266"/>
             <text class="lbl2" x="250" y="404">Private IP VPN (IPsec over DX)</text>
           </svg>
         </div>

@@ -59,7 +59,7 @@
     if (on) return; on = true;
     root.classList.add('presenting');
     bar.hidden = false;
-    show(typeof start === 'number' ? start : nearest());
+    show(typeof start === 'number' ? start : 0);   // always start from the first slide
     if (root.requestFullscreen && !document.fullscreenElement) root.requestFullscreen().catch(function () {});
   }
   function exit() {
@@ -75,12 +75,6 @@
     try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) {}
     if (s) s.scrollIntoView({ block: 'start' });
   }
-  function nearest() {                 // start from the section currently on screen
-    var best = 0;
-    slides.forEach(function (s, k) { if (s.getBoundingClientRect().top <= innerHeight * 0.4) best = k; });
-    return best;
-  }
-
   function init() {
     var main = document.querySelector('main');
     if (!main) return;

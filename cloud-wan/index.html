@@ -153,6 +153,8 @@ svg .site{stroke:var(--fiber-ink);stroke-width:2;fill:none;stroke-dasharray:6 5}
 svg .lbl{fill:var(--trace);font-family:var(--mono);font-size:11px;font-weight:500}
 svg .lbl2{fill:var(--fiber-ink);font-family:var(--mono);font-size:11px;font-weight:500}
 svg .dot{fill:var(--fiber)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) svg .ic-gen{filter:invert(1)}}
+:root[data-theme="dark"] svg .ic-gen{filter:invert(1)}
 .legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--ink-2)}
 .legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--fiber)}
 .legend i.p{border-top:2px solid var(--trace)}
@@ -443,41 +445,54 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <title id="arch-title">Cloud WAN 레퍼런스 아키텍처</title>
             <desc id="arch-desc">서울, 도쿄, 버지니아 북부 리전의 코어 네트워크 엣지가 풀 메시로 연결됩니다. 데이터센터는 Direct Connect gateway를 거쳐 hybrid 세그먼트로 들어오고, 지사의 SD-WAN은 SD-WAN VPC의 Tunnel-less Connect로 도쿄 엣지에 연결됩니다. 서울 엣지에는 prod 세그먼트 VPC가, 버지니아 엣지에는 검사 VPC로 구성된 network function group과 dev 세그먼트 VPC가, 도쿄 엣지에는 기존 Transit Gateway 피어링이 연결됩니다.</desc>
             <rect class="zone" x="10" y="40" width="150" height="380" rx="6"/>
-            <text class="z" x="24" y="62">ON-PREMISES</text>
+            <image href="../assets/aws-icons/Corporate-data-center_32.svg" x="10" y="40" width="24" height="24"/>
+            <text class="z" x="42" y="56">ON-PREMISES</text>
             <rect class="zone" x="180" y="40" width="790" height="380" rx="6"/>
-            <text class="z" x="194" y="62">AWS</text>
+            <image href="../assets/aws-icons/AWS-Cloud_32.svg" x="180" y="40" width="24" height="24"/>
+            <text class="z" x="212" y="56">AWS</text>
             <rect class="zone" x="350" y="74" width="360" height="320" rx="6"/>
             <text class="z" x="364" y="96">CORE NETWORK</text>
 
             <rect class="box" x="24" y="100" width="122" height="60" rx="4"/>
-            <text class="t" x="36" y="126">데이터센터</text><text class="s" x="36" y="146">BGP router</text>
+            <image class="ic-gen" href="../assets/aws-icons/Res_Servers_48_Light.svg" x="32" y="118" width="24" height="24"/>
+            <text class="t" x="64" y="126">데이터센터</text><text class="s" x="64" y="146">BGP router</text>
             <rect class="box" x="24" y="300" width="122" height="60" rx="4"/>
-            <text class="t" x="36" y="326">지사</text><text class="s" x="36" y="346">SD-WAN edge</text>
+            <image class="ic-gen" href="../assets/aws-icons/Res_Office-building_48_Light.svg" x="32" y="318" width="24" height="24"/>
+            <text class="t" x="64" y="326">지사</text><text class="s" x="64" y="346">SD-WAN edge</text>
 
             <rect class="box" x="196" y="100" width="136" height="60" rx="4"/>
-            <text class="t" x="208" y="126">DX Gateway</text><text class="s" x="208" y="146">seg: hybrid</text>
+            <image href="../assets/aws-icons/Res_AWS-Direct-Connect_Gateway_48.svg" x="204" y="118" width="24" height="24"/>
+            <text class="t" x="236" y="126">DX Gateway</text><text class="s" x="236" y="146">seg: hybrid</text>
             <rect class="box" x="196" y="300" width="136" height="60" rx="4"/>
-            <text class="t" x="208" y="326">SD-WAN VPC</text><text class="s" x="208" y="346">seg: hybrid</text>
+            <image href="../assets/aws-icons/Res_Amazon-VPC_Virtual-private-cloud-VPC_48.svg" x="204" y="318" width="24" height="24"/>
+            <text class="t" x="236" y="326">SD-WAN VPC</text><text class="s" x="236" y="346">seg: hybrid</text>
 
             <rect class="box" x="380" y="110" width="140" height="60" rx="4"/>
-            <text class="t" x="392" y="136">CNE 서울</text><text class="s" x="392" y="156">ap-northeast-2</text>
+            <image href="../assets/aws-icons/Res_AWS-Cloud-WAN_Core-Network-Edge_48.svg" x="388" y="128" width="24" height="24"/>
+            <text class="t" x="420" y="136">CNE 서울</text><text class="s" x="420" y="156">ap-northeast-2</text>
             <rect class="box" x="380" y="300" width="140" height="60" rx="4"/>
-            <text class="t" x="392" y="326">CNE 도쿄</text><text class="s" x="392" y="346">ap-northeast-1</text>
+            <image href="../assets/aws-icons/Res_AWS-Cloud-WAN_Core-Network-Edge_48.svg" x="388" y="318" width="24" height="24"/>
+            <text class="t" x="420" y="326">CNE 도쿄</text><text class="s" x="420" y="346">ap-northeast-1</text>
             <rect class="box" x="560" y="205" width="136" height="60" rx="4"/>
-            <text class="t" x="572" y="231">CNE 버지니아</text><text class="s" x="572" y="251">us-east-1</text>
+            <image href="../assets/aws-icons/Res_AWS-Cloud-WAN_Core-Network-Edge_48.svg" x="568" y="223" width="24" height="24"/>
+            <text class="t" x="600" y="231">CNE 버지니아</text><text class="s" x="600" y="251">us-east-1</text>
 
             <path class="fiber" d="M450 170 V300"/>
             <path class="fiber" d="M520 150 C560 150 560 205 600 205"/>
             <path class="fiber" d="M520 320 C560 320 560 265 600 265"/>
 
             <rect class="box" x="760" y="80" width="190" height="56" rx="4"/>
-            <text class="t" x="772" y="104">VPC prod</text><text class="s" x="772" y="122">seg: prod</text>
+            <image href="../assets/aws-icons/Res_Amazon-VPC_Virtual-private-cloud-VPC_48.svg" x="770" y="94" width="28" height="28"/>
+            <text class="t" x="808" y="104">VPC prod</text><text class="s" x="808" y="122">seg: prod</text>
             <rect class="box" x="760" y="160" width="190" height="56" rx="4"/>
-            <text class="t" x="772" y="184">검사 VPC</text><text class="s" x="772" y="202">NFG: inspection</text>
+            <image href="../assets/aws-icons/Res_Amazon-VPC_Virtual-private-cloud-VPC_48.svg" x="770" y="174" width="28" height="28"/>
+            <text class="t" x="808" y="184">검사 VPC</text><text class="s" x="808" y="202">NFG: inspection</text>
             <rect class="box" x="760" y="240" width="190" height="56" rx="4"/>
-            <text class="t" x="772" y="264">VPC dev</text><text class="s" x="772" y="282">seg: dev</text>
+            <image href="../assets/aws-icons/Res_Amazon-VPC_Virtual-private-cloud-VPC_48.svg" x="770" y="254" width="28" height="28"/>
+            <text class="t" x="808" y="264">VPC dev</text><text class="s" x="808" y="282">seg: dev</text>
             <rect class="box" x="760" y="330" width="190" height="56" rx="4"/>
-            <text class="t" x="772" y="354">Transit Gateway</text><text class="s" x="772" y="372">peering · seg: shared</text>
+            <image href="../assets/aws-icons/Arch_AWS-Transit-Gateway_48.svg" x="770" y="344" width="28" height="28"/>
+            <text class="t" x="808" y="354">Transit Gateway</text><text class="s" x="808" y="372">peering · seg: shared</text>
 
             <path class="path" d="M146 130 H196"/>
             <text class="lbl2" x="152" y="122">DX</text>

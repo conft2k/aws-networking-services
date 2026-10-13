@@ -448,48 +448,62 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <title id="arch-title">PrivateLink 레퍼런스 아키텍처</title>
             <desc id="arch-desc">서울 리전의 소비자 VPC에 Interface endpoint와 Resource endpoint가 있습니다. 애플리케이션과 온프레미스 데이터센터는 Interface endpoint를 거쳐, 같은 10.0.0.0/16 대역을 쓰는 공급자 VPC의 Network Load Balancer 기반 endpoint service와 서비스 대상에 연결됩니다. Resource endpoint는 다른 VPC의 resource gateway를 거쳐 데이터베이스에 연결됩니다. 다른 리전의 소비자 VPC는 리전 간 PrivateLink로 같은 endpoint service에 연결됩니다.</desc>
             <rect class="zone" x="10" y="40" width="150" height="380" rx="6"/>
-            <text class="z" x="24" y="62">ON-PREMISES</text>
+            <image href="../assets/aws-icons/Corporate-data-center_32.svg" x="10" y="40" width="24" height="24"/>
+            <text class="z" x="42" y="56">ON-PREMISES</text>
             <rect class="zone" x="190" y="40" width="260" height="380" rx="6"/>
-            <text class="z" x="204" y="62">CONSUMER VPC · 10.0.0.0/16</text>
-            <rect class="zone" x="520" y="40" width="250" height="240" rx="6"/>
-            <text class="z" x="534" y="62">PROVIDER VPC · 10.0.0.0/16</text>
-            <rect class="zone" x="520" y="300" width="250" height="120" rx="6"/>
-            <text class="z" x="534" y="322">RESOURCE VPC</text>
-            <rect class="zone" x="800" y="40" width="170" height="240" rx="6"/>
-            <text class="z" x="814" y="62">OTHER REGION</text>
+            <image href="../assets/aws-icons/Virtual-private-cloud-VPC_32.svg" x="190" y="40" width="24" height="24"/>
+            <text class="z" x="222" y="56">CONSUMER VPC · 10.0.0.0/16</text>
+            <rect class="zone" x="526" y="40" width="234" height="240" rx="6"/>
+            <image href="../assets/aws-icons/Virtual-private-cloud-VPC_32.svg" x="526" y="40" width="24" height="24"/>
+            <text class="z" x="558" y="56">PROVIDER VPC · 10.0.0.0/16</text>
+            <rect class="zone" x="526" y="300" width="444" height="120" rx="6"/>
+            <image href="../assets/aws-icons/Virtual-private-cloud-VPC_32.svg" x="526" y="300" width="24" height="24"/>
+            <text class="z" x="558" y="316">RESOURCE VPC</text>
+            <rect class="zone" x="780" y="40" width="190" height="240" rx="6"/>
+            <image href="../assets/aws-icons/Region_32.svg" x="780" y="40" width="24" height="24"/>
+            <text class="z" x="812" y="56">OTHER REGION</text>
 
-            <rect class="box" x="24" y="196" width="122" height="64" rx="4"/>
-            <text class="t" x="36" y="224">데이터센터</text><text class="s" x="36" y="244">DX · VPN</text>
+            <rect class="box" x="22" y="196" width="126" height="64" rx="4"/>
+            <image class="ic-gen" href="../assets/aws-icons/Res_Servers_48_Light.svg" x="29" y="216" width="24" height="24"/>
+            <text class="t" x="59" y="224">데이터센터</text><text class="s" x="59" y="244">DX · VPN</text>
 
             <rect class="box" x="210" y="84" width="220" height="56" rx="4"/>
-            <text class="t" x="224" y="108">애플리케이션</text><text class="s" x="224" y="126">api.example.com 호출</text>
+            <image class="ic-gen" href="../assets/aws-icons/Res_Generic-Application_48_Light.svg" x="219" y="98" width="28" height="28"/>
+            <text class="t" x="256" y="108">애플리케이션</text><text class="s" x="256" y="126">api.example.com 호출</text>
             <rect class="box" x="210" y="190" width="220" height="76" rx="4"/>
-            <text class="t" x="224" y="216">Interface endpoint</text><text class="s" x="224" y="236">ENI 10.0.1.25 · AZ a</text><text class="s" x="224" y="252">ENI 10.0.2.37 · AZ c</text>
+            <image href="../assets/aws-icons/Res_Amazon-VPC_Endpoints_48.svg" x="219" y="214" width="28" height="28"/>
+            <text class="t" x="256" y="216">Interface endpoint</text><text class="s" x="256" y="236">ENI 10.0.1.25 · AZ a</text><text class="s" x="256" y="252">ENI 10.0.2.37 · AZ c</text>
             <rect class="box" x="210" y="330" width="220" height="60" rx="4"/>
-            <text class="t" x="224" y="356">Resource endpoint</text><text class="s" x="224" y="376">TCP · DNS 이름</text>
+            <image href="../assets/aws-icons/Res_Amazon-VPC_Endpoints_48.svg" x="219" y="346" width="28" height="28"/>
+            <text class="t" x="256" y="356">Resource endpoint</text><text class="s" x="256" y="376">TCP · DNS 이름</text>
 
-            <rect class="box" x="540" y="84" width="210" height="60" rx="4"/>
-            <text class="t" x="554" y="110">Endpoint service</text><text class="s" x="554" y="130">Network Load Balancer</text>
-            <rect class="box" x="540" y="196" width="210" height="60" rx="4"/>
-            <text class="t" x="554" y="222">서비스 대상</text><text class="s" x="554" y="242">EC2 · 컨테이너</text>
+            <rect class="box" x="536" y="84" width="208" height="60" rx="4"/>
+            <image href="../assets/aws-icons/Arch_AWS-PrivateLink_48.svg" x="545" y="100" width="28" height="28"/>
+            <text class="t" x="582" y="110">Endpoint service</text><text class="s" x="582" y="130">Network Load Balancer</text>
+            <rect class="box" x="536" y="196" width="208" height="60" rx="4"/>
+            <image href="../assets/aws-icons/Arch_Amazon-EC2_48.svg" x="545" y="212" width="28" height="28"/>
+            <text class="t" x="582" y="222">서비스 대상</text><text class="s" x="582" y="242">EC2 · 컨테이너</text>
 
-            <rect class="box" x="534" y="340" width="120" height="60" rx="4"/>
-            <text class="t" x="544" y="366">Resource GW</text><text class="s" x="544" y="386">ingress</text>
-            <rect class="box" x="664" y="340" width="96" height="60" rx="4"/>
-            <text class="t" x="672" y="366">데이터베이스</text><text class="s" x="672" y="386">Amazon RDS</text>
+            <rect class="box" x="540" y="340" width="170" height="60" rx="4"/>
+            <image href="../assets/aws-icons/Arch_Amazon-VPC-Lattice_48.svg" x="549" y="356" width="28" height="28"/>
+            <text class="t" x="586" y="366">Resource GW</text><text class="s" x="586" y="386">ingress</text>
+            <rect class="box" x="740" y="340" width="210" height="60" rx="4"/>
+            <image href="../assets/aws-icons/Arch_Amazon-RDS_48.svg" x="749" y="356" width="28" height="28"/>
+            <text class="t" x="786" y="366">데이터베이스</text><text class="s" x="786" y="386">Amazon RDS</text>
 
-            <rect class="box" x="814" y="96" width="144" height="76" rx="4"/>
-            <text class="t" x="826" y="122">소비자 VPC</text><text class="s" x="826" y="142">Interface endpoint</text><text class="s" x="826" y="158">service Region 지정</text>
+            <rect class="box" x="794" y="96" width="164" height="76" rx="4"/>
+            <image href="../assets/aws-icons/Res_Amazon-VPC_Virtual-private-cloud-VPC_48.svg" x="801" y="122" width="24" height="24"/>
+            <text class="t" x="831" y="122">소비자 VPC</text><text class="s" x="831" y="142">Interface endpoint</text><text class="s" x="831" y="158">service Region 지정</text>
 
-            <path class="path" d="M146 228 H210"/>
+            <path class="path" d="M148 228 H210"/>
             <path class="path" d="M320 140 V190"/>
-            <path class="fiber" d="M430 216 C480 216 490 114 540 114"/>
-            <text class="lbl2" x="486" y="200">PrivateLink</text>
-            <path class="path" d="M645 144 V196"/>
-            <path class="fiber" d="M430 360 C480 360 490 370 534 370"/>
-            <path class="path" d="M654 370 H664"/>
-            <path class="site" d="M814 134 C790 134 780 114 750 114"/>
-            <text class="lbl2" x="814" y="196">cross-Region</text>
+            <path class="fiber" d="M430 216 C480 216 490 114 536 114"/>
+            <text class="lbl2" x="451" y="238">PrivateLink</text>
+            <path class="path" d="M640 144 V196"/>
+            <path class="fiber" d="M430 360 C480 360 490 370 540 370"/>
+            <path class="path" d="M710 370 H740"/>
+            <path class="site" d="M794 134 C770 134 765 114 744 114"/>
+            <text class="lbl2" x="794" y="196">cross-Region</text>
           </svg>
         </div>
         <figcaption class="legend">

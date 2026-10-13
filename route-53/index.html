@@ -301,7 +301,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
       <div class="hero-grid">
         <div>
           <p class="eyebrow">Amazon Route 53 · DNS · 헬스 체크 · 하이브리드 해석</p>
-          <h1>질의 하나마다 <em>정상인 응답</em>을 돌려주는 DNS</h1>
+          <h1>모든 질의에 <em>살아 있는 엔드포인트</em>로 답하는 DNS</h1>
           <p class="lede">Route 53은 퍼블릭 도메인의 권한 DNS, VPC 안의 사설 DNS, 온프레미스와 주고받는 하이브리드 DNS를 하나의 서비스에서 운영합니다. 헬스 체크 결과를 응답에 반영해 장애가 난 엔드포인트로 트래픽이 가지 않게 합니다.</p>
           <div class="cta-row">
             <a class="btn btn-primary" href="#routing">라우팅 정책 보기</a>
@@ -426,71 +426,75 @@ app.example.com.	60	IN	A	<span class="v">198.51.100.20</span></pre>
             </defs>
             <!-- zones -->
             <rect class="zone" x="10" y="40" width="180" height="400" rx="6"/>
-            <text class="z" x="24" y="62">ON-PREMISES</text>
+            <image href="../assets/aws-icons/Corporate-data-center_32.svg" x="18" y="48" width="22" height="22"/>
+            <text class="z" x="46" y="62">ON-PREMISES</text>
             <rect class="zone" x="250" y="40" width="720" height="400" rx="6"/>
-            <text class="z" x="264" y="62">AWS REGION</text>
+            <image href="../assets/aws-icons/Region_32.svg" x="258" y="48" width="22" height="22"/>
+            <text class="z" x="286" y="62">AWS REGION</text>
             <rect class="zone" x="268" y="80" width="204" height="344" rx="6"/>
-            <text class="z" x="282" y="100">SHARED SERVICES VPC</text>
+            <image href="../assets/aws-icons/Virtual-private-cloud-VPC_32.svg" x="276" y="86" width="20" height="20"/>
+            <text class="z" x="302" y="100">SHARED SERVICES VPC</text>
             <rect class="zone" x="670" y="80" width="286" height="344" rx="6"/>
-            <text class="z" x="684" y="100">WORKLOAD VPCs</text>
+            <image href="../assets/aws-icons/Virtual-private-cloud-VPC_32.svg" x="678" y="86" width="20" height="20"/>
+            <text class="z" x="704" y="100">WORKLOAD VPCs</text>
 
             <!-- DX / VPN link -->
             <path class="link" d="M220 70 V420"/>
             <text class="z" x="220" y="458" text-anchor="middle">DX / VPN</text>
 
             <!-- on-prem -->
-            <rect class="box" x="26" y="80" width="148" height="60" rx="4"/>
-            <text class="t" x="40" y="106">사내 클라이언트</text><text class="s" x="40" y="126">aws.corp.internal?</text>
-            <rect class="box" x="26" y="200" width="148" height="80" rx="4"/>
-            <text class="t" x="40" y="226">사내 DNS 서버</text><text class="s" x="40" y="246">corp.internal 권한</text><text class="s" x="40" y="264">aws.* 조건부 전달</text>
+            <rect class="box" x="18" y="80" width="164" height="60" rx="4"/>
+            <image class="ic-gen" href="../assets/aws-icons/Res_Client_48_Light.svg" x="26" y="98" width="24" height="24"/><text class="t" x="56" y="106">사내 클라이언트</text><text class="s" x="56" y="126">aws.corp.internal?</text>
+            <rect class="box" x="18" y="200" width="164" height="80" rx="4"/>
+            <image class="ic-gen" href="../assets/aws-icons/Res_Server_48_Light.svg" x="26" y="228" width="24" height="24"/><text class="t" x="56" y="226">사내 DNS 서버</text><text class="s" x="56" y="246">corp.internal 권한</text><text class="s" x="56" y="264">aws.* 조건부 전달</text>
 
             <!-- shared services VPC -->
             <text class="lbl" x="285" y="122">inbound: 온프레미스 → AWS</text>
-            <rect class="box" x="285" y="130" width="170" height="64" rx="4"/>
-            <text class="t" x="299" y="158">Inbound 엔드포인트</text><text class="s" x="299" y="178">ENI × 2 AZ</text>
-            <rect class="box" x="285" y="320" width="170" height="64" rx="4"/>
-            <text class="t" x="299" y="348">Outbound 엔드포인트</text><text class="s" x="299" y="368">ENI × 2 AZ</text>
+            <rect class="box" x="285" y="130" width="183" height="64" rx="4"/>
+            <image href="../assets/aws-icons/Res_Amazon-VPC_Elastic-Network-Interface_48.svg" x="293" y="150" width="24" height="24"/><text class="t" x="323" y="158">Inbound 엔드포인트</text><text class="s" x="323" y="178">ENI × 2 AZ</text>
+            <rect class="box" x="285" y="320" width="183" height="64" rx="4"/>
+            <image href="../assets/aws-icons/Res_Amazon-VPC_Elastic-Network-Interface_48.svg" x="293" y="340" width="24" height="24"/><text class="t" x="323" y="348">Outbound 엔드포인트</text><text class="s" x="323" y="368">ENI × 2 AZ</text>
             <text class="lbl2" x="285" y="406">outbound: AWS → 온프레미스</text>
 
             <!-- regional resolver column -->
-            <rect class="box" x="495" y="100" width="150" height="64" rx="4"/>
-            <text class="t" x="509" y="128">Private zone</text><text class="s" x="509" y="148">aws.corp.internal</text>
-            <rect class="box" x="495" y="200" width="150" height="80" rx="4"/>
-            <text class="t" x="509" y="226">VPC Resolver</text><text class="s" x="509" y="246">각 VPC의 .2 주소</text><text class="s" x="509" y="264">리전 서비스</text>
-            <rect class="box" x="495" y="320" width="150" height="64" rx="4"/>
-            <text class="t" x="509" y="348">Forwarding rule</text><text class="s" x="509" y="368">corp.internal</text>
+            <rect class="box" x="495" y="100" width="160" height="64" rx="4"/>
+            <image href="../assets/aws-icons/Res_Amazon-Route-53-Hosted-Zone_48.svg" x="503" y="120" width="24" height="24"/><text class="t" x="533" y="128">Private zone</text><text class="s" x="533" y="148">aws.corp.internal</text>
+            <rect class="box" x="495" y="200" width="160" height="80" rx="4"/>
+            <image href="../assets/aws-icons/Res_Amazon-Route-53_Resolver_48.svg" x="503" y="228" width="24" height="24"/><text class="t" x="533" y="226">VPC Resolver</text><text class="s" x="533" y="246">각 VPC의 .2 주소</text><text class="s" x="533" y="264">리전 서비스</text>
+            <rect class="box" x="495" y="320" width="160" height="64" rx="4"/>
+            <image href="../assets/aws-icons/Res_Amazon-Route-53_Route-Table_48.svg" x="503" y="340" width="24" height="24"/><text class="t" x="533" y="348">Forwarding rule</text><text class="s" x="533" y="368">corp.internal</text>
 
             <!-- workload -->
             <rect class="box" x="690" y="110" width="245" height="56" rx="4"/>
-            <text class="t" x="704" y="134">DNS Firewall</text><text class="s" x="704" y="152">Rule group · 질의 필터</text>
+            <image href="../assets/aws-icons/Res_Amazon-Route-53_Resolver-DNS-Firewall_48.svg" x="700" y="124" width="28" height="28"/><text class="t" x="736" y="134">DNS Firewall</text><text class="s" x="736" y="152">Rule group · 질의 필터</text>
             <rect class="box" x="690" y="200" width="245" height="80" rx="4"/>
-            <text class="t" x="704" y="226">워크로드 VPC A · B</text><text class="s" x="704" y="246">EC2 → VPC+2 질의</text><text class="s" x="704" y="264">10.1.0.0/16 · 10.2.0.0/16</text>
+            <image href="../assets/aws-icons/Res_Amazon-VPC_Virtual-private-cloud-VPC_48.svg" x="700" y="226" width="28" height="28"/><text class="t" x="736" y="226">워크로드 VPC A · B</text><text class="s" x="736" y="246">EC2 → VPC+2 질의</text><text class="s" x="736" y="264">10.1.0.0/16 · 10.2.0.0/16</text>
             <rect class="box" x="690" y="320" width="245" height="64" rx="4"/>
-            <text class="t" x="704" y="348">Route 53 Profile</text><text class="s" x="704" y="368">규칙·PHZ·Firewall 일괄 연결</text>
+            <image href="../assets/aws-icons/Arch_Amazon-Route-53_48.svg" x="700" y="338" width="28" height="28"/><text class="t" x="736" y="348">Route 53 Profile</text><text class="s" x="736" y="368">규칙·PHZ·Firewall 일괄 연결</text>
 
             <!-- profile associations -->
             <path class="assoc" d="M812 320 V280"/>
             <path class="assoc" d="M812 166 V200"/>
-            <path class="assoc" d="M690 352 H645"/>
+            <path class="assoc" d="M690 352 H655"/>
 
             <!-- inbound query path: on-prem -> AWS -->
             <path class="q-in" d="M100 140 V199" marker-end="url(#ah-in)"/>
             <text class="lbl" x="108" y="176">① 질의</text>
-            <path class="q-in" d="M174 222 C228 222 232 162 284 162" marker-end="url(#ah-in)"/>
+            <path class="q-in" d="M182 222 C232 222 234 162 284 162" marker-end="url(#ah-in)"/>
             <text class="lbl" x="282" y="214">② 조건부 전달</text>
-            <path class="q-in" d="M455 162 C478 162 472 225 494 225" marker-end="url(#ah-in)"/>
-            <text class="lbl" x="484" y="184">③</text>
+            <path class="q-in" d="M468 162 C484 162 478 225 494 225" marker-end="url(#ah-in)"/>
+            <text class="lbl" x="486" y="190">③</text>
             <path class="q-in" d="M570 200 V165" marker-end="url(#ah-in)"/>
             <text class="lbl" x="578" y="188">④ 조회</text>
 
             <!-- outbound query path: AWS -> on-prem -->
-            <path class="q-out" d="M690 255 H646" marker-end="url(#ah-out)"/>
-            <text class="lbl2" x="655" y="246">❶</text>
+            <path class="q-out" d="M690 255 H656" marker-end="url(#ah-out)"/>
+            <text class="lbl2" x="665" y="246">❶</text>
             <path class="q-out" d="M570 280 V319" marker-end="url(#ah-out)"/>
             <text class="lbl2" x="578" y="304">❷ 규칙 일치</text>
-            <path class="q-out" d="M495 352 H456" marker-end="url(#ah-out)"/>
-            <text class="lbl2" x="464" y="344">❸</text>
-            <path class="q-out" d="M285 362 C232 362 228 262 175 262" marker-end="url(#ah-out)"/>
+            <path class="q-out" d="M495 352 H469" marker-end="url(#ah-out)"/>
+            <text class="lbl2" x="475" y="344">❸</text>
+            <path class="q-out" d="M285 362 C234 362 232 262 183 262" marker-end="url(#ah-out)"/>
             <text class="lbl2" x="282" y="300">❹ 사내 DNS로 전달</text>
           </svg>
         </div>

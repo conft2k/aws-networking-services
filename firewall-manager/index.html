@@ -484,72 +484,84 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <rect class="zone" x="10" y="40" width="250" height="420" rx="6"/>
             <text class="z" x="24" y="62">MANAGEMENT · SECURITY</text>
             <rect class="zone" x="300" y="40" width="400" height="250" rx="6"/>
-            <text class="z" x="314" y="62">OU · PROD  (auto remediation)</text>
+            <image href="../assets/aws-icons/Res_AWS-Organizations_Organizational-Unit_48.svg" x="308" y="48" width="22" height="22"/>
+            <text class="z" x="336" y="62">OU · PROD  (auto remediation)</text>
             <rect class="zone" x="300" y="310" width="400" height="150" rx="6"/>
-            <text class="z" x="314" y="332">OU · DEV  (report only)</text>
+            <image href="../assets/aws-icons/Res_AWS-Organizations_Organizational-Unit_48.svg" x="308" y="318" width="22" height="22"/>
+            <text class="z" x="336" y="332">OU · DEV  (report only)</text>
             <rect class="zone" x="730" y="40" width="240" height="250" rx="6"/>
-            <text class="z" x="744" y="62">JOINING ACCOUNT</text>
+            <image href="../assets/aws-icons/AWS-Account_32.svg" x="738" y="48" width="22" height="22"/>
+            <text class="z" x="766" y="62">JOINING ACCOUNT</text>
             <rect class="zone" x="730" y="310" width="240" height="150" rx="6"/>
-            <text class="z" x="744" y="332">IN EVERY MEMBER ACCOUNT</text>
+            <image href="../assets/aws-icons/AWS-Account_32.svg" x="738" y="318" width="22" height="22"/>
+            <text class="z" x="766" y="332">IN EVERY MEMBER ACCOUNT</text>
 
             <!-- management / security -->
-            <rect class="box" x="30" y="80" width="210" height="56" rx="4"/>
-            <text class="t" x="44" y="104">관리 계정</text><text class="s" x="44" y="124">Organizations · 관리자 지정</text>
-            <rect class="edge" x="30" y="166" width="210" height="140" rx="4"/>
-            <text class="t" x="44" y="190">Firewall Manager</text>
-            <text class="s" x="44" y="210">security 계정 · 기본 관리자</text>
-            <text class="s" x="44" y="232">· AWS WAF policy</text>
-            <text class="s" x="44" y="250">· Security group policy</text>
-            <text class="s" x="44" y="268">· Network Firewall policy</text>
-            <text class="s" x="44" y="286">· DNS Firewall policy</text>
-            <rect class="box" x="30" y="350" width="210" height="84" rx="4"/>
-            <text class="t" x="44" y="374">Security Hub CSPM</text>
-            <text class="s" x="44" y="394">FMS findings</text>
-            <text class="s" x="44" y="412">+ SNS 위반 알림</text>
+            <rect class="box" x="20" y="80" width="230" height="56" rx="4"/>
+            <image href="../assets/aws-icons/Res_AWS-Organizations_Management-Account_48.svg" x="30" y="94" width="28" height="28"/>
+            <text class="t" x="66" y="104">관리 계정</text><text class="s" x="66" y="124">Organizations · 관리자 지정</text>
+            <rect class="edge" x="20" y="166" width="230" height="140" rx="4"/>
+            <image href="../assets/aws-icons/Arch_AWS-Firewall-Manager_48.svg" x="30" y="176" width="28" height="28"/>
+            <text class="t" x="66" y="190">Firewall Manager</text>
+            <text class="s" x="66" y="210">security 계정 · 기본 관리자</text>
+            <text class="s" x="66" y="232">· AWS WAF policy</text>
+            <text class="s" x="66" y="250">· Security group policy</text>
+            <text class="s" x="66" y="268">· Network Firewall policy</text>
+            <text class="s" x="66" y="286">· DNS Firewall policy</text>
+            <rect class="box" x="20" y="350" width="230" height="84" rx="4"/>
+            <image href="../assets/aws-icons/Arch_AWS-Security-Hub_48.svg" x="30" y="360" width="28" height="28"/>
+            <text class="t" x="66" y="374">Security Hub CSPM</text>
+            <text class="s" x="66" y="394">FMS findings</text>
+            <text class="s" x="66" y="412">+ SNS 위반 알림</text>
             <path class="path" d="M135 136 V166"/>
 
             <!-- prod accounts -->
             <rect class="box" x="330" y="80" width="340" height="88" rx="4"/>
-            <text class="t" x="344" y="104">계정 A · payments</text>
-            <text class="s" x="344" y="124">ALB ← FMS 관리 web ACL</text>
-            <text class="s" x="344" y="142">VPC · NFW 엔드포인트 (distributed)</text>
-            <text class="lbl" x="344" y="160">COMPLIANT</text>
+            <image href="../assets/aws-icons/Res_AWS-Organizations_Account_48.svg" x="340" y="90" width="28" height="28"/>
+            <text class="t" x="376" y="104">계정 A · payments</text>
+            <text class="s" x="376" y="124">ALB ← FMS 관리 web ACL</text>
+            <text class="s" x="376" y="142">VPC · NFW 엔드포인트 (distributed)</text>
+            <text class="lbl" x="376" y="160">COMPLIANT</text>
             <rect class="box" x="330" y="186" width="340" height="88" rx="4"/>
-            <text class="t" x="344" y="210">계정 B · orders</text>
-            <text class="s" x="344" y="230">sg-0a1b · 0.0.0.0/0 → tcp/22</text>
-            <text class="s" x="344" y="248">content audit 위반 → 규칙 제거</text>
-            <text class="lbl3" x="344" y="266">NON-COMPLIANT → 자동 수정</text>
+            <image href="../assets/aws-icons/Res_AWS-Organizations_Account_48.svg" x="340" y="196" width="28" height="28"/>
+            <text class="t" x="376" y="210">계정 B · orders</text>
+            <text class="s" x="376" y="230">sg-0a1b · 0.0.0.0/0 → tcp/22</text>
+            <text class="s" x="376" y="248">content audit 위반 → 규칙 제거</text>
+            <text class="lbl3" x="376" y="266">NON-COMPLIANT → 자동 수정</text>
 
             <!-- dev account -->
             <rect class="box" x="330" y="350" width="340" height="84" rx="4"/>
-            <text class="t" x="344" y="374">계정 C · sandbox</text>
-            <text class="s" x="344" y="394">미사용 보안 그룹 3개 (usage audit)</text>
-            <text class="lbl3" x="344" y="414">NON-COMPLIANT · 변경 없음</text>
+            <image href="../assets/aws-icons/Res_AWS-Organizations_Account_48.svg" x="340" y="360" width="28" height="28"/>
+            <text class="t" x="376" y="374">계정 C · sandbox</text>
+            <text class="s" x="376" y="394">미사용 보안 그룹 3개 (usage audit)</text>
+            <text class="lbl3" x="376" y="414">NON-COMPLIANT · 변경 없음</text>
 
             <!-- joining account -->
             <rect class="box" x="750" y="96" width="200" height="72" rx="4"/>
-            <text class="t" x="764" y="122">새 계정 D</text>
-            <text class="s" x="764" y="142">Prod OU로 이동</text>
-            <text class="s" x="764" y="158">→ 범위 평가 후 자동 적용</text>
+            <image href="../assets/aws-icons/Res_AWS-Organizations_Account_48.svg" x="760" y="106" width="28" height="28"/>
+            <text class="t" x="796" y="122">새 계정 D</text>
+            <text class="s" x="796" y="142">Prod OU로 이동</text>
+            <text class="s" x="796" y="158">→ 범위 평가 후 자동 적용</text>
             <path class="path" d="M750 132 H700"/>
             <text class="lbl" x="752" y="196">OU 가입</text>
 
             <!-- config -->
             <rect class="box" x="750" y="350" width="200" height="84" rx="4"/>
-            <text class="t" x="764" y="374">AWS Config</text>
-            <text class="s" x="764" y="394">리소스 변경 기록</text>
-            <text class="s" x="764" y="412">FMS Config 규칙 평가</text>
+            <image href="../assets/aws-icons/Arch_AWS-Config_48.svg" x="760" y="360" width="28" height="28"/>
+            <text class="t" x="796" y="374">AWS Config</text>
+            <text class="s" x="796" y="394">리소스 변경 기록</text>
+            <text class="s" x="796" y="412">FMS Config 규칙 평가</text>
             <path class="path" d="M750 392 H670" stroke-dasharray="3 4"/>
 
             <!-- policy push -->
-            <path class="site" d="M240 200 C285 200 285 124 330 124"/>
-            <path class="fiber" d="M240 236 C285 236 285 230 330 230"/>
-            <path class="site" d="M240 272 C285 272 285 392 330 392"/>
-            <text class="lbl2" x="250" y="160">배포</text>
-            <text class="lbl2" x="250" y="225">자동 수정</text>
+            <path class="site" d="M250 200 C285 200 285 124 330 124"/>
+            <path class="fiber" d="M250 236 C285 236 285 230 330 230"/>
+            <path class="site" d="M250 272 C285 272 285 392 330 392"/>
+            <text class="lbl2" x="256" y="160">배포</text>
+            <text class="lbl2" x="258" y="219">자동 수정</text>
 
             <!-- findings back -->
-            <path class="path" d="M330 420 C290 420 280 400 240 400"/>
+            <path class="path" d="M330 420 C290 420 285 400 250 400"/>
             <text class="lbl" x="252" y="446">findings</text>
           </svg>
         </div>

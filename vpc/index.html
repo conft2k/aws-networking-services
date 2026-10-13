@@ -439,12 +439,15 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <title id="arch-title">Amazon VPC 레퍼런스 아키텍처</title>
             <desc id="arch-desc">서울 리전의 VPC 10.0.0.0/16에 인터넷 게이트웨이가 붙어 있습니다. VPC는 가용 영역 a와 c로 나뉘고, 각 AZ에 퍼블릭, 앱, 데이터 서브넷이 있습니다. 퍼블릭 서브넷에는 NAT 게이트웨이와 ALB 노드가 있고 인터넷 게이트웨이와 연결됩니다. 앱 서브넷은 같은 AZ의 NAT 게이트웨이로 아웃바운드 트래픽을 보내고, 인터페이스 엔드포인트로 AWS 서비스 API에 접근합니다. 데이터 서브넷은 게이트웨이 엔드포인트로 S3에 접근합니다. VPC는 피어링이나 Transit Gateway로 다른 VPC와 온프레미스에 연결됩니다.</desc>
             <rect class="box" x="300" y="10" width="160" height="40" rx="4"/>
-            <text class="t" x="380" y="35" text-anchor="middle">Internet</text>
+            <image class="ic-gen" href="../assets/aws-icons/Res_Internet_48_Light.svg" x="310" y="18" width="24" height="24"/>
+            <text class="t" x="394" y="35" text-anchor="middle">Internet</text>
 
             <rect class="zone" x="10" y="70" width="960" height="450" rx="6"/>
-            <text class="z" x="24" y="90">AWS · SEOUL REGION</text>
+            <image href="../assets/aws-icons/Region_32.svg" x="10" y="70" width="22" height="22"/>
+            <text class="z" x="40" y="86">AWS · SEOUL REGION</text>
             <rect class="zone" x="30" y="100" width="700" height="405" rx="6"/>
-            <text class="z" x="44" y="124">VPC 10.0.0.0/16</text>
+            <image href="../assets/aws-icons/Virtual-private-cloud-VPC_32.svg" x="30" y="100" width="22" height="22"/>
+            <text class="z" x="60" y="116">VPC 10.0.0.0/16</text>
 
             <rect class="zone" x="50" y="140" width="320" height="345" rx="6"/>
             <text class="z" x="64" y="160">AZ a</text>
@@ -452,28 +455,38 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <text class="z" x="404" y="160">AZ c</text>
 
             <rect class="box" x="320" y="82" width="120" height="40" rx="4"/>
-            <text class="t" x="380" y="107" text-anchor="middle">IGW</text>
+            <image href="../assets/aws-icons/Res_Amazon-VPC_Internet-Gateway_48.svg" x="328" y="90" width="24" height="24"/>
+            <text class="t" x="392" y="107" text-anchor="middle">IGW</text>
 
             <rect class="box" x="70" y="170" width="280" height="70" rx="4"/>
-            <text class="t" x="84" y="198">Public 10.0.0.0/24</text><text class="s" x="84" y="220">NAT gateway · ALB node</text>
+            <image href="../assets/aws-icons/Public-subnet_32.svg" x="80" y="191" width="28" height="28"/>
+            <text class="t" x="118" y="198">Public 10.0.0.0/24</text><text class="s" x="118" y="220">NAT gateway · ALB node</text>
             <rect class="box" x="70" y="280" width="280" height="70" rx="4"/>
-            <text class="t" x="84" y="308">App 10.0.16.0/20</text><text class="s" x="84" y="330">EC2 · EKS node · SG app</text>
+            <image href="../assets/aws-icons/Private-subnet_32.svg" x="80" y="301" width="28" height="28"/>
+            <text class="t" x="118" y="308">App 10.0.16.0/20</text><text class="s" x="118" y="330">EC2 · EKS node · SG app</text>
             <rect class="box" x="70" y="390" width="280" height="70" rx="4"/>
-            <text class="t" x="84" y="418">Data 10.0.64.0/24</text><text class="s" x="84" y="440">RDS · SG db · NACL data</text>
+            <image href="../assets/aws-icons/Private-subnet_32.svg" x="80" y="411" width="28" height="28"/>
+            <text class="t" x="118" y="418">Data 10.0.64.0/24</text><text class="s" x="118" y="440">RDS · SG db · NACL data</text>
 
             <rect class="box" x="410" y="170" width="280" height="70" rx="4"/>
-            <text class="t" x="424" y="198">Public 10.0.1.0/24</text><text class="s" x="424" y="220">NAT gateway · ALB node</text>
+            <image href="../assets/aws-icons/Public-subnet_32.svg" x="420" y="191" width="28" height="28"/>
+            <text class="t" x="458" y="198">Public 10.0.1.0/24</text><text class="s" x="458" y="220">NAT gateway · ALB node</text>
             <rect class="box" x="410" y="280" width="280" height="70" rx="4"/>
-            <text class="t" x="424" y="308">App 10.0.32.0/20</text><text class="s" x="424" y="330">EC2 · EKS node · SG app</text>
+            <image href="../assets/aws-icons/Private-subnet_32.svg" x="420" y="301" width="28" height="28"/>
+            <text class="t" x="458" y="308">App 10.0.32.0/20</text><text class="s" x="458" y="330">EC2 · EKS node · SG app</text>
             <rect class="box" x="410" y="390" width="280" height="70" rx="4"/>
-            <text class="t" x="424" y="418">Data 10.0.65.0/24</text><text class="s" x="424" y="440">RDS · SG db · NACL data</text>
+            <image href="../assets/aws-icons/Private-subnet_32.svg" x="420" y="411" width="28" height="28"/>
+            <text class="t" x="458" y="418">Data 10.0.65.0/24</text><text class="s" x="458" y="440">RDS · SG db · NACL data</text>
 
-            <rect class="box" x="760" y="160" width="190" height="60" rx="4"/>
-            <text class="t" x="774" y="186">다른 VPC · 온프레미스</text><text class="s" x="774" y="206">pcx · tgw 경로</text>
-            <rect class="box" x="760" y="285" width="190" height="60" rx="4"/>
-            <text class="t" x="774" y="311">AWS 서비스 API</text><text class="s" x="774" y="331">interface endpoint</text>
-            <rect class="box" x="760" y="395" width="190" height="60" rx="4"/>
-            <text class="t" x="774" y="421">Amazon S3</text><text class="s" x="774" y="441">gateway endpoint</text>
+            <rect class="box" x="750" y="160" width="210" height="60" rx="4"/>
+            <image href="../assets/aws-icons/Res_Amazon-VPC_Peering-Connection_48.svg" x="759" y="176" width="28" height="28"/>
+            <text class="t" x="796" y="186">다른 VPC · 온프레미스</text><text class="s" x="796" y="206">pcx · tgw 경로</text>
+            <rect class="box" x="750" y="285" width="210" height="60" rx="4"/>
+            <image href="../assets/aws-icons/Res_Amazon-VPC_Endpoints_48.svg" x="759" y="301" width="28" height="28"/>
+            <text class="t" x="796" y="311">AWS 서비스 API</text><text class="s" x="796" y="331">interface endpoint</text>
+            <rect class="box" x="750" y="395" width="210" height="60" rx="4"/>
+            <image href="../assets/aws-icons/Arch_Amazon-Simple-Storage-Service_48.svg" x="759" y="411" width="28" height="28"/>
+            <text class="t" x="796" y="421">Amazon S3</text><text class="s" x="796" y="441">gateway endpoint</text>
 
             <path class="fiber" d="M380 50 V82"/>
             <path class="fiber" d="M355 122 C355 150 210 140 210 170"/>
@@ -484,9 +497,9 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <path class="site" d="M550 280 V240"/>
             <text class="lbl2" x="560" y="265">0/0 → nat-c</text>
 
-            <path class="path" d="M730 190 H760"/>
-            <path class="path" d="M690 315 H760"/>
-            <path class="path" d="M690 425 H760"/>
+            <path class="path" d="M730 190 H750"/>
+            <path class="path" d="M690 315 H750"/>
+            <path class="path" d="M690 425 H750"/>
           </svg>
         </div>
         <figcaption class="legend">

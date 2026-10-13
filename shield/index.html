@@ -416,62 +416,79 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <desc id="arch-desc">사용자와 공격 트래픽이 인터넷에서 들어옵니다. DNS 질의는 Shield Advanced로 보호하는 Route 53 hosted zone이 받습니다. 웹 트래픽은 Shield Advanced와 AWS WAF web ACL이 연결된 CloudFront 배포를 거쳐 리전의 Application Load Balancer 오리진과 EC2로 갑니다. TCP와 UDP 트래픽은 보호된 Global Accelerator standard accelerator를 거쳐 Network Load Balancer와 EC2로 갑니다. 공격 트래픽은 엣지에서 흡수되고 완화됩니다. Shield Advanced 제어 영역에는 Shield Response Team, Route 53 헬스 체크, 보호 그룹, CloudWatch 지표가 있으며 헬스 체크가 진입점의 상태를 감지에 반영합니다.</desc>
             <!-- zones -->
             <rect class="zone" x="10" y="150" width="180" height="280" rx="6"/>
-            <text class="z" x="24" y="172">INTERNET</text>
+            <image class="ic-gen" href="../assets/aws-icons/Res_Internet_48_Light.svg" x="18" y="158" width="22" height="22"/>
+            <text class="z" x="46" y="172">INTERNET</text>
             <rect class="zone" x="220" y="40" width="300" height="390" rx="6"/>
-            <text class="z" x="234" y="62">AWS EDGE · SHIELD ADVANCED</text>
-            <rect class="zone" x="560" y="40" width="410" height="110" rx="6"/>
-            <text class="z" x="574" y="62">DETECTION · RESPONSE</text>
-            <rect class="zone" x="560" y="170" width="410" height="260" rx="6"/>
-            <text class="z" x="574" y="192">AWS REGION</text>
+            <image href="../assets/aws-icons/AWS-Cloud_32.svg" x="228" y="48" width="22" height="22"/>
+            <text class="z" x="256" y="62">AWS EDGE · SHIELD ADVANCED</text>
+            <rect class="zone" x="545" y="40" width="425" height="110" rx="6"/>
+            <text class="z" x="559" y="62">DETECTION · RESPONSE</text>
+            <rect class="zone" x="545" y="170" width="425" height="260" rx="6"/>
+            <image href="../assets/aws-icons/Region_32.svg" x="553" y="178" width="22" height="22"/>
+            <text class="z" x="581" y="192">AWS REGION</text>
 
             <!-- internet -->
-            <rect class="box" x="30" y="200" width="140" height="60" rx="4"/>
-            <text class="t" x="44" y="226">사용자</text><text class="s" x="44" y="245">client</text>
-            <rect class="box" x="30" y="340" width="140" height="60" rx="4"/>
-            <text class="t" x="44" y="366">공격 트래픽</text><text class="s" x="44" y="385">flood · reflection</text>
+            <rect class="box" x="20" y="200" width="166" height="60" rx="4"/>
+            <image class="ic-gen" href="../assets/aws-icons/Res_Users_48_Light.svg" x="27" y="218" width="24" height="24"/>
+            <text class="t" x="58" y="226">사용자</text><text class="s" x="58" y="245">client</text>
+            <rect class="box" x="20" y="340" width="166" height="60" rx="4"/>
+            <image class="ic-gen" href="../assets/aws-icons/Res_Client_48_Light.svg" x="27" y="358" width="24" height="24"/>
+            <text class="t" x="58" y="366">공격 트래픽</text><text class="s" x="58" y="385">flood · reflection</text>
 
             <!-- edge -->
             <rect class="edge" x="250" y="80" width="240" height="56" rx="4"/>
-            <text class="t" x="264" y="104">Route 53 hosted zone</text><text class="s" x="264" y="123">L3/L4 보호</text>
+            <image href="../assets/aws-icons/Res_Amazon-Route-53-Hosted-Zone_48.svg" x="260" y="94" width="28" height="28"/>
+            <text class="t" x="296" y="104">Route 53 hosted zone</text><text class="s" x="296" y="123">L3/L4 보호</text>
             <rect class="edge" x="250" y="190" width="240" height="84" rx="4"/>
-            <text class="t" x="264" y="214">CloudFront + AWS WAF</text>
-            <text class="s" x="264" y="234">web ACL · rate-based rules</text>
-            <text class="lbl2" x="264" y="258">Anti-DDoS rule group</text>
+            <image href="../assets/aws-icons/Arch_Amazon-CloudFront_48.svg" x="260" y="200" width="28" height="28"/>
+            <image href="../assets/aws-icons/Arch_AWS-WAF_48.svg" x="260" y="236" width="28" height="28"/>
+            <text class="t" x="296" y="214">CloudFront + AWS WAF</text>
+            <text class="s" x="296" y="234">web ACL · rate-based rules</text>
+            <text class="lbl2" x="296" y="258">Anti-DDoS rule group</text>
             <rect class="edge" x="250" y="320" width="240" height="70" rx="4"/>
-            <text class="t" x="264" y="346">Global Accelerator</text><text class="s" x="264" y="366">standard · TCP/UDP</text>
+            <image href="../assets/aws-icons/Arch_AWS-Global-Accelerator_48.svg" x="260" y="341" width="28" height="28"/>
+            <text class="t" x="296" y="346">Global Accelerator</text><text class="s" x="296" y="366">standard · TCP/UDP</text>
 
-            <path class="usr" d="M170 220 C210 220 210 108 250 108"/>
-            <path class="usr" d="M170 232 H250"/>
-            <path class="usr" d="M170 248 C210 248 210 346 250 346"/>
-            <path class="atk" d="M170 370 C215 370 215 258 250 258"/>
-            <path class="atk" d="M170 378 H250"/>
+            <path class="usr" d="M186 220 C218 220 218 108 250 108"/>
+            <path class="usr" d="M186 232 H250"/>
+            <path class="usr" d="M186 248 C218 248 218 346 250 346"/>
+            <path class="atk" d="M186 370 C218 370 218 258 250 258"/>
+            <path class="atk" d="M186 378 H250"/>
             <text class="lbl3" x="236" y="420">엣지에서 흡수 · 완화</text>
 
             <!-- detection -->
-            <rect class="box" x="580" y="76" width="120" height="58" rx="4"/>
-            <text class="t" x="592" y="100">SRT</text><text class="s" x="592" y="119">DRT role · 연락</text>
-            <rect class="box" x="712" y="76" width="120" height="58" rx="4"/>
-            <text class="t" x="724" y="100">Health check</text><text class="s" x="724" y="119">Route 53</text>
-            <rect class="box" x="844" y="76" width="112" height="58" rx="4"/>
-            <text class="t" x="856" y="100">CloudWatch</text><text class="s" x="856" y="119">DDoSDetected</text>
+            <rect class="box" x="555" y="76" width="137" height="58" rx="4"/>
+            <image href="../assets/aws-icons/Arch_AWS-Shield_48.svg" x="563" y="93" width="24" height="24"/>
+            <text class="t" x="593" y="100">SRT</text><text class="s" x="593" y="119">DRT role · 연락</text>
+            <rect class="box" x="698" y="76" width="131" height="58" rx="4"/>
+            <image href="../assets/aws-icons/Arch_Amazon-Route-53_48.svg" x="706" y="93" width="24" height="24"/>
+            <text class="t" x="736" y="100">Health check</text><text class="s" x="736" y="119">Route 53</text>
+            <rect class="box" x="835" y="76" width="125" height="58" rx="4"/>
+            <image href="../assets/aws-icons/Arch_Amazon-CloudWatch_48.svg" x="843" y="93" width="24" height="24"/>
+            <text class="t" x="873" y="100">CloudWatch</text><text class="s" x="873" y="119">DDoSDetected</text>
 
             <!-- region -->
-            <rect class="box" x="590" y="210" width="170" height="64" rx="4"/>
-            <text class="t" x="604" y="236">ALB</text><text class="s" x="604" y="256">오리진 · CloudFront만 허용</text>
-            <rect class="box" x="590" y="330" width="170" height="64" rx="4"/>
-            <text class="t" x="604" y="356">NLB + Elastic IP</text><text class="s" x="604" y="376">EIP로 보호</text>
+            <rect class="box" x="560" y="210" width="210" height="64" rx="4"/>
+            <image href="../assets/aws-icons/Res_Elastic-Load-Balancing_Application-Load-Balancer_48.svg" x="570" y="228" width="28" height="28"/>
+            <text class="t" x="606" y="236">ALB</text><text class="s" x="606" y="256">오리진 · CloudFront만 허용</text>
+            <rect class="box" x="560" y="330" width="210" height="64" rx="4"/>
+            <image href="../assets/aws-icons/Res_Elastic-Load-Balancing_Network-Load-Balancer_48.svg" x="570" y="348" width="28" height="28"/>
+            <image href="../assets/aws-icons/Res_Amazon-EC2_Elastic-IP-Address_48.svg" x="602" y="348" width="28" height="28"/>
+            <text class="t" x="638" y="356">NLB + Elastic IP</text><text class="s" x="638" y="376">EIP로 보호</text>
             <rect class="box" x="800" y="210" width="150" height="64" rx="4"/>
-            <text class="t" x="814" y="236">EC2</text><text class="s" x="814" y="256">웹 서버</text>
+            <image href="../assets/aws-icons/Arch_Amazon-EC2_48.svg" x="810" y="228" width="28" height="28"/>
+            <text class="t" x="846" y="236">EC2</text><text class="s" x="846" y="256">웹 서버</text>
             <rect class="box" x="800" y="330" width="150" height="64" rx="4"/>
-            <text class="t" x="814" y="356">EC2</text><text class="s" x="814" y="376">게임 · API 서버</text>
+            <image href="../assets/aws-icons/Arch_Amazon-EC2_48.svg" x="810" y="348" width="28" height="28"/>
+            <text class="t" x="846" y="356">EC2</text><text class="s" x="846" y="376">게임 · API 서버</text>
 
-            <path class="fiber" d="M490 232 H590"/>
-            <path class="fiber" d="M490 355 C540 355 540 362 590 362"/>
-            <path class="path" d="M760 242 H800"/>
-            <path class="path" d="M760 362 H800"/>
-            <path class="path" d="M772 134 V160 C772 176 740 176 700 190 L675 210" stroke-dasharray="6 5"/>
-            <text class="lbl" x="780" y="160">헬스 기반 감지</text>
-            <text class="lbl" x="500" y="222">정상 트래픽</text>
+            <path class="fiber" d="M490 232 H560"/>
+            <path class="fiber" d="M490 355 C525 355 525 362 560 362"/>
+            <path class="path" d="M770 242 H800"/>
+            <path class="path" d="M770 362 H800"/>
+            <path class="path" d="M763 134 V160 C763 176 740 176 700 190 L665 210" stroke-dasharray="6 5"/>
+            <text class="lbl" x="771" y="160">헬스 기반 감지</text>
+            <text class="lbl" x="487" y="222">정상 트래픽</text>
           </svg>
         </div>
         <figcaption class="legend">

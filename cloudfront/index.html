@@ -410,38 +410,40 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <text class="z" x="194" y="62">CLOUDFRONT</text>
             <text class="z" x="194" y="404">SHIELD STANDARD 기본 적용</text>
             <rect class="zone" x="740" y="40" width="230" height="380" rx="6"/>
-            <text class="z" x="754" y="62">ORIGIN REGION</text>
+            <image href="../assets/aws-icons/Region_32.svg" x="748" y="48" width="22" height="22"/>
+            <text class="z" x="776" y="62">ORIGIN REGION</text>
 
             <!-- viewers -->
-            <rect class="box" x="26" y="196" width="118" height="64" rx="4"/>
-            <text class="t" x="40" y="224">사용자</text><text class="s" x="40" y="244">HTTP/3 · IPv6</text>
+            <rect class="box" x="18" y="196" width="134" height="64" rx="4"/>
+            <image class="ic-gen" href="../assets/aws-icons/Res_Users_48_Light.svg" x="26" y="216" width="24" height="24"/>
+            <text class="t" x="56" y="224">사용자</text><text class="s" x="56" y="244">HTTP/3 · IPv6</text>
 
             <!-- edge tiers -->
             <rect class="box" x="200" y="100" width="150" height="56" rx="4"/>
-            <text class="t" x="214" y="124">AWS WAF</text><text class="s" x="214" y="142">web ACL</text>
+            <image href="../assets/aws-icons/Arch_AWS-WAF_48.svg" x="210" y="114" width="28" height="28"/><text class="t" x="246" y="124">AWS WAF</text><text class="s" x="246" y="142">web ACL</text>
             <rect class="box" x="200" y="196" width="150" height="64" rx="4"/>
-            <text class="t" x="214" y="224">Edge location</text><text class="s" x="214" y="244">POP · 엣지 함수</text>
+            <image href="../assets/aws-icons/Res_Amazon-CloudFront_Edge-Location_48.svg" x="210" y="214" width="28" height="28"/><text class="t" x="246" y="224">Edge location</text><text class="s" x="246" y="244">POP · 엣지 함수</text>
             <rect class="box" x="380" y="196" width="150" height="64" rx="4"/>
-            <text class="t" x="394" y="224">Regional edge</text><text class="s" x="394" y="244">공유 캐시</text>
-            <rect class="box" x="560" y="196" width="140" height="64" rx="4"/>
-            <text class="t" x="574" y="224">Origin Shield</text><text class="s" x="574" y="244">선택 · 리전 1곳</text>
+            <image href="../assets/aws-icons/Arch_Amazon-CloudFront_48.svg" x="390" y="214" width="28" height="28"/><text class="t" x="426" y="224">Regional edge</text><text class="s" x="426" y="244">공유 캐시</text>
+            <rect class="box" x="560" y="196" width="152" height="64" rx="4"/>
+            <image href="../assets/aws-icons/Arch_Amazon-CloudFront_48.svg" x="570" y="214" width="28" height="28"/><text class="t" x="606" y="224">Origin Shield</text><text class="s" x="606" y="244">선택 · 리전 1곳</text>
 
             <!-- origin group -->
             <rect class="zone" x="756" y="84" width="198" height="300" rx="6"/>
             <text class="z" x="768" y="104">ORIGIN GROUP</text>
             <rect class="box" x="770" y="120" width="170" height="72" rx="4"/>
-            <text class="t" x="784" y="146">ALB · Primary</text><text class="s" x="784" y="164">VPC origin</text><text class="s" x="784" y="180">사설 서브넷</text>
+            <image href="../assets/aws-icons/Res_Elastic-Load-Balancing_Application-Load-Balancer_48.svg" x="780" y="142" width="28" height="28"/><text class="t" x="816" y="146">ALB · Primary</text><text class="s" x="816" y="164">VPC origin</text><text class="s" x="816" y="180">사설 서브넷</text>
             <rect class="box" x="770" y="290" width="170" height="72" rx="4"/>
-            <text class="t" x="784" y="316">S3 · Secondary</text><text class="s" x="784" y="334">OAC 서명 요청</text><text class="s" x="784" y="350">비공개 버킷</text>
+            <image href="../assets/aws-icons/Res_Amazon-Simple-Storage-Service_Bucket_48.svg" x="780" y="312" width="28" height="28"/><text class="t" x="816" y="316">S3 · Secondary</text><text class="s" x="816" y="334">OAC 서명 요청</text><text class="s" x="816" y="350">비공개 버킷</text>
 
             <!-- request path -->
-            <path class="fiber" d="M144 228 H200"/>
+            <path class="fiber" d="M152 228 H200"/>
             <path class="fiber" d="M350 228 H380"/>
             <path class="fiber" d="M530 228 H560"/>
-            <path class="fiber" d="M700 220 C735 220 735 156 770 156"/>
+            <path class="fiber" d="M712 220 C741 220 741 156 770 156"/>
             <path class="path" d="M275 196 V156"/>
             <text class="lbl" x="284" y="182">검사</text>
-            <path class="site" d="M700 236 C735 236 735 326 770 326"/>
+            <path class="site" d="M712 236 C741 236 741 326 770 326"/>
             <text class="lbl2" x="796" y="250">Failover</text>
             <text class="lbl2" x="796" y="266">지정한 상태 코드</text>
             <text class="lbl" x="200" y="300">캐시 미스일 때만 다음 계층으로</text>

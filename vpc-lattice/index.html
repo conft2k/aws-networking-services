@@ -481,17 +481,22 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <rect class="zone" x="270" y="40" width="320" height="400" rx="6"/>
             <text class="z" x="284" y="62">SERVICE NETWORK · AWS_IAM</text>
             <rect class="zone" x="620" y="40" width="350" height="220" rx="6"/>
-            <text class="z" x="634" y="62">ACCOUNT B · 서비스 소유자</text>
+            <image href="../assets/aws-icons/AWS-Account_32.svg" x="620" y="40" width="24" height="24"/>
+            <text class="z" x="652" y="56">ACCOUNT B · 서비스 소유자</text>
             <rect class="zone" x="620" y="280" width="350" height="160" rx="6"/>
-            <text class="z" x="634" y="302">ACCOUNT C · DB VPC</text>
+            <image href="../assets/aws-icons/AWS-Account_32.svg" x="620" y="280" width="24" height="24"/>
+            <text class="z" x="652" y="296">ACCOUNT C · DB VPC</text>
 
             <!-- clients -->
             <rect class="box" x="30" y="96" width="180" height="64" rx="4"/>
-            <text class="t" x="44" y="124">클라이언트 VPC</text><text class="s" x="44" y="144">EC2 · 컨테이너</text>
+            <image href="../assets/aws-icons/Res_Amazon-VPC_Virtual-private-cloud-VPC_48.svg" x="38" y="114" width="28" height="28"/>
+            <text class="t" x="74" y="124">클라이언트 VPC</text><text class="s" x="74" y="144">EC2 · 컨테이너</text>
             <rect class="box" x="30" y="206" width="180" height="64" rx="4"/>
-            <text class="t" x="44" y="234">연결용 VPC</text><text class="s" x="44" y="254">SN endpoint</text>
+            <image href="../assets/aws-icons/Res_Amazon-VPC_Virtual-private-cloud-VPC_48.svg" x="38" y="224" width="28" height="28"/>
+            <text class="t" x="74" y="234">연결용 VPC</text><text class="s" x="74" y="254">SN endpoint</text>
             <rect class="box" x="30" y="350" width="180" height="64" rx="4"/>
-            <text class="t" x="44" y="378">온프레미스</text><text class="s" x="44" y="398">데이터센터</text>
+            <image class="ic-gen" href="../assets/aws-icons/Res_Servers_48_Light.svg" x="38" y="368" width="28" height="28"/>
+            <text class="t" x="74" y="378">온프레미스</text><text class="s" x="74" y="398">데이터센터</text>
             <path class="site" d="M120 350 V270"/>
             <text class="lbl2" x="128" y="316">DX · VPN</text>
 
@@ -503,32 +508,39 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
 
             <!-- services in SN -->
             <rect class="box" x="300" y="96" width="260" height="60" rx="4"/>
-            <text class="t" x="314" y="122">orders</text><text class="s" x="314" y="142">HTTPS:443 · path 규칙</text>
+            <image href="../assets/aws-icons/Arch_Amazon-VPC-Lattice_48.svg" x="308" y="112" width="28" height="28"/>
+            <text class="t" x="344" y="122">orders</text><text class="s" x="344" y="142">HTTPS:443 · path 규칙</text>
             <rect class="box" x="300" y="172" width="260" height="60" rx="4"/>
-            <text class="t" x="314" y="198">inventory</text><text class="s" x="314" y="218">HTTP:80 · 가중치 forward</text>
+            <image href="../assets/aws-icons/Arch_Amazon-VPC-Lattice_48.svg" x="308" y="188" width="28" height="28"/>
+            <text class="t" x="344" y="198">inventory</text><text class="s" x="344" y="218">HTTP:80 · 가중치 forward</text>
             <rect class="box" x="300" y="280" width="260" height="60" rx="4"/>
-            <text class="t" x="314" y="306">rds-primary</text><text class="s" x="314" y="326">resource configuration · TCP</text>
+            <image href="../assets/aws-icons/Arch_Amazon-VPC-Lattice_48.svg" x="308" y="296" width="28" height="28"/>
+            <text class="t" x="344" y="306">rds-primary</text><text class="s" x="344" y="326">resource configuration · TCP</text>
             <text class="s" x="300" y="392">auth policy: service network + 서비스</text>
             <text class="s" x="300" y="412">access logs: CloudWatch · S3 · Firehose</text>
 
             <!-- account B -->
             <rect class="box" x="650" y="96" width="290" height="60" rx="4"/>
-            <text class="t" x="664" y="122">Target group · IP</text><text class="s" x="664" y="142">EKS Pod · ECS 작업</text>
+            <image href="../assets/aws-icons/Arch_Amazon-Elastic-Kubernetes-Service_48.svg" x="658" y="112" width="28" height="28"/>
+            <text class="t" x="694" y="122">Target group · IP</text><text class="s" x="694" y="142">EKS Pod · ECS 작업</text>
             <rect class="box" x="650" y="172" width="290" height="60" rx="4"/>
-            <text class="t" x="664" y="198">Target group · Lambda</text><text class="s" x="664" y="218">Lambda 함수</text>
+            <image href="../assets/aws-icons/Res_AWS-Lambda_Lambda-Function_48.svg" x="658" y="188" width="28" height="28"/>
+            <text class="t" x="694" y="198">Target group · Lambda</text><text class="s" x="694" y="218">Lambda 함수</text>
             <path class="path" d="M560 126 H650"/>
             <path class="path" d="M560 202 H650"/>
             <text class="lbl" x="568" y="118">RAM</text>
             <text class="lbl" x="568" y="194">RAM</text>
 
             <!-- account C -->
-            <rect class="box" x="650" y="318" width="130" height="60" rx="4"/>
-            <text class="t" x="664" y="344">Resource GW</text><text class="s" x="664" y="364">ENI 집합</text>
-            <rect class="box" x="810" y="318" width="130" height="60" rx="4"/>
-            <text class="t" x="824" y="344">Amazon RDS</text><text class="s" x="824" y="364">TCP 5432</text>
-            <path class="path" d="M560 310 C605 310 605 348 650 348"/>
+            <rect class="box" x="640" y="318" width="160" height="60" rx="4"/>
+            <image href="../assets/aws-icons/Arch_Amazon-VPC-Lattice_48.svg" x="648" y="334" width="28" height="28"/>
+            <text class="t" x="684" y="344">Resource GW</text><text class="s" x="684" y="364">ENI 집합</text>
+            <rect class="box" x="815" y="318" width="145" height="60" rx="4"/>
+            <image href="../assets/aws-icons/Arch_Amazon-RDS_48.svg" x="823" y="334" width="28" height="28"/>
+            <text class="t" x="859" y="344">Amazon RDS</text><text class="s" x="859" y="364">TCP 5432</text>
+            <path class="path" d="M560 310 C600 310 600 348 640 348"/>
             <text class="lbl" x="568" y="302">RAM</text>
-            <path class="path" d="M780 348 H810"/>
+            <path class="path" d="M800 348 H815"/>
           </svg>
         </div>
         <figcaption class="legend">

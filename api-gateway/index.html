@@ -454,48 +454,51 @@ Accept: application/json</pre>
             <desc id="arch-desc">온프레미스 사내 클라이언트가 Direct Connect로 소비자 VPC에 연결되고, Route 53 Resolver inbound 엔드포인트로 API 이름을 해석합니다. 소비자 VPC의 애플리케이션과 온프레미스 클라이언트는 execute-api 인터페이스 엔드포인트로 사설 REST API를 호출합니다. 사설 REST API는 resource policy로 허용된 VPC 엔드포인트의 요청만 받고, Lambda 함수로 프록시 통합하거나 VPC link를 거쳐 사설 서브넷의 ALB 또는 NLB로 전달합니다.</desc>
             <!-- zones -->
             <rect class="zone" x="10" y="40" width="180" height="380" rx="6"/>
-            <text class="z" x="24" y="62">ON-PREMISES</text>
+            <image href="../assets/aws-icons/Corporate-data-center_32.svg" x="18" y="48" width="22" height="22"/>
+            <text class="z" x="46" y="62">ON-PREMISES</text>
             <rect class="zone" x="210" y="40" width="760" height="380" rx="6"/>
-            <text class="z" x="224" y="62">AWS REGION</text>
+            <image href="../assets/aws-icons/Region_32.svg" x="218" y="48" width="22" height="22"/>
+            <text class="z" x="246" y="62">AWS REGION</text>
             <rect class="zone" x="230" y="80" width="250" height="320" rx="6"/>
-            <text class="z" x="244" y="100">CONSUMER VPC</text>
+            <image href="../assets/aws-icons/Virtual-private-cloud-VPC_32.svg" x="238" y="86" width="20" height="20"/>
+            <text class="z" x="264" y="100">CONSUMER VPC</text>
             <rect class="zone" x="500" y="80" width="220" height="320" rx="6"/>
             <text class="z" x="514" y="100">API GATEWAY</text>
             <rect class="zone" x="740" y="80" width="220" height="320" rx="6"/>
             <text class="z" x="754" y="100">BACKEND</text>
 
             <!-- on-prem -->
-            <rect class="box" x="28" y="190" width="144" height="64" rx="4"/>
-            <text class="t" x="42" y="218">사내 클라이언트</text><text class="s" x="42" y="238">사내 DNS 사용</text>
+            <rect class="box" x="20" y="190" width="156" height="64" rx="4"/>
+            <image class="ic-gen" href="../assets/aws-icons/Res_Client_48_Light.svg" x="28" y="210" width="24" height="24"/><text class="t" x="58" y="218">사내 클라이언트</text><text class="s" x="58" y="238">사내 DNS 사용</text>
 
             <!-- consumer vpc -->
-            <rect class="box" x="250" y="112" width="210" height="56" rx="4"/>
-            <text class="t" x="264" y="136">애플리케이션</text><text class="s" x="264" y="154">10.0.1.0/24</text>
-            <rect class="box" x="250" y="190" width="210" height="64" rx="4"/>
-            <text class="t" x="264" y="218">Interface endpoint</text><text class="s" x="264" y="238">execute-api · Private DNS</text>
-            <rect class="box" x="250" y="300" width="210" height="64" rx="4"/>
-            <text class="t" x="264" y="328">Resolver inbound</text><text class="s" x="264" y="348">온프레미스 이름 해석</text>
+            <rect class="box" x="244" y="112" width="226" height="56" rx="4"/>
+            <image class="ic-gen" href="../assets/aws-icons/Res_Generic-Application_48_Light.svg" x="254" y="128" width="24" height="24"/><text class="t" x="286" y="136">애플리케이션</text><text class="s" x="286" y="154">10.0.1.0/24</text>
+            <rect class="box" x="244" y="190" width="226" height="64" rx="4"/>
+            <image href="../assets/aws-icons/Res_Amazon-VPC_Endpoints_48.svg" x="254" y="210" width="24" height="24"/><text class="t" x="286" y="218">Interface endpoint</text><text class="s" x="286" y="238">execute-api · Private DNS</text>
+            <rect class="box" x="244" y="300" width="226" height="64" rx="4"/>
+            <image href="../assets/aws-icons/Res_Amazon-Route-53_Resolver_48.svg" x="254" y="320" width="24" height="24"/><text class="t" x="286" y="328">Resolver inbound</text><text class="s" x="286" y="348">온프레미스 이름 해석</text>
 
             <!-- api gateway -->
             <rect class="box" x="515" y="190" width="190" height="64" rx="4"/>
-            <text class="t" x="529" y="218">Private REST API</text><text class="s" x="529" y="238">aws:SourceVpce 정책</text>
+            <image href="../assets/aws-icons/Arch_Amazon-API-Gateway_48.svg" x="525" y="208" width="28" height="28"/><text class="t" x="561" y="218">Private REST API</text><text class="s" x="561" y="238">aws:SourceVpce 정책</text>
             <rect class="box" x="515" y="300" width="190" height="64" rx="4"/>
-            <text class="t" x="529" y="328">VPC link</text><text class="s" x="529" y="348">VPC link v2</text>
+            <image href="../assets/aws-icons/Arch_Amazon-API-Gateway_48.svg" x="525" y="318" width="28" height="28"/><text class="t" x="561" y="328">VPC link</text><text class="s" x="561" y="348">VPC link v2</text>
 
             <!-- backend -->
             <rect class="box" x="755" y="112" width="190" height="64" rx="4"/>
-            <text class="t" x="769" y="140">Lambda</text><text class="s" x="769" y="160">AWS_PROXY</text>
+            <image href="../assets/aws-icons/Res_AWS-Lambda_Lambda-Function_48.svg" x="765" y="130" width="28" height="28"/><text class="t" x="801" y="140">Lambda</text><text class="s" x="801" y="160">AWS_PROXY</text>
             <rect class="box" x="755" y="300" width="190" height="64" rx="4"/>
-            <text class="t" x="769" y="328">ALB · NLB</text><text class="s" x="769" y="348">사설 서브넷</text>
+            <image href="../assets/aws-icons/Arch_Elastic-Load-Balancing_48.svg" x="765" y="318" width="28" height="28"/><text class="t" x="801" y="328">ALB · NLB</text><text class="s" x="801" y="348">사설 서브넷</text>
 
             <!-- links -->
-            <path class="fiber" d="M172 222 H250"/>
-            <text class="lbl2" x="178" y="212">DX</text>
-            <path class="site" d="M100 254 V332 H250"/>
+            <path class="fiber" d="M176 222 H244"/>
+            <text class="lbl2" x="182" y="212">DX</text>
+            <path class="site" d="M100 254 V332 H244"/>
             <text class="lbl2" x="108" y="300">DNS 질의</text>
             <path class="path" d="M355 168 V190"/>
-            <path class="path" d="M460 222 H515"/>
-            <text class="lbl" x="466" y="212">HTTPS</text>
+            <path class="path" d="M470 222 H515"/>
+            <text class="lbl" x="474" y="212">HTTPS</text>
             <path class="path" d="M705 210 C730 210 730 144 755 144"/>
             <path class="path" d="M610 254 V300"/>
             <path class="path" d="M705 332 H755"/>

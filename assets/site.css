@@ -21,3 +21,6 @@ html.presenting .present-bar:not([hidden]){display:flex;position:fixed;left:50%;
 html.presenting .present-progress{display:block;position:fixed;top:0;left:0;height:4px;background:var(--fiber);z-index:50;transition:width .25s ease}
 @media (prefers-reduced-motion:reduce){html.presenting .present-progress{transition:none}}
 @media print{.nav-tools,.present-bar,.present-progress{display:none!important}}
+/* official generic icons ship only as _Light (dark glyph); invert them on dark backgrounds */
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ic-gen{filter:invert(1)}}
+:root[data-theme="dark"] .ic-gen{filter:invert(1)}
