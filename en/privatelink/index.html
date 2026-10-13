@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AWS PrivateLink Overview</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+body{margin:0}img{max-width:100%}[hidden]{display:none!important}
+
+/* Layout: a cross-connect work order. Cool steel paper, navy ink, Amazon orange as the one accent; section tags read like fiber labels. */
+:root{
+  --bg:#EEF1F4; --surface:#FFFFFF; --sunken:#E3E8ED;
+  --ink:#14202E; --ink-2:#44515F; --ink-3:#5A6672;
+  --line:#CDD5DD; --line-2:#B4BFCA;
+  --fiber:#FF9900;          /* Amazon orange — fills only */
+  --fiber-ink:#B35C00;      /* orange-derived, AA on light surfaces */
+  --fiber-soft:#FFF0D9;
+  --on-fiber:#14202E;
+  --trace:#2E7D9A;          /* secondary line color for diagram paths */
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --maxw:1120px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--fiber-ink);outline-offset:3px;border-radius:2px}
+.skip-link{position:absolute;left:16px;top:-60px;background:var(--fiber);color:var(--on-fiber);padding:8px 14px;font-weight:700;z-index:50;text-decoration:none}
+.skip-link:focus{top:12px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.wrap{max-width:var(--maxw);margin:0 auto;padding-inline:24px}
+section{padding-block:88px;border-top:1px solid var(--line)}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.25}
+h2{font-size:clamp(26px,3.4vw,36px);font-weight:700;letter-spacing:-.01em}
+h3{font-size:18px;font-weight:700}
+p{margin:0}
+.lede{color:var(--ink-2);max-width:62ch;margin-top:14px}
+.num{font-family:var(--display);font-variant-numeric:tabular-nums lining-nums}
+.mono{font-family:var(--mono)}
+
+/* fiber label: the section tag */
+.tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-bottom:14px}
+.tag::before{content:"";width:22px;height:8px;background:var(--fiber);border-radius:1px}
+
+/* nav */
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:60px}
+.brand{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.02em;text-decoration:none;text-transform:uppercase}
+.brand span{color:var(--fiber-ink)}
+.navlinks{display:flex;gap:22px;font-size:14px;align-items:center}
+.navlinks a{text-decoration:none;color:var(--ink-2)}
+.navlinks a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;font-weight:700;font-size:15px;text-decoration:none;border-radius:4px;border:1px solid transparent;transition:transform .15s ease,background .15s ease}
+.btn-primary{background:var(--fiber);color:var(--on-fiber)}
+.btn-primary:hover{transform:translateY(-1px)}
+.btn-ghost{border-color:var(--line-2);color:var(--ink)}
+.btn-ghost:hover{background:var(--sunken)}
+.navlinks .btn{min-height:38px;padding:0 14px;font-size:14px;color:var(--on-fiber)}
+
+/* hero */
+.hero{padding-block:72px 64px;border-top:0}
+.hero-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:56px;align-items:center}
+.eyebrow{font-family:var(--mono);font-size:13px;color:var(--fiber-ink);letter-spacing:.04em}
+.hero h1{font-size:clamp(34px,5vw,56px);font-weight:700;letter-spacing:-.02em;margin-top:16px}
+.hero h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--fiber) 62%,var(--fiber) 90%,transparent 90%);padding-inline:2px}
+.hero .lede{font-size:18px}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+
+/* hero visual: port faceplate */
+.faceplate{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px}
+.faceplate-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.ports{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+.port{border:1px solid var(--line);border-radius:4px;padding:14px 14px 12px;background:var(--sunken);display:flex;flex-direction:column;gap:2px}
+.port .num{font-size:40px;font-weight:600;line-height:1}
+.port .num small{font-size:18px;color:var(--ink-2);margin-left:2px}
+.port .optic{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+.port .led{width:8px;height:8px;border-radius:50%;background:var(--fiber);align-self:flex-end;margin-top:-6px;animation:blink 2.4s ease-in-out infinite}
+.port:nth-child(2) .led{animation-delay:.6s}.port:nth-child(3) .led{animation-delay:1.2s}.port:nth-child(4) .led{animation-delay:1.8s}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.faceplate-foot{margin-top:14px;font-size:13px;color:var(--ink-2)}
+
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:56px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.chip{padding:18px 20px;border-left:1px solid var(--line);min-width:0}
+.chip:first-child{border-left:0}
+.chip .num{font-size:34px;font-weight:600;line-height:1.1}
+.chip p{font-size:13.5px;color:var(--ink-2);margin-top:4px}
+
+/* value */
+.split{display:grid;grid-template-columns:1fr 1.4fr;gap:56px}
+.pillars{display:grid;gap:0;border-top:1px solid var(--line-2)}
+.pillar{display:grid;grid-template-columns:120px 1fr;gap:20px;padding-block:22px;border-bottom:1px solid var(--line)}
+.pillar .k{font-family:var(--display);font-size:22px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--fiber-ink)}
+.pillar p{color:var(--ink-2);margin-top:6px}
+
+/* stack (L1/L2/L3) */
+.stack{margin-top:40px;display:grid;gap:10px}
+.layer{display:grid;grid-template-columns:96px 1fr 1.2fr;gap:24px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px 24px}
+.layer .lv{font-family:var(--display);font-size:44px;font-weight:700;line-height:.9}
+.layer .lv small{display:block;font-family:var(--mono);font-size:11px;font-weight:400;color:var(--ink-3);letter-spacing:.06em;margin-top:8px;text-transform:uppercase}
+.layer p{color:var(--ink-2);margin-top:6px;font-size:15px}
+.specs{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+.specs code{font-family:var(--mono);font-size:12.5px;background:var(--sunken);border:1px solid var(--line);padding:3px 8px;border-radius:3px;color:var(--ink)}
+
+/* features */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:40px}
+.feature{background:var(--surface);padding:26px 24px;min-width:0}
+.feature .ft{font-family:var(--mono);font-size:11.5px;color:var(--fiber-ink);letter-spacing:.06em;text-transform:uppercase}
+.feature h3{margin-top:8px}
+.feature p{color:var(--ink-2);font-size:15px;margin-top:8px}
+
+/* table */
+.tbl-wrap{margin-top:36px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:14px 18px;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--sunken)}
+tbody tr:last-child td{border-bottom:0}
+td.row-h{font-weight:700;width:22%}
+td .num{font-size:18px;font-weight:600}
+
+/* architecture */
+.arch{margin-top:36px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px}
+.arch-scroll{overflow-x:auto}
+.arch svg{display:block;width:100%;min-width:860px;height:auto}
+.arch-hint{display:none;font-size:13px;color:var(--ink-3);margin-top:10px}
+svg .box{fill:var(--sunken);stroke:var(--line-2)}
+svg .zone{fill:none;stroke:var(--line-2);stroke-dasharray:4 4}
+svg .t{fill:var(--ink);font-family:var(--sans);font-size:14px;font-weight:700}
+svg .s{fill:var(--ink-3);font-family:var(--mono);font-size:11px}
+svg .z{fill:var(--ink-2);font-family:var(--mono);font-size:11px;letter-spacing:.08em}
+svg .fiber{stroke:var(--fiber);stroke-width:5;fill:none;stroke-linecap:round}
+svg .path{stroke:var(--trace);stroke-width:2;fill:none}
+svg .site{stroke:var(--fiber-ink);stroke-width:2;fill:none;stroke-dasharray:6 5}
+svg .lbl{fill:var(--trace);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .lbl2{fill:var(--fiber-ink);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .dot{fill:var(--fiber)}
+svg .ah-p{fill:var(--trace)}
+svg .ah-f{fill:var(--fiber)}
+svg .ah-s{fill:var(--fiber-ink)}
+.legend i.dir{position:relative;width:26px}
+.legend i.dir::after{content:"";position:absolute;right:-3px;top:-6px;border-left:8px solid var(--trace);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.legend i.f.dir::after{top:-7px;border-left-color:var(--fiber)}
+.legend i.t.dir::after{top:-6.5px;border-left-color:var(--fiber)}
+.legend i.s.dir::after{border-left-color:var(--fiber-ink)}
+.legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--ink-2)}
+.legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--fiber)}
+.legend i.p{border-top:2px solid var(--trace)}
+.legend i.s{border-top:2px dashed var(--fiber-ink)}
+
+/* steps */
+.steps{list-style:none;padding:0;margin:40px 0 0;display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:4px solid var(--fiber)}
+.steps li{padding:20px 18px 0 0;min-width:0}
+.steps .num{font-size:15px;font-weight:600;color:var(--fiber-ink);letter-spacing:.06em}
+.steps h3{font-size:16px;margin-top:6px}
+.steps p{font-size:14px;color:var(--ink-2);margin-top:6px}
+
+/* resiliency */
+.res{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:36px}
+.res-card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:26px}
+.res-card .num{font-size:52px;font-weight:700;line-height:1}
+.res-card .num small{font-size:20px;color:var(--ink-2)}
+.res-card h3{margin-top:10px}
+.res-card p{color:var(--ink-2);font-size:15px;margin-top:6px}
+.res-card.max{border-color:var(--fiber);box-shadow:inset 0 4px 0 var(--fiber)}
+
+/* cta */
+.cta{text-align:center}
+.cta h2{max-width:22ch;margin:0 auto}
+.cta .lede{margin:14px auto 0}
+.cta .cta-row{justify-content:center}
+footer{border-top:1px solid var(--line);padding-block:28px;font-size:13px;color:var(--ink-3)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+
+@media (max-width:1024px){
+  .hero-grid,.split{grid-template-columns:1fr;gap:40px}
+  .features{grid-template-columns:repeat(2,1fr)}
+  .steps{grid-template-columns:repeat(2,1fr);border-top:0;gap:0 24px}
+  .steps li{border-top:4px solid var(--fiber);padding-bottom:24px}
+  .layer{grid-template-columns:80px 1fr}
+  .layer .specs{grid-column:2}
+  .chips{grid-template-columns:repeat(2,1fr)}
+  .chip:nth-child(3){border-left:0}
+  .chip:nth-child(n+3){border-top:1px solid var(--line)}
+}
+@media (max-width:640px){
+  .wrap{padding-inline:18px}
+  section{padding-block:60px}
+  .navlinks a:not(.btn){display:none}
+  .features,.res{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr}
+  .pillar{grid-template-columns:1fr;gap:0}
+  .layer{grid-template-columns:1fr;gap:12px}
+  .layer .specs{grid-column:auto}
+  .cta-row .btn{width:100%}
+  .arch-hint{display:block}
+  table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  table,tbody,tr,td{display:block;width:100%}
+  tr{border-bottom:1px solid var(--line);padding:14px 16px}
+  tbody tr:last-child{border-bottom:0}
+  td{border:0;padding:3px 0}
+  td.row-h{width:100%;font-size:16px;padding-bottom:6px}
+  td[data-k]::before{content:attr(data-k);display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+
+/* ---- service-specific ---- */
+/* PrivateLink: hero endpoint object + provider/consumer split */
+.vpce{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px;min-width:0}
+.vpce-head{display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.vpce-head .ok{display:inline-flex;align-items:center;gap:6px;color:var(--fiber-ink)}
+.vpce-head .ok::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--fiber);animation:blink 2.4s ease-in-out infinite}
+.enis{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+.eni{border:1px solid var(--line);border-radius:4px;padding:14px;background:var(--sunken);min-width:0}
+.eni .az{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.eni .ip{display:block;font-family:var(--display);font-size:30px;font-weight:600;line-height:1.1;margin-top:4px;font-variant-numeric:tabular-nums}
+.eni .id{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);overflow-wrap:anywhere}
+.dns{margin-top:12px;border:1px solid var(--line);border-radius:4px;background:var(--sunken);padding:12px 14px;font-family:var(--mono);font-size:12px;color:var(--ink-2);overflow-wrap:anywhere}
+.dns b{display:block;font-weight:500;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:2px}
+.dns span{color:var(--ink)}
+.flow{margin-top:12px;display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;color:var(--ink-2);flex-wrap:wrap}
+.flow .pill{border:1px solid var(--line-2);border-radius:3px;padding:3px 8px;color:var(--ink)}
+.flow .pill.svc{background:var(--fiber);border-color:var(--fiber);color:var(--on-fiber)}
+.flow .arr{color:var(--trace)}
+
+.roles{margin-top:40px;display:grid;grid-template-columns:1fr auto 1fr;gap:0;align-items:stretch}
+.role{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:24px;min-width:0}
+.role .who{font-family:var(--display);font-size:24px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--fiber-ink)}
+.role h3{margin-top:4px}
+.role ul{list-style:none;padding:0;margin:14px 0 0;display:grid;gap:10px}
+.role li{display:grid;grid-template-columns:auto 1fr;gap:10px;color:var(--ink-2);font-size:15px}
+.role li code{font-family:var(--mono);font-size:12px;background:var(--sunken);border:1px solid var(--line);padding:1px 7px;border-radius:3px;color:var(--ink);align-self:start;margin-top:2px}
+.bridge{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:0 18px;min-width:120px}
+.bridge .line{width:100%;height:4px;background:var(--fiber);border-radius:2px;position:relative}
+.bridge .line::after{content:"";position:absolute;right:-12px;top:-5px;border:7px solid transparent;border-left-color:var(--fiber)}
+.bridge span{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);text-align:center}
+@media (max-width:1024px){
+  .roles{grid-template-columns:1fr;gap:0}
+  .bridge{flex-direction:row;padding:14px 0;min-width:0}
+  .bridge .line{width:4px;height:36px;flex:none}
+  .bridge .line::after{right:auto;left:-5px;top:auto;bottom:-12px;border-left-color:transparent;border-top-color:var(--fiber)}
+}
+@media (max-width:640px){
+  .vpce{padding:16px}
+  .eni .ip{font-size:24px}
+  .role{padding:20px}
+}
+@media (max-width:640px){
+  .chip .num{font-size:24px}
+}
+/* nav: 6 links need room; keep labels on one line and collapse to the CTA earlier */
+.navlinks a{white-space:nowrap}
+@media (max-width:880px){
+  .navlinks a:not(.btn){display:none}
+}
+
+/* nav: keep links on one line, show only CTA below 960px */
+.navlinks a{white-space:nowrap}
+@media (max-width:960px){.navlinks a:not(.btn){display:none}}
+
+/* Korean line breaking: never split a word mid-syllable */
+h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
+</style>
+<link rel="stylesheet" href="../../assets/site.css?v=17">
+<script src="../../assets/site.js?v=17"></script>
+</head>
+<body>
+
+
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<nav aria-label="Main menu">
+  <div class="wrap">
+    <a class="brand" href="#top">AWS <span>PrivateLink</span></a>
+    <div class="navlinks">
+      <a href="../">Service portfolio</a>
+      <a href="#roles">Connection model</a>
+      <a href="#features">Features</a>
+      <a href="#types">Endpoint types</a>
+      <a href="#arch">Architecture</a>
+      <a href="#pricing">Pricing</a>
+      <a class="btn btn-primary" href="#start">Get started</a>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+  <header class="hero" id="top">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">AWS PrivateLink · Private connectivity per service</p>
+          <h1>Bring only the services you need into your VPC on <em>private IPs</em></h1>
+          <p class="lede">AWS PrivateLink brings services into your VPC on private IP addresses. Reach AWS services, services in other accounts, and partner SaaS without an internet gateway, NAT, or public IPs, and limit what is reachable to individual services.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="#roles">View connection model</a>
+            <a class="btn btn-ghost" href="#arch">View architecture</a>
+          </div>
+        </div>
+
+        <div class="vpce" aria-label="Example interface endpoint">
+          <div class="vpce-head"><span>Interface endpoint</span><span class="ok">available</span></div>
+          <div class="enis">
+            <div class="eni"><span class="az">AZ a · ENI</span><span class="ip">10.0.1.25</span><span class="id">subnet-app-a</span></div>
+            <div class="eni"><span class="az">AZ c · ENI</span><span class="ip">10.0.2.37</span><span class="id">subnet-app-c</span></div>
+          </div>
+          <div class="dns"><b>Private DNS name</b><span>api.example.com</span></div>
+          <div class="dns"><b>Regional DNS name</b>vpce-0a1b2c3d4e5f6a7b8-k3m9x2p1.vpce-svc-0123456789abcdef0.ap-northeast-2.vpce.amazonaws.com</div>
+          <div class="flow" aria-label="Traffic flow"><span class="pill">consumer app</span><span class="arr" aria-hidden="true">→</span><span class="pill">ENI</span><span class="arr" aria-hidden="true">→</span><span class="pill svc">endpoint service</span></div>
+        </div>
+      </div>
+
+      <div class="chips" role="list">
+        <div class="chip" role="listitem"><span class="num">100 Gbps</span><p>Max bandwidth per endpoint, per AZ (scales automatically from 10 Gbps)</p></div>
+        <div class="chip" role="listitem"><span class="num">8500</span><p>VPC endpoint MTU (bytes)</p></div>
+        <div class="chip" role="listitem"><span class="num">TCP · UDP</span><p>Protocols supported by interface endpoints</p></div>
+        <div class="chip" role="listitem"><span class="num">IPv4 · IPv6</span><p>IPv4, IPv6, and dualstack endpoints</p></div>
+      </div>
+    </div>
+  </header>
+
+  <section id="why" aria-labelledby="why-h">
+    <div class="wrap split">
+      <div>
+        <p class="tag">Why PrivateLink</p>
+        <h2 id="why-h">You don't need to open an entire network to use one service</h2>
+        <p class="lede">VPC peering and Transit Gateway open routes between networks. PrivateLink creates only an entry point to a specific service in your VPC; no routes are created to other resources in the other VPC.</p>
+      </div>
+      <div class="pillars">
+        <div class="pillar"><span class="k">Private</span><div><h3>No internet exposure</h3><p>Reach services from private subnets without an internet gateway, NAT, or public IPs.</p></div></div>
+        <div class="pillar"><span class="k">One-way</span><div><h3>One-way connectivity</h3><p>Only the consumer VPC can initiate connections. No path is created from the provider VPC into the consumer VPC.</p></div></div>
+        <div class="pillar"><span class="k">Overlap</span><div><h3>Overlapping CIDRs allowed</h3><p>As long as the consumer and provider are in different VPCs, their IP ranges can overlap, because access goes through an ENI inside the consumer VPC.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="roles" aria-labelledby="roles-h">
+    <div class="wrap">
+      <p class="tag">Provider &amp; consumer</p>
+      <h2 id="roles-h">Providers publish services; consumers create endpoints</h2>
+      <p class="lede">A PrivateLink connection is completed by work on both sides. The provider puts a service behind a load balancer and publishes it as an endpoint service, and the consumer creates an endpoint in its own VPC to connect to that service.</p>
+      <div class="roles">
+        <div class="role">
+          <span class="who">Consumer</span>
+          <h3>The side that uses the service</h3>
+          <ul>
+            <li><code>subnet</code><span>Pick a subnet per AZ to create an interface endpoint. One ENI is created in each AZ.</span></li>
+            <li><code>SG</code><span>Attach security groups to the endpoint ENIs to restrict which clients can connect.</span></li>
+            <li><code>DNS</code><span>With private DNS enabled, clients reach the endpoint using the existing service name.</span></li>
+          </ul>
+        </div>
+        <div class="bridge" aria-hidden="true"><span>consumer → provider</span><div class="line"></div><span>one-way</span></div>
+        <div class="role">
+          <span class="who">Provider</span>
+          <h3>The side that publishes the service</h3>
+          <ul>
+            <li><code>NLB</code><span>Put the service behind a Network Load Balancer and create an endpoint service. Appliances use a Gateway Load Balancer.</span></li>
+            <li><code>allow</code><span>Specify the AWS accounts or IAM principals allowed to connect, and optionally require manual acceptance of requests.</span></li>
+            <li><code>region</code><span>Add supported Regions so consumers in other Regions can create endpoints too.</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" aria-labelledby="features-h">
+    <div class="wrap">
+      <p class="tag">Features</p>
+      <h2 id="features-h">Key features</h2>
+      <div class="features">
+        <article class="feature"><p class="ft">Cross-Region</p><h3>Cross-Region PrivateLink</h3><p>Connect with an interface endpoint to endpoint services and select AWS services (S3, IAM, ECR, and others) in another Region. You don't need to match AZs with the provider, and connections to AWS services can use only the Regional DNS name. PrivateLink manages failover across AZs but not across Regions.</p></article>
+        <article class="feature"><p class="ft">Name resolution</p><h3>Private DNS</h3><p>Once the provider verifies and associates a domain name, consumers reach the endpoint with the same name without changing application settings.</p></article>
+        <article class="feature"><p class="ft">Access control</p><h3>Endpoint policy</h3><p>Attach a resource policy to the endpoint to restrict the principals, actions, and resources that can be called through it.</p></article>
+        <article class="feature"><p class="ft">Hybrid</p><h3>Access from on-premises</h3><p>Traffic arriving over Direct Connect, Site-to-Site VPN, Transit Gateway, Cloud WAN, or VPC peering also reaches the endpoint.</p></article>
+        <article class="feature"><p class="ft">VPC Lattice</p><h3>Resource endpoint</h3><p>Reach databases, domain names, or IP targets in other VPCs or on-premises over TCP without a load balancer. The provider shares resources through a resource gateway.</p></article>
+        <article class="feature"><p class="ft">Inspection</p><h3>Gateway Load Balancer endpoint</h3><p>Set it as the next hop in a VPC route table to send traffic to a fleet of virtual appliances such as firewalls.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="types" aria-labelledby="types-h">
+    <div class="wrap">
+      <p class="tag">Endpoint types</p>
+      <h2 id="types-h">VPC endpoint types built on PrivateLink</h2>
+      <p class="lede">The endpoint type depends on what you connect to. Gateway endpoints for Amazon S3 and DynamoDB don't use PrivateLink, so they are not included here.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">Comparison of VPC endpoint types built on PrivateLink</caption>
+          <thead><tr><th scope="col">Type</th><th scope="col">Connects to</th><th scope="col">Provider-side setup</th><th scope="col">How traffic is sent</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="row-h">Interface</td>
+              <td data-k="Connects to">AWS services, services from other accounts or partners</td>
+              <td data-k="Provider-side setup">Endpoint service backed by an NLB</td>
+              <td data-k="How traffic is sent">The DNS name resolves to the ENI private IPs. TCP · UDP</td>
+            </tr>
+            <tr>
+              <td class="row-h">Gateway Load Balancer</td>
+              <td data-k="Connects to">Fleet of virtual appliances</td>
+              <td data-k="Provider-side setup">Endpoint service backed by a GWLB</td>
+              <td data-k="How traffic is sent">Set the endpoint as the next hop in a route table.</td>
+            </tr>
+            <tr>
+              <td class="row-h">Resource</td>
+              <td data-k="Connects to">Databases, EC2 instances, domain names or IP targets</td>
+              <td data-k="Provider-side setup">Resource gateway and resource configuration</td>
+              <td data-k="How traffic is sent">Access through the endpoint DNS name. TCP</td>
+            </tr>
+            <tr>
+              <td class="row-h">Service network</td>
+              <td data-k="Connects to">Multiple services and resources associated with a VPC Lattice service network</td>
+              <td data-k="Provider-side setup">VPC Lattice service network</td>
+              <td data-k="How traffic is sent">One endpoint reaches multiple targets.</td>
+            </tr>
+            <tr>
+              <td class="row-h">Tunnel</td>
+              <td data-k="Connects to">A shared network segment (CIDR range)</td>
+              <td data-k="Provider-side setup">Share a CIDR-range resource configuration through AWS RAM</td>
+              <td data-k="How traffic is sent">Encapsulated in GENEVE on UDP 6081. Inner traffic is TCP; UDP is supported only for DNS queries.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="arch" aria-labelledby="arch-h">
+    <div class="wrap">
+      <p class="tag">Reference architecture</p>
+      <h2 id="arch-h">Connect just the service, even with overlapping IP ranges</h2>
+      <p class="lede">Even when the consumer and provider VPCs both use 10.0.0.0/16, the interface endpoint connects to the service. On-premises reaches the endpoint through the consumer VPC, and consumers in other Regions use cross-Region PrivateLink.</p>
+      <figure class="arch">
+        <div class="arch-scroll">
+          <svg viewBox="0 0 980 440" role="img" aria-labelledby="arch-title arch-desc">
+            <title id="arch-title">PrivateLink reference architecture</title>
+            <desc id="arch-desc">A consumer VPC in the Seoul Region has an interface endpoint and a resource endpoint. The application and the on-premises data center connect through the interface endpoint to a Network Load Balancer-backed endpoint service and its service targets in a provider VPC that uses the same 10.0.0.0/16 range. The resource endpoint connects to a database through a resource gateway in another VPC. A consumer VPC in another Region connects to the same endpoint service through cross-Region PrivateLink.</desc>
+            <defs>
+              <marker id="ar-pl-p" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-p" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-pl-f" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><path class="ah-f" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-pl-s" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-s" d="M0 0 L10 5 L0 10 z"/></marker>
+            </defs>
+            <rect class="zone" x="10" y="40" width="150" height="380" rx="6"/>
+            <image href="../../assets/aws-icons/Corporate-data-center_32.svg" x="10" y="40" width="24" height="24"/>
+            <text class="z" x="42" y="56">ON-PREMISES</text>
+            <rect class="zone" x="190" y="40" width="260" height="380" rx="6"/>
+            <image href="../../assets/aws-icons/Virtual-private-cloud-VPC_32.svg" x="190" y="40" width="24" height="24"/>
+            <text class="z" x="222" y="56">CONSUMER VPC · 10.0.0.0/16</text>
+            <rect class="zone" x="526" y="40" width="234" height="240" rx="6"/>
+            <image href="../../assets/aws-icons/Virtual-private-cloud-VPC_32.svg" x="526" y="40" width="24" height="24"/>
+            <text class="z" x="558" y="56">PROVIDER VPC · 10.0.0.0/16</text>
+            <rect class="zone" x="526" y="300" width="444" height="120" rx="6"/>
+            <image href="../../assets/aws-icons/Virtual-private-cloud-VPC_32.svg" x="526" y="300" width="24" height="24"/>
+            <text class="z" x="558" y="316">RESOURCE VPC</text>
+            <rect class="zone" x="780" y="40" width="190" height="240" rx="6"/>
+            <image href="../../assets/aws-icons/Region_32.svg" x="780" y="40" width="24" height="24"/>
+            <text class="z" x="812" y="56">OTHER REGION</text>
+
+            <rect class="box" x="22" y="196" width="126" height="64" rx="4"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Servers_48_Light.svg" x="29" y="216" width="24" height="24"/>
+            <text class="t" x="59" y="224">Data center</text><text class="s" x="59" y="244">DX · VPN</text>
+
+            <rect class="box" x="210" y="84" width="220" height="56" rx="4"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Generic-Application_48_Light.svg" x="219" y="98" width="28" height="28"/>
+            <text class="t" x="256" y="108">Application</text><text class="s" x="256" y="126">calls api.example.com</text>
+            <rect class="box" x="210" y="190" width="220" height="76" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-VPC_Endpoints_48.svg" x="219" y="214" width="28" height="28"/>
+            <text class="t" x="256" y="216">Interface endpoint</text><text class="s" x="256" y="236">ENI 10.0.1.25 · AZ a</text><text class="s" x="256" y="252">ENI 10.0.2.37 · AZ c</text>
+            <rect class="box" x="210" y="330" width="220" height="60" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-VPC_Endpoints_48.svg" x="219" y="346" width="28" height="28"/>
+            <text class="t" x="256" y="356">Resource endpoint</text><text class="s" x="256" y="376">TCP · DNS name</text>
+
+            <rect class="box" x="536" y="84" width="208" height="60" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_AWS-PrivateLink_48.svg" x="545" y="100" width="28" height="28"/>
+            <text class="t" x="582" y="110">Endpoint service</text><text class="s" x="582" y="130">Network Load Balancer</text>
+            <rect class="box" x="536" y="196" width="208" height="60" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_Amazon-EC2_48.svg" x="545" y="212" width="28" height="28"/>
+            <text class="t" x="582" y="222">Service targets</text><text class="s" x="582" y="242">EC2 · containers</text>
+
+            <rect class="box" x="540" y="340" width="170" height="60" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_Amazon-VPC-Lattice_48.svg" x="549" y="356" width="28" height="28"/>
+            <text class="t" x="586" y="366">Resource GW</text><text class="s" x="586" y="386">ingress</text>
+            <rect class="box" x="740" y="340" width="210" height="60" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_Amazon-RDS_48.svg" x="749" y="356" width="28" height="28"/>
+            <text class="t" x="786" y="366">Database</text><text class="s" x="786" y="386">Amazon RDS</text>
+
+            <rect class="box" x="794" y="96" width="164" height="76" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-VPC_Virtual-private-cloud-VPC_48.svg" x="801" y="122" width="24" height="24"/>
+            <text class="t" x="831" y="122">Consumer VPC</text><text class="s" x="831" y="142">Interface endpoint</text><text class="s" x="831" y="158">service Region set</text>
+
+            <path class="path" d="M148 228 H208" marker-end="url(#ar-pl-p)"/>
+            <path class="path" d="M320 140 V188" marker-end="url(#ar-pl-p)"/>
+            <path class="fiber" d="M430 216 C480 216 486 114 533 114" marker-end="url(#ar-pl-f)"/>
+            <text class="lbl2" x="451" y="238">PrivateLink</text>
+            <path class="path" d="M640 144 V194" marker-end="url(#ar-pl-p)"/>
+            <path class="fiber" d="M430 360 C480 360 486 370 537 370" marker-end="url(#ar-pl-f)"/>
+            <path class="path" d="M710 370 H738" marker-end="url(#ar-pl-p)"/>
+            <path class="site" d="M794 134 C770 134 765 114 746 114" marker-end="url(#ar-pl-s)"/>
+            <text class="lbl2" x="794" y="196">cross-Region</text>
+          </svg>
+        </div>
+        <figcaption class="legend">
+          <span><i class="f dir"></i>PrivateLink connection (consumer → provider, one-way)</span>
+          <span><i class="p dir"></i>In-VPC · hybrid request path</span>
+          <span><i class="s dir"></i>Cross-Region PrivateLink</span><span>Arrows show the direction connections are initiated; responses return on the same connection.</span>
+        </figcaption>
+        <p class="arch-hint">On narrow screens, swipe the diagram sideways.</p>
+      </figure>
+    </div>
+  </section>
+
+  <section id="start" aria-labelledby="start-h">
+    <div class="wrap">
+      <p class="tag">Getting started</p>
+      <h2 id="start-h">Steps to publish your service with PrivateLink</h2>
+      <ol class="steps">
+        <li><span class="num">STEP 1</span><h3>Prepare an NLB</h3><p>Create a Network Load Balancer and target group across two or more AZs in the provider VPC.</p></li>
+        <li><span class="num">STEP 2</span><h3>Create the endpoint service</h3><p>Select the NLB to create an endpoint service, and add the principals allowed to connect.</p></li>
+        <li><span class="num">STEP 3</span><h3>Create the endpoint</h3><p>The consumer creates an interface endpoint using the service name and picks subnets and security groups.</p></li>
+        <li><span class="num">STEP 4</span><h3>Accept the connection</h3><p>If acceptance is required, the provider accepts the connection request.</p></li>
+        <li><span class="num">STEP 5</span><h3>Test with DNS</h3><p>Connect to the service using the endpoint DNS name or the private DNS name.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="pricing" aria-labelledby="pricing-h">
+    <div class="wrap">
+      <p class="tag">Pricing</p>
+      <h2 id="pricing-h">Cost components</h2>
+      <p class="lede">PrivateLink pricing is based on the hours an endpoint is provisioned and the amount of data it processes. The provider-side load balancer and inter-Region transfer are charged separately.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">AWS PrivateLink billing components</caption>
+          <thead><tr><th scope="col">Component</th><th scope="col">Billing basis</th><th scope="col">Notes</th></tr></thead>
+          <tbody>
+          <tr><td class="row-h">Interface endpoint hours</td><td data-k="Billing basis">Hours provisioned in each AZ where the endpoint exists. Partial hours are billed as full hours.</td><td data-k="Notes">Billed to the consumer that created the endpoint.</td></tr>
+          <tr><td class="row-h">Interface endpoint data processing</td><td data-k="Billing basis">GB processed by the endpoint</td><td data-k="Notes">Tiered rates apply to the combined volume of all interface endpoints in the Region.</td></tr>
+          <tr><td class="row-h">Gateway Load Balancer endpoint</td><td data-k="Billing basis">Endpoint hours and GB processed</td><td data-k="Notes">The provider-side Gateway Load Balancer is billed separately at Elastic Load Balancing rates.</td></tr>
+          <tr><td class="row-h">Resource · Tunnel endpoint</td><td data-k="Billing basis">Resource endpoints: hours per resource; tunnel endpoints: endpoint hours. Both: GB processed</td><td data-k="Notes">Processing tiers are calculated separately from interface endpoints. Service network endpoints themselves have no additional charge; resources and services accessed through the service network follow VPC Lattice pricing.</td></tr>
+          <tr><td class="row-h">Cross-Region connectivity</td><td data-k="Billing basis">Providers: a fixed hourly fee per active remote Region. Consumers: standard endpoint charges plus inter-Region transfer GB</td><td data-k="Notes">A remote Region is active if at least one interface endpoint is connected from it. Inter-Region transfer is billed to the endpoint owner.</td></tr>
+          <tr><td class="row-h">Provider Network Load Balancer</td><td data-k="Billing basis">NLB hours and NLCUs</td><td data-k="Notes">Billed separately at Elastic Load Balancing rates.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="lede" style="font-size:14px">Rates vary by Region and usage. See the <a href="https://aws.amazon.com/privatelink/pricing/" target="_blank" rel="noopener">AWS PrivateLink pricing page</a> for current rates.</p>
+    </div>
+  </section>
+
+  <section class="cta" aria-labelledby="cta-h">
+    <div class="wrap">
+      <p class="tag">Next step</p>
+      <h2 id="cta-h">Design service publishing and private access with us</h2>
+      <p class="lede">Bring the services to publish, the range of consumer accounts, on-premises access paths, and DNS setup, and we'll review endpoint types and placement together.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="https://aws.amazon.com/privatelink/" target="_blank" rel="noopener">Open service page</a>
+        <a class="btn btn-ghost" href="https://docs.aws.amazon.com/vpc/latest/privatelink/what-is-privatelink.html" target="_blank" rel="noopener">Read the User Guide</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a href="../">← AWS Networking Services Portfolio</a>
+    <span>AWS PrivateLink overview. Supported Regions and features vary by endpoint type; check the official documentation.</span>
+    <a href="https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-limits-endpoints.html" target="_blank" rel="noopener">PrivateLink quotas</a>
+  </div>
+</footer>
+
+</body>
+</html>
