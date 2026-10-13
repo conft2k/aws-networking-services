@@ -105,3 +105,10 @@ html.presenting .present-title{left:24px}
 /* presentation: content block centered horizontally (still top-anchored); headings and lede use its full width */
 html.presenting main>.slide.slide-on>.wrap{margin-inline:auto}
 html.presenting main>.slide.slide-on h1,html.presenting main>.slide.slide-on h2,html.presenting main>.slide.slide-on .lede{max-width:none}
+/* menu top row: title left, compact search pushed to the right */
+.drawer .mtop{justify-content:space-between}
+.drawer .msearch{flex:0 1 260px;margin-left:auto}
+@media (max-width:640px){.drawer .msearch{flex:1 0 100%;margin-left:0}}
+/* tighter space between the top bar and the hero on every page */
+.hero{padding-top:32px}
+@media (max-width:640px){.hero{padding-top:24px}}
