@@ -4,7 +4,7 @@
 Source: AWS Price List bulk API (public, no auth)
   https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/index.json
 
-Offers used: AWSDirectConnect, AWSCloudWAN, AmazonVPC, AWSDataTransfer, AWSGlobalAccelerator.
+Offers used: AWSDirectConnect, AWSCloudWAN, AmazonVPC (incl. VPC Lattice), AWSDataTransfer, AWSGlobalAccelerator, AWSELB.
 Per-region offer files are downloaded into a cache directory outside the repo, filtered
 by productFamily / usagetype / attributes, and reduced to On-Demand USD prices.
 
@@ -24,7 +24,7 @@ BASE = 'https://pricing.us-east-1.amazonaws.com'
 DEFAULT_CACHE = '/tmp/claude-1000/-home-ec2-user-mydev/efa2e064-b184-4982-b7ba-c281fe24d394/scratchpad/pricecache'
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(os.path.dirname(HERE))
-OFFERS = ['AWSDirectConnect', 'AWSCloudWAN', 'AmazonVPC', 'AWSDataTransfer', 'AWSGlobalAccelerator']
+OFFERS = ['AWSDirectConnect', 'AWSCloudWAN', 'AmazonVPC', 'AWSDataTransfer', 'AWSGlobalAccelerator', 'AWSELB']
 
 # Commercial AWS Region codes look like "ap-northeast-2". Local Zones / Wavelength Zones
 # ("us-east-1-scl-1") and pseudo regions ("aws-other") do not match.
@@ -515,6 +515,81 @@ def build_ga(path):
             [{'id': e, 'label': e, 'desc': e} for e in extra], 'rows': rows, 'directionOrClientDiffers': differs}
 
 
+# ---------------------------------------------------------------- Elastic Load Balancing
+ELB_KIND = {'LoadBalancing:Application': 'alb', 'LoadBalancing:Network': 'nlb', 'LoadBalancing:Gateway': 'gwlb',
+            'LoadBalancing': 'clb'}
+
+
+def build_elb(files, names):
+    """Per Region: hour / LCU-hour / reserved LCU-hour per LB type, ALB trust store hour, CLB GB.
+    Outposts SKUs (locationType 'AWS Outposts' or usagetype '*-Outposts-*') are left out."""
+    rows, other = [], set()
+    for code, path in files.items():
+        doc = load(path)
+        r = {}
+        for sku, fam, a in products(doc):
+            if a.get('locationType') != 'AWS Region':
+                continue
+            names.setdefault(code, a.get('location'))
+            u, kind = a.get('usagetype', ''), ELB_KIND.get(a.get('operation'))
+            if 'Outposts' in u or not kind:
+                other.add(u.split('-', 1)[-1] + ':' + str(a.get('operation')))
+                continue
+            # us-east-1 usage types carry no Region prefix, so match on the suffix
+            if u.endswith('TS-LoadBalancerUsage'):
+                key = 'ts'
+            elif u.endswith('LoadBalancerUsage'):
+                key = 'h'
+            elif u.endswith('ReservedLCUUsage'):
+                key = 'res'
+            elif u.endswith('LCUUsage'):
+                key = 'lcu'
+            elif u.endswith('IdleProvisionedLBCapacity'):
+                key = 'idle'
+            elif u.endswith('DataProcessing-Bytes') or u == 'DataProcessing-Bytes':
+                key = 'gb'
+            else:
+                other.add(u + ':' + a.get('operation'))
+                continue
+            r[kind + '_' + key] = one(doc, sku)
+        if r:
+            rows.append(dict(r=code, **r))
+    return rows, sorted(other)
+
+
+# ---------------------------------------------------------------- VPC Lattice (inside AmazonVPC)
+def build_lattice(files):
+    rows = []
+    free = {}
+    for code, path in files.items():
+        doc = load(path)
+        r = {}
+        for sku, fam, a in products(doc):
+            if a.get('locationType') != 'AWS Region':
+                continue
+            u = a.get('usagetype', '')
+            k = u.split('-', 1)[1] if re.match(r'^[A-Z]{2,4}\d*-', u) else u
+            key = {'VPCLattice-Service-Hourly': 'svc', 'VPCLattice-DataProcessing-Bytes': 'gb',
+                   'VPCLattice-RequestCount-Charged': 'req', 'VPCLattice-ConnectionCount-Charged': 'conn',
+                   'VpcLattice-Service-Network-Resource-Hours': 'res',
+                   'VpcLattice-Service-Network-ODB-Resource-Hours': 'resOdb',
+                   'VpcResource-Provider-Bytes': 'provGb'}.get(k)
+            if key in ('req', 'conn'):
+                dims = ondemand(doc, sku)          # $/request is ~1e-7: keep it as $ per million
+                r[key + 'M'] = round(dims[0]['usd'] * 1e6, 6) if dims else None
+            elif key:
+                r[key] = one(doc, sku)
+            elif k == 'VpcResource-Consumer-Bytes':
+                r['resGb'] = tiers(doc, sku)
+            elif k in ('VPCLattice-RequestCount-Free', 'VPCLattice-ConnectionCount-Free'):
+                m = re.search(r'first ([\d,]+)', a.get('groupDescription', ''))
+                if m:
+                    free['req' if 'Request' in k else 'conn'] = int(m.group(1).replace(',', ''))
+        if any(x in r for x in ('svc', 'res', 'resOdb')):
+            rows.append(dict(r=code, **r))
+    return rows, free
+
+
 # ---------------------------------------------------------------- main
 def main():
     ap = argparse.ArgumentParser()
@@ -537,6 +612,8 @@ def main():
 
     dx = build_dx(files['AWSDirectConnect'], order)
     ga = build_ga(files['AWSGlobalAccelerator']['aws-other'])
+    elb, elb_other = build_elb(files['AWSELB'], names)
+    lattice, lattice_free = build_lattice(files['AmazonVPC'])
 
     dt_regions = [c for c in order if c in inter]
     matrix = [[inter[f].get(t) if f != t else None for t in dt_regions] for f in dt_regions]
@@ -559,6 +636,8 @@ def main():
         'vpn': by_order(vpn),
         'ga': ga,
         'privatelink': by_order(pl),
+        'elb': {'rows': by_order(elb), 'skipped': elb_other},
+        'lattice': {'rows': by_order(lattice), 'freePerHour': lattice_free},
         'notes': notes,
     }
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
@@ -571,6 +650,8 @@ def main():
     print('dx public/private DTO mismatches:', dx['dto']['publicPrivateMismatch'])
     print('ga direction/client differences:', ga['directionOrClientDiffers'][:20])
     print('notes:', notes[:20])
+    print('elb regions=%d skipped usage types: %s' % (len(elb), elb_other))
+    print('lattice regions=%d free/hour: %s' % (len(lattice), lattice_free))
     other_cw = sorted({o for x in cw for o in x.get('_other', [])})
     if other_cw:
         print('cloudwan unmapped usage types:', other_cw)

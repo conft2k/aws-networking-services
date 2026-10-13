@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>AWS 네트워킹 가격표</title>
-<meta name="description" content="AWS Price List API 기준 Direct Connect, Cloud WAN, Transit Gateway, EC2 데이터 전송, VPN, Global Accelerator, PrivateLink 요금표">
+<meta name="description" content="AWS Price List API 기준 Elastic Load Balancing, VPC Lattice, Global Accelerator, Direct Connect, Cloud WAN, Transit Gateway, VPN, PrivateLink, EC2 데이터 전송 요금표">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -131,11 +131,21 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
 
 #prices{padding-block:40px 88px;scroll-margin-top:60px}
 .toolbar{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:center;justify-content:space-between}
-.tablist{display:flex;gap:0;overflow-x:auto;border-bottom:1px solid var(--line-2);scrollbar-width:thin;max-width:100%}
-.tablist button{flex:none;appearance:none;background:transparent;border:0;border-bottom:3px solid transparent;margin-bottom:-1px;padding:12px 16px 10px;font:500 14px/1.2 var(--sans);color:var(--ink-2);cursor:pointer;white-space:nowrap}
-.tablist button:hover{color:var(--ink)}
-.tablist button[aria-selected="true"]{color:var(--ink);font-weight:700;border-bottom-color:var(--fiber)}
-.tablist button:focus-visible{outline-offset:-3px}
+.tablist{display:flex;flex-wrap:wrap;gap:4px;padding:4px;background:var(--sunken);border:1px solid var(--line);border-radius:8px;max-width:100%;width:max-content}
+.tablist button{flex:none;appearance:none;background:transparent;border:1px solid transparent;border-radius:6px;padding:10px 16px;font:500 14px/1.2 var(--sans);color:var(--ink-2);cursor:pointer;white-space:nowrap;transition:background-color .15s ease,color .15s ease}
+.tablist button:hover{color:var(--ink);background:color-mix(in srgb,var(--surface) 55%,transparent)}
+.tablist button[aria-selected="true"]{color:var(--ink);font-weight:700;background:var(--surface);border-color:var(--line-2);box-shadow:inset 0 -3px 0 var(--fiber),0 1px 2px rgba(0,0,0,.06)}
+.tablist button:focus-visible{outline:2px solid var(--fiber);outline-offset:1px}
+@media (max-width:640px){.tablist{width:auto}.tablist button{padding:9px 12px;font-size:13.5px}}
+/* tab groups: one labeled segmented cluster per service area; clusters wrap as whole units, never scroll */
+.tabgroups{display:flex;flex-wrap:wrap;gap:14px 18px;align-items:flex-end;min-width:0;max-width:100%}
+.tgroup{display:flex;flex-direction:column;gap:6px;min-width:0;max-width:100%}
+.tgroup-label{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);padding-left:2px;white-space:nowrap}
+.tgroup-label::before{content:"";width:14px;height:6px;border-radius:1px;background:var(--g,var(--line-2))}
+.tgroup[data-area="app"]{--g:#C7B8EA}.tgroup[data-area="edge"]{--g:#A6D4EC}.tgroup[data-area="hybrid"]{--g:#A9DEC4}.tgroup[data-area="fnd"]{--g:#F6CDA2}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .tgroup[data-area="app"]{--g:#9D88CF}:root:not([data-theme="light"]) .tgroup[data-area="edge"]{--g:#6FA9C8}:root:not([data-theme="light"]) .tgroup[data-area="hybrid"]{--g:#6FB596}:root:not([data-theme="light"]) .tgroup[data-area="fnd"]{--g:#CF9C67}}
+:root[data-theme="dark"] .tgroup[data-area="app"]{--g:#9D88CF}:root[data-theme="dark"] .tgroup[data-area="edge"]{--g:#6FA9C8}:root[data-theme="dark"] .tgroup[data-area="hybrid"]{--g:#6FB596}:root[data-theme="dark"] .tgroup[data-area="fnd"]{--g:#CF9C67}
+@media (max-width:640px){.tabgroups{flex-direction:column;align-items:stretch;gap:12px;width:100%}}
 .search{display:flex;align-items:center;gap:8px;margin-top:20px}
 .search label{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
 .search input,.sel select{height:40px;min-width:0;width:260px;max-width:100%;padding:0 12px;border:1px solid var(--line-2);border-radius:4px;background:var(--surface);color:var(--ink);font:400 15px var(--sans)}
@@ -154,7 +164,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
 .panel th,.panel td{padding:9px 14px;white-space:nowrap}
 .panel thead th{font-size:11px;vertical-align:bottom;white-space:normal;min-width:84px}
 .panel thead th.l{min-width:0}
-.panel td.n,.panel thead th.n{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.panel td.n,.panel thead th.n{text-align:left;font-family:var(--mono);font-variant-numeric:tabular-nums}
 .panel td.n{font-size:13.5px}
 .panel table.mx th,.panel table.mx td{padding:8px 9px}
 .panel table.mx thead th{min-width:0}
@@ -203,9 +213,15 @@ details.more .inner dd{margin:2px 0 0}
 }
 @media print{.toolbar,.search,.official{display:none}}
 html.presenting #prices .tablist{position:static}
+.panel thead th .gk{display:block;font-family:var(--sans);font-size:13px;font-weight:700;letter-spacing:0;text-transform:none;color:var(--ink);white-space:nowrap}
+.panel thead th .gs{display:block;font-family:var(--sans);font-size:11px;font-weight:400;letter-spacing:0;text-transform:none;color:var(--ink-3);line-height:1.35;white-space:normal;min-width:7em;max-width:11em}
+.panel thead th .c{display:block;font-family:var(--mono);font-size:10.5px;color:var(--ink-3);font-weight:400}
+.panel thead th .corner{display:flex;flex-direction:column;gap:2px;font-family:var(--mono);font-size:11px;white-space:nowrap}
+.panel thead th .corner span:last-child{color:var(--fiber-ink)}
+.panel thead th{vertical-align:bottom}
 </style>
-<link rel="stylesheet" href="../assets/site.css?v=2">
-<script src="../assets/site.js?v=2"></script>
+<link rel="stylesheet" href="../assets/site.css?v=3">
+<script src="../assets/site.js?v=3"></script>
 </head>
 <body>
 
@@ -251,14 +267,37 @@ html.presenting #prices .tablist{position:static}
   <section id="prices" aria-label="서비스별 가격표">
     <div class="wrap">
       <div class="toolbar">
-        <div class="tablist" role="tablist" aria-label="서비스">
-          <button role="tab" id="tab-dx" aria-controls="dx" aria-selected="true" tabindex="0">Direct Connect</button>
-          <button role="tab" id="tab-cloudwan" aria-controls="cloudwan" aria-selected="false" tabindex="-1">Cloud WAN</button>
-          <button role="tab" id="tab-tgw" aria-controls="tgw" aria-selected="false" tabindex="-1">Transit Gateway</button>
-          <button role="tab" id="tab-dt" aria-controls="dt" aria-selected="false" tabindex="-1">EC2 데이터 전송</button>
-          <button role="tab" id="tab-vpn" aria-controls="vpn" aria-selected="false" tabindex="-1">VPN</button>
-          <button role="tab" id="tab-ga" aria-controls="ga" aria-selected="false" tabindex="-1">Global Accelerator</button>
-          <button role="tab" id="tab-privatelink" aria-controls="privatelink" aria-selected="false" tabindex="-1">PrivateLink</button>
+        <!-- one tablist per service area; arrow keys move across all tabs in order (see script) -->
+        <div class="tabgroups" id="tabgroups">
+          <div class="tgroup" data-area="app">
+            <span class="tgroup-label" aria-hidden="true">Application Networking</span>
+            <div class="tablist" role="tablist" aria-label="Application Networking">
+              <button role="tab" id="tab-elb" aria-controls="elb" aria-selected="false" tabindex="-1">Elastic Load Balancing</button>
+              <button role="tab" id="tab-lattice" aria-controls="lattice" aria-selected="false" tabindex="-1">VPC Lattice</button>
+            </div>
+          </div>
+          <div class="tgroup" data-area="edge">
+            <span class="tgroup-label" aria-hidden="true">Edge Networking</span>
+            <div class="tablist" role="tablist" aria-label="Edge Networking">
+              <button role="tab" id="tab-ga" aria-controls="ga" aria-selected="false" tabindex="-1">Global Accelerator</button>
+            </div>
+          </div>
+          <div class="tgroup" data-area="hybrid">
+            <span class="tgroup-label" aria-hidden="true">Hybrid Networking</span>
+            <div class="tablist" role="tablist" aria-label="Hybrid Networking">
+              <button role="tab" id="tab-dx" aria-controls="dx" aria-selected="true" tabindex="0">Direct Connect</button>
+              <button role="tab" id="tab-cloudwan" aria-controls="cloudwan" aria-selected="false" tabindex="-1">Cloud WAN</button>
+              <button role="tab" id="tab-tgw" aria-controls="tgw" aria-selected="false" tabindex="-1">Transit Gateway</button>
+              <button role="tab" id="tab-vpn" aria-controls="vpn" aria-selected="false" tabindex="-1">VPN</button>
+              <button role="tab" id="tab-privatelink" aria-controls="privatelink" aria-selected="false" tabindex="-1">PrivateLink</button>
+            </div>
+          </div>
+          <div class="tgroup" data-area="fnd">
+            <span class="tgroup-label" aria-hidden="true">Foundation (VPC)</span>
+            <div class="tablist" role="tablist" aria-label="Foundation (VPC)">
+              <button role="tab" id="tab-dt" aria-controls="dt" aria-selected="false" tabindex="-1">EC2 데이터 전송</button>
+            </div>
+          </div>
         </div>
       </div>
       <div class="search">
@@ -268,6 +307,38 @@ html.presenting #prices .tablist{position:static}
       </div>
 
       <div id="status" class="status" role="status">가격 데이터(<code>data.json</code>)를 불러오는 중입니다…</div>
+
+      <!-- Elastic Load Balancing -->
+      <div class="panel" role="tabpanel" id="elb" aria-labelledby="tab-elb" hidden>
+        <div class="panel-head"><h2>Elastic Load Balancing</h2><span class="src" data-src="AWSELB"></span></div>
+        <p class="lede">로드 밸런서가 실행 중인 시간(부분 시간도 1시간)과 사용한 용량 단위(LCU)로 요금을 냅니다. LCU는 매시간 여러 차원 중 가장 많이 쓴 차원 하나로만 계산합니다. Classic Load Balancer만 LCU 대신 처리한 데이터 GB당 요금을 씁니다.</p>
+        <div class="dims">
+          <div><span class="k">ALB · LCU</span><p>새 연결, 활성 연결, 처리 바이트, 규칙 평가 4개 차원 중 최댓값입니다.</p></div>
+          <div><span class="k">NLB · NLCU</span><p>새 연결/flow, 활성 연결/flow, 처리 바이트 3개 차원이고 TCP·UDP·TLS 트래픽을 따로 계산해 더합니다.</p></div>
+          <div><span class="k">GWLB · GLCU</span><p>새 연결/flow, 활성 연결/flow, 처리 바이트 3개 차원입니다. 시간당 요금은 AZ마다 부과합니다.</p></div>
+          <div><span class="k">LCU 예약</span><p>미리 예약한 LCU는 사용 여부와 상관없이 시간당 부과하고, 예약량을 넘은 사용분은 일반 LCU 단가로 냅니다.</p></div>
+        </div>
+        <div data-render="elb"></div>
+        <div class="official">
+          <a class="btn btn-ghost" href="https://aws.amazon.com/elasticloadbalancing/pricing/" target="_blank" rel="noopener">공식 요금 페이지</a>
+        </div>
+      </div>
+
+      <!-- VPC Lattice -->
+      <div class="panel" role="tabpanel" id="lattice" aria-labelledby="tab-lattice" hidden>
+        <div class="panel-head"><h2>VPC Lattice</h2><span class="src" data-src="AmazonVPC"></span></div>
+        <p class="lede">VPC Lattice service는 서비스 시간당 요금, 처리 데이터 GB당 요금, 요청(HTTP/HTTPS listener) 또는 TCP 연결(TLS listener) 수 요금 세 가지로 냅니다. service network에 붙인 VPC resource(resource configuration)는 resource 시간당 요금과 GB당 처리 요금이 따로 붙습니다.</p>
+        <div class="dims">
+          <div><span class="k">Service hour</span><p>VPC Lattice service가 프로비저닝되어 있는 매시간(부분 시간 포함) 부과합니다.</p></div>
+          <div><span class="k">Data processing</span><p>service가 받은 요청과 보낸 응답을 합친 GB당입니다. AZ 간 전송 요금은 따로 붙지 않습니다.</p></div>
+          <div><span class="k">Requests · Connections</span><p>service마다 매시간 첫 30만 건은 무료(Always Free)이고, 넘는 부분만 100만 건당 부과합니다.</p></div>
+          <div><span class="k">VPC resource</span><p>소비자는 service network에 추가한 resource당 시간 요금과 처리 GB 계단 요금, 제공자는 Resource Gateway 처리 GB당 요금을 냅니다.</p></div>
+        </div>
+        <div data-render="lattice"></div>
+        <div class="official">
+          <a class="btn btn-ghost" href="https://aws.amazon.com/vpc/lattice/pricing/" target="_blank" rel="noopener">공식 요금 페이지</a>
+        </div>
+      </div>
 
       <!-- Direct Connect -->
       <div class="panel" role="tabpanel" id="dx" aria-labelledby="tab-dx">
@@ -400,7 +471,8 @@ html.presenting #prices .tablist{position:static}
     'us-west-1': '캘리포니아 북부', 'us-west-2': '오레곤', 'mx-central-1': '멕시코 중부', 'sa-east-1': '상파울루'
   };
   var GEO = { ap: '아시아 태평양', me: '중동', af: '아프리카', eu: '유럽', ca: '캐나다', us: '미국', la: '중남미' };
-  var TABS = ['dx', 'cloudwan', 'tgw', 'dt', 'vpn', 'ga', 'privatelink'];
+  // visual order of the tab bar (groups: application, edge, hybrid, foundation)
+  var TABS = ['elb', 'lattice', 'ga', 'dx', 'cloudwan', 'tgw', 'vpn', 'privatelink', 'dt'];
   var D, REG = {}, rendered = {};
 
   /* ---------- formatting ---------- */
@@ -442,6 +514,30 @@ html.presenting #prices .tablist{position:static}
     return '<th scope="row" title="' + esc(r.name) + '">' + esc(KO[code] || r.name) + '<span class="c">' + esc(code) + '</span></th>';
   }
   function searchKey(code) { var r = REG[code] || {}; return (code + ' ' + (r.name || '') + ' ' + (KO[code] || '')).toLowerCase(); }
+  // Korean labels for location/edge groups used as matrix columns
+  var GK = {
+    US: ['미국', '하와이 제외'], HI: ['하와이', ''], CA: ['캐나다', ''], EU: ['유럽', ''], JP: ['일본', ''],
+    AP1: ['아시아 1', '한국·홍콩·싱가포르·대만·말레이시아·태국'], ID: ['인도네시아', ''], PH: ['필리핀', ''], IN: ['인도', ''], VN: ['베트남', ''],
+    SAMX: ['남미·멕시코', ''], AUNZ: ['호주·뉴질랜드', ''], ME: ['중동', '이스라엘·튀르키예 포함'], AF: ['아프리카', ''],
+    USA: ['미국', ''], HAWAII: ['하와이', ''], CANADA: ['캐나다', ''], EUROPE: ['유럽', ''], JAPAN: ['일본', ''],
+    'HKG-MNL-ICN-SIN-TPE': ['아시아', '홍콩·마닐라·서울·싱가포르·타이베이'], 'SOUTH-ASIA': ['인도네시아', '자카르타'], PHILIPPINES: ['필리핀', ''], INDIA: ['인도', ''],
+    AUSTRALIA: ['호주', ''], 'SOUTH-AMERICA': ['남미', ''], AFRICA: ['아프리카', ''],
+    NA: ['북미', '미국·멕시코·캐나다'], AP: ['아시아 태평양', '인도·필리핀·태국·베트남·한국·호주 제외'], KR: ['한국', ''], AU: ['호주·뉴질랜드', ''], SA: ['남미', ''], ZA: ['아프리카', '남아공·케냐·나이지리아']
+  };
+  GK.IN_GA = ['인도 등', '인도·필리핀·태국·베트남'];
+  function gkey(id, ga) { return ga && id === 'IN' ? 'IN_GA' : (ga && id === 'ME' ? 'ME_GA' : id); }
+  GK.ME_GA = ['중동', ''];
+  GK.EU_GA = ['유럽', '이스라엘·튀르키예 포함'];
+  function colH(id, ga) {
+    var k = ga && id === 'EU' ? 'EU_GA' : gkey(id, ga), v = GK[k];
+    if (!v) return esc(id);
+    return '<span class="gk">' + esc(v[0]) + '</span>' + (v[1] ? '<span class="gs">' + esc(v[1]) + '</span>' : '') + '<span class="c">' + esc(id) + '</span>';
+  }
+  function rowH(id, ga) {
+    var k = ga && id === 'EU' ? 'EU_GA' : gkey(id, ga), v = GK[k];
+    return v ? th(esc(v[0]), esc(id)) : th(esc(id));
+  }
+  function corner(rowLabel, colLabel) { return '<span class="corner"><span>' + rowLabel + ' ↓</span><span>' + colLabel + ' →</span></span>'; }
   function table(o) {
     // o: {caption, head:[{h, n?}], rows:[{r?:code, th?:html, cells:[html]}], geo?:bool}
     // the visible caption sits outside the horizontal scroller so it never scrolls off-screen;
@@ -485,8 +581,8 @@ html.presenting #prices .tablist{position:static}
     var g = x.dto.groups;
     out += sub('데이터 전송(DTO) · 리전 → DX 로케이션', 'GB당 요금입니다. 행은 트래픽이 출발하는 AWS 리전, 열은 트래픽이 나가는 Direct Connect 로케이션의 지역 그룹입니다. 같은 리전의 로케이션(예: 서울 리전 → 한국 로케이션, AP1)이 가장 쌉니다.');
     out += table({
-      caption: '<b>Data transfer out</b> $/GB. 열 머리글에 마우스를 올리면 그룹에 포함된 지역이 보입니다.',
-      head: [{ h: 'FROM 리전' }].concat(g.map(function (c) { return { h: esc(c.label), title: c.desc }; })),
+      caption: '<b>Data transfer out</b> $/GB. 행은 트래픽이 출발하는 AWS 리전, 열은 트래픽이 나가는 DX 로케이션의 지역입니다.',
+      head: [{ h: corner('FROM 리전', 'TO DX 로케이션') }].concat(g.map(function (c) { return { h: colH(c.id), title: c.desc }; })),
       rows: x.dto.rows.map(function (r) { return { r: r.r, cells: r.v.map(function (v) { return cell(usd(v)); }) }; }),
       label: 'Direct Connect 데이터 전송 매트릭스', mx: true
     });
@@ -509,8 +605,8 @@ html.presenting #prices .tablist{position:static}
     out += sub('SiteLink', 'SiteLink를 켠 VIF마다 시간당 ' + usd(s.vifHour[0]) + '(월 ' + month(s.vifHour[0]) + ')이고, DX 로케이션 간 전송은 아래 GB당 요금입니다. 행은 트래픽이 들어온 로케이션의 그룹, 열은 나가는 로케이션의 그룹입니다.');
     out += table({
       caption: '<b>SiteLink data transfer</b> $/GB (FROM 로케이션 그룹 → TO 로케이션 그룹)',
-      head: [{ h: 'FROM 그룹' }].concat(s.dst.map(function (c) { return { h: esc(c) }; })),
-      rows: s.rows.map(function (r) { return { th: th(esc(r.from)), cells: r.v.map(function (v) { return cell(usd(v)); }) }; }),
+      head: [{ h: corner('FROM 로케이션', 'TO 로케이션') }].concat(s.dst.map(function (c) { return { h: colH(c) }; })),
+      rows: s.rows.map(function (r) { return { th: rowH(r.from), cells: r.v.map(function (v) { return cell(usd(v)); }) }; }),
       geo: false, label: 'SiteLink 데이터 전송 매트릭스', mx: true
     });
     out += notes([
@@ -598,7 +694,7 @@ html.presenting #prices .tablist{position:static}
     out += sub('리전 간 데이터 전송', '소스 리전을 고르면 모든 목적지 리전으로의 GB당 단가를 보여 줍니다.');
     out += '<div class="sel"><label for="dt-from">FROM 리전</label><select id="dt-from">' + opts + '</select></div><div id="dt-one"></div>';
     // full matrix
-    var head = [{ h: 'FROM \\ TO' }].concat(x.regions.map(function (c) { return { h: esc(c), title: (KO[c] || '') + ' ' + REG[c].name }; }));
+    var head = [{ h: corner('FROM 리전', 'TO 리전') }].concat(x.regions.map(function (c) { return { h: '<span class="gk">' + esc(KO[c] || REG[c].name) + '</span><span class="c">' + esc(c) + '</span>', title: REG[c].name }; }));
     out += '<details class="more"><summary>전체 매트릭스 보기 (' + x.regions.length + ' × ' + x.regions.length + ', $/GB)</summary>' + table({
       caption: '<b>Inter-Region data transfer out</b> $/GB. 행 = 소스 리전, 열 = 목적지 리전',
       head: head,
@@ -691,10 +787,10 @@ html.presenting #prices .tablist{position:static}
     out += sub('DT-Premium', 'dominant direction 트래픽 GB당 요금입니다. 행은 엔드포인트가 있는 AWS 리전 그룹, 열은 클라이언트가 접속한 edge location 그룹입니다.');
     out += table({
       caption: '<b>DT-Premium</b> $/GB (FROM 리전 그룹 → TO edge location 그룹)',
-      head: [{ h: 'FROM 리전 그룹' }].concat(g.map(function (c) { return { h: esc(c.label), title: c.desc }; })),
+      head: [{ h: corner('FROM 리전 그룹', 'TO edge location 그룹') }].concat(g.map(function (c) { return { h: colH(c.id, true), title: c.desc }; })),
       rows: x.rows.map(function (r) {
         var gg = g.filter(function (c) { return c.id === r.from; })[0];
-        return { th: th(esc(gg ? gg.label : r.from), esc(r.from)), cells: r.v.map(function (v) { return cell(usd(v)); }) };
+        return { th: rowH(r.from, true), cells: r.v.map(function (v) { return cell(usd(v)); }) };
       }),
       geo: false, label: 'Global Accelerator DT-Premium 매트릭스', mx: true
     });
@@ -737,11 +833,118 @@ html.presenting #prices .tablist{position:static}
       rows: rows.filter(function (r) { return r.gwlbe != null; }).map(function (r) { return { r: r.r, cells: [cell(usd(r.gwlbe)), cell(month(r.gwlbe), 'm'), cell(usd(r.gwlbeGb))] }; }),
       label: 'GWLB endpoint 요금'
     });
-    out += notes(['Gateway Load Balancer 자체(GWLB 시간·GLCU)는 Elastic Load Balancing 요금이며 여기에는 없습니다.']);
+    out += notes(['Gateway Load Balancer 자체(GWLB 시간·GLCU)는 Elastic Load Balancing 요금입니다(<a href="#elb">Elastic Load Balancing 탭</a>).']);
     return out;
   }
 
-  var RENDER = { dx: renderDX, cloudwan: renderCW, tgw: renderTGW, dt: renderDT, vpn: renderVPN, ga: renderGA, privatelink: renderPL };
+  /* ---------- Elastic Load Balancing ---------- */
+  function renderELB() {
+    var rows = D.elb.rows, out = '';
+    out += sub('ALB · NLB · GWLB', null);
+    out += table({
+      caption: '<b>Application · Network · Gateway Load Balancer</b> 시간 요금과 용량 단위(LCU·NLCU·GLCU) 시간당 요금. GWLB 시간 요금은 AZ당입니다.',
+      head: [{ h: '리전' }, { h: 'ALB<br>시간당' }, { h: 'ALB<br>월' }, { h: 'ALB LCU<br>시간당' }, { h: 'NLB<br>시간당' }, { h: 'NLB<br>월' }, { h: 'NLB NLCU<br>시간당' }, { h: 'GWLB·AZ<br>시간당' }, { h: 'GWLB·AZ<br>월' }, { h: 'GWLB GLCU<br>시간당' }],
+      rows: rows.map(function (r) {
+        return { r: r.r, cells: [cell(usd(r.alb_h)), cell(month(r.alb_h), 'm'), cell(usd(r.alb_lcu)), cell(usd(r.nlb_h)), cell(month(r.nlb_h), 'm'), cell(usd(r.nlb_lcu)), cell(usd(r.gwlb_h)), cell(month(r.gwlb_h), 'm'), cell(usd(r.gwlb_lcu))] };
+      }), label: 'ALB NLB GWLB 요금'
+    });
+    var se = rows.filter(function (r) { return r.r === 'ap-northeast-2'; })[0];
+    out += notes([
+      se ? '월 예시(서울): ALB 1개가 시간당 평균 2 LCU를 쓰면 ' + month(se.alb_h) + ' + 2 × ' + usd(se.alb_lcu) + ' × 730 = $' + ((se.alb_h + 2 * se.alb_lcu) * H).toFixed(2) + '.' : '',
+      'GWLB는 시간 요금이 GWLB를 배치한 AZ마다 붙습니다. 앞단의 Gateway Load Balancer endpoint 요금은 PrivateLink 탭에 있습니다.',
+      '로드 밸런서에서 인터넷·다른 AZ·다른 리전으로 나가는 트래픽에는 EC2 데이터 전송 요금이 별도로 붙습니다.'
+    ]);
+
+    out += sub('LCU 1개에 포함되는 사용량', '시간 평균 기준입니다. 각 차원을 아래 값으로 나눈 LCU 수 중 가장 큰 값으로 과금합니다.');
+    out += table({
+      caption: '<b>LCU · NLCU · GLCU</b> 1개당 차원별 용량 (공식 요금 페이지 기준)',
+      head: [{ h: '차원' }, { h: 'ALB<br>LCU', n: false }, { h: 'NLB TCP<br>NLCU', n: false }, { h: 'NLB UDP<br>NLCU', n: false }, { h: 'NLB TLS<br>NLCU', n: false }, { h: 'GWLB<br>GLCU', n: false }],
+      rows: [
+        ['새 연결 · flow', '초당 25', '초당 800', '초당 400 flow', '초당 50', '초당 600'],
+        ['활성 연결 · flow', '분당 3,000<br>(mTLS 1,500)', '100,000', '50,000 flow', '3,000', '60,000'],
+        ['처리 바이트', '시간당 1 GB<br>(Lambda 대상 0.4 GB)', '시간당 1 GB', '시간당 1 GB', '시간당 1 GB', '시간당 1 GB'],
+        ['규칙 평가', '초당 1,000<br>(처음 10개 규칙 무료)', '—', '—', '—', '—']
+      ].map(function (x) { return { th: th(x[0]), cells: x.slice(1).map(function (v) { return '<td>' + v + '</td>'; }) }; }),
+      geo: false, label: 'LCU 차원별 용량'
+    });
+    out += notes([
+      'ALB 규칙 평가 = 요청률 × (처리한 규칙 수 − 무료 10개). 규칙이 10개 이하면 이 차원은 계산에서 빠집니다.',
+      'ALB HTTPS listener의 초당 25 연결은 RSA 2K 이하·ECDSA 256 이하 인증서 기준입니다. 더 큰 키는 공식 FAQ의 별도 값을 따릅니다.',
+      'NLB는 TCP·UDP·TLS listener 트래픽을 각각 계산해 더합니다. NLB·GWLB의 활성 연결은 분 단위로 샘플링한 동시 연결 수입니다.'
+    ]);
+
+    var hasRes = function (r) { return r.alb_res != null || r.nlb_res != null || r.gwlb_res != null || r.alb_ts != null; };
+    out += sub('LCU 예약과 mTLS Trust Store', null);
+    out += table({
+      caption: '<b>LCU Reservation</b> 예약 LCU 시간당 요금과 <b>ALB Trust Store</b>(mutual TLS) 시간당 요금. 빈 칸 = 해당 리전에 SKU 없음',
+      head: [{ h: '리전' }, { h: 'ALB 예약 LCU<br>시간당' }, { h: 'NLB 예약 LCU<br>시간당' }, { h: 'GWLB 예약 LCU<br>시간당' }, { h: 'Trust Store<br>시간당' }, { h: 'Trust Store<br>월' }],
+      rows: rows.filter(hasRes).map(function (r) {
+        return { r: r.r, cells: [cell(usd(r.alb_res)), cell(usd(r.nlb_res)), cell(usd(r.gwlb_res)), cell(usd(r.alb_ts)), cell(month(r.alb_ts), 'm')] };
+      }), label: 'LCU 예약과 Trust Store 요금'
+    });
+    var nRes = rows.filter(function (r) { return r.nlb_res != null; }).length, gRes = rows.filter(function (r) { return r.gwlb_res != null; }).length;
+    out += notes([
+      '예약 LCU는 예약한 양만큼 매시간 부과하고, 실제 사용이 예약량을 넘으면 넘은 만큼 일반 LCU 단가가 더해집니다. 예: us-east-1 NLB에 3,000 LCU를 예약하고 3,500을 썼다면 시간당 $0.0225 + 3,000 × $0.006 + 500 × $0.006.',
+      'Price List 기준 NLB 예약 LCU는 ' + nRes + '개 리전, GWLB 예약 LCU는 ' + gRes + '개 리전에만 SKU가 있습니다(ALB는 전 리전).',
+      'Trust Store 요금은 mutual TLS용 Trust Store를 ALB에 연결한 동안 Trust Store 1개당 시간 요금입니다. mTLS를 쓰면 ALB LCU의 활성 연결 용량이 분당 1,500으로 줄어듭니다.'
+    ]);
+
+    out += sub('Classic Load Balancer', null);
+    out += table({
+      caption: '<b>Classic Load Balancer</b> 시간 요금과 처리 데이터 GB당 요금',
+      head: [{ h: '리전' }, { h: 'CLB<br>시간당' }, { h: 'CLB<br>월' }, { h: '데이터 처리<br>$/GB' }],
+      rows: rows.filter(function (r) { return r.clb_h != null; }).map(function (r) { return { r: r.r, cells: [cell(usd(r.clb_h)), cell(month(r.clb_h), 'm'), cell(usd(r.clb_gb))] }; }),
+      label: 'Classic Load Balancer 요금'
+    });
+    var idle = rows.filter(function (r) { return r.clb_idle != null || r.alb_idle != null; });
+    out += notes([
+      'Classic Load Balancer는 이전 세대 제품입니다. 새 워크로드는 ALB나 NLB를 권장합니다.',
+      idle.length ? 'Price List에는 ' + idle.map(function (r) { return '<code>' + esc(r.r) + '</code>'; }).join(', ') + '에만 <code>IdleProvisionedLBCapacity</code>(유휴 프로비저닝 용량, Classic ' + usd(idle[0].clb_idle) + '·ALB ' + usd(idle[0].alb_idle) + ' / IdleLCU-Hr) 사용 유형이 있습니다. 공식 요금 페이지에는 나오지 않아 표에서 뺐습니다.' : '',
+      'ALB on Outposts 요금은 Outposts 위치별 상품이라 이 표에서 뺐습니다.'
+    ]);
+    return out;
+  }
+
+  /* ---------- VPC Lattice ---------- */
+  function renderLattice() {
+    var x = D.lattice, rows = x.rows, out = '';
+    var fr = x.freePerHour || {}, frq = (fr.req || 0).toLocaleString('en-US'), fcn = (fr.conn || 0).toLocaleString('en-US');
+    var svc = rows.filter(function (r) { return r.svc != null; });
+    out += sub('VPC Lattice service', null);
+    out += table({
+      caption: '<b>VPC Lattice service</b> 1개당 시간 요금, 처리 데이터 $/GB, 요청·연결 100만 건당 요금(시간당 무료분 초과분)',
+      head: [{ h: '리전' }, { h: 'Service<br>시간당' }, { h: 'Service<br>월' }, { h: '데이터 처리<br>$/GB' }, { h: 'HTTP 요청<br>100만 건당' }, { h: 'TCP 연결 (TLS)<br>100만 건당' }],
+      rows: svc.map(function (r) { return { r: r.r, cells: [cell(usd(r.svc)), cell(month(r.svc), 'm'), cell(usd(r.gb)), cell(usd(r.reqM)), cell(usd(r.connM))] }; }),
+      label: 'VPC Lattice service 요금'
+    });
+    var us = rows.filter(function (r) { return r.r === 'us-east-1'; })[0];
+    out += notes([
+      'HTTP 요청은 HTTP/HTTPS listener, TCP 연결은 TLS(passthrough) listener에만 과금합니다. service마다 매시간 요청 ' + frq + '건, TCP 연결 ' + fcn + '건까지 무료(Always Free Tier)이며 그 시간의 사용량에서 이만큼을 빼고 계산합니다.',
+      'Price List에는 건당 단가(예: 서울 $0.00000013/건)로 있어 100만 건당으로 환산했습니다.',
+      us ? '월 예시(us-east-1): service 1개가 시간당 요청 100만 건과 1 GB를 처리하면 ' + month(us.svc) + ' + 730 GB × ' + usd(us.gb) + ' + 0.7 × ' + usd(us.reqM) + ' × 730 = $' + ((us.svc + us.gb + 0.7 * us.reqM) * H).toFixed(2) + '.' : '',
+      'VPC association과 service network endpoint는 추가 요금이 없습니다.'
+    ]);
+
+    var t0 = (rows.filter(function (r) { return r.resGb; })[0] || {}).resGb || [];
+    out += sub('VPC resource (resource configuration)', 'service network에 VPC resource를 추가해 접근할 때의 요금입니다. Oracle Database@AWS(ODB) 네트워크의 resource는 별도 사용 유형으로 게시됩니다.');
+    out += table({
+      caption: '<b>VPC resource</b> 소비자: service network의 resource당 시간 요금과 처리 계단($/GB). 제공자: Resource Gateway 처리 $/GB',
+      head: [{ h: '리전' }, { h: 'Resource<br>시간당' }, { h: 'Resource<br>월' }, { h: 'ODB resource<br>시간당' }].concat(t0.map(function (t, i) { return { h: '소비자 처리<br>' + tierLabel(t, i, t0) }; })).concat([{ h: '제공자 처리<br>$/GB' }]),
+      rows: rows.map(function (r) {
+        var tc = t0.map(function (t, i) { return cell(usd(r.resGb && r.resGb[i] ? r.resGb[i][2] : null)); });
+        return { r: r.r, cells: [cell(usd(r.res)), cell(month(r.res), 'm'), cell(usd(r.resOdb))].concat(tc).concat([cell(usd(r.provGb))]) };
+      }), label: 'VPC resource 요금'
+    });
+    var odbOnly = rows.filter(function (r) { return r.svc == null; });
+    out += notes([
+      '소비자 처리 계단은 리전 안에서 접근하는 모든 resource의 월 처리량 합계에 적용합니다. PrivateLink resource endpoint와 같은 계단입니다(resource endpoint 시간 요금은 PrivateLink 탭).',
+      'ODB resource = Price List <code>VpcLattice-Service-Network-ODB-Resource-Hours</code>. Oracle Database@AWS의 ODB 네트워크 resource를 service network로 접근할 때의 resource 시간 요금입니다. 공식 Lattice 요금 페이지에는 따로 나오지 않습니다.',
+      odbOnly.length ? odbOnly.map(function (r) { return '<code>' + esc(r.r) + '</code>'; }).join(', ') + '는 Price List에 ODB resource 요금만 있고 Lattice service·VPC resource SKU가 없습니다.' : ''
+    ]);
+    return out;
+  }
+
+  var RENDER = { elb: renderELB, lattice: renderLattice, dx: renderDX, cloudwan: renderCW, tgw: renderTGW, dt: renderDT, vpn: renderVPN, ga: renderGA, privatelink: renderPL };
 
   /* ---------- tabs ---------- */
   function select(id, focus) {
@@ -762,7 +965,7 @@ html.presenting #prices .tablist{position:static}
     if (id === 'dt') { var s = document.getElementById('dt-from'); if (s) { s.addEventListener('change', renderDTOne); renderDTOne(); } }
     applyFilter();
   }
-  var tl = document.querySelector('[role="tablist"]');
+  var tl = document.getElementById('tabgroups');
   tl.addEventListener('click', function (e) {
     var b = e.target.closest('[role="tab"]'); if (!b) return;
     var id = b.getAttribute('aria-controls');
@@ -829,7 +1032,7 @@ html.presenting #prices .tablist{position:static}
     d.regions.forEach(function (r) { REG[r.code] = r; });
     document.getElementById('f-regions').textContent = d.regions.length;
     document.getElementById('stamp-date').innerHTML = esc(utc(d.indexPublicationDate).slice(0, 10)) + '<small>' + esc(utc(d.indexPublicationDate).slice(11)) + '</small>';
-    var OFF = { AWSDirectConnect: 'Direct Connect', AWSCloudWAN: 'Cloud WAN', AmazonVPC: 'VPC (TGW·VPN·PrivateLink·IPv4)', AWSDataTransfer: 'Data Transfer', AWSGlobalAccelerator: 'Global Accelerator' };
+    var OFF = { AWSDirectConnect: 'Direct Connect', AWSCloudWAN: 'Cloud WAN', AmazonVPC: 'VPC (TGW · VPN · PrivateLink · Lattice · IPv4)', AWSDataTransfer: 'Data Transfer', AWSGlobalAccelerator: 'Global Accelerator', AWSELB: 'Elastic Load Balancing' };
     document.getElementById('stamp-offers').innerHTML = Object.keys(OFF).map(function (k) {
       var s = d.sources[k]; return s ? '<dt>' + esc(OFF[k]) + '</dt><dd>' + esc(utc(s.publicationDate)) + '</dd>' : '';
     }).join('');
