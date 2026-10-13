@@ -543,7 +543,7 @@ Accept: application/json</pre>
           <tr><td class="row-h">WebSocket API</td><td data-k="과금 기준">주고받은 메시지 100만 건당(32 KB 단위 계량)과 연결 시간(분)</td><td data-k="참고">ping·pong 같은 제어 프레임은 계량하지 않습니다.</td></tr>
           <tr><td class="row-h">API 캐시</td><td data-k="과금 기준">REST API 스테이지 캐시의 선택한 크기별 시간 요금</td><td data-k="참고">캐시를 켠 스테이지에만 붙습니다.</td></tr>
           <tr><td class="row-h">Portal</td><td data-k="과금 기준">Portal당 월 요금(PortalProduct 10개 포함), 추가 PortalProduct당 월 요금</td><td data-k="참고">월 중 사용 기간에 비례해 청구합니다.</td></tr>
-          <tr><td class="row-h">데이터 전송</td><td data-k="과금 기준">외부로 나가는 데이터 GB당, EC2 데이터 전송 요금 적용</td><td data-k="참고">Private API에는 데이터 전송 아웃 요금이 없습니다.</td></tr>
+          <tr><td class="row-h">데이터 전송</td><td data-k="과금 기준">외부로 나가는 데이터 GB당, EC2 데이터 전송 요금 적용</td><td data-k="참고">Private API에는 AWS에서 나가는 데이터 전송(DTO) 요금이 없습니다.</td></tr>
           <tr><td class="row-h">Private API 엔드포인트</td><td data-k="과금 기준">execute-api 인터페이스 VPC 엔드포인트의 AZ당 시간 요금과 처리 데이터 GB당</td><td data-k="참고">AWS PrivateLink에서 과금합니다.</td></tr>
           <tr><td class="row-h">연관 서비스</td><td data-k="과금 기준">Lambda 호출, CloudWatch Logs, AWS WAF</td><td data-k="참고">각 서비스에서 따로 과금합니다.</td></tr>
           </tbody>

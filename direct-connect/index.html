@@ -498,25 +498,77 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
 
   <section id="pricing" aria-labelledby="pricing-h">
     <div class="wrap">
-      <p class="tag">Pricing</p>
-      <h2 id="pricing-h">비용 항목</h2>
-      <p class="lede">기본 요금제(Pay-as-you-go)는 포트를 쓰는 시간과 AWS에서 나가는 데이터 전송량으로 과금됩니다. 10·100 Gbps 전용 연결은 DTO가 포함된 정액제(Flat-rate)도 고를 수 있습니다. 설치비와 최소 요금은 없고, 회선 파트너와 콜로케이션 비용은 따로 발생합니다.</p>
+      <p class="tag">Pricing · 기본 요금제</p>
+      <h2 id="pricing-h">종량제(Pay-as-you-go): 쓴 만큼 냅니다</h2>
+      <p class="lede">모든 연결에 기본으로 적용되는 요금제입니다. 포트를 쓰는 시간과 AWS에서 나가는 데이터 양으로 과금되고, 설치비와 최소 요금은 없습니다. 회선 파트너와 콜로케이션 비용은 따로 발생합니다. 10 · 100 Gbps 전용 연결은 다음 장의 <a href="#pricing-flat">정액제</a>를 대신 고를 수 있습니다.</p>
       <div class="tbl-wrap">
         <table>
-          <caption class="sr-only">AWS Direct Connect 과금 항목</caption>
+          <caption class="sr-only">AWS Direct Connect 종량제 과금 항목</caption>
           <thead><tr><th scope="col">과금 항목</th><th scope="col">과금 기준</th><th scope="col">참고</th></tr></thead>
           <tbody>
-          <tr><td class="row-h">포트 시간 (전용 연결)</td><td data-k="과금 기준">포트 용량(1·10·100·400 Gbps)별 시간당</td><td data-k="참고">포트가 프로비저닝되어 있는 동안 데이터가 없어도 과금됩니다. 일본은 별도 단가입니다.</td></tr>
+          <tr><td class="row-h">포트 시간 (전용 연결)</td><td data-k="과금 기준">포트 용량(1 · 10 · 100 · 400 Gbps)별 시간당</td><td data-k="참고">포트가 프로비저닝되어 있는 동안 트래픽이 없어도 과금됩니다. 일본은 1 · 10 Gbps 단가가 조금 낮습니다.</td></tr>
           <tr><td class="row-h">포트 시간 (호스팅 연결)</td><td data-k="과금 기준">용량(50 Mbps–25 Gbps)별 시간당</td><td data-k="참고">Direct Connect 파트너를 통해 주문하며, 파트너 서비스 요금은 따로 발생합니다.</td></tr>
-          <tr><td class="row-h">데이터 전송 아웃 (DTO)</td><td data-k="과금 기준">GB당, 소스 리전(또는 Local Zone)과 Direct Connect 로케이션 조합</td><td data-k="참고">DX Gateway로 다른 리전에 연결해도 트래픽을 보낸 리전 기준 단가가 적용됩니다.</td></tr>
-          <tr><td class="row-h">정액제 (Flat-rate)</td><td data-k="과금 기준">10·100 Gbps 전용 연결의 대역폭과 지리적 범위 등급(Tier 1–5)별 시간당</td><td data-k="참고">선택한 등급이 포함하는 리전에서 나가는 DTO는 따로 과금되지 않습니다. 서로 다른 장비나 로케이션의 두 연결을 묶은 port-pair는 두 번째 연결이 추가 요금 없이 포함되며, 요금제는 언제든 바꿀 수 있습니다.</td></tr>
-          <tr><td class="row-h">데이터 전송 인</td><td data-k="과금 기준">과금 없음</td><td data-k="참고">모든 로케이션에서 GB당 0달러입니다.</td></tr>
-          <tr><td class="row-h">SiteLink</td><td data-k="과금 기준">SiteLink를 켠 VIF 시간당, 그리고 DX 로케이션 사이 GB당 데이터 전송</td><td data-k="참고">기본은 꺼져 있습니다. 켜 두면 트래픽이 없어도 시간 요금이 붙고, 전송 단가는 출발지와 목적지 지역에 따라 다릅니다.</td></tr>
+          <tr><td class="row-h">AWS에서 나가는 데이터 (DTO)</td><td data-k="과금 기준">GB당. 트래픽을 보낸 리전(또는 Local Zone)과 Direct Connect 로케이션 조합별 단가</td><td data-k="참고">DX Gateway로 다른 리전에 연결해도 트래픽을 보낸 리전 기준 단가가 적용됩니다.</td></tr>
+          <tr><td class="row-h">AWS로 들어오는 데이터 (DTI)</td><td data-k="과금 기준">무료</td><td data-k="참고">온프레미스에서 AWS로 보내는 데이터는 모든 로케이션에서 과금되지 않습니다.</td></tr>
+          <tr><td class="row-h">SiteLink</td><td data-k="과금 기준">SiteLink를 켠 VIF 시간당, 그리고 DX 로케이션 사이 GB당</td><td data-k="참고">기본은 꺼져 있습니다. 켜 두면 트래픽이 없어도 시간 요금이 붙고, 전송 단가는 출발지와 목적지 지역에 따라 다릅니다.</td></tr>
           <tr><td class="row-h">Transit Gateway · Cloud WAN</td><td data-k="과금 기준">어태치먼트 시간당, 그리고 GB당 데이터 처리</td><td data-k="참고">각 서비스 요금으로 따로 청구됩니다. Transit Gateway의 DX Gateway 어태치먼트 요금은 DX Gateway 소유자가 냅니다.</td></tr>
           </tbody>
         </table>
       </div>
-      <p class="lede" style="font-size:14px">요금 단가는 리전과 사용량에 따라 다릅니다. 최신 단가는 <a href="https://aws.amazon.com/directconnect/pricing/" target="_blank" rel="noopener">Direct Connect 요금 페이지</a>에서 확인하세요.</p>
+      <p class="lede" style="font-size:14px">단가는 리전과 로케이션에 따라 다릅니다. 최신 단가는 <a href="https://aws.amazon.com/directconnect/pricing/" target="_blank" rel="noopener">Direct Connect 요금 페이지</a>에서 확인하세요.</p>
+    </div>
+  </section>
+  <section id="pricing-flat" aria-labelledby="pricing-flat-h">
+    <div class="wrap">
+      <p class="tag">Pricing · 신규 요금제 (2026년 9월)</p>
+      <h2 id="pricing-flat-h">정액제(Flat-rate): 정해진 시간 요금에 DTO가 포함됩니다</h2>
+      <p class="lede">10 · 100 Gbps <strong>전용 연결</strong>에만 고를 수 있는 별도 요금제입니다. 대역폭과 Tier로 정해진 시간 요금만 내고, 선택한 Tier가 포함하는 리전에서 나가는 데이터(DTO)는 GB당 요금이 없습니다. 월 요금은 <strong>대역폭 · Tier별 시간 요금 × 연결이 프로비저닝된 시간</strong>이며, 1시간 단위로 올림해 과금합니다. 중국 리전을 뺀 모든 상용 리전의 Direct Connect 로케이션에서 쓸 수 있습니다.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">정액제 Tier 구분</caption>
+          <thead><tr><th scope="col">Tier</th><th scope="col">범위</th><th scope="col">트래픽을 보내는 리전과 로케이션의 관계</th><th scope="col">예</th></tr></thead>
+          <tbody>
+          <tr><td class="row-h">Tier 1</td><td data-k="범위">Local</td><td data-k="관계">같은 메트로</td><td data-k="예">us-east-1 ↔ Ashburn(버지니아) 로케이션</td></tr>
+          <tr><td class="row-h">Tier 2</td><td data-k="범위">Regional</td><td data-k="관계">같은 권역(대륙 등) 안</td><td data-k="예">us-east-1 ↔ San Francisco 로케이션</td></tr>
+          <tr><td class="row-h">Tier 3</td><td data-k="범위">Continental</td><td data-k="관계">대륙 · 권역을 더 멀리 가로지름</td><td data-k="예">us-east-1 ↔ Cape Town 로케이션, eu-central-1 ↔ San Francisco</td></tr>
+          <tr><td class="row-h">Tier 4</td><td data-k="범위">Long-haul</td><td data-k="관계">넓은 권역이나 다른 대륙</td><td data-k="예">—</td></tr>
+          <tr><td class="row-h">Tier 5</td><td data-k="범위">Global</td><td data-k="관계">전 세계 모든 AWS 리전</td><td data-k="예">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="lede" style="font-size:14px">Tier는 연결마다 하나씩 고릅니다. 상위 Tier는 하위 Tier의 리전을 모두 포함하고, Tier 1이 가장 저렴합니다. 위 표는 AWS가 제시한 일반 기준이며, 경로별 정확한 Tier는 <a href="https://aws.amazon.com/directconnect/pricing/flat-rate/" target="_blank" rel="noopener">정액제 요금 페이지</a>의 표로 확인합니다.</p>
+    </div>
+  </section>
+  <section id="pricing-flat-billing" aria-labelledby="pricing-flat-billing-h">
+    <div class="wrap">
+      <p class="tag">Pricing · 정액제 과금 방식</p>
+      <h2 id="pricing-flat-billing-h">정액제에 포함되는 것과 따로 내는 것</h2>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">정액제 과금 방식</caption>
+          <thead><tr><th scope="col">항목</th><th scope="col">정액제에 포함</th><th scope="col">따로 과금</th></tr></thead>
+          <tbody>
+          <tr><td class="row-h">포트 시간</td><td data-k="정액제에 포함">포함 (대역폭 · Tier별 시간 요금)</td><td data-k="따로 과금">—</td></tr>
+          <tr><td class="row-h">Tier가 포함하는 리전에서 나가는 데이터</td><td data-k="정액제에 포함">포함, GB당 요금 없음. private · public · transit 트래픽 모두 해당</td><td data-k="따로 과금">—</td></tr>
+          <tr><td class="row-h">Tier 밖 리전에서 나가는 데이터</td><td data-k="정액제에 포함">—</td><td data-k="따로 과금">종량제 DTO 단가</td></tr>
+          <tr><td class="row-h">AWS로 들어오는 데이터</td><td data-k="정액제에 포함">항상 무료</td><td data-k="따로 과금">—</td></tr>
+          <tr><td class="row-h">port-pair 이중화 포트</td><td data-k="정액제에 포함">두 번째 포트 추가 요금 없음</td><td data-k="따로 과금">—</td></tr>
+          <tr><td class="row-h">SiteLink 데이터</td><td data-k="정액제에 포함">—</td><td data-k="따로 과금">SiteLink 단가 (어떤 Tier에도 포함되지 않음)</td></tr>
+          <tr><td class="row-h">크로스커넥트 · 회선 · 다른 서비스</td><td data-k="정액제에 포함">—</td><td data-k="따로 과금">콜로케이션 사업자 · 파트너 · 회선 사업자, Transit Gateway 등 다른 AWS 서비스</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">정액제 운영 시 확인할 점</caption>
+          <thead><tr><th scope="col">확인할 점</th><th scope="col">내용</th></tr></thead>
+          <tbody>
+          <tr><td class="row-h">port-pair</td><td data-k="내용">서로 다른 장비나 로케이션의 전용 연결 2개를 같은 대역폭 · Tier로 묶습니다. 한쪽은 대기용이라 10 Gbps port-pair의 사용 가능 대역폭은 20이 아니라 10 Gbps입니다. 기존 연결은 Resiliency Group에 넣어 port-pair로 만들 수 있고, 묶지 않고 개별 정액제 연결로 써도 됩니다.</td></tr>
+          <tr><td class="row-h">여러 리전 연결</td><td data-k="내용">DX Gateway, Transit Gateway, Cloud WAN을 붙이면 여러 리전의 트래픽이 들어올 수 있습니다. 붙이기 전에 Tier가 원하는 리전을 모두 포함하는지 확인하고, 새 리전으로 확장하면 Tier를 올려야 할 수 있습니다.</td></tr>
+          <tr><td class="row-h">요금제 전환</td><td data-k="내용">콘솔의 Change Billing Mode 또는 <code>UpdateConnectionsBillingMode</code> API로 언제든 바꿀 수 있고, 트래픽은 끊기지 않습니다. 같은 계정에서는 로케이션 단위로 적용되어, 연결 하나를 바꾸면 그 로케이션의 연결이 모두 바뀝니다.</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </section>
 
