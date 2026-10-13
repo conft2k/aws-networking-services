@@ -1780,11 +1780,20 @@ html.presenting #prices .tablist{position:static}
   q.addEventListener('input', applyFilter);
 
   /* ---------- load ---------- */
-  if (fromHash()) {
-    // a tab hash would otherwise scroll to the bare panel; show the tab bar instead
-    var go = function () { if (!document.documentElement.classList.contains('presenting')) document.getElementById('prices').scrollIntoView({ block: 'start' }); };
-    requestAnimationFrame(go); addEventListener('load', go, { once: true });
-  } else select(DEFAULT_TAB);
+  // a tab hash (e.g. #ga from a service page's $ button) should land on the tab bar. The publication card
+  // above it and the tables are filled in after the data loads, which pushes the tab bar down, so the
+  // jump is repeated (instantly, no smooth scroll) once the content and fonts have settled.
+  var deep = fromHash();
+  function go() {
+    if (!deep || document.documentElement.classList.contains('presenting')) return;
+    var p = document.getElementById('prices'); if (!p) return;
+    var top = p.getBoundingClientRect().top + scrollY - (parseFloat(getComputedStyle(p).scrollMarginTop) || 0);
+    scrollTo({ top: Math.max(0, top), behavior: 'instant' });
+  }
+  if (deep) { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; requestAnimationFrame(go); addEventListener('load', go, { once: true }); }
+  else select(DEFAULT_TAB);
+  // the user scrolling on their own ends the auto-jump
+  ['wheel', 'touchstart', 'keydown'].forEach(function (ev) { addEventListener(ev, function () { deep = false; }, { once: true, passive: true }); });
   var st = document.getElementById('status');
   fetch('../../data/pricing.json', { cache: 'no-cache' }).then(function (r) {
     if (!r.ok) throw new Error('HTTP ' + r.status);
@@ -1807,6 +1816,8 @@ html.presenting #prices .tablist{position:static}
     st.hidden = true;
     var cur = TABS.filter(function (t) { return !document.getElementById(t).hidden; })[0] || DEFAULT_TAB;
     ensure(cur);
+    go(); requestAnimationFrame(go);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { go(); setTimeout(go, 150); });
   }).catch(function (e) {
     st.innerHTML = '<b>가격 데이터를 불러오지 못했습니다.</b> <code>data.json</code>을 같은 폴더에서 HTTP로 제공해야 합니다(파일을 직접 열면 브라우저가 막습니다). 저장소 루트에서 <code>python3 -m http.server</code>를 실행한 뒤 <code>http://localhost:8000/pricing/</code>로 열어 보세요. (' + esc(e.message) + ')';
     document.getElementById('stamp-date').textContent = '데이터 없음';
