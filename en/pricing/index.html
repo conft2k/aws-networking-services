@@ -248,8 +248,8 @@ html.presenting #prices .tablist{position:static}
 .panel thead th .corner span:last-child{color:var(--fiber-ink)}
 .panel thead th{vertical-align:bottom}
 </style>
-<link rel="stylesheet" href="../../assets/site.css?v=23">
-<script src="../../assets/site.js?v=23"></script>
+<link rel="stylesheet" href="../../assets/site.css?v=25">
+<script src="../../assets/site.js?v=25"></script>
 </head>
 <body>
 
@@ -1779,7 +1779,7 @@ html.presenting #prices .tablist{position:static}
     requestAnimationFrame(go); addEventListener('load', go, { once: true });
   } else select(DEFAULT_TAB);
   var st = document.getElementById('status');
-  fetch('../../pricing/data.json', { cache: 'no-cache' }).then(function (r) {
+  fetch('../../data/pricing.json', { cache: 'no-cache' }).then(function (r) {
     if (!r.ok) throw new Error('HTTP ' + r.status);
     return r.json();
   }).then(function (d) {

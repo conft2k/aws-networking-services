@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build pricing/data.json for the AWS networking price table page.
+"""Build data/pricing.json for the AWS networking price table page.
 
 Source: AWS Price List bulk API (public, no auth)
   https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/index.json
@@ -17,7 +17,7 @@ JSON that the official VPC pricing page loads (b0.p.awsstatic.com .../ec2/USD/cu
 and marked as source "pricing page" in data.json.
 
 Usage (stdlib only):
-  python3 -I tools/pricing/build_pricing.py [--cache DIR] [--refresh] [--out pricing/data.json]
+  python3 -I tools/pricing/build_pricing.py [--cache DIR] [--refresh] [--out data/pricing.json]
 """
 import argparse
 import collections
@@ -1066,7 +1066,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--cache', default=os.environ.get('PRICE_CACHE', DEFAULT_CACHE))
     ap.add_argument('--refresh', action='store_true', help='re-download even if cached')
-    ap.add_argument('--out', default=os.path.join(REPO, 'pricing', 'data.json'))
+    ap.add_argument('--out', default=os.path.join(REPO, 'data', 'pricing.json'))
     args = ap.parse_args()
 
     idx, meta, files, excluded = offer_files(args.cache, args.refresh)

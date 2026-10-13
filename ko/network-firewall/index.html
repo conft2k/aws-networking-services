@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Network Firewall 소개</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+body{margin:0}img{max-width:100%}[hidden]{display:none!important}
+
+/* Layout: a cross-connect work order. Cool steel paper, navy ink, Amazon orange as the one accent; section tags read like fiber labels. */
+:root{
+  --bg:#EEF1F4; --surface:#FFFFFF; --sunken:#E3E8ED;
+  --ink:#14202E; --ink-2:#44515F; --ink-3:#5A6672;
+  --line:#CDD5DD; --line-2:#B4BFCA;
+  --fiber:#FF9900;          /* Amazon orange — fills only */
+  --fiber-ink:#B35C00;      /* orange-derived, AA on light surfaces */
+  --fiber-soft:#FFF0D9;
+  --on-fiber:#14202E;
+  --trace:#2E7D9A;          /* secondary line color for diagram paths */
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --maxw:1120px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--fiber-ink);outline-offset:3px;border-radius:2px}
+.skip-link{position:absolute;left:16px;top:-60px;background:var(--fiber);color:var(--on-fiber);padding:8px 14px;font-weight:700;z-index:50;text-decoration:none}
+.skip-link:focus{top:12px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.wrap{max-width:var(--maxw);margin:0 auto;padding-inline:24px}
+section{padding-block:88px;border-top:1px solid var(--line)}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.25}
+h2{font-size:clamp(26px,3.4vw,36px);font-weight:700;letter-spacing:-.01em}
+h3{font-size:18px;font-weight:700}
+p{margin:0}
+.lede{color:var(--ink-2);max-width:62ch;margin-top:14px}
+.num{font-family:var(--display);font-variant-numeric:tabular-nums lining-nums}
+.mono{font-family:var(--mono)}
+
+/* fiber label: the section tag */
+.tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-bottom:14px}
+.tag::before{content:"";width:22px;height:8px;background:var(--fiber);border-radius:1px}
+
+/* nav */
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:60px}
+.brand{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.02em;text-decoration:none;text-transform:uppercase}
+.brand span{color:var(--fiber-ink)}
+.navlinks{display:flex;gap:22px;font-size:14px;align-items:center}
+.navlinks a{text-decoration:none;color:var(--ink-2)}
+.navlinks a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;font-weight:700;font-size:15px;text-decoration:none;border-radius:4px;border:1px solid transparent;transition:transform .15s ease,background .15s ease}
+.btn-primary{background:var(--fiber);color:var(--on-fiber)}
+.btn-primary:hover{transform:translateY(-1px)}
+.btn-ghost{border-color:var(--line-2);color:var(--ink)}
+.btn-ghost:hover{background:var(--sunken)}
+.navlinks .btn{min-height:38px;padding:0 14px;font-size:14px;color:var(--on-fiber)}
+
+/* hero */
+.hero{padding-block:72px 64px;border-top:0}
+.hero-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:56px;align-items:center}
+.eyebrow{font-family:var(--mono);font-size:13px;color:var(--fiber-ink);letter-spacing:.04em}
+.hero h1{font-size:clamp(34px,5vw,56px);font-weight:700;letter-spacing:-.02em;margin-top:16px}
+.hero h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--fiber) 62%,var(--fiber) 90%,transparent 90%);padding-inline:2px}
+.hero .lede{font-size:18px}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+
+/* hero visual: port faceplate */
+.faceplate{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px}
+.faceplate-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.ports{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+.port{border:1px solid var(--line);border-radius:4px;padding:14px 14px 12px;background:var(--sunken);display:flex;flex-direction:column;gap:2px}
+.port .num{font-size:40px;font-weight:600;line-height:1}
+.port .num small{font-size:18px;color:var(--ink-2);margin-left:2px}
+.port .optic{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+.port .led{width:8px;height:8px;border-radius:50%;background:var(--fiber);align-self:flex-end;margin-top:-6px;animation:blink 2.4s ease-in-out infinite}
+.port:nth-child(2) .led{animation-delay:.6s}.port:nth-child(3) .led{animation-delay:1.2s}.port:nth-child(4) .led{animation-delay:1.8s}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.faceplate-foot{margin-top:14px;font-size:13px;color:var(--ink-2)}
+
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:56px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.chip{padding:18px 20px;border-left:1px solid var(--line);min-width:0}
+.chip:first-child{border-left:0}
+.chip .num{font-size:34px;font-weight:600;line-height:1.1}
+.chip p{font-size:13.5px;color:var(--ink-2);margin-top:4px}
+
+/* value */
+.split{display:grid;grid-template-columns:1fr 1.4fr;gap:56px}
+.pillars{display:grid;gap:0;border-top:1px solid var(--line-2)}
+.pillar{display:grid;grid-template-columns:120px 1fr;gap:20px;padding-block:22px;border-bottom:1px solid var(--line)}
+.pillar .k{font-family:var(--display);font-size:22px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--fiber-ink)}
+.pillar p{color:var(--ink-2);margin-top:6px}
+
+/* stack (L1/L2/L3) */
+.stack{margin-top:40px;display:grid;gap:10px}
+.layer{display:grid;grid-template-columns:96px 1fr 1.2fr;gap:24px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px 24px}
+.layer .lv{font-family:var(--display);font-size:44px;font-weight:700;line-height:.9}
+.layer .lv small{display:block;font-family:var(--mono);font-size:11px;font-weight:400;color:var(--ink-3);letter-spacing:.06em;margin-top:8px;text-transform:uppercase}
+.layer p{color:var(--ink-2);margin-top:6px;font-size:15px}
+.specs{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+.specs code{font-family:var(--mono);font-size:12.5px;background:var(--sunken);border:1px solid var(--line);padding:3px 8px;border-radius:3px;color:var(--ink)}
+
+/* features */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:40px}
+.feature{background:var(--surface);padding:26px 24px;min-width:0}
+.feature .ft{font-family:var(--mono);font-size:11.5px;color:var(--fiber-ink);letter-spacing:.06em;text-transform:uppercase}
+.feature h3{margin-top:8px}
+.feature p{color:var(--ink-2);font-size:15px;margin-top:8px}
+
+/* table */
+.tbl-wrap{margin-top:36px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:14px 18px;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--sunken)}
+tbody tr:last-child td{border-bottom:0}
+td.row-h{font-weight:700;width:22%}
+td .num{font-size:18px;font-weight:600}
+
+/* architecture */
+.arch{margin-top:36px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px}
+.arch-scroll{overflow-x:auto}
+.arch svg{display:block;width:100%;min-width:860px;height:auto}
+.arch-hint{display:none;font-size:13px;color:var(--ink-3);margin-top:10px}
+svg .box{fill:var(--sunken);stroke:var(--line-2)}
+svg .zone{fill:none;stroke:var(--line-2);stroke-dasharray:4 4}
+svg .t{fill:var(--ink);font-family:var(--sans);font-size:14px;font-weight:700}
+svg .s{fill:var(--ink-3);font-family:var(--mono);font-size:11px}
+svg .z{fill:var(--ink-2);font-family:var(--mono);font-size:11px;letter-spacing:.08em}
+svg .fiber{stroke:var(--fiber);stroke-width:5;fill:none;stroke-linecap:round}
+svg .path{stroke:var(--trace);stroke-width:2;fill:none}
+svg .site{stroke:var(--fiber-ink);stroke-width:2;fill:none;stroke-dasharray:6 5}
+svg .lbl{fill:var(--trace);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .lbl2{fill:var(--fiber-ink);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .dot{fill:var(--fiber)}
+svg .ah-f{fill:var(--fiber)}
+svg .ah-p{fill:var(--trace)}
+.legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--ink-2)}
+.legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--fiber)}
+.legend i.p{border-top:2px solid var(--trace)}
+.legend i.s{border-top:2px dashed var(--fiber-ink)}
+
+/* steps */
+.steps{list-style:none;padding:0;margin:40px 0 0;display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:4px solid var(--fiber)}
+.steps li{padding:20px 18px 0 0;min-width:0}
+.steps .num{font-size:15px;font-weight:600;color:var(--fiber-ink);letter-spacing:.06em}
+.steps h3{font-size:16px;margin-top:6px}
+.steps p{font-size:14px;color:var(--ink-2);margin-top:6px}
+
+/* resiliency */
+.res{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:36px}
+.res-card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:26px}
+.res-card .num{font-size:52px;font-weight:700;line-height:1}
+.res-card .num small{font-size:20px;color:var(--ink-2)}
+.res-card h3{margin-top:10px}
+.res-card p{color:var(--ink-2);font-size:15px;margin-top:6px}
+.res-card.max{border-color:var(--fiber);box-shadow:inset 0 4px 0 var(--fiber)}
+
+/* cta */
+.cta{text-align:center}
+.cta h2{max-width:22ch;margin:0 auto}
+.cta .lede{margin:14px auto 0}
+.cta .cta-row{justify-content:center}
+footer{border-top:1px solid var(--line);padding-block:28px;font-size:13px;color:var(--ink-3)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+
+@media (max-width:1024px){
+  .hero-grid,.split{grid-template-columns:1fr;gap:40px}
+  .features{grid-template-columns:repeat(2,1fr)}
+  .steps{grid-template-columns:repeat(2,1fr);border-top:0;gap:0 24px}
+  .steps li{border-top:4px solid var(--fiber);padding-bottom:24px}
+  .layer{grid-template-columns:80px 1fr}
+  .layer .specs{grid-column:2}
+  .chips{grid-template-columns:repeat(2,1fr)}
+  .chip:nth-child(3){border-left:0}
+  .chip:nth-child(n+3){border-top:1px solid var(--line)}
+}
+@media (max-width:640px){
+  .wrap{padding-inline:18px}
+  section{padding-block:60px}
+  .navlinks a:not(.btn){display:none}
+  .features,.res{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr}
+  .pillar{grid-template-columns:1fr;gap:0}
+  .layer{grid-template-columns:1fr;gap:12px}
+  .layer .specs{grid-column:auto}
+  .cta-row .btn{width:100%}
+  .arch-hint{display:block}
+  table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  table,tbody,tr,td{display:block;width:100%}
+  tr{border-bottom:1px solid var(--line);padding:14px 16px}
+  tbody tr:last-child{border-bottom:0}
+  td{border:0;padding:3px 0}
+  td.row-h{width:100%;font-size:16px;padding-bottom:6px}
+  td[data-k]::before{content:attr(data-k);display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+
+/* ---- service-specific ---- */
+/* hero visual: rule engine pipeline */
+.engine{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px;min-width:0}
+.engine-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.stages{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:0}
+.stage{position:relative;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;background:var(--sunken);border:1px solid var(--line);border-radius:4px;padding:12px 14px;min-width:0}
+.stage + .stage{margin-top:22px}
+.stage + .stage::before{content:"";position:absolute;left:24px;top:-23px;width:2px;height:22px;background:var(--trace)}
+.stage .sn{font-family:var(--display);font-size:22px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;line-height:1.1}
+.stage .sd{display:block;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);margin-top:2px;overflow-wrap:anywhere}
+.acts{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end}
+.acts code{font-family:var(--mono);font-size:11.5px;border:1px solid var(--line-2);padding:2px 6px;border-radius:3px;color:var(--ink-2);background:var(--surface)}
+.acts code.hit{background:var(--fiber);border-color:var(--fiber);color:var(--on-fiber);font-weight:500}
+.stage.pkt{background:transparent;border-style:dashed;border-color:var(--line-2)}
+.stage.pkt .sn{font-size:18px}
+.stage .pulse{width:8px;height:8px;border-radius:50%;background:var(--fiber);animation:blink 2.4s ease-in-out infinite}
+.engine-foot{margin-top:14px;font-size:13px;color:var(--ink-2)}
+
+/* suricata rules block */
+.policy{display:grid;grid-template-columns:1.35fr 1fr;gap:40px;margin-top:36px;align-items:start}
+.code{background:var(--sunken);border:1px solid var(--line);border-radius:6px;min-width:0;margin:0}
+.code-head{display:flex;justify-content:space-between;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.code pre{margin:0;padding:16px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.75;color:var(--ink)}
+.code .a{color:var(--fiber-ink);font-weight:500}
+.code .k{color:var(--trace)}
+.code .c{color:var(--ink-3)}
+.checks{list-style:none;margin:0;padding:0;display:grid;gap:0;border-top:1px solid var(--line-2)}
+.checks li{padding:18px 0;border-bottom:1px solid var(--line);min-width:0}
+.checks h3{font-size:16px}
+.checks h3 code{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--fiber-ink)}
+.checks p{color:var(--ink-2);font-size:15px;margin-top:4px}
+
+@media (max-width:1024px){
+  .policy{grid-template-columns:1fr}
+}
+
+/* nav: six items need more room than the base 640px breakpoint gives */
+.brand,.navlinks a{white-space:nowrap}
+@media (max-width:900px){.navlinks a:not(.btn){display:none}}
+
+/* nav: keep links on one line, show only CTA below 960px */
+.navlinks a{white-space:nowrap}
+@media (max-width:960px){.navlinks a:not(.btn){display:none}}
+
+/* Korean line breaking: never split a word mid-syllable */
+h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
+</style>
+<link rel="stylesheet" href="../../assets/site.css?v=25">
+<script src="../../assets/site.js?v=25"></script>
+</head>
+<body>
+
+
+<a class="skip-link" href="#main">본문으로 건너뛰기</a>
+
+<nav aria-label="주요 메뉴">
+  <div class="wrap">
+    <a class="brand" href="#top">AWS <span>Network Firewall</span></a>
+    <div class="navlinks">
+      <a href="../">서비스 포트폴리오</a>
+      <a href="#rules">규칙 엔진</a>
+      <a href="#features">주요 기능</a>
+      <a href="#models">배포 모델</a>
+      <a href="#arch">아키텍처</a>
+      <a href="#pricing">비용</a>
+      <a class="btn btn-primary" href="#start">시작하기</a>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+  <header class="hero" id="top">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">AWS Network Firewall · 관리형 방화벽 · IPS</p>
+          <h1>VPC를 오가는 트래픽을 <em>Suricata 규칙</em>으로 검사하세요</h1>
+          <p class="lede">AWS Network Firewall은 VPC 트래픽을 위한 관리형 stateful 방화벽이자 침입 탐지 · 방지 서비스입니다. 익숙한 Suricata 문법으로 규칙을 쓰고, 용량과 가용성은 AWS가 관리합니다.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="#models">배포 모델 보기</a>
+            <a class="btn btn-ghost" href="#arch">아키텍처 보기</a>
+          </div>
+        </div>
+
+        <div class="engine" aria-label="패킷이 규칙 엔진을 거치는 순서">
+          <div class="engine-head"><span>Firewall policy · strict order</span><span>flow → verdict</span></div>
+          <ol class="stages">
+            <li class="stage pkt"><span><span class="sn">Packet in</span><span class="sd">10.0.1.25:49152 → 198.51.100.10:443 TCP</span></span><span class="pulse" aria-hidden="true"></span></li>
+            <li class="stage"><span><span class="sn">Stateless</span><span class="sd">5-tuple 매칭 · 패킷 단위</span></span><span class="acts"><code>pass</code><code>drop</code><code class="hit">forward</code></span></li>
+            <li class="stage"><span><span class="sn">Stateful</span><span class="sd">Suricata 호환 · 흐름 단위 · tls.sni</span></span><span class="acts"><code class="hit">pass</code><code>drop</code><code>reject</code><code>alert</code></span></li>
+          </ol>
+          <p class="engine-foot">stateless 엔진이 forward한 패킷만 stateful 엔진이 흐름 문맥으로 검사합니다.</p>
+        </div>
+      </div>
+
+      <div class="chips" role="list">
+        <div class="chip" role="listitem"><span class="num">100 Gbps</span><p>가용 영역당 최대 자동 확장 처리량</p></div>
+        <div class="chip" role="listitem"><span class="num">Suricata</span><p>오픈 소스 IPS 호환 stateful 규칙</p></div>
+        <div class="chip" role="listitem"><span class="num">4</span><p>stateful 액션 (pass · drop · reject · alert)</p></div>
+        <div class="chip" role="listitem"><span class="num">3</span><p>로그 유형 (Alert · Flow · TLS)</p></div>
+      </div>
+    </div>
+  </header>
+
+  <section id="why" aria-labelledby="why-h">
+    <div class="wrap split">
+      <div>
+        <p class="tag">Why Network Firewall</p>
+        <h2 id="why-h">보안 그룹과 NACL 다음 단계의 검사가 필요할 때</h2>
+        <p class="lede">보안 그룹과 네트워크 ACL은 IP와 포트로 허용 여부를 정합니다. 도메인 기반 아웃바운드 통제, 프로토콜 탐지, 시그니처 기반 침입 방지가 필요하면 방화벽 계층을 더합니다.</p>
+      </div>
+      <div class="pillars">
+        <div class="pillar"><span class="k">Managed</span><div><h3>운영 부담 없는 확장</h3><p>트래픽에 따라 자동으로 확장되며, 가용성과 복원력은 AWS가 관리합니다. 어플라이언스 인스턴스를 직접 운영하지 않습니다.</p></div></div>
+        <div class="pillar"><span class="k">Inspect</span><div><h3>흐름 단위 심층 검사</h3><p>포트와 무관하게 HTTPS 같은 프로토콜을 식별하고, 패킷 페이로드까지 규칙으로 검사합니다.</p></div></div>
+        <div class="pillar"><span class="k">Central</span><div><h3>하나의 정책, 여러 VPC</h3><p>방화벽 정책 하나로 여러 VPC의 엔드포인트나 Transit Gateway 연결을 함께 관리합니다.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="rules" aria-labelledby="rules-h">
+    <div class="wrap">
+      <p class="tag">Stateful rules</p>
+      <h2 id="rules-h">규칙은 Suricata 문법 그대로 씁니다</h2>
+      <p class="lede">아래는 아웃바운드 허용 목록 예시입니다. 새 방화벽 정책의 기본값인 strict order에서는 규칙 그룹은 우선순위 순서로, 그룹 안의 규칙은 적힌 순서대로 평가됩니다.</p>
+      <div class="policy">
+        <figure class="code">
+          <div class="code-head"><span>egress-allowlist.rules</span><span>Suricata compatible</span></div>
+<pre><code><span class="c"># 승인된 도메인으로 가는 TLS만 허용</span>
+<span class="a">pass</span> tls $HOME_NET any -> $EXTERNAL_NET 443 (<span class="k">tls.sni</span>; content:".amazonaws.com"; endswith; nocase; flow:to_server; msg:"allow AWS endpoints"; sid:1000001; rev:1;)
+<span class="a">pass</span> http $HOME_NET any -> $EXTERNAL_NET 80 (<span class="k">http.host</span>; content:"repo.example.com"; startswith; endswith; flow:to_server; msg:"allow package repo"; sid:1000002; rev:1;)
+
+<span class="c"># 평문 관리 프로토콜은 TCP RST로 즉시 차단</span>
+<span class="a">reject</span> tcp $HOME_NET any -> $EXTERNAL_NET 23 (flow:to_server; msg:"block telnet"; sid:1000003; rev:1;)
+
+<span class="c"># 나머지 TLS는 기록 후 차단</span>
+<span class="a">alert</span> tls $HOME_NET any -> $EXTERNAL_NET any (msg:"unapproved TLS destination"; flow:to_server, established; sid:1000004; rev:1;)
+<span class="a">drop</span> tls $HOME_NET any -> $EXTERNAL_NET any (flow:to_server, established; sid:1000005; rev:1;)</code></pre>
+          <figcaption class="sr-only">승인된 도메인만 허용하고 나머지는 차단하는 Suricata 규칙 예시</figcaption>
+        </figure>
+        <ol class="checks" aria-label="stateful 규칙 평가 방식">
+          <li><h3>Strict order <code>기본 · 권장</code></h3><p>새 정책의 기본 방식입니다. 규칙 그룹은 우선순위 번호가 낮은 것부터, 그룹 안의 규칙은 정의한 순서대로 평가합니다. 일치하는 규칙이 없을 때의 기본 액션을 정책에서 고르며, 새 정책은 Application drop established (server-directed only)가 기본입니다.</p></li>
+          <li><h3>Action order <code>레거시</code></h3><p>기존 정책 호환용 방식입니다. 모든 pass 규칙을 먼저 평가하고, 이어서 drop, reject, alert 순서로 평가합니다. 같은 액션 안에서는 priority 키워드로 순서를 정합니다. 규칙 그룹의 평가 순서는 정책과 같아야 합니다.</p></li>
+          <li><h3><code>reject</code>는 TCP 전용</h3><p>일치한 트래픽을 차단하고 송신자에게 TCP RST를 보냅니다. FTP와 IMAP 프로토콜에는 쓸 수 없습니다.</p></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" aria-labelledby="features-h">
+    <div class="wrap">
+      <p class="tag">Features</p>
+      <h2 id="features-h">주요 기능</h2>
+      <div class="features">
+        <article class="feature"><p class="ft">Stateless</p><h3>Stateless 규칙</h3><p>패킷 하나를 흐름 문맥 없이 출발지 · 목적지, 포트, 프로토콜로 판정합니다. pass, drop, stateful 엔진으로 forward 중 하나를 고릅니다.</p></article>
+        <article class="feature"><p class="ft">Domain filtering</p><h3>도메인 목록 규칙</h3><p>HTTPS는 TLS SNI, HTTP는 Host 헤더로 도메인을 판단합니다. 허용 · 거부 목록에 더해 reject, alert 액션도 쓸 수 있고, <span class="mono">.example.com</span>처럼 하위 도메인 전체를 지정합니다.</p></article>
+        <article class="feature"><p class="ft">TLS inspection</p><h3>TLS 검사</h3><p>ACM 인증서로 암호화된 트래픽을 복호화해 stateful 엔진에 넘기고 다시 암호화합니다. 인바운드는 서버 인증서를, 아웃바운드는 가져온 CA 인증서를 씁니다. session holding을 켜면 SNI 규칙 평가 전까지 연결 수립 패킷을 목적지로 보내지 않습니다.</p></article>
+        <article class="feature"><p class="ft">Managed rules</p><h3>AWS 관리형 규칙 그룹</h3><p>도메인 · IP, 위협 시그니처(StrictOrder · ActionOrder 버전) 관리형 규칙 그룹과 AWS Marketplace 파트너 규칙 그룹을 정책에 추가합니다. Amazon 위협 인텔리전스 기반 active threat defense는 콘솔에서 새 정책을 만들 때 기본으로 켜지며, 별도 요금이 붙습니다.</p></article>
+        <article class="feature"><p class="ft">Multi-VPC</p><h3>여러 VPC 엔드포인트</h3><p>VPC endpoint association으로 한 방화벽의 엔드포인트를 다른 VPC에도 둡니다. AWS RAM으로 방화벽을 공유하면 다른 계정 VPC도 같은 정책으로 보호합니다. 모든 엔드포인트가 AZ당 처리량을 나눠 씁니다.</p></article>
+        <article class="feature"><p class="ft">Logging</p><h3>Alert · Flow · TLS 로그</h3><p>로그 유형별로 Amazon S3, CloudWatch Logs, Amazon Data Firehose 중 대상을 지정합니다. drop, alert, reject 규칙이 일치하면 alert 로그에 남습니다.</p></article>
+        <article class="feature"><p class="ft">Web categories</p><h3>URL · 도메인 카테고리 필터링</h3><p>GenAI, 소셜 미디어, 스트리밍 같은 미리 정의된 웹 카테고리로 규칙을 씁니다. TLS 검사와 함께 쓰면 URL 단위로 더 세밀하게 통제합니다.</p></article>
+        <article class="feature"><p class="ft">Containers</p><h3>컨테이너 속성 기반 규칙</h3><p>Amazon EKS의 namespace · cluster · label, Amazon ECS의 cluster · 속성으로 규칙 대상을 지정합니다. 와일드카드도 지원하며 추가 요금은 없습니다.</p></article>
+        <article class="feature"><p class="ft">Preview</p><h3>명시적 forward proxy</h3><p>같은 방화벽 정책으로 explicit proxy 모드를 함께 쓰는 기능이 퍼블릭 프리뷰 중입니다(2026년 8월, US East (Ohio)). 정식 출시 전이므로 운영 설계에는 반영하지 마세요.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="models" aria-labelledby="models-h">
+    <div class="wrap">
+      <p class="tag">Deployment models</p>
+      <h2 id="models-h">트래픽을 방화벽으로 보내는 네 가지 방법</h2>
+      <p class="lede">방화벽은 라우팅으로 트래픽을 받습니다. 어느 라우팅 테이블에서 방화벽을 다음 홉으로 지정하느냐에 따라 배포 모델이 나뉩니다.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">Network Firewall 배포 모델 비교</caption>
+          <thead><tr><th scope="col">모델</th><th scope="col">구성</th><th scope="col">트래픽 유도</th><th scope="col">어떤 경우에 맞나</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="row-h">분산형<br><span class="mono" style="font-size:12px;font-weight:400;color:var(--ink-3)">Distributed</span></td>
+              <td data-k="구성">VPC마다 방화벽 서브넷과 AZ별 방화벽 엔드포인트</td>
+              <td data-k="트래픽 유도">VPC 라우팅 테이블, IGW 엣지 라우팅 테이블</td>
+              <td data-k="어떤 경우에 맞나">VPC별로 인터넷 진출입을 따로 검사하고 정책도 따로 두는 경우</td>
+            </tr>
+            <tr>
+              <td class="row-h">중앙형 · 검사 VPC<br><span class="mono" style="font-size:12px;font-weight:400;color:var(--ink-3)">Inspection VPC + TGW</span></td>
+              <td data-k="구성">검사 VPC에 방화벽을 두고 Transit Gateway에 VPC로 연결</td>
+              <td data-k="트래픽 유도">TGW 라우팅 테이블과 검사 VPC 라우팅 테이블. 검사 VPC 연결에 appliance mode 사용</td>
+              <td data-k="어떤 경우에 맞나">VPC 간, 하이브리드, 이그레스 트래픽을 한 곳에서 검사하는 경우</td>
+            </tr>
+            <tr>
+              <td class="row-h">TGW 연결형<br><span class="mono" style="font-size:12px;font-weight:400;color:var(--ink-3)">TGW-attached firewall</span></td>
+              <td data-k="구성">방화벽을 Transit Gateway attachment로 직접 연결. 검사 VPC를 직접 만들지 않음</td>
+              <td data-k="트래픽 유도">TGW 라우팅 테이블만 사용. appliance mode는 항상 켜짐</td>
+              <td data-k="어떤 경우에 맞나">중앙 검사가 필요하지만 검사 VPC 서브넷과 라우팅을 관리하고 싶지 않은 경우</td>
+            </tr>
+            <tr>
+              <td class="row-h">Cloud WAN<br><span class="mono" style="font-size:12px;font-weight:400;color:var(--ink-3)">Service insertion</span></td>
+              <td data-k="구성">검사 VPC를 network function group에 연결</td>
+              <td data-k="트래픽 유도">core network policy의 send-via(east-west), send-to(north-south) 액션</td>
+              <td data-k="어떤 경우에 맞나">여러 리전과 세그먼트 사이 트래픽을 정책으로 검사하는 경우</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="arch" aria-labelledby="arch-h">
+    <div class="wrap">
+      <p class="tag">Reference architecture</p>
+      <h2 id="arch-h">Transit Gateway에 직접 붙이는 중앙 검사</h2>
+      <p class="lede">스포크 VPC와 온프레미스 트래픽은 TGW 라우팅 테이블을 따라 방화벽 attachment로 갑니다. 방화벽이 쓰는 VPC는 Network Firewall이 관리하므로 보이지 않고, 검사를 통과한 트래픽은 목적지 VPC나 이그레스 VPC로 이어집니다.</p>
+      <figure class="arch">
+        <div class="arch-scroll">
+          <svg viewBox="0 0 980 440" role="img" aria-labelledby="arch-title arch-desc">
+            <title id="arch-title">Transit Gateway 연결형 Network Firewall 아키텍처</title>
+            <desc id="arch-desc">스포크 VPC A와 B, 그리고 Direct Connect 또는 VPN으로 연결된 온프레미스가 Transit Gateway에 연결됩니다. 스포크 라우팅 테이블은 기본 경로를 Network Firewall attachment로 보냅니다. 방화벽은 appliance mode가 켜진 상태로 트래픽을 검사하고, 방화벽 라우팅 테이블을 통해 다른 스포크 VPC나 NAT 게이트웨이와 인터넷 게이트웨이가 있는 이그레스 VPC로 보냅니다.</desc>
+            <defs>
+              <marker id="ar-nfw-f" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" orient="auto"><path class="ah-f" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-nfw-p" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-p" d="M0 0 L10 5 L0 10 z"/></marker>
+            </defs>
+            <!-- zones -->
+            <rect class="zone" x="10" y="40" width="220" height="380" rx="6"/>
+            <text class="z" x="24" y="62">SPOKES</text>
+            <rect class="zone" x="580" y="40" width="390" height="190" rx="6"/>
+            <text class="z" x="594" y="62">MANAGED BY NETWORK FIREWALL</text>
+            <rect class="zone" x="580" y="250" width="390" height="170" rx="6"/>
+            <image href="../../assets/aws-icons/Virtual-private-cloud-VPC_32.svg" x="588" y="258" width="22" height="22"/>
+            <text class="z" x="616" y="272">EGRESS VPC</text>
+
+            <!-- spokes -->
+            <rect class="box" x="20" y="90" width="200" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-VPC_Virtual-private-cloud-VPC_48.svg" x="30" y="108" width="28" height="28"/>
+            <text class="t" x="66" y="118">스포크 VPC A</text><text class="s" x="66" y="138">10.1.0.0/16</text>
+            <rect class="box" x="20" y="190" width="200" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-VPC_Virtual-private-cloud-VPC_48.svg" x="30" y="208" width="28" height="28"/>
+            <text class="t" x="66" y="218">스포크 VPC B</text><text class="s" x="66" y="238">10.2.0.0/16</text>
+            <rect class="box" x="20" y="330" width="200" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Corporate-data-center_32.svg" x="30" y="348" width="28" height="28"/>
+            <text class="t" x="66" y="358">온프레미스</text><text class="s" x="66" y="378">DX · Site-to-Site VPN</text>
+
+            <!-- tgw -->
+            <rect class="box" x="320" y="180" width="222" height="84" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_AWS-Transit-Gateway_48.svg" x="330" y="190" width="28" height="28"/>
+            <text class="t" x="366" y="210">Transit Gateway</text>
+            <text class="s" x="366" y="230">spoke RT: 0/0 → firewall</text>
+            <text class="s" x="366" y="248">firewall RT: 전파 경로</text>
+
+            <path class="path" d="M220 122 C270 122 260 204 320 204"/>
+            <path class="path" d="M220 222 H320"/>
+            <path class="site" d="M220 362 C270 362 260 244 320 244"/>
+            <text class="lbl2" x="234" y="320">DX · VPN</text>
+
+            <!-- firewall -->
+            <rect class="box" x="610" y="90" width="330" height="70" rx="4"/>
+            <image href="../../assets/aws-icons/Res_AWS-Network-Firewall_Endpoints_48.svg" x="620" y="111" width="28" height="28"/>
+            <text class="t" x="656" y="120">Network Firewall attachment</text>
+            <text class="s" x="656" y="142">appliance mode 항상 켜짐 · AZ별 엔드포인트</text>
+            <path class="fiber" d="M542 196 C578 196 576 118 604 118" marker-end="url(#ar-nfw-f)"/>
+            <path class="path" d="M610 146 C584 146 576 214 544 214" marker-end="url(#ar-nfw-p)"/>
+            <text class="lbl2" x="546" y="150">검사</text>
+            <text class="s" x="610" y="196">Suricata 규칙 · TLS 검사 · 도메인 목록</text>
+
+            <!-- egress -->
+            <rect class="box" x="610" y="300" width="150" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-VPC_NAT-Gateway_48.svg" x="620" y="318" width="28" height="28"/>
+            <text class="t" x="656" y="328">NAT Gateway</text><text class="s" x="656" y="348">이그레스</text>
+            <rect class="box" x="790" y="300" width="150" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-VPC_Internet-Gateway_48.svg" x="800" y="318" width="28" height="28"/>
+            <text class="t" x="836" y="328">IGW</text><text class="s" x="836" y="348">인터넷</text>
+            <path class="path" d="M542 244 C578 244 576 332 608 332" marker-end="url(#ar-nfw-p)"/>
+            <path class="path" d="M760 332 H788" marker-end="url(#ar-nfw-p)"/>
+            <text class="lbl" x="490" y="300">검사 후</text>
+          </svg>
+        </div>
+        <figcaption class="legend">
+          <span><i></i>방화벽 검사 경로 (TGW → 방화벽)</span>
+          <span><i class="p"></i>TGW attachment 트래픽</span>
+          <span><i class="s"></i>하이브리드 연결 (DX · VPN)</span>
+          <span>→ 화살표: 트래픽 방향 (검사 후 TGW 복귀 · 이그레스 아웃바운드)</span>
+        </figcaption>
+        <p class="arch-hint">좁은 화면에서는 다이어그램을 좌우로 밀어서 보세요.</p>
+      </figure>
+    </div>
+  </section>
+
+  <section id="start" aria-labelledby="start-h">
+    <div class="wrap">
+      <p class="tag">Getting started</p>
+      <h2 id="start-h">첫 방화벽을 배포하는 순서</h2>
+      <ol class="steps">
+        <li><span class="num">STEP 1</span><h3>규칙 그룹 작성</h3><p>stateless, stateful 규칙 그룹을 만들거나 관리형 규칙 그룹을 고릅니다.</p></li>
+        <li><span class="num">STEP 2</span><h3>방화벽 정책</h3><p>규칙 그룹을 묶고 평가 순서(기본값 strict order)와 기본 액션을 정합니다.</p></li>
+        <li><span class="num">STEP 3</span><h3>방화벽 생성</h3><p>VPC와 AZ별 방화벽 서브넷을 지정하거나, Transit Gateway(다른 계정 소유면 RAM으로 공유받은)에 직접 연결합니다.</p></li>
+        <li><span class="num">STEP 4</span><h3>라우팅 변경</h3><p>VPC 또는 TGW 라우팅 테이블에서 방화벽 엔드포인트나 attachment를 다음 홉으로 지정합니다.</p></li>
+        <li><span class="num">STEP 5</span><h3>로깅과 검증</h3><p>alert · flow 로그를 켜고, 허용과 차단이 의도대로 동작하는지 확인합니다.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="pricing" aria-labelledby="pricing-h">
+    <div class="wrap">
+      <p class="tag">Pricing</p>
+      <h2 id="pricing-h">비용 항목</h2>
+      <p class="lede">리전과 가용 영역별 방화벽 엔드포인트 시간과 처리한 트래픽 양이 기본 요금입니다. TLS 검사와 active threat defense를 켜면 요금이 더해집니다.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">AWS Network Firewall 과금 항목</caption>
+          <thead><tr><th scope="col">과금 항목</th><th scope="col">과금 기준</th><th scope="col">참고</th></tr></thead>
+          <tbody>
+            <tr><td class="row-h">방화벽 엔드포인트</td><td data-k="과금 기준">리전 · 가용 영역별 엔드포인트 시간</td><td data-k="참고">AZ마다 엔드포인트를 두므로 AZ 수만큼 과금됩니다</td></tr>
+            <tr><td class="row-h">트래픽 처리</td><td data-k="과금 기준">리전 · 가용 영역별 처리 GB</td><td data-k="참고">같은 경로의 NAT 게이트웨이 시간 요금과 데이터 처리 요금은 방화벽 사용량만큼 면제됩니다</td></tr>
+            <tr><td class="row-h">Advanced Inspection (TLS 검사)</td><td data-k="과금 기준">리전 · 가용 영역별 추가 엔드포인트 시간</td><td data-k="참고">표준 트래픽 처리 요금 외에 추가 데이터 처리 요금은 없습니다</td></tr>
+            <tr><td class="row-h">보조 엔드포인트</td><td data-k="과금 기준">VPC endpoint association당 시간 (기본 엔드포인트보다 낮은 단가)</td><td data-k="참고">보조 엔드포인트에는 추가 데이터 처리 요금이 없습니다</td></tr>
+            <tr><td class="row-h">Active threat defense</td><td data-k="과금 기준">리전 · 가용 영역별 처리 GB</td><td data-k="참고">active threat defense 관리형 규칙 그룹을 켠 경우에만. 콘솔에서 새 정책을 만들면 기본으로 켜지니 비용을 확인하세요</td></tr>
+            <tr><td class="row-h">Marketplace 규칙 그룹</td><td data-k="과금 기준">판매자가 정한 요금</td><td data-k="참고">AWS Marketplace 파트너 관리형 규칙 그룹을 구독한 경우 Network Firewall 요금에 더해 청구됩니다</td></tr>
+            <tr><td class="row-h">관련 요금</td><td data-k="과금 기준">다른 서비스에서 청구</td><td data-k="참고">데이터 전송(Amazon EC2 요금), TGW 연결형 방화벽의 Transit Gateway 요금(TGW 요금), 로그 대상(S3 · CloudWatch Logs · Firehose 요금)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="lede" style="font-size:14px">요금 단가는 리전과 사용량에 따라 다릅니다. TGW 연결형 방화벽은 별도 추가 요금 없이 Network Firewall과 Transit Gateway 표준 요금이 적용되며, Transit Gateway의 flexible cost allocation으로 데이터 처리 비용을 다른 계정에 배분할 수 있습니다. 최신 단가는 <a href="https://aws.amazon.com/network-firewall/pricing/" target="_blank" rel="noopener">AWS Network Firewall 요금 페이지</a>에서 확인하세요.</p>
+    </div>
+  </section>
+
+  <section class="cta" aria-labelledby="cta-h">
+    <div class="wrap">
+      <p class="tag">Next step</p>
+      <h2 id="cta-h">우리 네트워크에 맞는 검사 구조를 설계해 보세요</h2>
+      <p class="lede">검사할 트래픽 방향, VPC와 계정 구조, TGW · Cloud WAN 사용 여부를 정리해 오시면 배포 모델과 규칙 설계를 함께 검토합니다.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="https://aws.amazon.com/network-firewall/" target="_blank" rel="noopener">서비스 페이지 열기</a>
+        <a class="btn btn-ghost" href="https://docs.aws.amazon.com/network-firewall/latest/developerguide/what-is-aws-network-firewall.html" target="_blank" rel="noopener">개발자 안내서 읽기</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a href="../">← AWS 네트워킹 서비스 포트폴리오</a>
+    <span>AWS Network Firewall 소개 자료. 기능 지원 범위, 처리량, 요금은 리전과 구성에 따라 다르니 공식 문서를 확인하세요.</span>
+    <a href="https://docs.aws.amazon.com/network-firewall/latest/developerguide/tgw-firewall.html" target="_blank" rel="noopener">TGW 연결형 방화벽 문서</a>
+  </div>
+</footer>
+
+</body>
+</html>

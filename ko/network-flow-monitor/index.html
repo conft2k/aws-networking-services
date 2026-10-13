@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Network Flow Monitor 소개</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+body{margin:0}img{max-width:100%}[hidden]{display:none!important}
+
+/* Layout: a cross-connect work order. Cool steel paper, navy ink, Amazon orange as the one accent; section tags read like fiber labels. */
+:root{
+  --bg:#EEF1F4; --surface:#FFFFFF; --sunken:#E3E8ED;
+  --ink:#14202E; --ink-2:#44515F; --ink-3:#5A6672;
+  --line:#CDD5DD; --line-2:#B4BFCA;
+  --fiber:#FF9900;          /* Amazon orange — fills only */
+  --fiber-ink:#B35C00;      /* orange-derived, AA on light surfaces */
+  --fiber-soft:#FFF0D9;
+  --on-fiber:#14202E;
+  --trace:#2E7D9A;          /* secondary line color for diagram paths */
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --maxw:1120px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--fiber-ink);outline-offset:3px;border-radius:2px}
+.skip-link{position:absolute;left:16px;top:-60px;background:var(--fiber);color:var(--on-fiber);padding:8px 14px;font-weight:700;z-index:50;text-decoration:none}
+.skip-link:focus{top:12px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.wrap{max-width:var(--maxw);margin:0 auto;padding-inline:24px}
+section{padding-block:88px;border-top:1px solid var(--line)}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.25}
+h2{font-size:clamp(26px,3.4vw,36px);font-weight:700;letter-spacing:-.01em}
+h3{font-size:18px;font-weight:700}
+p{margin:0}
+.lede{color:var(--ink-2);max-width:62ch;margin-top:14px}
+.num{font-family:var(--display);font-variant-numeric:tabular-nums lining-nums}
+.mono{font-family:var(--mono)}
+
+/* fiber label: the section tag */
+.tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-bottom:14px}
+.tag::before{content:"";width:22px;height:8px;background:var(--fiber);border-radius:1px}
+
+/* nav */
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:60px}
+.brand{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.02em;text-decoration:none;text-transform:uppercase}
+.brand span{color:var(--fiber-ink)}
+.navlinks{display:flex;gap:22px;font-size:14px;align-items:center}
+.navlinks a{text-decoration:none;color:var(--ink-2)}
+.navlinks a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;font-weight:700;font-size:15px;text-decoration:none;border-radius:4px;border:1px solid transparent;transition:transform .15s ease,background .15s ease}
+.btn-primary{background:var(--fiber);color:var(--on-fiber)}
+.btn-primary:hover{transform:translateY(-1px)}
+.btn-ghost{border-color:var(--line-2);color:var(--ink)}
+.btn-ghost:hover{background:var(--sunken)}
+.navlinks .btn{min-height:38px;padding:0 14px;font-size:14px;color:var(--on-fiber)}
+
+/* hero */
+.hero{padding-block:72px 64px;border-top:0}
+.hero-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:56px;align-items:center}
+.eyebrow{font-family:var(--mono);font-size:13px;color:var(--fiber-ink);letter-spacing:.04em}
+.hero h1{font-size:clamp(34px,5vw,56px);font-weight:700;letter-spacing:-.02em;margin-top:16px}
+.hero h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--fiber) 62%,var(--fiber) 90%,transparent 90%);padding-inline:2px}
+.hero .lede{font-size:18px}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+
+/* hero visual: port faceplate */
+.faceplate{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px}
+.faceplate-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.ports{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+.port{border:1px solid var(--line);border-radius:4px;padding:14px 14px 12px;background:var(--sunken);display:flex;flex-direction:column;gap:2px}
+.port .num{font-size:40px;font-weight:600;line-height:1}
+.port .num small{font-size:18px;color:var(--ink-2);margin-left:2px}
+.port .optic{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+.port .led{width:8px;height:8px;border-radius:50%;background:var(--fiber);align-self:flex-end;margin-top:-6px;animation:blink 2.4s ease-in-out infinite}
+.port:nth-child(2) .led{animation-delay:.6s}.port:nth-child(3) .led{animation-delay:1.2s}.port:nth-child(4) .led{animation-delay:1.8s}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.faceplate-foot{margin-top:14px;font-size:13px;color:var(--ink-2)}
+
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:56px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.chip{padding:18px 20px;border-left:1px solid var(--line);min-width:0}
+.chip:first-child{border-left:0}
+.chip .num{font-size:34px;font-weight:600;line-height:1.1}
+.chip p{font-size:13.5px;color:var(--ink-2);margin-top:4px}
+
+/* value */
+.split{display:grid;grid-template-columns:1fr 1.4fr;gap:56px}
+.pillars{display:grid;gap:0;border-top:1px solid var(--line-2)}
+.pillar{display:grid;grid-template-columns:120px 1fr;gap:20px;padding-block:22px;border-bottom:1px solid var(--line)}
+.pillar .k{font-family:var(--display);font-size:22px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--fiber-ink)}
+.pillar p{color:var(--ink-2);margin-top:6px}
+
+/* stack (L1/L2/L3) */
+.stack{margin-top:40px;display:grid;gap:10px}
+.layer{display:grid;grid-template-columns:96px 1fr 1.2fr;gap:24px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px 24px}
+.layer .lv{font-family:var(--display);font-size:44px;font-weight:700;line-height:.9}
+.layer .lv small{display:block;font-family:var(--mono);font-size:11px;font-weight:400;color:var(--ink-3);letter-spacing:.06em;margin-top:8px;text-transform:uppercase}
+.layer p{color:var(--ink-2);margin-top:6px;font-size:15px}
+.specs{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+.specs code{font-family:var(--mono);font-size:12.5px;background:var(--sunken);border:1px solid var(--line);padding:3px 8px;border-radius:3px;color:var(--ink)}
+
+/* features */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:40px}
+.feature{background:var(--surface);padding:26px 24px;min-width:0}
+.feature .ft{font-family:var(--mono);font-size:11.5px;color:var(--fiber-ink);letter-spacing:.06em;text-transform:uppercase}
+.feature h3{margin-top:8px}
+.feature p{color:var(--ink-2);font-size:15px;margin-top:8px}
+
+/* table */
+.tbl-wrap{margin-top:36px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:14px 18px;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--sunken)}
+tbody tr:last-child td{border-bottom:0}
+td.row-h{font-weight:700;width:22%}
+td .num{font-size:18px;font-weight:600}
+
+/* architecture */
+.arch{margin-top:36px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px}
+.arch-scroll{overflow-x:auto}
+.arch svg{display:block;width:100%;min-width:860px;height:auto}
+.arch-hint{display:none;font-size:13px;color:var(--ink-3);margin-top:10px}
+svg .box{fill:var(--sunken);stroke:var(--line-2)}
+svg .zone{fill:none;stroke:var(--line-2);stroke-dasharray:4 4}
+svg .t{fill:var(--ink);font-family:var(--sans);font-size:14px;font-weight:700}
+svg .s{fill:var(--ink-3);font-family:var(--mono);font-size:11px}
+svg .z{fill:var(--ink-2);font-family:var(--mono);font-size:11px;letter-spacing:.08em}
+svg .fiber{stroke:var(--fiber);stroke-width:5;fill:none;stroke-linecap:round}
+svg .path{stroke:var(--trace);stroke-width:2;fill:none}
+svg .site{stroke:var(--fiber-ink);stroke-width:2;fill:none;stroke-dasharray:6 5}
+svg .lbl{fill:var(--trace);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .lbl2{fill:var(--fiber-ink);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .dot{fill:var(--fiber)}
+svg .ah-tr{fill:var(--trace)}
+svg .ah-fi{fill:var(--fiber)}
+svg .ah-fk{fill:var(--fiber-ink)}
+.legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--ink-2)}
+.legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--fiber)}
+.legend i.p{border-top:2px solid var(--trace)}
+.legend i.s{border-top:2px dashed var(--fiber-ink)}
+.legend i.dir{position:relative;width:26px}
+.legend i.dir::after{content:"";position:absolute;right:-3px;top:-7px;border-left:8px solid var(--fiber);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.legend i.p.dir::after{top:-6px;border-left-color:var(--trace)}
+.legend i.s.dir::after{top:-6px;border-left-color:var(--fiber-ink)}
+
+/* steps */
+.steps{list-style:none;padding:0;margin:40px 0 0;display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:4px solid var(--fiber)}
+.steps li{padding:20px 18px 0 0;min-width:0}
+.steps .num{font-size:15px;font-weight:600;color:var(--fiber-ink);letter-spacing:.06em}
+.steps h3{font-size:16px;margin-top:6px}
+.steps p{font-size:14px;color:var(--ink-2);margin-top:6px}
+
+/* resiliency */
+.res{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:36px}
+.res-card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:26px}
+.res-card .num{font-size:52px;font-weight:700;line-height:1}
+.res-card .num small{font-size:20px;color:var(--ink-2)}
+.res-card h3{margin-top:10px}
+.res-card p{color:var(--ink-2);font-size:15px;margin-top:6px}
+.res-card.max{border-color:var(--fiber);box-shadow:inset 0 4px 0 var(--fiber)}
+
+/* cta */
+.cta{text-align:center}
+.cta h2{max-width:22ch;margin:0 auto}
+.cta .lede{margin:14px auto 0}
+.cta .cta-row{justify-content:center}
+footer{border-top:1px solid var(--line);padding-block:28px;font-size:13px;color:var(--ink-3)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+
+@media (max-width:1024px){
+  .hero-grid,.split{grid-template-columns:1fr;gap:40px}
+  .features{grid-template-columns:repeat(2,1fr)}
+  .steps{grid-template-columns:repeat(2,1fr);border-top:0;gap:0 24px}
+  .steps li{border-top:4px solid var(--fiber);padding-bottom:24px}
+  .layer{grid-template-columns:80px 1fr}
+  .layer .specs{grid-column:2}
+  .chips{grid-template-columns:repeat(2,1fr)}
+  .chip:nth-child(3){border-left:0}
+  .chip:nth-child(n+3){border-top:1px solid var(--line)}
+}
+@media (max-width:640px){
+  .wrap{padding-inline:18px}
+  section{padding-block:60px}
+  .navlinks a:not(.btn){display:none}
+  .features,.res{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr}
+  .pillar{grid-template-columns:1fr;gap:0}
+  .layer{grid-template-columns:1fr;gap:12px}
+  .layer .specs{grid-column:auto}
+  .cta-row .btn{width:100%}
+  .arch-hint{display:block}
+  table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  table,tbody,tr,td{display:block;width:100%}
+  tr{border-bottom:1px solid var(--line);padding:14px 16px}
+  tbody tr:last-child{border-bottom:0}
+  td{border:0;padding:3px 0}
+  td.row-h{width:100%;font-size:16px;padding-bottom:6px}
+  td[data-k]::before{content:attr(data-k);display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+
+
+/* ---- service-specific ---- */
+figure.arch{margin-inline:0}
+/* hero visual: a monitor overview with NHI */
+.mon{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px;min-width:0}
+.mon-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:16px}
+.kpi{background:var(--sunken);border:1px solid var(--line);border-radius:4px;padding:12px 14px 10px;min-width:0}
+.kpi .k{font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:.04em}
+.kpi .num{display:block;font-size:32px;font-weight:600;line-height:1.1;margin-top:2px}
+.kpi .num small{font-size:15px;color:var(--ink-2);margin-left:3px}
+.kpi svg{display:block;width:100%;height:22px;margin-top:4px}
+.kpi svg path{fill:none;stroke:var(--trace);stroke-width:1.6}
+.kpi.up svg path{stroke:var(--fiber-ink)}
+.kpi .d{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.kpi.up .d{color:var(--fiber-ink)}
+.nhi{margin-top:12px;border:1px solid var(--fiber);border-radius:4px;padding:12px 14px;box-shadow:inset 4px 0 0 var(--fiber);background:var(--surface)}
+.nhi-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.nhi-top b{font-weight:700;font-size:15px}
+.nhi-top .st{font-family:var(--mono);font-size:11.5px;background:var(--fiber);color:var(--on-fiber);padding:2px 8px;border-radius:3px;font-weight:500}
+.nhi-bar{display:grid;grid-template-columns:repeat(24,1fr);gap:2px;margin-top:10px}
+.nhi-bar i{height:12px;border-radius:1px;background:var(--line-2)}
+.nhi-bar i.bad{background:var(--fiber)}
+.nhi-axis{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin-top:4px}
+.mon-foot{margin-top:12px;font-size:13px;color:var(--ink-2)}
+
+/* how-it-works block */
+.policy{display:grid;grid-template-columns:1.25fr 1fr;gap:40px;margin-top:32px;align-items:start}
+.code{background:var(--sunken);border:1px solid var(--line);border-radius:6px;min-width:0;margin:0}
+.code-head{display:flex;justify-content:space-between;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.code pre{margin:0;padding:16px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.7;color:var(--ink)}
+.code .a{color:var(--fiber-ink);font-weight:500}
+.code .k{color:var(--trace)}
+.code .c{color:var(--ink-3)}
+.checks{list-style:none;margin:0;padding:0;display:grid;gap:0;border-top:1px solid var(--line-2)}
+.checks li{padding:16px 0;border-bottom:1px solid var(--line);min-width:0}
+.checks h3{font-size:16px}
+.checks h3 code{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--fiber-ink)}
+.checks p{color:var(--ink-2);font-size:15px;margin-top:4px}
+.cats{margin-top:12px}
+.note{font-size:14px;color:var(--ink-2);margin-top:20px;max-width:none}
+td.y{color:var(--fiber-ink);font-weight:700}
+
+@media (max-width:1024px){
+  .policy{grid-template-columns:1fr}
+}
+@media (max-width:640px){
+  .kpi .num{font-size:26px}
+}
+
+/* nav: keep links on one line, show only CTA below 960px */
+.brand,.navlinks a{white-space:nowrap}
+@media (max-width:960px){.navlinks a:not(.btn){display:none}}
+
+/* Korean line breaking: never split a word mid-syllable */
+h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
+</style>
+<link rel="stylesheet" href="../../assets/site.css?v=25">
+<script src="../../assets/site.js?v=25"></script>
+</head>
+<body>
+
+<a class="skip-link" href="#main">본문으로 건너뛰기</a>
+
+<nav aria-label="주요 메뉴">
+  <div class="wrap">
+    <a class="brand" href="#top">Amazon CloudWatch <span>Network Flow Monitor</span></a>
+    <div class="navlinks">
+      <a href="../">서비스 포트폴리오</a>
+      <a href="#how">동작 방식</a>
+      <a href="#features">주요 기능</a>
+      <a href="#compare">비교</a>
+      <a href="#arch">아키텍처</a>
+      <a href="#pricing">비용</a>
+      <a class="btn btn-primary" href="#start">시작하기</a>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+  <header class="hero" id="top">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">CloudWatch Network Monitoring · Flow monitors · TCP 성능 관측</p>
+          <h1>느려진 원인이 <em>AWS 네트워크인지</em> 몇 분 안에 가려내세요</h1>
+          <p class="lede">Network Flow Monitor는 EC2와 EKS에 설치한 경량 agent가 TCP 연결 통계를 모아, 워크로드 사이 흐름의 재전송, 타임아웃, RTT, 전송량을 거의 실시간으로 보여줍니다. monitor마다 network health indicator(NHI)를 계산해 AWS 네트워크 문제였는지를 알려줍니다.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="#how">동작 방식 보기</a>
+            <a class="btn btn-ghost" href="#compare">다른 모니터링과 비교</a>
+          </div>
+        </div>
+
+        <div class="mon" aria-label="flow monitor 개요 화면을 단순화한 예시. 재전송과 타임아웃이 늘어난 시간대에 NHI가 Degraded로 표시됨">
+          <div class="mon-head"><span>monitor · web-az-a → db-az-c</span><span>last 6h</span></div>
+          <div class="kpis">
+            <div class="kpi up"><span class="k">Retransmissions</span><span class="num">1,284</span><svg viewBox="0 0 120 22" preserveAspectRatio="none" aria-hidden="true"><path d="M0 18 L20 18 L35 17 L50 18 L62 6 L72 3 L82 8 L95 17 L120 18"/></svg><span class="d">▲ 14:10–14:40</span></div>
+            <div class="kpi up"><span class="k">Timeouts</span><span class="num">37</span><svg viewBox="0 0 120 22" preserveAspectRatio="none" aria-hidden="true"><path d="M0 20 L55 20 L62 9 L70 5 L80 12 L90 20 L120 20"/></svg><span class="d">▲ 14:10–14:40</span></div>
+            <div class="kpi"><span class="k">RoundTripTime</span><span class="num">812<small>µs</small></span><svg viewBox="0 0 120 22" preserveAspectRatio="none" aria-hidden="true"><path d="M0 14 L20 13 L40 15 L60 10 L75 9 L90 13 L120 14"/></svg><span class="d">평균 · 일부 구간만 계산</span></div>
+            <div class="kpi"><span class="k">DataTransferred</span><span class="num">42.6<small>GB</small></span><svg viewBox="0 0 120 22" preserveAspectRatio="none" aria-hidden="true"><path d="M0 12 L20 10 L40 11 L60 12 L80 9 L100 11 L120 10"/></svg><span class="d">monitor 전체 흐름 합계</span></div>
+          </div>
+          <div class="nhi">
+            <div class="nhi-top"><b>Network health indicator</b><span class="st">100 · Degraded</span></div>
+            <div class="nhi-bar" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="bad"></i><i class="bad"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="nhi-axis"><span>09:00</span><span>12:00</span><span>15:00</span></div>
+          </div>
+          <p class="mon-foot">NHI가 100이면 그 시간대에 AWS 네트워크 문제가 있었다는 뜻입니다. 0(Healthy)인데 재전송이 늘었다면 워크로드 쪽부터 봅니다.</p>
+        </div>
+      </div>
+
+      <div class="chips" role="list">
+        <div class="chip" role="listitem"><span class="num">~30 s</span><p>agent가 집계 통계를 보내는 주기 (eBPF 기반, payload 미접근)</p></div>
+        <div class="chip" role="listitem"><span class="num">5</span><p>monitor 지표 (RTT · 재전송 · 타임아웃 · 전송량 · NHI)</p></div>
+        <div class="chip" role="listitem"><span class="num">100</span><p>Organizations 연동 시 scope에 넣을 수 있는 최대 계정 수</p></div>
+        <div class="chip" role="listitem"><span class="num">17</span><p>지원 Region (서울 ap-northeast-2 포함)</p></div>
+      </div>
+    </div>
+  </header>
+
+  <section id="why" aria-labelledby="why-h">
+    <div class="wrap split">
+      <div>
+        <p class="tag">Why Network Flow Monitor</p>
+        <h2 id="why-h">"네트워크 문제 같아요"를 데이터로 확인합니다</h2>
+        <p class="lede">애플리케이션 지연이 생기면 네트워크, 인스턴스, 코드 중 어디를 볼지부터 막힙니다. Network Flow Monitor는 실제 워크로드 트래픽의 TCP 지표와 AWS 네트워크 상태 판정을 같은 화면에 놓아 첫 판단을 빠르게 합니다.</p>
+      </div>
+      <div class="pillars">
+        <div class="pillar"><span class="k">Real traffic</span><div><h3>실제 흐름의 TCP 성능</h3><p>합성 probe가 아니라 운영 중인 연결에서 재전송, 재전송 타임아웃, RTT, 전송 바이트를 수집합니다. AZ 내 · AZ 간, VPC 간, S3 · DynamoDB, 다른 Region까지의 흐름을 구분해 봅니다.</p></div></div>
+        <div class="pillar"><span class="k">Attribute</span><div><h3>AWS 원인 여부 판별</h3><p>NHI는 monitor가 추적하는 흐름 중 하나라도 AWS 네트워크 문제를 겪었는지를 0 또는 100으로 알려줍니다. 문제 해결을 AWS 쪽으로 넘길지, 워크로드를 파고들지 정하는 기준이 됩니다.</p></div></div>
+        <div class="pillar"><span class="k">Focus</span><div><h3>top contributor부터</h3><p>지표별로 값이 가장 큰 흐름을 top contributor로 보여주고, Historical explorer에서 경로 위 구성요소를 토폴로지로 펼쳐 어느 구간이 문제인지 좁힙니다.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how" aria-labelledby="how-h">
+    <div class="wrap">
+      <p class="tag">How it works</p>
+      <h2 id="how-h">agent가 모으고, scope 전체를 보고, monitor로 좁힙니다</h2>
+      <p class="lede">agent는 커널의 TCP 이벤트만 받아 약 30초마다 Network Flow Monitor로 보냅니다. scope 안의 모든 흐름은 Workload insights에서 분류별로 보고, 계속 지켜볼 흐름은 local · remote 리소스를 지정해 monitor로 만듭니다.</p>
+      <div class="policy">
+        <figure class="code">
+          <div class="code-head"><span>aws networkflowmonitor create-monitor</span><span>예시</span></div>
+<pre><code><span class="c"># web 서브넷(local) → DynamoDB · 다른 AZ(remote) 흐름을 추적</span>
+aws networkflowmonitor create-monitor \
+  --monitor-name web-to-backend \
+  --scope-arn arn:aws:networkflowmonitor:ap-northeast-2:111122223333:scope/<span class="a">e21c…d8cf</span> \
+  --local-resources  type=<span class="k">"AWS::EC2::Subnet"</span>,identifier=<span class="k">"arn:aws:ec2:…:subnet/subnet-0web…"</span> \
+  --remote-resources type=<span class="k">"AWS::AWSService"</span>,identifier=<span class="k">"DynamoDB"</span> \
+                     type=<span class="k">"AWS::AvailabilityZone"</span>,identifier=<span class="k">"ap-northeast-2c"</span>
+
+<span class="c"># 생성 후 AWS/NetworkFlowMonitor 네임스페이스에 지표 게시</span>
+<span class="c"># DataTransferred · Retransmissions · Timeouts</span>
+<span class="c"># RoundTripTime(µs) · HealthIndicator(0 healthy / 100 degraded)</span></code></pre>
+          <figcaption class="sr-only">서브넷을 local 리소스로, DynamoDB와 다른 가용 영역을 remote 리소스로 지정해 monitor를 만드는 CLI 예시</figcaption>
+        </figure>
+        <ol class="checks" aria-label="Network Flow Monitor 구성 요소">
+          <li><h3><code>agent</code> eBPF로 TCP 통계 수집</h3><p>커널에서 <span class="mono">bpf_sock_ops</span> 구조체(주소, 포트, 카운터, RTT)만 받고 payload는 보지 않습니다. EC2는 SSM Distributor · CloudShell 스크립트 · RPM/DEB 패키지로, EKS는 add-on으로 설치합니다.</p></li>
+          <li><h3><code>scope</code> 관측 범위와 토폴로지</h3><p>계정(또는 Organizations 계정 묶음)과 Region 단위 범위입니다. scope가 정해지면 서비스가 리소스 토폴로지를 만들고, Workload insights가 scope 전체의 top contributor를 보여줍니다.</p></li>
+          <li><h3><code>monitor</code> 지표와 NHI</h3><p>local은 서브넷 · VPC · AZ · EKS 클러스터 · Region, remote는 서브넷 · VPC · AZ · AWS 서비스(S3, DynamoDB) · Region입니다. Region을 remote로 지정하면 그 Region의 edge까지 측정합니다.</p></li>
+        </ol>
+      </div>
+      <p class="note">Workload insights 분류: <span class="mono">INTRA_AZ</span> · <span class="mono">INTER_AZ</span> · <span class="mono">INTER_VPC</span> · <span class="mono">INTER_REGION</span> · <span class="mono">AMAZON_S3</span> · <span class="mono">AMAZON_DYNAMODB</span> · <span class="mono">UNCLASSIFIED</span>(NAT 게이트웨이를 거치거나 AWS 밖으로 나가는 흐름 등). RTT는 항상 계산되지 않아 데이터가 듬성할 수 있습니다.</p>
+    </div>
+  </section>
+
+  <section id="features" aria-labelledby="features-h">
+    <div class="wrap">
+      <p class="tag">Features</p>
+      <h2 id="features-h">주요 기능</h2>
+      <div class="features">
+        <article class="feature"><p class="ft">Workload insights</p><h3>scope 전체 흐름 한눈에</h3><p>agent가 보낸 흐름을 AZ 내 · AZ 간 · VPC 간 · Region 간 · AWS 서비스 같은 분류로 묶어 전송량과 지표별 상위 흐름을 보여줍니다. 여기서 monitor로 만들 흐름을 고릅니다.</p></article>
+        <article class="feature"><p class="ft">Monitors</p><h3>top contributor와 Historical explorer</h3><p>monitor는 지정한 흐름의 지표를 지속 게시하고, Historical explorer에서 기간을 골라 재전송 · RTT 상위 흐름과 경로 위 구성요소 토폴로지를 확인합니다.</p></article>
+        <article class="feature"><p class="ft">NHI</p><h3>AWS 네트워크 장애 귀속</h3><p><span class="mono">HealthIndicator</span>는 0(Healthy) 또는 100(Degraded)인 이진 값입니다. 성능 이상이 보일 때 AWS 네트워크 쪽 문제였는지 먼저 확인해 조사 방향을 정합니다.</p></article>
+        <article class="feature"><p class="ft">Inter-Region</p><h3>Region 간 흐름까지</h3><p>2025년 9월부터 다른 Region의 공인 IP로 가는 흐름과 VPC peering · Transit Gateway peering을 지나는 사설 흐름도 측정하고, NHI가 Region 사이 AWS global network 상태를 반영합니다.</p></article>
+        <article class="feature"><p class="ft">Amazon EKS</p><h3>add-on과 Container Network Observability</h3><p>AWS Network Flow Monitor Agent add-on이 모든 노드에 agent 파드를 띄웁니다. 흐름에 파드 메타데이터가 붙고, 노드 단위 시스템 지표는 OpenMetrics 형식으로 노출돼 Prometheus 호환 도구로 수집할 수 있습니다.</p></article>
+        <article class="feature"><p class="ft">CloudWatch</p><h3>지표 · 알람 · 대시보드</h3><p>monitor 지표는 <span class="mono">AWS/NetworkFlowMonitor</span> 네임스페이스에 올라가 일반 CloudWatch 지표처럼 알람과 대시보드에 씁니다. agent는 PrivateLink 인터페이스 엔드포인트로 사설 전송할 수 있습니다.</p></article>
+      </div>
+      <p class="note">기본 할당량: scope는 계정 · Region당 1개, monitor는 계정 · Region당 20개(조정 가능), monitor당 local · remote 리소스 각 25개. 서비스 전체로 분당 약 500만 흐름, agent 설치 인스턴스 약 5,000대 규모까지 지원하며 그 이상은 용량이 늘 때까지 모니터링 성능에 영향이 있을 수 있습니다. agent는 Linux(Amazon Linux 2023, RPM · DEB 계열, x86_64 · Graviton)용입니다.</p>
+    </div>
+  </section>
+
+  <section id="compare" aria-labelledby="compare-h">
+    <div class="wrap">
+      <p class="tag">Compare</p>
+      <h2 id="compare-h">CloudWatch Network Monitoring 세 기능과 VPC Flow Logs</h2>
+      <p class="lede">Network Flow Monitor는 AWS 안의 워크로드 간 실제 TCP 흐름, Internet Monitor는 인터넷 최종 사용자 구간, Network Synthetic Monitor는 VPC와 온프레미스 사이 하이브리드 경로를 봅니다. VPC Flow Logs는 성능이 아니라 흐름 기록입니다.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">Network Flow Monitor, Internet Monitor, Network Synthetic Monitor, VPC Flow Logs 비교</caption>
+          <thead><tr><th scope="col">항목</th><th scope="col">Network Flow Monitor</th><th scope="col">Internet Monitor</th><th scope="col">Network Synthetic Monitor</th><th scope="col">VPC Flow Logs</th></tr></thead>
+          <tbody>
+            <tr><td class="row-h">보는 구간</td><td data-k="Network Flow Monitor">AWS 안 워크로드 간 · S3 · DynamoDB · 다른 Region</td><td data-k="Internet Monitor">애플리케이션 ↔ 인터넷 최종 사용자(city-network)</td><td data-k="Network Synthetic Monitor">VPC 서브넷 ↔ 온프레미스 IP (Direct Connect 등)</td><td data-k="VPC Flow Logs">ENI · TGW를 지난 IP 흐름</td></tr>
+            <tr><td class="row-h">데이터 출처</td><td data-k="Network Flow Monitor">실제 트래픽, 인스턴스 agent</td><td data-k="Internet Monitor">AWS global networking 데이터와 VPC flow log 분석</td><td data-k="Network Synthetic Monitor">AWS 관리형 probe의 합성 트래픽</td><td data-k="VPC Flow Logs">흐름 메타데이터 레코드</td></tr>
+            <tr><td class="row-h">주요 지표</td><td data-k="Network Flow Monitor">재전송, 타임아웃, RTT, 전송량</td><td data-k="Internet Monitor">성능 · 가용성 점수, 지연, health event</td><td data-k="Network Synthetic Monitor">RTT, 패킷 손실</td><td data-k="VPC Flow Logs">bytes, packets, ACCEPT · REJECT</td></tr>
+            <tr><td class="row-h">AWS 원인 판별</td><td class="y" data-k="Network Flow Monitor">NHI</td><td data-k="Internet Monitor">health event (영향 city-network · ASN 표시)</td><td class="y" data-k="Network Synthetic Monitor">NHI (DX 경로, TGW inter-Region peering)</td><td data-k="VPC Flow Logs">없음</td></tr>
+            <tr><td class="row-h">설치</td><td data-k="Network Flow Monitor">agent 필요 (EC2 · EKS, Linux)</td><td data-k="Internet Monitor">없음</td><td data-k="Network Synthetic Monitor">없음 (probe는 AWS가 관리)</td><td data-k="VPC Flow Logs">없음</td></tr>
+            <tr><td class="row-h">과금 기준</td><td data-k="Network Flow Monitor">monitored resource(agent 인스턴스) + CloudWatch 지표</td><td data-k="Internet Monitor">monitored resource + city-network + 로그</td><td data-k="Network Synthetic Monitor">monitored resource + CloudWatch 지표</td><td data-k="VPC Flow Logs">vended logs GB</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="arch" aria-labelledby="arch-h">
+    <div class="wrap">
+      <p class="tag">Reference architecture</p>
+      <h2 id="arch-h">워크로드 옆의 agent, CloudWatch로 이어지는 지표</h2>
+      <p class="lede">EC2 인스턴스와 EKS 노드의 agent가 AZ 간 흐름과 S3 · DynamoDB로 가는 흐름을 관측해 Network Flow Monitor로 보냅니다. delegated administrator 계정이 scope를 관리하고, monitor 지표는 CloudWatch 알람과 대시보드로 이어집니다. 경로 구성 자체의 검증은 <a href="../reachability-analyzer/">Reachability Analyzer</a>, 흐름 기록은 <a href="../vpc-flow-logs/">VPC Flow Logs</a>가 맡습니다.</p>
+      <figure class="arch">
+        <div class="arch-scroll">
+          <svg viewBox="0 0 980 420" role="img" aria-labelledby="arch-title arch-desc">
+            <title id="arch-title">Network Flow Monitor 수집과 지표 게시 아키텍처</title>
+            <desc id="arch-desc">한 Region의 VPC 안에서 두 가용 영역에 걸친 EC2 web, EC2 app, EKS node, EC2 db가 서로 TCP로 통신하고, EC2 app은 Amazon S3, EC2 db는 DynamoDB와 통신합니다. 각 인스턴스와 노드의 agent는 TCP 통계를 Network Flow Monitor로 약 30초마다 보냅니다. delegated administrator 계정이 Organizations 계정으로 scope를 관리합니다. Network Flow Monitor는 monitor 지표와 NHI를 CloudWatch 지표 AWS/NetworkFlowMonitor로 게시하고, 이 지표로 CloudWatch 알람과 대시보드를 구성합니다.</desc>
+            <defs>
+              <marker id="ar-network-flow-monitor-tr" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-tr" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-network-flow-monitor-fi" viewBox="0 0 10 10" refX="3" refY="5" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><path class="ah-fi" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-network-flow-monitor-fk" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-fk" d="M0 0 L10 5 L0 10 z"/></marker>
+            </defs>
+            <!-- zones -->
+            <rect class="zone" x="10" y="40" width="410" height="360" rx="6"/>
+            <image href="../../assets/aws-icons/Region_32.svg" x="10" y="40" width="22" height="22"/>
+            <text class="z" x="40" y="56">REGION · ap-northeast-2</text>
+            <rect class="zone" x="24" y="72" width="382" height="236" rx="6"/>
+            <image href="../../assets/aws-icons/Virtual-private-cloud-VPC_32.svg" x="24" y="72" width="22" height="22"/>
+            <text class="z" x="54" y="88">VPC · WORKLOAD ACCOUNT</text>
+            <rect class="zone" x="38" y="100" width="176" height="198" rx="4"/>
+            <text class="z" x="48" y="118">AZ a</text>
+            <rect class="zone" x="220" y="100" width="176" height="198" rx="4"/>
+            <text class="z" x="230" y="118">AZ c</text>
+            <rect class="zone" x="730" y="40" width="240" height="360" rx="6"/>
+            <text class="z" x="744" y="62">CLOUDWATCH</text>
+
+            <!-- workloads -->
+            <rect class="box" x="50" y="128" width="152" height="60" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-EC2_Instance_48.svg" x="58" y="144" width="28" height="28"/>
+            <text class="t" x="94" y="154">EC2 web</text><text class="s" x="94" y="174">agent</text>
+            <rect class="box" x="50" y="222" width="152" height="60" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-EC2_Instance_48.svg" x="58" y="238" width="28" height="28"/>
+            <text class="t" x="94" y="248">EC2 app</text><text class="s" x="94" y="268">agent</text>
+            <rect class="box" x="232" y="128" width="152" height="60" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_Amazon-Elastic-Kubernetes-Service_48.svg" x="240" y="144" width="28" height="28"/>
+            <text class="t" x="276" y="154">EKS node</text><text class="s" x="276" y="174">add-on 파드</text>
+            <rect class="box" x="232" y="222" width="152" height="60" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-EC2_Instance_48.svg" x="240" y="238" width="28" height="28"/>
+            <text class="t" x="276" y="248">EC2 db</text><text class="s" x="276" y="268">agent</text>
+
+            <!-- AWS services in region -->
+            <rect class="box" x="24" y="330" width="186" height="56" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_Amazon-Simple-Storage-Service_48.svg" x="33" y="344" width="28" height="28"/>
+            <text class="t" x="70" y="354">Amazon S3</text><text class="s" x="70" y="372">AMAZON_S3</text>
+            <rect class="box" x="220" y="330" width="186" height="56" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_Amazon-DynamoDB_48.svg" x="229" y="344" width="28" height="28"/>
+            <text class="t" x="266" y="354">DynamoDB</text><text class="s" x="266" y="372">AMAZON_DYNAMODB</text>
+
+            <!-- workload TCP flows: bidirectional, plain -->
+            <path class="fiber" d="M202 158 H232"/>
+            <path class="fiber" d="M202 252 H232"/>
+            <path class="fiber" d="M126 188 V222"/>
+            <path class="fiber" d="M126 282 V330"/>
+            <path class="fiber" d="M308 282 V330"/>
+
+            <!-- delegated admin -->
+            <rect class="box" x="470" y="40" width="230" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_AWS-Organizations_48.svg" x="479" y="58" width="28" height="28"/>
+            <text class="t" x="516" y="66">Delegated admin</text><text class="s" x="516" y="86">scope · 최대 100 계정</text>
+            <path class="site" d="M585 104 V150"/>
+
+            <!-- network flow monitor -->
+            <rect class="box" x="470" y="150" width="230" height="170" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_Amazon-CloudWatch_48.svg" x="479" y="164" width="28" height="28"/>
+            <text class="t" x="516" y="184">Network Flow Monitor</text>
+            <text class="s" x="516" y="208">scope · 토폴로지</text>
+            <text class="s" x="516" y="226">Workload insights</text>
+            <text class="s" x="516" y="244">monitor · top contributors</text>
+            <text class="s" x="516" y="262">Historical explorer</text>
+            <text class="s" x="516" y="280">NHI 0 / 100</text>
+
+            <!-- telemetry: agent -> NFM -->
+            <path class="path" d="M384 158 C430 158 428 206 466 206" marker-end="url(#ar-network-flow-monitor-tr)"/>
+            <path class="path" d="M384 252 C430 252 428 236 466 236" marker-end="url(#ar-network-flow-monitor-tr)"/>
+            <text class="lbl" x="430" y="136">Publish · ~30s</text>
+
+            <!-- cloudwatch -->
+            <rect class="box" x="746" y="80" width="208" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-CloudWatch_Alarm_48.svg" x="755" y="98" width="28" height="28"/>
+            <text class="t" x="792" y="106">CloudWatch alarm</text><text class="s" x="792" y="126">HealthIndicator ≥ 100</text>
+            <rect class="box" x="746" y="186" width="208" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_Amazon-CloudWatch_48.svg" x="755" y="204" width="28" height="28"/>
+            <text class="t" x="792" y="212">CloudWatch metrics</text><text class="s" x="792" y="232">AWS/NetworkFlowMonitor</text>
+            <rect class="box" x="746" y="292" width="208" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_Amazon-CloudWatch_48.svg" x="755" y="310" width="28" height="28"/>
+            <text class="t" x="792" y="318">Dashboard</text><text class="s" x="792" y="338">RTT · Retransmissions</text>
+
+            <path class="fiber" d="M700 218 H734" marker-end="url(#ar-network-flow-monitor-fi)"/>
+            <text class="lbl2" x="702" y="206">게시</text>
+            <path class="site" d="M850 186 V146" marker-end="url(#ar-network-flow-monitor-fk)"/>
+            <path class="site" d="M850 250 V290" marker-end="url(#ar-network-flow-monitor-fk)"/>
+          </svg>
+        </div>
+        <figcaption class="legend">
+          <span><i></i>워크로드 TCP 흐름 (양방향, agent가 관측)</span>
+          <span><i class="p dir"></i>agent 통계 전송 (모든 agent, 약 30초 주기)</span>
+          <span><i class="dir"></i>monitor 지표 · NHI 게시</span>
+          <span><i class="s dir"></i>알람 · 대시보드로 활용</span>
+          <span><i class="s"></i>scope 관리</span>
+        </figcaption>
+        <p class="arch-hint">좁은 화면에서는 다이어그램을 좌우로 밀어서 보세요.</p>
+      </figure>
+    </div>
+  </section>
+
+  <section id="start" aria-labelledby="start-h">
+    <div class="wrap">
+      <p class="tag">Getting started</p>
+      <h2 id="start-h">시작하기</h2>
+      <ol class="steps">
+        <li><span class="num">STEP 1</span><h3>계정 범위 결정</h3><p>여러 계정을 볼 거라면 Organizations에서 CloudWatch용 delegated administrator를 등록하고 그 계정으로 진행합니다.</p></li>
+        <li><span class="num">STEP 2</span><h3>초기화</h3><p>CloudWatch 콘솔 Network Monitoring의 Flow monitors에서 초기화합니다. 서비스 연결 역할, scope, 초기 토폴로지가 만들어지며 최대 30분 걸립니다.</p></li>
+        <li><span class="num">STEP 3</span><h3>agent 배포</h3><p>인스턴스 역할에 <span class="mono">CloudWatchNetworkFlowMonitor<wbr>AgentPublishPolicy</span>를 붙이고 SSM · CloudShell · 패키지로 설치합니다. EKS는 add-on을 켭니다.</p></li>
+        <li><span class="num">STEP 4</span><h3>Workload insights 검토</h3><p>AZ 간 · VPC 간 · S3 등 분류별 상위 흐름을 보고 지속 추적할 워크로드를 고릅니다.</p></li>
+        <li><span class="num">STEP 5</span><h3>monitor와 알람</h3><p>local · remote 리소스로 monitor를 만들고 <span class="mono">HealthIndicator</span>와 재전송 지표에 CloudWatch 알람을 겁니다.</p></li>
+      </ol>
+      <p class="note">scope에 계정을 더하거나 뺀 뒤에는 토폴로지를 다시 만드는 동안 약 20분이 지나야 다음 변경을 할 수 있습니다. 관리 계정으로도 계정을 추가할 수 있지만 delegated administrator 사용이 권장됩니다.</p>
+    </div>
+  </section>
+
+  <section id="pricing" aria-labelledby="pricing-h">
+    <div class="wrap">
+      <p class="tag">Pricing</p>
+      <h2 id="pricing-h">비용 항목</h2>
+      <p class="lede">flow monitoring 요금은 두 가지로 정해집니다. agent를 배포 · 활성화한 컴퓨팅 리소스 수(monitored resource)와, 게시되는 CloudWatch 지표입니다. 단가는 Region마다 다릅니다.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">Network Flow Monitor 과금 항목</caption>
+          <thead><tr><th scope="col">과금 항목</th><th scope="col">과금 기준</th><th scope="col">참고</th></tr></thead>
+          <tbody>
+            <tr><td class="row-h">Monitored resource</td><td data-k="과금 기준">agent가 활성화된 컴퓨팅 인스턴스 수</td><td data-k="참고">EC2 인스턴스 1대 또는 EKS 노드 1대가 monitored resource 1개입니다</td></tr>
+            <tr><td class="row-h">CloudWatch 지표</td><td data-k="과금 기준">CloudWatch metrics 요금</td><td data-k="참고">monitor가 <span class="mono">AWS/NetworkFlowMonitor</span>로 게시하는 지표에 표준 지표 요금이 적용됩니다</td></tr>
+            <tr><td class="row-h">알람 · 대시보드</td><td data-k="과금 기준">CloudWatch 알람 · 대시보드 요금</td><td data-k="참고">NHI나 재전송 지표에 건 알람, 사용자 지정 대시보드는 각각 표준 요금</td></tr>
+            <tr><td class="row-h">사설 전송 (선택)</td><td data-k="과금 기준">인터페이스 VPC 엔드포인트 요금</td><td data-k="참고">agent 트래픽을 PrivateLink로 보낼 때 엔드포인트 시간 · 처리 데이터 요금이 붙습니다</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">agent를 설치하는 인스턴스 수가 곧 비용이므로, 모든 인스턴스보다 핵심 계층(웹 · 앱 · DB 노드)부터 배포하는 것이 좋습니다. 최신 단가와 계산 예시는 <a href="https://aws.amazon.com/cloudwatch/pricing/" target="_blank" rel="noopener">Amazon CloudWatch 요금 페이지</a>의 CloudWatch Network Monitoring with flow monitoring 항목에서 확인하세요.</p>
+    </div>
+  </section>
+
+  <section class="cta" aria-labelledby="cta-h">
+    <div class="wrap">
+      <p class="tag">Next step</p>
+      <h2 id="cta-h">다음 성능 이슈에서는 첫 10분을 아끼세요</h2>
+      <p class="lede">핵심 워크로드의 계층 구조, AZ · VPC · Region 간 의존 관계, 계정 구조를 정리해 오시면 agent 배포 범위, monitor 설계, NHI 알람 기준을 함께 잡아 드립니다.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-NetworkFlowMonitor.html" target="_blank" rel="noopener">Network Flow Monitor 문서</a>
+        <a class="btn btn-ghost" href="https://aws.amazon.com/blogs/networking-and-content-delivery/visualizing-network-performance-of-your-aws-cloud-workloads-with-network-flow-monitor/" target="_blank" rel="noopener">구성 예시 블로그</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a href="../">← AWS 네트워킹 서비스 포트폴리오</a>
+    <span>Amazon CloudWatch Network Flow Monitor 소개 자료. 지원 Region, 할당량, 요금은 바뀔 수 있으니 공식 문서를 확인하세요.</span>
+    <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-NetworkFlowMonitor-cw-metrics.html" target="_blank" rel="noopener">Network Flow Monitor 지표 문서</a>
+  </div>
+</footer>
+
+</body>
+</html>

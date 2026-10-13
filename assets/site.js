@@ -11,8 +11,8 @@
   function counterpart() {            // same page in the other language
     var here = location.href.split('#')[0].split('?')[0];
     var rel = here.indexOf(ROOT) === 0 ? here.slice(ROOT.length) : '';
-    if (EN) rel = rel.replace(/^en\//, '');
-    return ROOT + (EN ? '' : 'en/') + rel + location.search + location.hash;
+    rel = rel.replace(/^(ko|en)\//, '');
+    return ROOT + (EN ? 'ko/' : 'en/') + rel + location.search + location.hash;
   }
   (function autoLang() {               // first visit: follow the browser language; an explicit choice wins
     var pref = null; try { pref = localStorage.getItem(LKEY); } catch (e) {}
@@ -172,7 +172,7 @@
     drawer.querySelector('.mempty').hidden = any;
   }
   function buildMenu(tools) {
-    var base = siteRoot(), lb = base + (EN ? 'en/' : ''), here = location.href.split('#')[0].split('?')[0];
+    var base = siteRoot(), lb = base + (EN ? 'en/' : 'ko/'), here = location.href.split('#')[0].split('?')[0];
     function isCur(href) { return here === href || here === href + 'index.html'; }
     function item(slug, name) {
       var href = lb + slug + '/';

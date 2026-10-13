@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CloudFront 소개</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+body{margin:0}img{max-width:100%}[hidden]{display:none!important}
+
+/* Layout: a cross-connect work order. Cool steel paper, navy ink, Amazon orange as the one accent; section tags read like fiber labels. */
+:root{
+  --bg:#EEF1F4; --surface:#FFFFFF; --sunken:#E3E8ED;
+  --ink:#14202E; --ink-2:#44515F; --ink-3:#5A6672;
+  --line:#CDD5DD; --line-2:#B4BFCA;
+  --fiber:#FF9900;          /* Amazon orange — fills only */
+  --fiber-ink:#B35C00;      /* orange-derived, AA on light surfaces */
+  --fiber-soft:#FFF0D9;
+  --on-fiber:#14202E;
+  --trace:#2E7D9A;          /* secondary line color for diagram paths */
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --maxw:1120px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--fiber-ink);outline-offset:3px;border-radius:2px}
+.skip-link{position:absolute;left:16px;top:-60px;background:var(--fiber);color:var(--on-fiber);padding:8px 14px;font-weight:700;z-index:50;text-decoration:none}
+.skip-link:focus{top:12px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.wrap{max-width:var(--maxw);margin:0 auto;padding-inline:24px}
+section{padding-block:88px;border-top:1px solid var(--line)}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.25}
+h2{font-size:clamp(26px,3.4vw,36px);font-weight:700;letter-spacing:-.01em}
+h3{font-size:18px;font-weight:700}
+p{margin:0}
+.lede{color:var(--ink-2);max-width:62ch;margin-top:14px}
+.num{font-family:var(--display);font-variant-numeric:tabular-nums lining-nums}
+.mono{font-family:var(--mono)}
+
+/* fiber label: the section tag */
+.tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-bottom:14px}
+.tag::before{content:"";width:22px;height:8px;background:var(--fiber);border-radius:1px}
+
+/* nav */
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:60px}
+.brand{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.02em;text-decoration:none;text-transform:uppercase}
+.brand span{color:var(--fiber-ink)}
+.navlinks{display:flex;gap:22px;font-size:14px;align-items:center}
+.navlinks a{text-decoration:none;color:var(--ink-2)}
+.navlinks a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;font-weight:700;font-size:15px;text-decoration:none;border-radius:4px;border:1px solid transparent;transition:transform .15s ease,background .15s ease}
+.btn-primary{background:var(--fiber);color:var(--on-fiber)}
+.btn-primary:hover{transform:translateY(-1px)}
+.btn-ghost{border-color:var(--line-2);color:var(--ink)}
+.btn-ghost:hover{background:var(--sunken)}
+.navlinks .btn{min-height:38px;padding:0 14px;font-size:14px;color:var(--on-fiber)}
+
+/* hero */
+.hero{padding-block:72px 64px;border-top:0}
+.hero-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:56px;align-items:center}
+.eyebrow{font-family:var(--mono);font-size:13px;color:var(--fiber-ink);letter-spacing:.04em}
+.hero h1{font-size:clamp(34px,5vw,56px);font-weight:700;letter-spacing:-.02em;margin-top:16px}
+.hero h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--fiber) 62%,var(--fiber) 90%,transparent 90%);padding-inline:2px}
+.hero .lede{font-size:18px}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+
+/* hero visual: port faceplate */
+.faceplate{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px}
+.faceplate-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.ports{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+.port{border:1px solid var(--line);border-radius:4px;padding:14px 14px 12px;background:var(--sunken);display:flex;flex-direction:column;gap:2px}
+.port .num{font-size:40px;font-weight:600;line-height:1}
+.port .num small{font-size:18px;color:var(--ink-2);margin-left:2px}
+.port .optic{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+.port .led{width:8px;height:8px;border-radius:50%;background:var(--fiber);align-self:flex-end;margin-top:-6px;animation:blink 2.4s ease-in-out infinite}
+.port:nth-child(2) .led{animation-delay:.6s}.port:nth-child(3) .led{animation-delay:1.2s}.port:nth-child(4) .led{animation-delay:1.8s}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.faceplate-foot{margin-top:14px;font-size:13px;color:var(--ink-2)}
+
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:56px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.chip{padding:18px 20px;border-left:1px solid var(--line);min-width:0}
+.chip:first-child{border-left:0}
+.chip .num{font-size:34px;font-weight:600;line-height:1.1}
+.chip p{font-size:13.5px;color:var(--ink-2);margin-top:4px}
+
+/* value */
+.split{display:grid;grid-template-columns:1fr 1.4fr;gap:56px}
+.pillars{display:grid;gap:0;border-top:1px solid var(--line-2)}
+.pillar{display:grid;grid-template-columns:120px 1fr;gap:20px;padding-block:22px;border-bottom:1px solid var(--line)}
+.pillar .k{font-family:var(--display);font-size:22px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--fiber-ink)}
+.pillar p{color:var(--ink-2);margin-top:6px}
+
+/* stack (L1/L2/L3) */
+.stack{margin-top:40px;display:grid;gap:10px}
+.layer{display:grid;grid-template-columns:96px 1fr 1.2fr;gap:24px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px 24px}
+.layer .lv{font-family:var(--display);font-size:44px;font-weight:700;line-height:.9}
+.layer .lv small{display:block;font-family:var(--mono);font-size:11px;font-weight:400;color:var(--ink-3);letter-spacing:.06em;margin-top:8px;text-transform:uppercase}
+.layer p{color:var(--ink-2);margin-top:6px;font-size:15px}
+.specs{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+.specs code{font-family:var(--mono);font-size:12.5px;background:var(--sunken);border:1px solid var(--line);padding:3px 8px;border-radius:3px;color:var(--ink)}
+
+/* features */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:40px}
+.feature{background:var(--surface);padding:26px 24px;min-width:0}
+.feature .ft{font-family:var(--mono);font-size:11.5px;color:var(--fiber-ink);letter-spacing:.06em;text-transform:uppercase}
+.feature h3{margin-top:8px}
+.feature p{color:var(--ink-2);font-size:15px;margin-top:8px}
+
+/* table */
+.tbl-wrap{margin-top:36px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:14px 18px;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--sunken)}
+tbody tr:last-child td{border-bottom:0}
+td.row-h{font-weight:700;width:22%}
+td .num{font-size:18px;font-weight:600}
+
+/* architecture */
+.arch{margin-top:36px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px}
+.arch-scroll{overflow-x:auto}
+.arch svg{display:block;width:100%;min-width:860px;height:auto}
+.arch-hint{display:none;font-size:13px;color:var(--ink-3);margin-top:10px}
+svg .box{fill:var(--sunken);stroke:var(--line-2)}
+svg .zone{fill:none;stroke:var(--line-2);stroke-dasharray:4 4}
+svg .t{fill:var(--ink);font-family:var(--sans);font-size:14px;font-weight:700}
+svg .s{fill:var(--ink-3);font-family:var(--mono);font-size:11px}
+svg .z{fill:var(--ink-2);font-family:var(--mono);font-size:11px;letter-spacing:.08em}
+svg .fiber{stroke:var(--fiber);stroke-width:5;fill:none;stroke-linecap:round}
+svg .path{stroke:var(--trace);stroke-width:2;fill:none}
+svg .site{stroke:var(--fiber-ink);stroke-width:2;fill:none;stroke-dasharray:6 5}
+svg .lbl{fill:var(--trace);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .lbl2{fill:var(--fiber-ink);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .dot{fill:var(--fiber)}
+.legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--ink-2)}
+.legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--fiber)}
+.legend i.p{border-top:2px solid var(--trace)}
+.legend i.s{border-top:2px dashed var(--fiber-ink)}
+
+/* steps */
+.steps{list-style:none;padding:0;margin:40px 0 0;display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:4px solid var(--fiber)}
+.steps li{padding:20px 18px 0 0;min-width:0}
+.steps .num{font-size:15px;font-weight:600;color:var(--fiber-ink);letter-spacing:.06em}
+.steps h3{font-size:16px;margin-top:6px}
+.steps p{font-size:14px;color:var(--ink-2);margin-top:6px}
+
+/* resiliency */
+.res{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:36px}
+.res-card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:26px}
+.res-card .num{font-size:52px;font-weight:700;line-height:1}
+.res-card .num small{font-size:20px;color:var(--ink-2)}
+.res-card h3{margin-top:10px}
+.res-card p{color:var(--ink-2);font-size:15px;margin-top:6px}
+.res-card.max{border-color:var(--fiber);box-shadow:inset 0 4px 0 var(--fiber)}
+
+/* cta */
+.cta{text-align:center}
+.cta h2{max-width:22ch;margin:0 auto}
+.cta .lede{margin:14px auto 0}
+.cta .cta-row{justify-content:center}
+footer{border-top:1px solid var(--line);padding-block:28px;font-size:13px;color:var(--ink-3)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+
+@media (max-width:1024px){
+  .hero-grid,.split{grid-template-columns:1fr;gap:40px}
+  .features{grid-template-columns:repeat(2,1fr)}
+  .steps{grid-template-columns:repeat(2,1fr);border-top:0;gap:0 24px}
+  .steps li{border-top:4px solid var(--fiber);padding-bottom:24px}
+  .layer{grid-template-columns:80px 1fr}
+  .layer .specs{grid-column:2}
+  .chips{grid-template-columns:repeat(2,1fr)}
+  .chip:nth-child(3){border-left:0}
+  .chip:nth-child(n+3){border-top:1px solid var(--line)}
+}
+@media (max-width:640px){
+  .wrap{padding-inline:18px}
+  section{padding-block:60px}
+  .navlinks a:not(.btn){display:none}
+  .features,.res{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr}
+  .pillar{grid-template-columns:1fr;gap:0}
+  .layer{grid-template-columns:1fr;gap:12px}
+  .layer .specs{grid-column:auto}
+  .cta-row .btn{width:100%}
+  .arch-hint{display:block}
+  table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  table,tbody,tr,td{display:block;width:100%}
+  tr{border-bottom:1px solid var(--line);padding:14px 16px}
+  tbody tr:last-child{border-bottom:0}
+  td{border:0;padding:3px 0}
+  td.row-h{width:100%;font-size:16px;padding-bottom:6px}
+  td[data-k]::before{content:attr(data-k);display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+
+/* ---- service-specific ---- */
+.hero h1,h2,h3{word-break:keep-all}
+.hero-grid>*{min-width:0}
+
+/* hero visual: request path hops */
+.hops{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px}
+.hops-head{display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.hop-list{list-style:none;margin:16px 0 0;padding:0;position:relative}
+.hop-list::before{content:"";position:absolute;left:11px;top:14px;bottom:14px;width:2px;background:var(--trace)}
+.hop{position:relative;display:grid;grid-template-columns:24px 1fr 80px;gap:12px;align-items:center;padding:8px 0}
+.hop .pin{width:24px;height:24px;border-radius:50%;background:var(--surface);border:2px solid var(--trace);position:relative;z-index:1}
+.hop.edge .pin,.hop.hit .pin{background:var(--fiber);border-color:var(--fiber)}
+.hop-body{background:var(--sunken);border:1px solid var(--line);border-radius:4px;padding:10px 14px;min-width:0}
+.hop-body b{display:block;font-size:15px}
+.hop-body span{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+.badge{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.06em;padding:3px 8px;border-radius:3px;border:1px solid var(--line-2);color:var(--ink-2);white-space:nowrap;justify-self:end}
+.badge.hit{background:var(--fiber);border-color:var(--fiber);color:var(--on-fiber)}
+.hop.skip .hop-body{opacity:.6}
+.hop.hit .pin{animation:blink 2.4s ease-in-out infinite}
+.hops-foot{margin-top:12px;font-size:13px;color:var(--ink-2)}
+
+/* request path layers */
+.path-stack .lv{font-size:40px}
+th.colh{color:var(--ink)}
+
+@media (max-width:640px){
+  .hops{padding:18px}
+  .hop{gap:10px;grid-template-columns:24px 1fr 66px}
+  .hop-body{padding:9px 12px}
+  .badge{font-size:10px;padding:2px 6px}
+}
+
+/* nav: keep links on one line, show only CTA below 960px */
+.navlinks a{white-space:nowrap}
+@media (max-width:960px){.navlinks a:not(.btn){display:none}}
+
+/* Korean line breaking: never split a word mid-syllable */
+h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
+svg .ah-fiber{fill:var(--fiber)}
+svg .ah-trace{fill:var(--trace)}
+svg .ah-site{fill:var(--fiber-ink)}
+svg .ah-usr{fill:var(--ink-3)}
+svg .ah-atk{fill:#C2410C}
+.legend i.dir{position:relative;width:26px}
+.legend i.dir::after{content:"";position:absolute;right:-3px;top:-7px;border-left:8px solid var(--fiber);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.legend i.p.dir::after,.legend i.s.dir::after,.legend i.u.dir::after,.legend i.a.dir::after{top:-6px}
+.legend i.p.dir::after{border-left-color:var(--trace)}
+.legend i.s.dir::after{border-left-color:var(--fiber-ink)}
+.legend i.u.dir::after{border-left-color:var(--ink-3)}
+.legend i.a.dir::after{border-left-color:#C2410C}
+</style>
+<link rel="stylesheet" href="../../assets/site.css?v=25">
+<script src="../../assets/site.js?v=25"></script>
+</head>
+<body>
+
+
+<a class="skip-link" href="#main">본문으로 건너뛰기</a>
+
+<nav aria-label="주요 메뉴">
+  <div class="wrap">
+    <a class="brand" href="#top">Amazon <span>CloudFront</span></a>
+    <div class="navlinks">
+      <a href="../">서비스 포트폴리오</a>
+      <a href="#path">요청 경로</a>
+      <a href="#features">주요 기능</a>
+      <a href="#edge">엣지 함수</a>
+      <a href="#arch">아키텍처</a>
+      <a href="#pricing">비용</a>
+      <a class="btn btn-primary" href="#start">시작하기</a>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+  <header class="hero" id="top">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">Amazon CloudFront · 콘텐츠 전송 네트워크</p>
+          <h1>사용자 가까운 엣지에서 응답하고, <em>오리진은 감추세요</em></h1>
+          <p class="lede">CloudFront는 사용자 요청을 지연이 가장 낮은 엣지 로케이션에서 받아 캐시로 응답합니다. 캐시에 없는 요청만 AWS 네트워크를 따라 오리진까지 가고, 오리진은 사설 서브넷이나 비공개 S3 버킷에 둘 수 있습니다.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="#path">요청 경로 보기</a>
+            <a class="btn btn-ghost" href="#arch">아키텍처 보기</a>
+          </div>
+        </div>
+
+        <div class="hops" aria-label="CloudFront 요청 경로 예시">
+          <div class="hops-head"><span>Request path</span><span>GET /img/logo.png</span></div>
+          <ol class="hop-list">
+            <li class="hop"><span class="pin" aria-hidden="true"></span><div class="hop-body"><b>Viewer</b><span>HTTP/3 · TLS 1.3</span></div><span class="badge">REQUEST</span></li>
+            <li class="hop edge"><span class="pin" aria-hidden="true"></span><div class="hop-body"><b>Edge location (POP)</b><span>AWS WAF · CloudFront Functions</span></div><span class="badge">MISS</span></li>
+            <li class="hop hit"><span class="pin" aria-hidden="true"></span><div class="hop-body"><b>Regional edge cache</b><span>여러 POP이 공유하는 캐시</span></div><span class="badge hit">HIT</span></li>
+            <li class="hop skip"><span class="pin" aria-hidden="true"></span><div class="hop-body"><b>Origin Shield</b><span>선택 사항 · 한 리전에 지정</span></div><span class="badge">SKIPPED</span></li>
+            <li class="hop skip"><span class="pin" aria-hidden="true"></span><div class="hop-body"><b>Origin</b><span>S3 · ALB · NLB · EC2 · 사용자 정의</span></div><span class="badge">SKIPPED</span></li>
+          </ol>
+          <p class="hops-foot">POP에 없던 객체를 regional edge cache에서 받아 POP에도 저장합니다. 오리진까지 가지 않았습니다.</p>
+        </div>
+      </div>
+
+      <div class="chips" role="list">
+        <div class="chip" role="listitem"><span class="num">99.9%</span><p>월간 가용성 SLA</p></div>
+        <div class="chip" role="listitem"><span class="num">50 GB</span><p>GET 응답 하나당 최대 캐시 크기</p></div>
+        <div class="chip" role="listitem"><span class="num">HTTP/3</span><p>TLS 1.3 기반 QUIC, 연결 마이그레이션 지원</p></div>
+        <div class="chip" role="listitem"><span class="num">L3·L4</span><p>Shield Standard DDoS 보호 기본 적용</p></div>
+      </div>
+    </div>
+  </header>
+
+  <section id="why" aria-labelledby="why-h">
+    <div class="wrap split">
+      <div>
+        <p class="tag">Why CloudFront</p>
+        <h2 id="why-h">가까운 곳에서 응답할수록 빠르고, 오리진은 덜 일합니다</h2>
+        <p class="lede">국내외 사용자에게 같은 품질로 콘텐츠와 API를 전달하려면, 요청을 사용자 가까이에서 끝내고 오리진으로 가는 요청 수를 줄여야 합니다.</p>
+      </div>
+      <div class="pillars">
+        <div class="pillar"><span class="k">Cache</span><div><h3>계층형 캐시</h3><p>POP, regional edge cache, Origin Shield가 차례로 요청을 흡수해 오리진 부하를 줄입니다.</p></div></div>
+        <div class="pillar"><span class="k">Protect</span><div><h3>엣지에서 막는 공격</h3><p>Shield Standard가 네트워크·전송 계층 DDoS를 막고, AWS WAF가 애플리케이션 계층 요청을 걸러냅니다.</p></div></div>
+        <div class="pillar"><span class="k">Program</span><div><h3>엣지에서 실행하는 코드</h3><p>CloudFront Functions와 Lambda@Edge로 헤더, URL, 인증 로직을 오리진 앞에서 처리합니다.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="path" aria-labelledby="path-h">
+    <div class="wrap">
+      <p class="tag">Request path</p>
+      <h2 id="path-h">요청이 오리진에 닿기까지</h2>
+      <p class="lede">DNS가 사용자를 지연이 가장 낮은 POP으로 보내고, 캐시에 없으면 다음 계층으로 넘어갑니다. PUT, POST, PATCH, OPTIONS, DELETE 같은 프록시 메서드와 동적 요청은 regional edge cache를 거치지 않고 POP에서 오리진으로 바로 갑니다.</p>
+      <div class="stack path-stack">
+        <div class="layer">
+          <span class="lv">01<small>Edge</small></span>
+          <div><h3>Edge location (POP)</h3><p>TLS를 종료하고 캐시를 확인합니다. AWS WAF 검사와 CloudFront Functions가 이 단계에서 실행됩니다.</p></div>
+          <div class="specs"><code>TLS termination</code><code>Viewer mTLS</code><code>AWS WAF</code><code>CloudFront Functions</code></div>
+        </div>
+        <div class="layer">
+          <span class="lv">02<small>Regional</small></span>
+          <div><h3>Regional edge cache</h3><p>한 지역의 POP들이 공유하는 더 큰 캐시입니다. 오리진이 같은 리전의 S3 버킷이면 이 계층을 건너뛰고 S3로 바로 갑니다.</p></div>
+          <div class="specs"><code>Shared cache</code><code>Cache miss</code><code>GET · HEAD</code></div>
+        </div>
+        <div class="layer">
+          <span class="lv">03<small>Origin</small></span>
+          <div><h3>Origin Shield · 오리진</h3><p>Origin Shield를 켜면 모든 캐시 계층의 오리진 요청이 지정한 리전 한 곳으로 모여, 같은 객체에 대한 요청이 오리진에 한 번만 가도록 합칠 수 있습니다.</p></div>
+          <div class="specs"><code>Origin Shield</code><code>Origin group</code><code>OAC</code><code>VPC origin</code><code>Origin mTLS</code><code>Origin request / response</code></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" aria-labelledby="features-h">
+    <div class="wrap">
+      <p class="tag">Features</p>
+      <h2 id="features-h">주요 기능</h2>
+      <div class="features">
+        <article class="feature"><p class="ft">S3 origin</p><h3>Origin Access Control</h3><p>S3 버킷을 공개하지 않고 CloudFront에서만 읽게 합니다. SSE-KMS 암호화 객체와 PUT·DELETE 요청도 지원하며, 레거시 OAI를 대체하는 권장 방식입니다.</p></article>
+        <article class="feature"><p class="ft">Private origin</p><h3>VPC origins</h3><p>사설 서브넷의 ALB, NLB, EC2 인스턴스를 오리진으로 씁니다. CloudFront가 서비스 관리형 ENI로 접근하므로 오리진에 공인 IP가 필요 없습니다. VPC에는 인터넷 게이트웨이가 연결되어 있어야 하며, AWS RAM으로 다른 계정의 VPC origin을 공유받아 쓸 수도 있습니다.</p></article>
+        <article class="feature"><p class="ft">Availability</p><h3>Origin failover</h3><p>Primary와 Secondary 오리진을 origin group으로 묶습니다. 지정한 상태 코드나 연결 실패, 타임아웃이 나면 GET, HEAD, OPTIONS 요청을 Secondary로 다시 보냅니다.</p></article>
+        <article class="feature"><p class="ft">Edge security</p><h3>AWS WAF · Shield</h3><p>배포에 web ACL을 연결해 L7 요청을 검사합니다. Shield Standard는 별도 요금 없이 모든 배포에 적용되고, Shield Advanced로 확장할 수 있습니다.</p></article>
+        <article class="feature"><p class="ft">Client identity</p><h3>Viewer mTLS</h3><p>엣지에서 클라이언트의 X.509 인증서를 trust store로 검증해, 신뢰하지 않는 클라이언트를 애플리케이션 앞에서 차단합니다. Connection Function으로 검증 로직을 더하고 OCSP 폐기 확인, 인증서를 오리진에 넘기는 passthrough 모드도 쓸 수 있습니다. 추가 요금은 없습니다.</p></article>
+        <article class="feature"><p class="ft">Pricing</p><h3>Flat-rate 요금제</h3><p>CDN, AWS WAF·DDoS 보호, 봇 관리, Route 53 DNS, CloudWatch Logs 수집, 엣지 컴퓨팅, S3 스토리지 크레딧을 배포 하나 단위의 월 정액으로 묶은 요금제입니다. Free, Pro, Business, Premium 네 등급이 있고 초과 요금이 없습니다.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="edge" aria-labelledby="edge-h">
+    <div class="wrap">
+      <p class="tag">Edge compute</p>
+      <h2 id="edge-h">CloudFront Functions와 Lambda@Edge</h2>
+      <p class="lede">헤더 조작, URL 재작성, 토큰 검사처럼 가볍고 짧은 로직은 CloudFront Functions에, 네트워크 호출이나 요청 본문 처리가 필요한 로직은 Lambda@Edge에 둡니다.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">CloudFront Functions와 Lambda@Edge 비교</caption>
+          <thead><tr><th scope="col">항목</th><th scope="col">CloudFront Functions</th><th scope="col">Lambda@Edge</th></tr></thead>
+          <tbody>
+            <tr><td class="row-h">런타임</td><td data-k="CloudFront Functions">JavaScript</td><td data-k="Lambda@Edge">Node.js, Python</td></tr>
+            <tr><td class="row-h">트리거 이벤트</td><td data-k="CloudFront Functions">Viewer request, Viewer response (mTLS 연결 단계는 Connection Function)</td><td data-k="Lambda@Edge">Viewer request·response, Origin request·response</td></tr>
+            <tr><td class="row-h">실행 시간</td><td data-k="CloudFront Functions"><span class="num">1 ms</span> 미만</td><td data-k="Lambda@Edge">viewer · origin 이벤트 모두 최대 <span class="num">30</span> 초</td></tr>
+            <tr><td class="row-h">최대 메모리</td><td data-k="CloudFront Functions"><span class="num">2</span> MB</td><td data-k="Lambda@Edge">Lambda 할당량과 동일, 최대 <span class="num">10,240</span> MB</td></tr>
+            <tr><td class="row-h">코드 크기</td><td data-k="CloudFront Functions"><span class="num">10</span> KB</td><td data-k="Lambda@Edge">viewer · origin 모두 <span class="num">50</span> MB</td></tr>
+            <tr><td class="row-h">네트워크 · 본문 접근</td><td data-k="CloudFront Functions">불가</td><td data-k="Lambda@Edge">가능</td></tr>
+            <tr><td class="row-h">규모</td><td data-k="CloudFront Functions">초당 수백만 요청</td><td data-k="Lambda@Edge">리전당 초당 최대 <span class="num">10,000</span> 요청</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="arch" aria-labelledby="arch-h">
+    <div class="wrap">
+      <p class="tag">Reference architecture</p>
+      <h2 id="arch-h">공개 진입점은 CloudFront 하나로</h2>
+      <p class="lede">동적 요청은 VPC origin으로 사설 서브넷의 ALB에, 정적 파일은 OAC로 보호한 S3에 보냅니다. ALB를 Primary로 둔 origin group에 S3 정적 페이지를 Secondary로 묶어 장애 시 응답을 유지합니다.</p>
+      <figure class="arch">
+        <div class="arch-scroll">
+          <svg viewBox="0 0 980 440" role="img" aria-labelledby="arch-title arch-desc">
+            <title id="arch-title">CloudFront 레퍼런스 아키텍처</title>
+            <desc id="arch-desc">사용자 요청이 엣지 로케이션에 도착하면 AWS WAF가 검사하고, 캐시 미스는 regional edge cache와 Origin Shield를 거쳐 오리진 리전으로 갑니다. 오리진 그룹의 Primary는 VPC origin으로 연결한 사설 서브넷의 Application Load Balancer이고, Secondary는 Origin Access Control로 보호한 Amazon S3 버킷입니다. Primary가 실패하면 Secondary로 전환합니다. Shield Standard가 엣지 전체에 적용됩니다.</desc>
+            <defs>
+              <marker id="ar-cloudfront-fiber" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><path class="ah-fiber" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-cloudfront-trace" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-trace" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-cloudfront-site" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-site" d="M0 0 L10 5 L0 10 z"/></marker>
+            </defs>
+            <!-- zones -->
+            <rect class="zone" x="10" y="40" width="150" height="380" rx="6"/>
+            <text class="z" x="24" y="62">VIEWERS</text>
+            <rect class="zone" x="180" y="40" width="540" height="380" rx="6"/>
+            <text class="z" x="194" y="62">CLOUDFRONT</text>
+            <text class="z" x="194" y="404">SHIELD STANDARD 기본 적용</text>
+            <rect class="zone" x="740" y="40" width="230" height="380" rx="6"/>
+            <image href="../../assets/aws-icons/Region_32.svg" x="748" y="48" width="22" height="22"/>
+            <text class="z" x="776" y="62">ORIGIN REGION</text>
+
+            <!-- viewers -->
+            <rect class="box" x="18" y="196" width="134" height="64" rx="4"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Users_48_Light.svg" x="26" y="216" width="24" height="24"/>
+            <text class="t" x="56" y="224">사용자</text><text class="s" x="56" y="244">HTTP/3 · IPv6</text>
+
+            <!-- edge tiers -->
+            <rect class="box" x="200" y="100" width="150" height="56" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_AWS-WAF_48.svg" x="210" y="114" width="28" height="28"/><text class="t" x="246" y="124">AWS WAF</text><text class="s" x="246" y="142">web ACL</text>
+            <rect class="box" x="200" y="196" width="150" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-CloudFront_Edge-Location_48.svg" x="210" y="214" width="28" height="28"/><text class="t" x="246" y="224">Edge location</text><text class="s" x="246" y="244">POP · 엣지 함수</text>
+            <rect class="box" x="380" y="196" width="150" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_Amazon-CloudFront_48.svg" x="390" y="214" width="28" height="28"/><text class="t" x="426" y="224">Regional edge</text><text class="s" x="426" y="244">공유 캐시</text>
+            <rect class="box" x="560" y="196" width="152" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_Amazon-CloudFront_48.svg" x="570" y="214" width="28" height="28"/><text class="t" x="606" y="224">Origin Shield</text><text class="s" x="606" y="244">선택 · 리전 1곳</text>
+
+            <!-- origin group -->
+            <rect class="zone" x="756" y="84" width="198" height="300" rx="6"/>
+            <text class="z" x="768" y="104">ORIGIN GROUP</text>
+            <rect class="box" x="770" y="120" width="170" height="72" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Elastic-Load-Balancing_Application-Load-Balancer_48.svg" x="780" y="142" width="28" height="28"/><text class="t" x="816" y="146">ALB · Primary</text><text class="s" x="816" y="164">VPC origin</text><text class="s" x="816" y="180">사설 서브넷</text>
+            <rect class="box" x="770" y="290" width="170" height="72" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-Simple-Storage-Service_Bucket_48.svg" x="780" y="312" width="28" height="28"/><text class="t" x="816" y="316">S3 · Secondary</text><text class="s" x="816" y="334">OAC 서명 요청</text><text class="s" x="816" y="350">비공개 버킷</text>
+
+            <!-- request path -->
+            <path class="fiber" d="M152 228 H191" marker-end="url(#ar-cloudfront-fiber)"/>
+            <path class="fiber" d="M350 228 H371" marker-end="url(#ar-cloudfront-fiber)"/>
+            <path class="fiber" d="M530 228 H551" marker-end="url(#ar-cloudfront-fiber)"/>
+            <path class="fiber" d="M712 220 C737 220 737 156 761 156" marker-end="url(#ar-cloudfront-fiber)"/>
+            <path class="path" d="M275 196 V158" marker-end="url(#ar-cloudfront-trace)"/>
+            <text class="lbl" x="284" y="182">검사</text>
+            <path class="site" d="M712 236 C741 236 741 326 768 326" marker-end="url(#ar-cloudfront-site)"/>
+            <text class="lbl2" x="796" y="250">Failover</text>
+            <text class="lbl2" x="796" y="266">지정한 상태 코드</text>
+            <text class="lbl" x="200" y="300">캐시 미스일 때만 다음 계층으로</text>
+          </svg>
+        </div>
+        <figcaption class="legend">
+          <span><i class="dir"></i>요청 방향 (캐시 미스일 때만 다음 계층)</span>
+          <span><i class="p dir"></i>요청 검사 (엣지 → WAF)</span>
+          <span><i class="s dir"></i>오리진 장애 시 전환 (Primary → Secondary)</span>
+        </figcaption>
+        <p class="arch-hint">좁은 화면에서는 다이어그램을 좌우로 밀어서 보세요.</p>
+      </figure>
+    </div>
+  </section>
+
+  <section id="start" aria-labelledby="start-h">
+    <div class="wrap">
+      <p class="tag">Getting started</p>
+      <h2 id="start-h">배포를 여는 순서</h2>
+      <ol class="steps">
+        <li><span class="num">STEP 1</span><h3>오리진 준비</h3><p>S3 버킷이나 사설 서브넷의 ALB를 준비합니다. 둘 다 공개하지 않아도 됩니다.</p></li>
+        <li><span class="num">STEP 2</span><h3>배포 생성</h3><p>오리진을 등록하고 S3에는 OAC를, ALB에는 VPC origin을 연결합니다.</p></li>
+        <li><span class="num">STEP 3</span><h3>캐시 동작 설정</h3><p>경로 패턴별로 캐시 정책, 오리진 요청 정책, 허용 메서드를 정합니다.</p></li>
+        <li><span class="num">STEP 4</span><h3>도메인 · 인증서</h3><p>대체 도메인 이름을 추가하고 us-east-1의 ACM 인증서를 연결합니다.</p></li>
+        <li><span class="num">STEP 5</span><h3>DNS 연결</h3><p>Route 53에서 배포를 가리키는 alias 레코드를 만들고 응답 헤더로 캐시 동작을 확인합니다.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="pricing" aria-labelledby="pricing-h">
+    <div class="wrap">
+      <p class="tag">Pricing</p>
+      <h2 id="pricing-h">비용 항목</h2>
+      <p class="lede">종량제에서는 인터넷으로 나가는 데이터 전송량과 요청 수가 비용의 대부분을 차지합니다. CDN, AWS WAF, DDoS 보호, Route 53 DNS 등을 월 정액으로 묶은 flat-rate 요금제를 대신 고를 수도 있습니다.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">CloudFront 과금 항목</caption>
+          <thead><tr><th scope="col">과금 항목</th><th scope="col">과금 기준</th><th scope="col">참고</th></tr></thead>
+          <tbody>
+          <tr><td class="row-h">인터넷 데이터 전송</td><td data-k="과금 기준">엣지에서 사용자에게 보낸 데이터 GB당, 지역별 단가 차등</td><td data-k="참고">프리 티어로 매월 1 TB가 무료입니다.</td></tr>
+          <tr><td class="row-h">오리진 방향 데이터 전송</td><td data-k="과금 기준">POST·PUT 요청 본문과 WebSocket·gRPC의 클라이언트→서버 트래픽 GB당</td><td data-k="참고">S3, VPC origin 등 AWS 오리진에서 CloudFront로 가져오는 전송은 무료입니다.</td></tr>
+          <tr><td class="row-h">HTTP · HTTPS 요청</td><td data-k="과금 기준">요청 1만 건당, HTTP와 HTTPS 단가 구분</td><td data-k="참고">프리 티어로 매월 1,000만 건이 무료입니다.</td></tr>
+          <tr><td class="row-h">Origin Shield</td><td data-k="과금 기준">Origin Shield를 지나는 요청 1만 건당, 지정한 리전 기준</td><td data-k="참고">캐시 미스로 Origin Shield까지 온 요청에만 붙습니다.</td></tr>
+          <tr><td class="row-h">무효화</td><td data-k="과금 기준">요청한 경로 또는 태그당</td><td data-k="참고">매월 처음 1,000개 경로·태그는 무료입니다.</td></tr>
+          <tr><td class="row-h">엣지 함수</td><td data-k="과금 기준">CloudFront Functions 호출 100만 건당, KeyValueStore 읽기 100만 건당. Lambda@Edge 요청 100만 건당과 GB-초 단위 실행 시간</td><td data-k="참고">Functions는 프리 티어로 월 200만 호출과 KeyValueStore 읽기 200만 건이 무료이고, Lambda@Edge에는 프리 티어가 없습니다.</td></tr>
+          <tr><td class="row-h">부가 기능</td><td data-k="과금 기준">실시간 로그 100만 줄당, 필드 수준 암호화 요청 1만 건당, 전용 IP 사용자 지정 SSL 인증서당 월, Anycast static IP의 IPv4 주소당 시간</td><td data-k="참고">Anycast static IP 목록의 IPv6 주소에는 요금이 없습니다.</td></tr>
+          <tr><td class="row-h">연관 서비스</td><td data-k="과금 기준">AWS WAF web ACL·규칙·요청, Shield Advanced, Route 53</td><td data-k="참고">각 서비스에서 따로 과금합니다. Shield Standard는 무료입니다.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="lede" style="font-size:14px">요금 단가는 리전과 사용량에 따라 다릅니다. 최신 단가는 <a href="https://aws.amazon.com/cloudfront/pricing/" target="_blank" rel="noopener">CloudFront 요금 페이지</a>에서 확인하세요.</p>
+    </div>
+  </section>
+
+  <section class="cta" aria-labelledby="cta-h">
+    <div class="wrap">
+      <p class="tag">Next step</p>
+      <h2 id="cta-h">오리진을 감추는 전송 구조를 함께 설계해 보세요</h2>
+      <p class="lede">콘텐츠 유형, 사용자 분포, 오리진 위치와 보안 요구사항을 정리해 오시면 캐시 정책과 오리진 보호 방식을 함께 검토합니다.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="https://aws.amazon.com/cloudfront/" target="_blank" rel="noopener">서비스 페이지 열기</a>
+        <a class="btn btn-ghost" href="https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Introduction.html" target="_blank" rel="noopener">개발자 안내서 읽기</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a href="../">← AWS 네트워킹 서비스 포트폴리오</a>
+    <span>Amazon CloudFront 소개 자료. 기능 지원 범위와 요금은 리전과 요금제에 따라 다르니 공식 문서를 확인하세요.</span>
+    <a href="https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/HowCloudFrontWorks.html" target="_blank" rel="noopener">CloudFront 동작 방식 문서</a>
+  </div>
+</footer>
+
+</body>
+</html>

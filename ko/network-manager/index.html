@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Network Manager 소개</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+body{margin:0}img{max-width:100%}[hidden]{display:none!important}
+
+/* Layout: a cross-connect work order. Cool steel paper, navy ink, Amazon orange as the one accent; section tags read like fiber labels. */
+:root{
+  --bg:#EEF1F4; --surface:#FFFFFF; --sunken:#E3E8ED;
+  --ink:#14202E; --ink-2:#44515F; --ink-3:#5A6672;
+  --line:#CDD5DD; --line-2:#B4BFCA;
+  --fiber:#FF9900;          /* Amazon orange — fills only */
+  --fiber-ink:#B35C00;      /* orange-derived, AA on light surfaces */
+  --fiber-soft:#FFF0D9;
+  --on-fiber:#14202E;
+  --trace:#2E7D9A;          /* secondary line color for diagram paths */
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --maxw:1120px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--fiber-ink);outline-offset:3px;border-radius:2px}
+.skip-link{position:absolute;left:16px;top:-60px;background:var(--fiber);color:var(--on-fiber);padding:8px 14px;font-weight:700;z-index:50;text-decoration:none}
+.skip-link:focus{top:12px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.wrap{max-width:var(--maxw);margin:0 auto;padding-inline:24px}
+section{padding-block:88px;border-top:1px solid var(--line)}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.25}
+h2{font-size:clamp(26px,3.4vw,36px);font-weight:700;letter-spacing:-.01em}
+h3{font-size:18px;font-weight:700}
+p{margin:0}
+.lede{color:var(--ink-2);max-width:62ch;margin-top:14px}
+.num{font-family:var(--display);font-variant-numeric:tabular-nums lining-nums}
+.mono{font-family:var(--mono)}
+
+/* fiber label: the section tag */
+.tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-bottom:14px}
+.tag::before{content:"";width:22px;height:8px;background:var(--fiber);border-radius:1px}
+
+/* nav */
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:60px}
+.brand{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.02em;text-decoration:none;text-transform:uppercase}
+.brand span{color:var(--fiber-ink)}
+.navlinks{display:flex;gap:22px;font-size:14px;align-items:center}
+.navlinks a{text-decoration:none;color:var(--ink-2)}
+.navlinks a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;font-weight:700;font-size:15px;text-decoration:none;border-radius:4px;border:1px solid transparent;transition:transform .15s ease,background .15s ease}
+.btn-primary{background:var(--fiber);color:var(--on-fiber)}
+.btn-primary:hover{transform:translateY(-1px)}
+.btn-ghost{border-color:var(--line-2);color:var(--ink)}
+.btn-ghost:hover{background:var(--sunken)}
+.navlinks .btn{min-height:38px;padding:0 14px;font-size:14px;color:var(--on-fiber)}
+
+/* hero */
+.hero{padding-block:72px 64px;border-top:0}
+.hero-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:56px;align-items:center}
+.eyebrow{font-family:var(--mono);font-size:13px;color:var(--fiber-ink);letter-spacing:.04em}
+.hero h1{font-size:clamp(34px,5vw,56px);font-weight:700;letter-spacing:-.02em;margin-top:16px}
+.hero h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--fiber) 62%,var(--fiber) 90%,transparent 90%);padding-inline:2px}
+.hero .lede{font-size:18px}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+
+/* hero visual: port faceplate */
+.faceplate{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px}
+.faceplate-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.ports{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+.port{border:1px solid var(--line);border-radius:4px;padding:14px 14px 12px;background:var(--sunken);display:flex;flex-direction:column;gap:2px}
+.port .num{font-size:40px;font-weight:600;line-height:1}
+.port .num small{font-size:18px;color:var(--ink-2);margin-left:2px}
+.port .optic{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+.port .led{width:8px;height:8px;border-radius:50%;background:var(--fiber);align-self:flex-end;margin-top:-6px;animation:blink 2.4s ease-in-out infinite}
+.port:nth-child(2) .led{animation-delay:.6s}.port:nth-child(3) .led{animation-delay:1.2s}.port:nth-child(4) .led{animation-delay:1.8s}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.faceplate-foot{margin-top:14px;font-size:13px;color:var(--ink-2)}
+
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:56px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.chip{padding:18px 20px;border-left:1px solid var(--line);min-width:0}
+.chip:first-child{border-left:0}
+.chip .num{font-size:34px;font-weight:600;line-height:1.1}
+.chip p{font-size:13.5px;color:var(--ink-2);margin-top:4px}
+
+/* value */
+.split{display:grid;grid-template-columns:1fr 1.4fr;gap:56px}
+.pillars{display:grid;gap:0;border-top:1px solid var(--line-2)}
+.pillar{display:grid;grid-template-columns:120px 1fr;gap:20px;padding-block:22px;border-bottom:1px solid var(--line)}
+.pillar .k{font-family:var(--display);font-size:22px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--fiber-ink)}
+.pillar p{color:var(--ink-2);margin-top:6px}
+
+/* stack (L1/L2/L3) */
+.stack{margin-top:40px;display:grid;gap:10px}
+.layer{display:grid;grid-template-columns:96px 1fr 1.2fr;gap:24px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px 24px}
+.layer .lv{font-family:var(--display);font-size:44px;font-weight:700;line-height:.9}
+.layer .lv small{display:block;font-family:var(--mono);font-size:11px;font-weight:400;color:var(--ink-3);letter-spacing:.06em;margin-top:8px;text-transform:uppercase}
+.layer p{color:var(--ink-2);margin-top:6px;font-size:15px}
+.specs{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+.specs code{font-family:var(--mono);font-size:12.5px;background:var(--sunken);border:1px solid var(--line);padding:3px 8px;border-radius:3px;color:var(--ink)}
+
+/* features */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:40px}
+.feature{background:var(--surface);padding:26px 24px;min-width:0}
+.feature .ft{font-family:var(--mono);font-size:11.5px;color:var(--fiber-ink);letter-spacing:.06em;text-transform:uppercase}
+.feature h3{margin-top:8px}
+.feature p{color:var(--ink-2);font-size:15px;margin-top:8px}
+
+/* table */
+.tbl-wrap{margin-top:36px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:14px 18px;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--sunken)}
+tbody tr:last-child td{border-bottom:0}
+td.row-h{font-weight:700;width:22%}
+td .num{font-size:18px;font-weight:600}
+
+/* architecture */
+.arch{margin-top:36px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px}
+.arch-scroll{overflow-x:auto}
+.arch svg{display:block;width:100%;min-width:860px;height:auto}
+.arch-hint{display:none;font-size:13px;color:var(--ink-3);margin-top:10px}
+svg .box{fill:var(--sunken);stroke:var(--line-2)}
+svg .zone{fill:none;stroke:var(--line-2);stroke-dasharray:4 4}
+svg .t{fill:var(--ink);font-family:var(--sans);font-size:14px;font-weight:700}
+svg .s{fill:var(--ink-3);font-family:var(--mono);font-size:11px}
+svg .z{fill:var(--ink-2);font-family:var(--mono);font-size:11px;letter-spacing:.08em}
+svg .fiber{stroke:var(--fiber);stroke-width:5;fill:none;stroke-linecap:round}
+svg .path{stroke:var(--trace);stroke-width:2;fill:none}
+svg .site{stroke:var(--fiber-ink);stroke-width:2;fill:none;stroke-dasharray:6 5}
+svg .lbl{fill:var(--trace);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .lbl2{fill:var(--fiber-ink);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .dot{fill:var(--fiber)}
+svg .ah-tr{fill:var(--trace)}
+svg .ah-fi{fill:var(--fiber)}
+svg .ah-fk{fill:var(--fiber-ink)}
+.legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--ink-2)}
+.legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--fiber)}
+.legend i.p{border-top:2px solid var(--trace)}
+.legend i.s{border-top:2px dashed var(--fiber-ink)}
+.legend i.dir{position:relative;width:26px}
+.legend i.dir::after{content:"";position:absolute;right:-3px;top:-7px;border-left:8px solid var(--fiber);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.legend i.p.dir::after{top:-6px;border-left-color:var(--trace)}
+.legend i.s.dir::after{top:-6px;border-left-color:var(--fiber-ink)}
+
+/* steps */
+.steps{list-style:none;padding:0;margin:40px 0 0;display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:4px solid var(--fiber)}
+.steps li{padding:20px 18px 0 0;min-width:0}
+.steps .num{font-size:15px;font-weight:600;color:var(--fiber-ink);letter-spacing:.06em}
+.steps h3{font-size:16px;margin-top:6px}
+.steps p{font-size:14px;color:var(--ink-2);margin-top:6px}
+
+/* resiliency */
+.res{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:36px}
+.res-card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:26px}
+.res-card .num{font-size:52px;font-weight:700;line-height:1}
+.res-card .num small{font-size:20px;color:var(--ink-2)}
+.res-card h3{margin-top:10px}
+.res-card p{color:var(--ink-2);font-size:15px;margin-top:6px}
+.res-card.max{border-color:var(--fiber);box-shadow:inset 0 4px 0 var(--fiber)}
+
+/* cta */
+.cta{text-align:center}
+.cta h2{max-width:22ch;margin:0 auto}
+.cta .lede{margin:14px auto 0}
+.cta .cta-row{justify-content:center}
+footer{border-top:1px solid var(--line);padding-block:28px;font-size:13px;color:var(--ink-3)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+
+@media (max-width:1024px){
+  .hero-grid,.split{grid-template-columns:1fr;gap:40px}
+  .features{grid-template-columns:repeat(2,1fr)}
+  .steps{grid-template-columns:repeat(2,1fr);border-top:0;gap:0 24px}
+  .steps li{border-top:4px solid var(--fiber);padding-bottom:24px}
+  .layer{grid-template-columns:80px 1fr}
+  .layer .specs{grid-column:2}
+  .chips{grid-template-columns:repeat(2,1fr)}
+  .chip:nth-child(3){border-left:0}
+  .chip:nth-child(n+3){border-top:1px solid var(--line)}
+}
+@media (max-width:640px){
+  .wrap{padding-inline:18px}
+  section{padding-block:60px}
+  .navlinks a:not(.btn){display:none}
+  .features,.res{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr}
+  .pillar{grid-template-columns:1fr;gap:0}
+  .layer{grid-template-columns:1fr;gap:12px}
+  .layer .specs{grid-column:auto}
+  .cta-row .btn{width:100%}
+  .arch-hint{display:block}
+  table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  table,tbody,tr,td{display:block;width:100%}
+  tr{border-bottom:1px solid var(--line);padding:14px 16px}
+  tbody tr:last-child{border-bottom:0}
+  td{border:0;padding:3px 0}
+  td.row-h{width:100%;font-size:16px;padding-bottom:6px}
+  td[data-k]::before{content:attr(data-k);display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+
+/* ---- service-specific ---- */
+/* Network Manager: hero topology tree + global network object model */
+.topo{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px;min-width:0}
+.topo-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.topo-head .live{display:inline-flex;align-items:center;gap:6px;color:var(--fiber-ink)}
+.topo-head .live::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--fiber);animation:blink 2.4s ease-in-out infinite}
+.tree{list-style:none;margin:16px 0 0;padding:0;font-size:14px}
+.tree ul{list-style:none;margin:0;padding:0 0 0 22px;border-left:2px solid var(--line-2);margin-left:9px}
+.tree li{position:relative;min-width:0}
+.tree ul > li::before{content:"";position:absolute;left:-22px;top:19px;width:16px;height:2px;background:var(--line-2)}
+.node{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--sunken);border:1px solid var(--line);border-radius:4px;padding:8px 12px;margin-top:8px;min-width:0}
+.node b{font-weight:700;white-space:nowrap}
+.node .id{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.node .st{flex:none;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:3px;border:1px solid var(--line-2);color:var(--ink-2);background:var(--surface)}
+.node .st.up{background:var(--fiber);border-color:var(--fiber);color:var(--on-fiber);font-weight:500}
+.node.root{background:transparent;border-style:dashed;border-color:var(--line-2)}
+.node .l{display:flex;align-items:baseline;gap:10px;min-width:0}
+.topo-foot{margin-top:14px;font-size:13px;color:var(--ink-2)}
+
+.anatomy{margin-top:40px;display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.key{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px 22px;min-width:0;display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:baseline}
+.key code{font-family:var(--mono);font-size:13.5px;font-weight:500;color:var(--ink);overflow-wrap:anywhere}
+.key .req{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);justify-self:end}
+.key .req.r{color:var(--fiber-ink)}
+.key p{grid-column:1 / -1;color:var(--ink-2);font-size:15px;margin-top:4px}
+.actions{margin-top:28px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.actions span.lbl{font-size:14px;color:var(--ink-2);margin-right:4px}
+.actions code{font-family:var(--mono);font-size:12.5px;background:var(--sunken);border:1px solid var(--line);padding:3px 8px;border-radius:3px;color:var(--ink)}
+.note{margin-top:28px;background:var(--fiber-soft);border-left:4px solid var(--fiber);border-radius:4px;padding:16px 20px;font-size:15px;color:var(--ink)}
+.note a{color:var(--fiber-ink)}
+@media (max-width:640px){
+  .topo{padding:16px}
+  .anatomy{grid-template-columns:1fr}
+  .key{padding:16px 18px}
+  .chip .num{font-size:24px}
+  .node .id{display:none}
+}
+
+/* nav: keep links on one line, show only CTA below 960px */
+.brand,.navlinks a{white-space:nowrap}
+@media (max-width:960px){.navlinks a:not(.btn){display:none}}
+
+/* Korean line breaking: never split a word mid-syllable */
+h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
+</style>
+<link rel="stylesheet" href="../../assets/site.css?v=25">
+<script src="../../assets/site.js?v=25"></script>
+</head>
+<body>
+
+
+<a class="skip-link" href="#main">본문으로 건너뛰기</a>
+
+<nav aria-label="주요 메뉴">
+  <div class="wrap">
+    <a class="brand" href="#top">AWS <span>Network Manager</span></a>
+    <div class="navlinks">
+      <a href="../">서비스 포트폴리오</a>
+      <a href="#model">구성 요소</a>
+      <a href="#features">주요 기능</a>
+      <a href="#ops">운영 질문</a>
+      <a href="#arch">아키텍처</a>
+      <a href="#pricing">비용</a>
+      <a class="btn btn-primary" href="#start">시작하기</a>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+  <header class="hero" id="top">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">AWS Network Manager · 글로벌 네트워크 운영 콘솔</p>
+          <h1>리전과 계정에 흩어진 네트워크를 <em>한 화면</em>에서 보세요</h1>
+          <p class="lede">AWS Network Manager는 여러 리전의 Transit Gateway와 Cloud WAN 코어 네트워크, 온프레미스 사이트를 하나의 global network로 묶습니다. 토폴로지, 이벤트, 경로 분석, AWS 백본 지연 시간을 한 곳에서 확인합니다.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="#model">구성 요소 보기</a>
+            <a class="btn btn-ghost" href="#arch">아키텍처 보기</a>
+          </div>
+        </div>
+
+        <div class="topo" aria-label="Network Manager 토폴로지 트리 예시">
+          <div class="topo-head"><span>topology tree · home us-west-2</span><span class="live">MONITORING</span></div>
+          <ul class="tree">
+            <li><div class="node root"><span class="l"><b>Global network</b><span class="id">global-network-0f3a</span></span><span class="st">container</span></div>
+              <ul>
+                <li><div class="node"><span class="l"><b>TGW 서울</b><span class="id">ap-northeast-2</span></span><span class="st up">registered</span></div>
+                  <ul>
+                    <li><div class="node"><span class="l"><b>VPN</b><span class="id">cgw ↔ device dc-rtr-01</span></span><span class="st up">up</span></div></li>
+                  </ul>
+                </li>
+                <li><div class="node"><span class="l"><b>TGW 도쿄</b><span class="id">ap-northeast-1</span></span><span class="st up">registered</span></div></li>
+                <li><div class="node"><span class="l"><b>Core network</b><span class="id">Cloud WAN</span></span><span class="st">policy v7</span></div></li>
+                <li><div class="node"><span class="l"><b>Site 판교 DC</b><span class="id">device · link ISP-A</span></span><span class="st">on-prem</span></div></li>
+              </ul>
+            </li>
+          </ul>
+          <p class="topo-foot">두 리전의 Transit Gateway, Cloud WAN 코어 네트워크, 온프레미스 사이트가 하나의 global network 아래에 있습니다.</p>
+        </div>
+      </div>
+
+      <div class="chips" role="list">
+        <div class="chip" role="listitem"><span class="num">us-west-2</span><p>토폴로지·이벤트 데이터를 모으는 home region</p></div>
+        <div class="chip" role="listitem"><span class="num">추가 요금 없음</span><p>Transit Gateway global network 관리 기능</p></div>
+        <div class="chip" role="listitem"><span class="num">10</span><p>Organizations에 등록할 수 있는 위임 관리자 계정 수</p></div>
+        <div class="chip" role="listitem"><span class="num">p50 · 5분</span><p>Infrastructure Performance CloudWatch 지표의 통계와 집계 주기</p></div>
+      </div>
+    </div>
+  </header>
+
+  <section id="why" aria-labelledby="why-h">
+    <div class="wrap split">
+      <div>
+        <p class="tag">Why Network Manager</p>
+        <h2 id="why-h">네트워크가 커질수록 "지금 어떤 상태인가"에 답하기 어려워집니다</h2>
+        <p class="lede">리전마다 Transit Gateway가 있고, 계정마다 VPC가 붙고, 데이터센터와 지사가 VPN과 Direct Connect로 들어오면 상태 확인이 리전별 콘솔로 흩어집니다. Network Manager는 이 자원을 하나의 global network에 등록해 같은 화면과 같은 이벤트 스트림으로 봅니다.</p>
+      </div>
+      <div class="pillars">
+        <div class="pillar"><span class="k">See</span><div><h3>한 곳에서 보는 토폴로지</h3><p>등록한 Transit Gateway와 attachment, VPN, Connect peer, 온프레미스 사이트를 토폴로지 트리와 지도로 그립니다. 리전과 계정을 넘나들 필요가 없습니다.</p></div></div>
+        <div class="pillar"><span class="k">Know</span><div><h3>변경을 이벤트로 받기</h3><p>토폴로지 변경, 경로 변경, 터널과 BGP 상태 변경을 EventBridge 이벤트로 받습니다. 알림과 자동 대응을 기존 이벤트 파이프라인에 붙입니다.</p></div></div>
+        <div class="pillar"><span class="k">Verify</span><div><h3>경로와 지연 시간 확인</h3><p>Route Analyzer로 Transit Gateway 라우팅 테이블의 경로를 따라가고, Infrastructure Performance로 리전과 AZ 사이 AWS 네트워크 지연 시간을 확인합니다.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="model" aria-labelledby="model-h">
+    <div class="wrap">
+      <p class="tag">Global network objects</p>
+      <h2 id="model-h">Global network를 이루는 구성 요소</h2>
+      <p class="lede">global network는 네트워크 객체를 담는 최상위 컨테이너입니다. AWS 쪽은 Transit Gateway를 등록하거나 Cloud WAN 코어 네트워크를 만들어 채우고, 온프레미스 쪽은 site, device, link로 모델링합니다.</p>
+      <div class="anatomy">
+        <div class="key"><code>Global network</code><span class="req r">container</span><p>하나의 사설 네트워크를 나타내는 최상위 객체입니다. Transit Gateway와 Cloud WAN 코어 네트워크를 함께 담을 수 있습니다.</p></div>
+        <div class="key"><code>Transit Gateway registration</code><span class="req r">AWS</span><p>여러 리전, 여러 계정의 Transit Gateway를 등록합니다. 등록한 뒤부터 토폴로지와 이벤트가 수집됩니다.</p></div>
+        <div class="key"><code>Core network</code><span class="req r">AWS</span><p>Cloud WAN으로 만드는 글로벌 코어 네트워크입니다. 정책, 세그먼트, attachment를 같은 콘솔에서 관리합니다.</p></div>
+        <div class="key"><code>Site</code><span class="req">on-prem</span><p>지사, 사무실, 매장, 캠퍼스, 데이터센터 같은 물리적 장소입니다. 주소나 좌표를 넣으면 지도에 표시됩니다.</p></div>
+        <div class="key"><code>Device</code><span class="req">on-prem</span><p>사이트의 물리 또는 가상 장비입니다. 라우터, 방화벽, SD-WAN 장비, 다른 클라우드의 가상 어플라이언스도 포함합니다.</p></div>
+        <div class="key"><code>Link</code><span class="req">on-prem</span><p>사이트의 인터넷 회선 하나입니다. 통신사, 회선 유형, 대역폭을 기록합니다.</p></div>
+        <div class="key"><code>Connection</code><span class="req">on-prem</span><p>두 device 사이의 연결입니다. 온프레미스 장비끼리, 또는 온프레미스 장비와 VPC 안 가상 어플라이언스 사이를 표현합니다.</p></div>
+        <div class="key"><code>Association</code><span class="req">mapping</span><p>Site-to-Site VPN의 customer gateway나 Transit Gateway Connect peer를 device(필요하면 link까지)에 연결해 AWS 자원과 온프레미스 객체를 잇습니다.</p></div>
+      </div>
+      <p class="note">이름이 여럿이라 헷갈릴 수 있습니다. 콘솔 이름은 <b>Network Manager</b>이고, 그 안에서 Transit Gateway를 등록해 쓰는 부분을 문서에서는 <b>AWS Global Networks for Transit Gateways</b>, 코어 네트워크를 만드는 부분을 <a href="../cloud-wan/">AWS Cloud WAN</a>이라고 부릅니다. 둘 다 같은 global network 위에서 동작합니다.</p>
+    </div>
+  </section>
+
+  <section id="features" aria-labelledby="features-h">
+    <div class="wrap">
+      <p class="tag">Features</p>
+      <h2 id="features-h">주요 기능</h2>
+      <div class="features">
+        <article class="feature"><p class="ft">Topology</p><h3>토폴로지 트리 · 지도</h3><p>global network의 자원 관계를 트리와 토폴로지 그래프로 보여 줍니다. 사이트 위치는 Amazon Location Service 기반 지도에 표시됩니다.</p></article>
+        <article class="feature"><p class="ft">Dashboard</p><h3>Transit Gateway 네트워크 대시보드</h3><p>등록한 Transit Gateway와 attachment의 트래픽, 패킷 drop 같은 CloudWatch 지표와 VPN 상태를 global network 단위로 모아 봅니다.</p></article>
+        <article class="feature"><p class="ft">Events</p><h3>EventBridge 이벤트</h3><p><span class="mono">aws.networkmanager</span> 소스로 Topology Change, Routing Update, Status Update 이벤트를 보냅니다. Cloud WAN을 쓰면 세그먼트와 정책 이벤트도 옵니다.</p></article>
+        <article class="feature"><p class="ft">Route Analyzer</p><h3>경로 분석</h3><p>출발·도착 Transit Gateway attachment와 IP를 넣으면 라우팅 테이블을 따라 경로를 분석합니다. 리턴 경로와 VPC 안 middlebox 경유도 포함할 수 있습니다.</p></article>
+        <article class="feature"><p class="ft">Performance</p><h3>Infrastructure Performance</h3><p>리전 간, AZ 간, AZ 내부의 AWS 네트워크 지연 시간을 거의 실시간과 과거 기간으로 보여 줍니다. CloudWatch 지표로 구독할 수 있습니다.</p></article>
+        <article class="feature"><p class="ft">Multi-account</p><h3>Organizations 연동</h3><p>trusted access를 켜고 위임 관리자 계정을 등록하면 다른 멤버 계정의 Transit Gateway를 하나의 global network에 등록하고 모니터링합니다.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="ops" aria-labelledby="ops-h">
+    <div class="wrap">
+      <p class="tag">Ops questions</p>
+      <h2 id="ops-h">운영 질문별로 쓰는 기능</h2>
+      <p class="lede">Network Manager는 데이터 경로에 들어가지 않습니다. 이미 있는 Transit Gateway와 Cloud WAN의 설정과 상태를 모아 보여 주는 관제 계층입니다. 질문에 따라 쓰는 기능과 보는 범위가 다릅니다.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">운영 질문별 Network Manager 기능과 분석 범위</caption>
+          <thead><tr><th scope="col">운영 질문</th><th scope="col">쓰는 기능</th><th scope="col">보는 범위</th><th scope="col">한계 · 보완</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="row-h">무엇이 어디에 연결돼 있나?</td>
+              <td data-k="쓰는 기능">토폴로지 트리 · 토폴로지 그래프 · 지도</td>
+              <td data-k="보는 범위">등록한 Transit Gateway, attachment, VPN, Connect peer, site · device · link</td>
+              <td data-k="한계 · 보완">온프레미스 객체는 직접 등록해야 지도에 나타납니다.</td>
+            </tr>
+            <tr>
+              <td class="row-h">방금 무엇이 바뀌었나?</td>
+              <td data-k="쓰는 기능">이벤트 (EventBridge)</td>
+              <td data-k="보는 범위">attachment 생성·삭제, 경로 추가·삭제, VPN 터널과 BGP 상태 변경</td>
+              <td data-k="한계 · 보완">등록 전에 일어난 변경은 기록되지 않습니다. 전달은 best effort입니다.</td>
+            </tr>
+            <tr>
+              <td class="row-h">A에서 B로 경로가 있나?</td>
+              <td data-k="쓰는 기능">Route Analyzer</td>
+              <td data-k="보는 범위">Transit Gateway 라우팅 테이블 (IPv4 · IPv6), 리턴 경로</td>
+              <td data-k="한계 · 보완">VPC 라우팅 테이블, 보안 그룹, NACL은 보지 않습니다. <a href="../reachability-analyzer/">Reachability Analyzer</a>와 <a href="../vpc-flow-logs/">VPC Flow Logs</a>로 보완합니다.</td>
+            </tr>
+            <tr>
+              <td class="row-h">AWS 네트워크가 느린가?</td>
+              <td data-k="쓰는 기능">Infrastructure Performance</td>
+              <td data-k="보는 범위">리전 간, AZ 간, AZ 내부의 AWS 백본 지연 시간 (p50)</td>
+              <td data-k="한계 · 보완">Transit Gateway, NAT gateway, ELB 같은 VPC 자원을 거치는 경로는 포함하지 않습니다. 저하 원인은 알려 주지 않습니다.</td>
+            </tr>
+            <tr>
+              <td class="row-h">트래픽이 얼마나 흐르나?</td>
+              <td data-k="쓰는 기능">대시보드 · CloudWatch 지표</td>
+              <td data-k="보는 범위">Transit Gateway와 attachment의 bytes · packets · drop</td>
+              <td data-k="한계 · 보완">흐름 단위 분석은 Transit Gateway Flow Logs를 씁니다.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="arch" aria-labelledby="arch-h">
+    <div class="wrap">
+      <p class="tag">Reference architecture</p>
+      <h2 id="arch-h">두 리전과 온프레미스를 묶은 global network</h2>
+      <p class="lede">서울과 도쿄의 Transit Gateway를 global network에 등록하고, 데이터센터와 지사를 site로 모델링합니다. 토폴로지와 이벤트 데이터는 home region인 us-west-2로 모이고, 이벤트는 EventBridge를 거쳐 CloudWatch Logs와 알림으로 이어집니다.</p>
+      <figure class="arch">
+        <div class="arch-scroll">
+          <svg viewBox="0 0 980 440" role="img" aria-labelledby="arch-title arch-desc">
+            <title id="arch-title">Network Manager 레퍼런스 아키텍처</title>
+            <desc id="arch-desc">온프레미스 데이터센터는 Site-to-Site VPN으로 서울 Transit Gateway에, 지사의 SD-WAN 장비는 Connect로 도쿄 Transit Gateway에 연결됩니다. 두 Transit Gateway는 서로 피어링되고 각각 VPC가 붙어 있으며, 도쿄 Transit Gateway는 Cloud WAN 코어 네트워크와도 피어링됩니다. 이 자원 전체가 global network에 등록되어 있고, 토폴로지와 이벤트 데이터는 us-west-2 home region의 Network Manager로 모인 뒤 EventBridge와 CloudWatch Logs로 전달됩니다.</desc>
+            <defs>
+              <marker id="ar-network-manager-tr" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-tr" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-network-manager-fk" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-fk" d="M0 0 L10 5 L0 10 z"/></marker>
+            </defs>
+            <rect class="zone" x="10" y="40" width="176" height="380" rx="6"/>
+            <image href="../../assets/aws-icons/Corporate-data-center_32.svg" x="10" y="40" width="22" height="22"/>
+            <text class="z" x="40" y="56">ON-PREMISES</text>
+            <rect class="zone" x="198" y="40" width="772" height="380" rx="6"/>
+            <image href="../../assets/aws-icons/AWS-Cloud_32.svg" x="198" y="40" width="22" height="22"/>
+            <text class="z" x="228" y="56">AWS</text>
+            <rect class="zone" x="212" y="74" width="462" height="330" rx="6"/>
+            <text class="z" x="226" y="96">GLOBAL NETWORK</text>
+            <rect class="zone" x="694" y="74" width="262" height="330" rx="6"/>
+            <image href="../../assets/aws-icons/Region_32.svg" x="694" y="74" width="22" height="22"/>
+            <text class="z" x="724" y="90">HOME REGION · us-west-2</text>
+
+            <rect class="box" x="22" y="100" width="152" height="70" rx="4"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Servers_48_Light.svg" x="28" y="112" width="24" height="24"/>
+            <text class="t" x="58" y="124">Site 판교 DC</text><text class="s" x="58" y="143">device dc-rtr-01</text><text class="s" x="58" y="159">link ISP-A</text>
+            <rect class="box" x="22" y="300" width="152" height="70" rx="4"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Office-building_48_Light.svg" x="28" y="312" width="24" height="24"/>
+            <text class="t" x="58" y="324">Site 부산 지사</text><text class="s" x="58" y="343">device sdwan-01</text><text class="s" x="58" y="359">link ISP-B</text>
+
+            <rect class="box" x="250" y="116" width="150" height="60" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_AWS-Transit-Gateway_48.svg" x="258" y="132" width="28" height="28"/>
+            <text class="t" x="294" y="142">TGW 서울</text><text class="s" x="294" y="162">ap-northeast-2</text>
+            <rect class="box" x="250" y="306" width="150" height="60" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_AWS-Transit-Gateway_48.svg" x="258" y="322" width="28" height="28"/>
+            <text class="t" x="294" y="332">TGW 도쿄</text><text class="s" x="294" y="352">ap-northeast-1</text>
+            <path class="fiber" d="M325 176 V306"/>
+            <text class="lbl2" x="334" y="246">peering</text>
+
+            <rect class="box" x="450" y="106" width="200" height="50" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-VPC_Virtual-private-cloud-VPC_48.svg" x="457" y="119" width="24" height="24"/>
+            <text class="t" x="488" y="128">VPC prod</text><text class="s" x="488" y="145">계정 A · VPC attachment</text>
+            <rect class="box" x="450" y="170" width="200" height="50" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-VPC_Virtual-private-cloud-VPC_48.svg" x="457" y="183" width="24" height="24"/>
+            <text class="t" x="488" y="192">VPC shared</text><text class="s" x="488" y="209">계정 B · VPC attachment</text>
+            <rect class="box" x="450" y="250" width="200" height="50" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_AWS-Cloud-WAN_48.svg" x="457" y="263" width="24" height="24"/>
+            <text class="t" x="488" y="272">Core network</text><text class="s" x="488" y="289">Cloud WAN · TGW peering</text>
+            <rect class="box" x="450" y="330" width="200" height="50" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-VPC_Virtual-private-cloud-VPC_48.svg" x="457" y="343" width="24" height="24"/>
+            <text class="t" x="488" y="352">VPC dev</text><text class="s" x="488" y="369">계정 C · VPC attachment</text>
+
+            <path class="path" d="M174 135 H250"/>
+            <text class="lbl" x="182" y="127">VPN</text>
+            <path class="path" d="M174 335 H250"/>
+            <text class="lbl" x="182" y="327">Connect</text>
+            <path class="path" d="M400 136 C428 136 428 131 450 131"/>
+            <path class="path" d="M400 156 C428 156 428 195 450 195"/>
+            <path class="path" d="M400 326 C428 326 428 275 450 275"/>
+            <path class="path" d="M400 346 C428 346 428 355 450 355"/>
+
+            <rect class="box" x="714" y="110" width="222" height="60" rx="4"/>
+            <image href="../../assets/icons/network-manager.svg" x="722" y="126" width="28" height="28"/>
+            <text class="t" x="758" y="136">Network Manager</text><text class="s" x="758" y="156">topology · Route Analyzer</text>
+            <rect class="box" x="714" y="210" width="222" height="60" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_Amazon-EventBridge_48.svg" x="722" y="226" width="28" height="28"/>
+            <text class="t" x="758" y="236">EventBridge</text><text class="s" x="758" y="256">source aws.networkmanager</text>
+            <rect class="box" x="714" y="310" width="222" height="60" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-CloudWatch_Logs_48.svg" x="722" y="326" width="28" height="28"/>
+            <text class="t" x="758" y="336">CloudWatch Logs · SNS</text><text class="s" x="758" y="356">Logs Insights · 알림</text>
+
+            <path class="site" d="M674 140 H712" marker-end="url(#ar-network-manager-fk)"/>
+            <path class="path" d="M825 170 V208" marker-end="url(#ar-network-manager-tr)"/>
+            <path class="path" d="M825 270 V308" marker-end="url(#ar-network-manager-tr)"/>
+            <text class="lbl2" x="834" y="194">events</text>
+            <text class="lbl2" x="834" y="294">rule → target</text>
+            <text class="lbl2" x="558" y="96">topology · events</text>
+          </svg>
+        </div>
+        <figcaption class="legend">
+          <span><i></i>Transit Gateway 피어링</span>
+          <span><i class="p"></i>attachment (VPN · Connect · VPC)</span>
+          <span><i class="p dir"></i>이벤트 전달</span>
+          <span><i class="s dir"></i>등록 자원의 메타데이터 수집 (→ home region)</span>
+        </figcaption>
+        <p class="arch-hint">좁은 화면에서는 다이어그램을 좌우로 밀어서 보세요.</p>
+      </figure>
+    </div>
+  </section>
+
+  <section id="start" aria-labelledby="start-h">
+    <div class="wrap">
+      <p class="tag">Getting started</p>
+      <h2 id="start-h">Global network를 여는 순서</h2>
+      <ol class="steps">
+        <li><span class="num">STEP 1</span><h3>Global network 생성</h3><p>Network Manager 콘솔에서 global network를 만듭니다. 데이터는 us-west-2에 모입니다.</p></li>
+        <li><span class="num">STEP 2</span><h3>멀티 계정 설정</h3><p>Organizations trusted access를 켜고 위임 관리자를 등록합니다. 필요한 역할은 StackSets로 배포됩니다.</p></li>
+        <li><span class="num">STEP 3</span><h3>Transit Gateway 등록</h3><p>리전과 계정의 Transit Gateway를 등록합니다. Cloud WAN을 쓰면 코어 네트워크를 만듭니다.</p></li>
+        <li><span class="num">STEP 4</span><h3>온프레미스 모델링</h3><p>site, device, link를 만들고 customer gateway와 Connect peer를 device에 연결합니다.</p></li>
+        <li><span class="num">STEP 5</span><h3>이벤트 · 지표 연결</h3><p>CloudWatch Logs Insights 온보딩을 하고 EventBridge 규칙과 지연 시간 구독을 설정합니다.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="pricing" aria-labelledby="pricing-h">
+    <div class="wrap">
+      <p class="tag">Pricing</p>
+      <h2 id="pricing-h">비용 항목</h2>
+      <p class="lede">Transit Gateway를 global network로 관리하는 기능에는 추가 요금이 없습니다. 비용은 관리 대상 네트워크 자원과, 이벤트와 지표를 보관하는 CloudWatch 같은 연계 서비스에서 생깁니다.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">AWS Network Manager 사용 시 과금 항목</caption>
+          <thead><tr><th scope="col">항목</th><th scope="col">과금 기준</th><th scope="col">참고</th></tr></thead>
+          <tbody>
+          <tr><td class="row-h">Network Manager 기능</td><td data-k="과금 기준">추가 요금 없음</td><td data-k="참고">토폴로지, 대시보드, 이벤트, Route Analyzer, Infrastructure Performance 조회가 포함됩니다.</td></tr>
+          <tr><td class="row-h">Transit Gateway</td><td data-k="과금 기준">attachment 시간과 데이터 처리 GB</td><td data-k="참고">등록 여부와 무관하게 <a href="../transit-gateway/">Transit Gateway</a> 표준 요금이 붙습니다.</td></tr>
+          <tr><td class="row-h">Cloud WAN</td><td data-k="과금 기준">코어 네트워크 엣지 시간, attachment 시간, 데이터 처리 GB</td><td data-k="참고">Network Manager에서 구성하지만 <a href="../cloud-wan/#pricing">Cloud WAN 요금</a>으로 따로 청구됩니다.</td></tr>
+          <tr><td class="row-h">CloudWatch</td><td data-k="과금 기준">Logs 수집·보관 GB, 지표 수, 알람 수</td><td data-k="참고">이벤트 로그 그룹(us-west-2)과 Infrastructure Performance 구독 지표가 해당합니다. 구독한 리전·AZ 쌍마다 지표가 하나씩 생깁니다.</td></tr>
+          <tr><td class="row-h">EventBridge · 알림 대상</td><td data-k="과금 기준">규칙 대상으로 쓰는 서비스의 사용량</td><td data-k="참고">SNS, Lambda, Step Functions 같은 대상 서비스 요금이 각각 붙습니다.</td></tr>
+          <tr><td class="row-h">VPN · Direct Connect 회선</td><td data-k="과금 기준">연결 시간, 포트 시간, 데이터 전송</td><td data-k="참고"><a href="../site-to-site-vpn/">Site-to-Site VPN</a>과 <a href="../direct-connect/">Direct Connect</a> 요금으로 청구됩니다.</td></tr>
+          <tr><td class="row-h">AWS PrivateLink</td><td data-k="과금 기준">interface endpoint 시간과 처리 GB</td><td data-k="참고">VPC에서 Network Manager API를 사설로 호출할 때만 해당합니다. 현재 us-west-2와 us-gov-west-1에서 듀얼스택 엔드포인트로만 지원합니다.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="lede" style="font-size:14px">요금 단가는 리전과 사용량에 따라 다릅니다. 최신 단가는 <a href="https://aws.amazon.com/transit-gateway/pricing/" target="_blank" rel="noopener">Transit Gateway 요금 페이지</a>와 <a href="https://aws.amazon.com/cloudwatch/pricing/" target="_blank" rel="noopener">CloudWatch 요금 페이지</a>에서 확인하세요.</p>
+    </div>
+  </section>
+
+  <section class="cta" aria-labelledby="cta-h">
+    <div class="wrap">
+      <p class="tag">Next step</p>
+      <h2 id="cta-h">우리 네트워크의 관제 화면부터 함께 그려 보세요</h2>
+      <p class="lede">운영 리전과 계정 구조, Transit Gateway 목록, 온프레미스 사이트와 회선 정보를 정리해 오시면 global network 등록 범위와 이벤트 알림 설계를 함께 검토합니다.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="https://console.aws.amazon.com/networkmanager/home/" target="_blank" rel="noopener">Network Manager 콘솔 열기</a>
+        <a class="btn btn-ghost" href="https://docs.aws.amazon.com/network-manager/latest/tgwnm/what-are-global-networks.html" target="_blank" rel="noopener">사용 설명서 읽기</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a href="../">← AWS 네트워킹 서비스 포트폴리오</a>
+    <span>AWS Network Manager 소개 자료. 지원 리전, 이벤트 유형, 기능 범위는 바뀔 수 있으니 공식 문서를 확인하세요.</span>
+    <a href="https://docs.aws.amazon.com/network-manager/latest/infrastructure-performance/what-is-nmip.html" target="_blank" rel="noopener">Infrastructure Performance 문서</a>
+  </div>
+</footer>
+
+</body>
+</html>

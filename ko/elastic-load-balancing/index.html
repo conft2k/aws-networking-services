@@ -1,0 +1,1069 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Elastic Load Balancing 소개</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+body{margin:0}img{max-width:100%}[hidden]{display:none!important}
+
+/* Layout: a cross-connect work order. Cool steel paper, navy ink, Amazon orange as the one accent; section tags read like fiber labels. */
+:root{
+  --bg:#EEF1F4; --surface:#FFFFFF; --sunken:#E3E8ED;
+  --ink:#14202E; --ink-2:#44515F; --ink-3:#5A6672;
+  --line:#CDD5DD; --line-2:#B4BFCA;
+  --fiber:#FF9900;          /* Amazon orange — fills only */
+  --fiber-ink:#B35C00;      /* orange-derived, AA on light surfaces */
+  --fiber-soft:#FFF0D9;
+  --on-fiber:#14202E;
+  --trace:#2E7D9A;          /* secondary line color for diagram paths */
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --maxw:1120px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--fiber-ink);outline-offset:3px;border-radius:2px}
+.skip-link{position:absolute;left:16px;top:-60px;background:var(--fiber);color:var(--on-fiber);padding:8px 14px;font-weight:700;z-index:50;text-decoration:none}
+.skip-link:focus{top:12px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.wrap{max-width:var(--maxw);margin:0 auto;padding-inline:24px}
+section{padding-block:88px;border-top:1px solid var(--line)}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.25}
+h2{font-size:clamp(26px,3.4vw,36px);font-weight:700;letter-spacing:-.01em}
+h3{font-size:18px;font-weight:700}
+p{margin:0}
+.lede{color:var(--ink-2);max-width:62ch;margin-top:14px}
+.num{font-family:var(--display);font-variant-numeric:tabular-nums lining-nums}
+.mono{font-family:var(--mono)}
+
+/* fiber label: the section tag */
+.tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-bottom:14px}
+.tag::before{content:"";width:22px;height:8px;background:var(--fiber);border-radius:1px}
+
+/* nav */
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:60px}
+.brand{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.02em;text-decoration:none;text-transform:uppercase}
+.brand span{color:var(--fiber-ink)}
+.navlinks{display:flex;gap:22px;font-size:14px;align-items:center}
+.navlinks a{text-decoration:none;color:var(--ink-2)}
+.navlinks a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;font-weight:700;font-size:15px;text-decoration:none;border-radius:4px;border:1px solid transparent;transition:transform .15s ease,background .15s ease}
+.btn-primary{background:var(--fiber);color:var(--on-fiber)}
+.btn-primary:hover{transform:translateY(-1px)}
+.btn-ghost{border-color:var(--line-2);color:var(--ink)}
+.btn-ghost:hover{background:var(--sunken)}
+.navlinks .btn{min-height:38px;padding:0 14px;font-size:14px;color:var(--on-fiber)}
+
+/* hero */
+.hero{padding-block:72px 64px;border-top:0}
+.hero-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:56px;align-items:center}
+.eyebrow{font-family:var(--mono);font-size:13px;color:var(--fiber-ink);letter-spacing:.04em}
+.hero h1{font-size:clamp(34px,5vw,56px);font-weight:700;letter-spacing:-.02em;margin-top:16px}
+.hero h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--fiber) 62%,var(--fiber) 90%,transparent 90%);padding-inline:2px}
+.hero .lede{font-size:18px}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+
+/* hero visual: port faceplate */
+.faceplate{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px}
+.faceplate-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.ports{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+.port{border:1px solid var(--line);border-radius:4px;padding:14px 14px 12px;background:var(--sunken);display:flex;flex-direction:column;gap:2px}
+.port .num{font-size:40px;font-weight:600;line-height:1}
+.port .num small{font-size:18px;color:var(--ink-2);margin-left:2px}
+.port .optic{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+.port .led{width:8px;height:8px;border-radius:50%;background:var(--fiber);align-self:flex-end;margin-top:-6px;animation:blink 2.4s ease-in-out infinite}
+.port:nth-child(2) .led{animation-delay:.6s}.port:nth-child(3) .led{animation-delay:1.2s}.port:nth-child(4) .led{animation-delay:1.8s}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.faceplate-foot{margin-top:14px;font-size:13px;color:var(--ink-2)}
+
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:56px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.chip{padding:18px 20px;border-left:1px solid var(--line);min-width:0}
+.chip:first-child{border-left:0}
+.chip .num{font-size:34px;font-weight:600;line-height:1.1}
+.chip p{font-size:13.5px;color:var(--ink-2);margin-top:4px}
+
+/* value */
+.split{display:grid;grid-template-columns:1fr 1.4fr;gap:56px}
+.pillars{display:grid;gap:0;border-top:1px solid var(--line-2)}
+.pillar{display:grid;grid-template-columns:120px 1fr;gap:20px;padding-block:22px;border-bottom:1px solid var(--line)}
+.pillar .k{font-family:var(--display);font-size:22px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--fiber-ink)}
+.pillar p{color:var(--ink-2);margin-top:6px}
+
+/* stack (L1/L2/L3) */
+.stack{margin-top:40px;display:grid;gap:10px}
+.layer{display:grid;grid-template-columns:96px 1fr 1.2fr;gap:24px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px 24px}
+.layer .lv{font-family:var(--display);font-size:44px;font-weight:700;line-height:.9}
+.layer .lv small{display:block;font-family:var(--mono);font-size:11px;font-weight:400;color:var(--ink-3);letter-spacing:.06em;margin-top:8px;text-transform:uppercase}
+.layer p{color:var(--ink-2);margin-top:6px;font-size:15px}
+.specs{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+.specs code{font-family:var(--mono);font-size:12.5px;background:var(--sunken);border:1px solid var(--line);padding:3px 8px;border-radius:3px;color:var(--ink)}
+
+/* features */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:40px}
+.feature{background:var(--surface);padding:26px 24px;min-width:0}
+.feature .ft{font-family:var(--mono);font-size:11.5px;color:var(--fiber-ink);letter-spacing:.06em;text-transform:uppercase}
+.feature h3{margin-top:8px}
+.feature p{color:var(--ink-2);font-size:15px;margin-top:8px}
+
+/* table */
+.tbl-wrap{margin-top:36px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:14px 18px;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--sunken)}
+tbody tr:last-child td{border-bottom:0}
+td.row-h{font-weight:700;width:22%}
+td .num{font-size:18px;font-weight:600}
+
+/* architecture */
+.arch{margin-top:36px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px}
+.arch-scroll{overflow-x:auto}
+.arch svg{display:block;width:100%;min-width:860px;height:auto}
+.arch-hint{display:none;font-size:13px;color:var(--ink-3);margin-top:10px}
+svg .box{fill:var(--sunken);stroke:var(--line-2)}
+svg .zone{fill:none;stroke:var(--line-2);stroke-dasharray:4 4}
+svg .t{fill:var(--ink);font-family:var(--sans);font-size:14px;font-weight:700}
+svg .s{fill:var(--ink-3);font-family:var(--mono);font-size:11px}
+svg .z{fill:var(--ink-2);font-family:var(--mono);font-size:11px;letter-spacing:.08em}
+svg .fiber{stroke:var(--fiber);stroke-width:5;fill:none;stroke-linecap:round}
+svg .path{stroke:var(--trace);stroke-width:2;fill:none}
+svg .site{stroke:var(--fiber-ink);stroke-width:2;fill:none;stroke-dasharray:6 5}
+svg .lbl{fill:var(--trace);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .lbl2{fill:var(--fiber-ink);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .dot{fill:var(--fiber)}
+svg .ah-f{fill:var(--fiber)}
+svg .ah-p{fill:var(--trace)}
+svg .ah-s{fill:var(--fiber-ink)}
+.legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--ink-2)}
+.legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--fiber)}
+.legend i.p{border-top:2px solid var(--trace)}
+.legend i.s{border-top:2px dashed var(--fiber-ink)}
+.legend i.a{border-top:1.5px solid var(--ink-3)}
+svg .assoc{stroke:var(--ink-3);stroke-width:1.5;fill:none}
+
+/* steps */
+.steps{list-style:none;padding:0;margin:40px 0 0;display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:4px solid var(--fiber)}
+.steps li{padding:20px 18px 0 0;min-width:0}
+.steps .num{font-size:15px;font-weight:600;color:var(--fiber-ink);letter-spacing:.06em}
+.steps h3{font-size:16px;margin-top:6px}
+.steps p{font-size:14px;color:var(--ink-2);margin-top:6px}
+
+/* resiliency */
+.res{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:36px}
+.res-card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:26px}
+.res-card .num{font-size:52px;font-weight:700;line-height:1}
+.res-card .num small{font-size:20px;color:var(--ink-2)}
+.res-card h3{margin-top:10px}
+.res-card p{color:var(--ink-2);font-size:15px;margin-top:6px}
+.res-card.max{border-color:var(--fiber);box-shadow:inset 0 4px 0 var(--fiber)}
+
+/* cta */
+.cta{text-align:center}
+.cta h2{max-width:22ch;margin:0 auto}
+.cta .lede{margin:14px auto 0}
+.cta .cta-row{justify-content:center}
+footer{border-top:1px solid var(--line);padding-block:28px;font-size:13px;color:var(--ink-3)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+
+@media (max-width:1024px){
+  .hero-grid,.split{grid-template-columns:1fr;gap:40px}
+  .features{grid-template-columns:repeat(2,1fr)}
+  .steps{grid-template-columns:repeat(2,1fr);border-top:0;gap:0 24px}
+  .steps li{border-top:4px solid var(--fiber);padding-bottom:24px}
+  .layer{grid-template-columns:80px 1fr}
+  .layer .specs{grid-column:2}
+  .chips{grid-template-columns:repeat(2,1fr)}
+  .chip:nth-child(3){border-left:0}
+  .chip:nth-child(n+3){border-top:1px solid var(--line)}
+}
+@media (max-width:640px){
+  .wrap{padding-inline:18px}
+  section{padding-block:60px}
+  .navlinks a:not(.btn){display:none}
+  .features,.res{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr}
+  .pillar{grid-template-columns:1fr;gap:0}
+  .layer{grid-template-columns:1fr;gap:12px}
+  .layer .specs{grid-column:auto}
+  .cta-row .btn{width:100%}
+  .arch-hint{display:block}
+  table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  table,tbody,tr,td{display:block;width:100%}
+  tr{border-bottom:1px solid var(--line);padding:14px 16px}
+  tbody tr:last-child{border-bottom:0}
+  td{border:0;padding:3px 0}
+  td.row-h{width:100%;font-size:16px;padding-bottom:6px}
+  td[data-k]::before{content:attr(data-k);display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+
+/* ---- service-specific ---- */
+/* hero visual: OSI layer selector */
+.osi{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px;min-width:0}
+.osi-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.osi-rows{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:6px}
+.osi-row{display:grid;grid-template-columns:44px 1fr auto;gap:14px;align-items:center;border:1px solid var(--line);border-radius:4px;padding:10px 14px;background:transparent;min-width:0}
+.osi-row .lv{font-family:var(--display);font-size:22px;font-weight:600;color:var(--ink-3);line-height:1}
+.osi-row .lname{font-size:13.5px;color:var(--ink-3)}
+.osi-row.on{background:var(--sunken);border-color:var(--line-2)}
+.osi-row.on .lv{color:var(--ink);font-size:30px;font-weight:700}
+.osi-row.on .lname{color:var(--ink);font-weight:700;font-size:15px}
+.osi-row .lb{font-family:var(--display);font-size:24px;font-weight:700;letter-spacing:.03em;color:var(--on-fiber);background:var(--fiber);padding:2px 10px;border-radius:3px;line-height:1.2}
+.osi-row .pr{display:block;font-family:var(--mono);font-size:11.5px;font-weight:400;color:var(--ink-3);margin-top:2px;overflow-wrap:anywhere}
+.osi-foot{margin-top:14px;font-size:13px;color:var(--ink-2)}
+
+/* listener rule table */
+.rules{margin-top:36px;border:1px solid var(--line);border-radius:6px;background:var(--surface);min-width:0}
+.rules-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 18px;border-bottom:1px solid var(--line);background:var(--sunken);font-family:var(--mono);font-size:12px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.rule{display:grid;grid-template-columns:80px 1.3fr 1fr;gap:20px;align-items:start;padding:16px 18px;border-bottom:1px solid var(--line);min-width:0}
+.rule:last-child{border-bottom:0}
+.rule .pri{font-family:var(--display);font-size:28px;font-weight:600;line-height:1}
+.rule .pri small{display:block;font-family:var(--mono);font-size:10.5px;font-weight:400;color:var(--ink-3);letter-spacing:.06em;margin-top:4px;text-transform:uppercase}
+.rule .cond,.rule .act{font-family:var(--mono);font-size:13px;line-height:1.7;min-width:0;overflow-wrap:anywhere}
+.rule .cond b{color:var(--trace);font-weight:500}
+.rule .act b{color:var(--fiber-ink);font-weight:500}
+.rule .act::before{content:"→ ";color:var(--ink-3)}
+.rule.dflt{background:var(--sunken)}
+.rule-note{margin-top:14px;font-size:14px;color:var(--ink-2);max-width:72ch}
+
+@media (max-width:640px){
+  .rule{grid-template-columns:1fr;gap:8px}
+  .rule .pri{font-size:22px}
+  .rule .pri small{display:inline;margin-left:8px}
+}
+
+/* nav: six items need more room than the base 640px breakpoint gives */
+.brand,.navlinks a{white-space:nowrap}
+@media (max-width:900px){.navlinks a:not(.btn){display:none}}
+@media (max-width:640px){.brand{font-size:17px}}
+
+/* nav: keep links on one line, show only CTA below 960px */
+.navlinks a{white-space:nowrap}
+@media (max-width:960px){.navlinks a:not(.btn){display:none}}
+
+/* Korean line breaking: never split a word mid-syllable */
+h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
+
+/* per-type sections (ALB · NLB · GWLB) */
+.type-grid{display:grid;grid-template-columns:1.05fr 1fr;gap:44px;align-items:start;margin-top:28px}
+.type-grid>*{min-width:0}
+.flow-steps{list-style:none;margin:0;padding:0;display:grid;gap:12px;counter-reset:fs}
+.flow-steps li{display:grid;grid-template-columns:30px 1fr;gap:12px;font-size:15px;color:var(--ink-2);line-height:1.6}
+.flow-steps li::before{counter-increment:fs;content:counter(fs,decimal-leading-zero);font-family:var(--display);font-weight:600;font-size:19px;color:var(--fiber-ink);line-height:1.3}
+.flow-steps b{color:var(--ink)}
+.flow{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px;margin:0}
+.flow svg{display:block;width:100%;height:auto}
+.flow figcaption{font-size:12.5px;color:var(--ink-3);margin-top:8px}
+.when{margin-top:18px}
+.when h3{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.when ul{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:5px}
+.when li{position:relative;padding-left:18px;font-size:14.5px;color:var(--ink-2);line-height:1.6}
+.when li::before{content:"";position:absolute;left:0;top:.62em;width:8px;height:8px;border-radius:1px;background:var(--fiber)}
+.chips.kpi{margin-top:28px}
+.chips.kpi .chip{padding:14px 18px}
+.chips.kpi .chip .num{font-size:30px}
+.chips.kpi .chip p{font-size:13px}
+.features.f-tight{margin-top:28px}
+.features.f-tight .feature{padding:20px 22px}
+.features.f-tight .feature h3{font-size:17px;margin-top:6px}
+.features.f-tight .feature p{font-size:14.5px;margin-top:6px;line-height:1.65}
+.feature code,.rule-note code,td code{font-family:var(--mono);font-size:12.5px;background:var(--sunken);border:1px solid var(--line);padding:0 5px;border-radius:3px;overflow-wrap:anywhere}
+.cmp td{font-size:14.5px;padding:11px 16px}
+.cmp th{padding:11px 16px}
+.cmp td.row-h{width:15%;font-size:14.5px}
+.cmp td .sub{display:block;color:var(--ink-3);font-size:13px}
+.cmp thead th b{font-family:var(--display);font-size:18px;font-weight:700;letter-spacing:.03em;color:var(--ink);text-transform:none}
+@media (max-width:1024px){.type-grid{grid-template-columns:1fr;gap:28px}}
+@media (max-width:640px){
+  .flow .arch-scroll{overflow-x:auto}
+  .flow svg{min-width:480px}
+  .cmp td.row-h{width:100%}
+}
+
+</style>
+<link rel="stylesheet" href="../../assets/site.css?v=25">
+<script src="../../assets/site.js?v=25"></script>
+</head>
+<body>
+
+
+<a class="skip-link" href="#main">본문으로 건너뛰기</a>
+
+<nav aria-label="주요 메뉴">
+  <div class="wrap">
+    <a class="brand" href="#top">Elastic Load <span>Balancing</span></a>
+    <div class="navlinks">
+      <a href="../">서비스 포트폴리오</a>
+      <a href="#compare">유형 비교</a>
+      <a href="#alb">ALB</a>
+      <a href="#nlb">NLB</a>
+      <a href="#gwlb">GWLB</a>
+      <a href="#arch-alb">아키텍처</a>
+      <a href="#pricing">비용</a>
+      <a class="btn btn-primary" href="#start">시작하기</a>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+  <header class="hero" id="top">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">Elastic Load Balancing · ALB · NLB · GWLB</p>
+          <h1>트래픽의 <em>계층</em>에 맞는 로드 밸런서를 고르세요</h1>
+          <p class="lede">Elastic Load Balancing은 들어오는 트래픽을 여러 가용 영역의 정상 대상으로 나눕니다. HTTP 요청은 Application Load Balancer가, TCP · UDP 연결은 Network Load Balancer가, 보안 어플라이언스로 보낼 IP 패킷은 Gateway Load Balancer가 맡습니다. 이 페이지는 공통 개념과 비교표에 이어 세 유형을 하나씩 살펴봅니다.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="#compare">유형 비교 보기</a>
+            <a class="btn btn-ghost" href="#alb">ALB부터 살펴보기</a>
+          </div>
+        </div>
+
+        <div class="osi" aria-label="OSI 계층별 로드 밸런서 유형">
+          <div class="osi-head"><span>OSI layer</span><span>Load balancer</span></div>
+          <ol class="osi-rows" reversed>
+            <li class="osi-row on"><span class="lv">L7</span><span class="lname">Application<span class="pr">HTTP · HTTPS · HTTP/2 · gRPC</span></span><span class="lb">ALB</span></li>
+            <li class="osi-row"><span class="lv">L6</span><span class="lname">Presentation</span><span></span></li>
+            <li class="osi-row"><span class="lv">L5</span><span class="lname">Session</span><span></span></li>
+            <li class="osi-row on"><span class="lv">L4</span><span class="lname">Transport<span class="pr">TCP · UDP · TLS · QUIC</span></span><span class="lb">NLB</span></li>
+            <li class="osi-row on"><span class="lv">L3</span><span class="lname">Network<span class="pr">모든 IP 패킷 · GENEVE 6081</span></span><span class="lb">GWLB</span></li>
+          </ol>
+          <p class="osi-foot">세 유형 모두 리스너, 대상 그룹, 헬스 체크라는 같은 구성 요소를 씁니다.</p>
+        </div>
+      </div>
+
+      <div class="chips" role="list">
+        <div class="chip" role="listitem"><span class="num">3</span><p>로드 밸런서 유형 (ALB · NLB · GWLB)</p></div>
+        <div class="chip" role="listitem"><span class="num">6081</span><p>GWLB와 어플라이언스 사이 GENEVE 포트</p></div>
+        <div class="chip" role="listitem"><span class="num">8500</span><p>GWLB 인터페이스 최대 패킷 크기 (bytes)</p></div>
+        <div class="chip" role="listitem"><span class="num">mTLS</span><p>ALB 상호 TLS 인증 (passthrough · verify)</p></div>
+      </div>
+    </div>
+  </header>
+
+  <section id="why" aria-labelledby="why-h">
+    <div class="wrap">
+      <p class="tag">Common building blocks</p>
+      <h2 id="why-h">대상이 늘고 줄어도 진입점은 하나로 유지됩니다</h2>
+      <p class="lede">로드 밸런서는 대상의 상태를 계속 확인하고 정상인 대상에만 트래픽을 보냅니다. Auto Scaling 그룹이나 컨테이너가 바뀌어도 클라이언트가 쓰는 주소는 그대로입니다. 세 유형은 아래 구성 요소를 공통으로 씁니다.</p>
+      <div class="features f-tight">
+        <article class="feature"><p class="ft">Listener</p><h3>리스너</h3><p>프로토콜과 포트로 연결을 받고, 규칙에 따라 대상 그룹으로 넘깁니다. GWLB는 리스너가 하나뿐이고 프로토콜 · 포트를 지정하지 않습니다.</p></article>
+        <article class="feature"><p class="ft">Target group</p><h3>대상 그룹</h3><p>instance, ip 같은 대상 유형을 정하고 대상을 등록합니다. 대상 유형은 생성 후 바꿀 수 없고, 헬스 체크와 속성도 대상 그룹마다 따로 둡니다.</p></article>
+        <article class="feature"><p class="ft">Health check</p><h3>헬스 체크와 fail open</h3><p>정상 대상에만 보내되, 정상 대상이 하나도 없으면 모든 대상에 보냅니다. ALB · NLB는 최소 정상 대상 수나 비율로 DNS failover와 라우팅 failover 기준을 정할 수 있습니다.</p></article>
+        <article class="feature"><p class="ft">Cross-zone</p><h3>교차 영역 분산</h3><p>켜면 각 노드가 모든 가용 영역의 대상에 나눕니다. ALB는 로드 밸런서 수준에서 항상 켜져 있고, NLB · GWLB는 기본으로 꺼져 있습니다.</p></article>
+        <article class="feature"><p class="ft">Deregistration delay</p><h3>등록 취소 지연</h3><p>등록을 취소한 대상은 <code>draining</code> 상태로 진행 중인 요청을 마칩니다. 기본 300초이고, 지나면 <code>unused</code>가 됩니다.</p></article>
+        <article class="feature"><p class="ft">LCU reservation</p><h3>용량 단위 예약</h3><p>예상되는 급증 전에 최소 용량을 예약합니다. 예약 후에도 트래픽에 따라 확장하되 예약치 아래로 줄지 않습니다. NLB · GWLB는 1 LCU를 2.2 Mbps로 환산합니다.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="compare" aria-labelledby="compare-h">
+    <div class="wrap">
+      <p class="tag">Type selection</p>
+      <h2 id="compare-h">ALB · NLB · GWLB 비교</h2>
+      <p class="lede">트래픽을 어느 계층에서 보고 결정해야 하는지가 선택 기준입니다.</p>
+      <div class="tbl-wrap">
+        <table class="cmp">
+          <caption class="sr-only">Application, Network, Gateway Load Balancer 비교</caption>
+          <thead><tr><th scope="col">항목</th><th scope="col"><b>ALB</b></th><th scope="col"><b>NLB</b></th><th scope="col"><b>GWLB</b></th></tr></thead>
+          <tbody>
+            <tr><td class="row-h">OSI 계층</td><td data-k="ALB">L7 · 요청 단위</td><td data-k="NLB">L4 · 연결 · 흐름 단위</td><td data-k="GWLB">L3 · 패킷 단위 (투명 게이트웨이)</td></tr>
+            <tr><td class="row-h">리스너 프로토콜</td><td data-k="ALB">HTTP · HTTPS<span class="sub">HTTP/2 · gRPC는 HTTPS 리스너</span></td><td data-k="NLB">TCP · TLS · UDP · TCP_UDP · QUIC · TCP_QUIC</td><td data-k="GWLB">모든 포트의 IP 패킷<span class="sub">어플라이언스와는 GENEVE (UDP 6081)</span></td></tr>
+            <tr><td class="row-h">대상 유형</td><td data-k="ALB"><span class="mono">instance · ip · lambda</span></td><td data-k="NLB"><span class="mono">instance · ip · alb</span></td><td data-k="GWLB"><span class="mono">instance · ip</span></td></tr>
+            <tr><td class="row-h">대상 선택</td><td data-k="ALB">round robin(기본), least outstanding requests, weighted random</td><td data-k="NLB">프로토콜, IP · 포트, TCP 시퀀스 번호 기반 flow hash</td><td data-k="GWLB">5-tuple(기본), 3-tuple, 2-tuple 흐름 고정</td></tr>
+            <tr><td class="row-h">고정 IP</td><td data-k="ALB">DNS 이름으로 접근. 고정 IP가 필요하면 NLB 뒤에 ALB를 둠</td><td data-k="NLB">가용 영역마다 고정 IP, 인터넷 연결 시 Elastic IP 지정 가능</td><td data-k="GWLB">라우팅 테이블에서 GWLB endpoint를 다음 홉으로 지정</td></tr>
+            <tr><td class="row-h">보안 그룹</td><td data-k="ALB">로드 밸런서에 연결</td><td data-k="NLB">생성할 때 연결한 경우에만 이후 변경 가능</td><td data-k="GWLB">없음. 어플라이언스의 보안 그룹 · NACL로 제어</td></tr>
+            <tr><td class="row-h">TLS</td><td data-k="ALB">HTTPS 리스너에서 종료, mTLS 지원</td><td data-k="NLB">TLS 리스너에서 종료(ALPN 정책), 또는 TCP로 패스스루</td><td data-k="GWLB">종료하지 않음. 패킷을 그대로 어플라이언스에 전달</td></tr>
+            <tr><td class="row-h">교차 영역 분산</td><td data-k="ALB">항상 켜짐. 대상 그룹 수준에서 끌 수 있음</td><td data-k="NLB">기본 꺼짐</td><td data-k="GWLB">기본 꺼짐</td></tr>
+            <tr><td class="row-h">대표 용도</td><td data-k="ALB">웹 · API · 마이크로서비스, 앞단 인증</td><td data-k="NLB">고성능 TCP · UDP, 고정 IP, PrivateLink 서비스</td><td data-k="GWLB">방화벽 · IDS/IPS 같은 인라인 검사</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== ALB ===================== -->
+  <section id="alb" aria-labelledby="alb-h">
+    <div class="wrap">
+      <p class="tag">Application Load Balancer · L7</p>
+      <h2 id="alb-h">ALB는 HTTP 요청 하나하나를 보고 경로를 정합니다</h2>
+      <p class="lede">ALB는 클라이언트 연결을 받아 종료하고, 요청의 호스트, 경로, 헤더, 메서드, 쿼리 문자열, 출발지 IP를 기준으로 대상 그룹을 고른 뒤 대상과 별도 연결로 요청을 보냅니다.</p>
+      <div class="type-grid">
+        <div>
+          <ol class="flow-steps">
+            <li><span><b>연결 · TLS 종료</b> — 클라이언트가 ALB의 DNS 이름으로 접속하면 HTTPS 리스너가 ACM 인증서로 TLS를 종료합니다. SNI로 기본 인증서 외에 25개까지 인증서를 더 둘 수 있습니다.</span></li>
+            <li><span><b>규칙 평가</b> — 리스너 규칙을 우선순위 순서로 평가하고, 처음 일치한 규칙의 인증 · JWT 검증 · transform을 거쳐 forward, redirect, fixed-response 중 하나를 실행합니다.</span></li>
+            <li><span><b>대상 선택</b> — 대상 그룹의 라우팅 알고리즘으로 정상 대상을 고릅니다. 고정 세션이 켜져 있으면 쿠키가 가리키는 대상으로 보냅니다.</span></li>
+            <li><span><b>전달</b> — EC2, 컨테이너 IP, Lambda 함수로 요청을 보내고 응답을 클라이언트에 돌려줍니다.</span></li>
+          </ol>
+        </div>
+        <div>
+          <figure class="flow">
+            <div class="arch-scroll">
+              <svg viewBox="0 0 560 280" role="img" aria-labelledby="alb-svg-t">
+                <title id="alb-svg-t">클라이언트가 ALB HTTPS 리스너로 접속하고, ALB가 경로 규칙에 따라 instance, ip, lambda 대상 그룹으로 요청을 나누는 흐름</title>
+                <defs>
+                  <marker id="ar-alb-f" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" orient="auto"><path class="ah-f" d="M0 0 L10 5 L0 10 z"/></marker>
+                  <marker id="ar-alb-p" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-p" d="M0 0 L10 5 L0 10 z"/></marker>
+                  <marker id="ar-alb-s" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-s" d="M0 0 L10 5 L0 10 z"/></marker>
+                </defs>
+                <rect class="zone" x="140" y="6" width="414" height="268" rx="6"/>
+                <image href="../../assets/aws-icons/Virtual-private-cloud-VPC_32.svg" x="140" y="6" width="24" height="24"/><text class="z" x="170" y="23">VPC</text>
+                <rect class="box" x="4" y="108" width="118" height="64" rx="4"/>
+                <image class="ic-gen" href="../../assets/aws-icons/Res_Client_48_Light.svg" x="12" y="128" width="24" height="24"/><text class="t" x="42" y="136">클라이언트</text><text class="s" x="42" y="156">HTTPS</text>
+                <rect class="box" x="160" y="70" width="156" height="140" rx="4"/>
+                <image href="../../assets/aws-icons/Res_Elastic-Load-Balancing_Application-Load-Balancer_48.svg" x="170" y="80" width="28" height="28"/><text class="t" x="206" y="98">ALB</text><text class="s" x="206" y="114">HTTPS:443</text>
+                <text class="s" x="172" y="150">1  host · path</text>
+                <text class="s" x="172" y="168">2  header · method</text>
+                <text class="s" x="172" y="186">*  default</text>
+                <path class="fiber" d="M122 140 H157" marker-end="url(#ar-alb-f)"/>
+                <rect class="box" x="392" y="30" width="150" height="56" rx="4"/>
+                <image href="../../assets/aws-icons/Res_Amazon-EC2_Instance_48.svg" x="400" y="44" width="28" height="28"/><text class="t" x="436" y="54">tg-web</text><text class="s" x="436" y="73">instance</text>
+                <rect class="box" x="392" y="112" width="150" height="56" rx="4"/>
+                <image href="../../assets/aws-icons/Res_Amazon-Elastic-Container-Service_Task_48.svg" x="400" y="126" width="28" height="28"/><text class="t" x="436" y="136">tg-api</text><text class="s" x="436" y="155">ip · 컨테이너</text>
+                <rect class="box" x="392" y="194" width="150" height="56" rx="4"/>
+                <image href="../../assets/aws-icons/Res_AWS-Lambda_Lambda-Function_48.svg" x="400" y="208" width="28" height="28"/><text class="t" x="436" y="218">tg-fn</text><text class="s" x="436" y="237">lambda</text>
+                <path class="path" d="M316 120 C354 120 352 58 390 58" marker-end="url(#ar-alb-p)"/>
+                <path class="path" d="M316 140 H390" marker-end="url(#ar-alb-p)"/>
+                <path class="path" d="M316 160 C354 160 352 222 390 222" marker-end="url(#ar-alb-p)"/>
+                <text class="lbl" x="326" y="80">/*</text>
+                <text class="lbl" x="330" y="133">/api/*</text>
+                <text class="lbl" x="322" y="214">/fn/*</text>
+              </svg>
+            </div>
+          </figure>
+          <div class="when">
+            <h3>언제 쓰나</h3>
+            <ul>
+              <li>호스트 · 경로별로 마이크로서비스와 컨테이너를 나눌 때</li>
+              <li>OIDC · Amazon Cognito 로그인이나 JWT 검증을 애플리케이션 앞에서 처리할 때</li>
+              <li>가중치 대상 그룹으로 블루/그린, 카나리 배포를 할 때</li>
+              <li>Lambda 함수를 HTTP 엔드포인트로 노출하거나 gRPC · WebSocket을 분산할 때</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="chips kpi" role="list" aria-label="ALB 기본 할당량">
+        <div class="chip" role="listitem"><span class="num">100</span><p>ALB당 규칙 (기본 규칙 제외, 조정 가능)</p></div>
+        <div class="chip" role="listitem"><span class="num">5</span><p>forward 액션 하나에 묶는 대상 그룹</p></div>
+        <div class="chip" role="listitem"><span class="num">1,000</span><p>ALB당 대상 (조정 가능)</p></div>
+        <div class="chip" role="listitem"><span class="num">50</span><p>ALB당 리스너 (조정 가능)</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="alb-rules" aria-labelledby="rules-h">
+    <div class="wrap">
+      <p class="tag">ALB · Listener rules</p>
+      <h2 id="rules-h">리스너 규칙: 조건이 맞으면 액션을 실행합니다</h2>
+      <p class="lede">리스너 규칙은 우선순위가 낮은 번호부터 평가하고, 처음 일치한 규칙의 액션을 실행합니다. 조건은 host-header, path-pattern, http-header, http-request-method, query-string, source-ip 여섯 가지이고, host-header · path-pattern · http-header는 와일드카드 대신 정규식으로도 매칭할 수 있습니다.</p>
+      <div class="rules" role="table" aria-label="HTTPS:443 리스너 규칙 예시">
+        <div class="rules-head" role="row"><span role="columnheader">Priority · Condition · Action</span><span>listener HTTPS:443</span></div>
+        <div class="rule" role="row">
+          <span class="pri" role="cell">1<small>priority</small></span>
+          <div class="cond" role="cell"><b>host-header</b> api.example.com<br><b>path-pattern</b> /v2/*</div>
+          <div class="act" role="cell"><b>forward</b> tg-v2 weight 90<br>tg-v1 weight 10</div>
+        </div>
+        <div class="rule" role="row">
+          <span class="pri" role="cell">2<small>priority</small></span>
+          <div class="cond" role="cell"><b>path-pattern</b> /admin/*<br><b>source-ip</b> 192.0.2.0/24</div>
+          <div class="act" role="cell"><b>authenticate-oidc</b><br><b>forward</b> tg-admin</div>
+        </div>
+        <div class="rule" role="row">
+          <span class="pri" role="cell">3<small>priority</small></span>
+          <div class="cond" role="cell"><b>http-header</b> X-Client-Version: 1.*</div>
+          <div class="act" role="cell"><b>fixed-response</b> 426</div>
+        </div>
+        <div class="rule" role="row">
+          <span class="pri" role="cell">4<small>priority</small></span>
+          <div class="cond" role="cell"><b>path-pattern</b> /old-docs/*</div>
+          <div class="act" role="cell"><b>redirect</b> HTTP_301<br>host docs.example.com · path /#{path}</div>
+        </div>
+        <div class="rule dflt" role="row">
+          <span class="pri" role="cell">*<small>default</small></span>
+          <div class="cond" role="cell">일치하는 규칙이 없을 때</div>
+          <div class="act" role="cell"><b>forward</b> tg-web</div>
+        </div>
+      </div>
+      <p class="rule-note">규칙마다 forward, redirect, fixed-response 중 하나의 라우팅 액션이 마지막에 있어야 합니다. HTTPS 리스너에서는 authenticate-cognito, authenticate-oidc, jwt-validation 액션을 그 앞에 둘 수 있습니다. 기본 규칙이 아닌 규칙에는 대상에 보내기 전 요청을 고쳐 쓰는 transform(host-header-rewrite, url-rewrite)을 하나씩 붙일 수 있습니다. 규칙 하나에 조건 값은 5개, 와일드카드는 6개까지 씁니다.</p>
+    </div>
+  </section>
+
+  <section id="alb-features" aria-labelledby="alb-f-h">
+    <div class="wrap">
+      <p class="tag">ALB · Features</p>
+      <h2 id="alb-f-h">인증, 배포, 세션을 로드 밸런서에서 처리합니다</h2>
+      <div class="features f-tight">
+        <article class="feature"><p class="ft">Authentication</p><h3>OIDC · Cognito 인증</h3><p>HTTPS 리스너 규칙의 <code>authenticate-oidc</code> · <code>authenticate-cognito</code> 액션이 로그인을 처리하고, 인증된 사용자 정보를 헤더에 담아 대상에 넘깁니다.</p></article>
+        <article class="feature"><p class="ft">JWT validation</p><h3>JWT 토큰 검증</h3><p><code>jwt-validation</code> 액션이 JWKS 엔드포인트의 공개 키로 서명을 확인하고 <code>iss</code>와 추가 클레임을 검사합니다. JWKS 응답은 150&nbsp;KB, 키 10개까지입니다.</p></article>
+        <article class="feature"><p class="ft">mTLS</p><h3>상호 TLS 인증</h3><p>verify 모드는 트러스트 스토어의 CA로 클라이언트 인증서를 검증하고, passthrough 모드는 인증서 체인을 헤더로 대상에 넘깁니다. verify 모드 리스너는 ALB당 2개입니다.</p></article>
+        <article class="feature"><p class="ft">Transforms</p><h3>URL · 호스트 헤더 재작성</h3><p>규칙의 transform이 정규식으로 경로, 쿼리 문자열, Host 헤더를 바꿔 대상에 보냅니다. 애플리케이션 코드나 별도 프록시 없이 URL 체계를 옮길 수 있습니다.</p></article>
+        <article class="feature"><p class="ft">Weighted target groups</p><h3>가중치 대상 그룹</h3><p>forward 액션 하나가 최대 5개 대상 그룹에 가중치로 요청을 나눕니다. 대상 그룹 수준 고정 세션을 켜면 클라이언트가 처음 배정된 그룹에 머뭅니다.</p></article>
+        <article class="feature"><p class="ft">Sticky sessions</p><h3>고정 세션</h3><p>ALB가 만드는 <code>AWSALB</code> 쿠키(duration-based)나 애플리케이션 쿠키(application-based)로 같은 대상에 보냅니다. 교차 영역 분산을 끈 대상 그룹에서는 쓸 수 없습니다.</p></article>
+        <article class="feature"><p class="ft">Algorithms · Slow start</p><h3>라우팅 알고리즘과 slow start</h3><p>slow start는 새 대상의 요청량을 30~900초 동안 선형으로 늘립니다(round robin 전용). weighted random에서는 ATW가 오류율이 튀는 대상의 트래픽을 자동으로 줄입니다.</p></article>
+        <article class="feature"><p class="ft">Lambda targets</p><h3>Lambda 함수 대상</h3><p>HTTP 요청을 JSON 이벤트로 바꿔 함수를 호출합니다. lambda 대상 그룹에는 함수 하나만 등록하고, 함수가 돌려주는 응답 JSON은 1&nbsp;MB까지입니다.</p></article>
+        <article class="feature"><p class="ft">HTTP/2 · gRPC</p><h3>gRPC와 WebSocket</h3><p>HTTPS 리스너 뒤 대상 그룹의 프로토콜 버전을 gRPC나 HTTP2로 두면 그대로 전달합니다. WebSocket 연결은 업그레이드를 수락한 대상에 계속 머뭅니다.</p></article>
+      </div>
+      <p class="rule-note">Target Optimizer를 켜면 대상에 설치한 에이전트가 대상별 최대 동시 요청 수를 강제합니다. 대상 그룹을 만들 때만 켤 수 있고, 켜면 알고리즘은 round robin만 쓰며 고정 세션은 지원하지 않습니다.</p>
+    </div>
+  </section>
+
+  <!-- ===================== NLB ===================== -->
+  <section id="nlb" aria-labelledby="nlb-h">
+    <div class="wrap">
+      <p class="tag">Network Load Balancer · L4</p>
+      <h2 id="nlb-h">NLB는 연결 단위로 L4 트래픽을 넘깁니다</h2>
+      <p class="lede">NLB는 TCP · UDP 흐름을 flow hash로 한 대상에 고정하고, 가용 영역마다 고정 IP를 가집니다. TLS 리스너가 아니면 페이로드를 열지 않고 넘기며, 초당 수백만 건의 요청을 처리하도록 확장됩니다.</p>
+      <div class="type-grid">
+        <div>
+          <ol class="flow-steps">
+            <li><span><b>DNS · 영역 IP</b> — DNS 이름은 활성 가용 영역마다 하나인 NLB 노드 IP로 풀립니다. <code>dns_record.client_routing_policy</code>로 같은 영역 선호도를 100 · 85 · 0%로 정합니다.</span></li>
+            <li><span><b>흐름 고정</b> — 노드가 프로토콜, 출발지 · 목적지 IP와 포트, TCP 시퀀스 번호로 대상을 고르고, 연결이 끝날 때까지 같은 대상으로 보냅니다.</span></li>
+            <li><span><b>전달</b> — 대상은 설정에 따라 원래 클라이언트 IP를 그대로 받습니다. TLS 리스너는 NLB에서 TLS를 종료하고 대상과 새 연결을 맺습니다.</span></li>
+            <li><span><b>유휴 제한 시간</b> — TCP는 기본 350초(60~6,000초로 변경), TLS는 350초 고정, UDP는 120초 고정입니다.</span></li>
+          </ol>
+        </div>
+        <div>
+          <figure class="flow">
+            <div class="arch-scroll">
+              <svg viewBox="0 0 560 280" role="img" aria-labelledby="nlb-svg-t">
+                <title id="nlb-svg-t">클라이언트와 PrivateLink 엔드포인트가 NLB의 가용 영역별 IP로 접속하고, NLB가 흐름을 각 영역의 대상에 고정해 전달하는 흐름</title>
+                <defs>
+                  <marker id="ar-nlb-f" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" orient="auto"><path class="ah-f" d="M0 0 L10 5 L0 10 z"/></marker>
+                  <marker id="ar-nlb-p" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-p" d="M0 0 L10 5 L0 10 z"/></marker>
+                  <marker id="ar-nlb-s" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-s" d="M0 0 L10 5 L0 10 z"/></marker>
+                </defs>
+                <rect class="box" x="4" y="40" width="124" height="60" rx="4"/>
+                <image class="ic-gen" href="../../assets/aws-icons/Res_Client_48_Light.svg" x="12" y="58" width="24" height="24"/><text class="t" x="42" y="66">클라이언트</text><text class="s" x="42" y="86">TCP · UDP</text>
+                <rect class="box" x="4" y="180" width="124" height="60" rx="4"/>
+                <image href="../../assets/aws-icons/Res_Amazon-VPC_Endpoints_48.svg" x="12" y="198" width="24" height="24"/><text class="t" x="42" y="206">엔드포인트</text><text class="s" x="42" y="226">소비자 VPC</text>
+                <rect class="box" x="156" y="14" width="176" height="252" rx="4"/>
+                <image href="../../assets/aws-icons/Res_Elastic-Load-Balancing_Network-Load-Balancer_48.svg" x="166" y="22" width="28" height="28"/><text class="t" x="202" y="42">NLB</text><text class="s" x="168" y="68">TCP · UDP · TLS · QUIC</text>
+                <rect class="zone" x="170" y="80" width="148" height="66" rx="4"/>
+                <text class="z" x="182" y="102">AZ-a</text><text class="s" x="182" y="126">EIP 203.0.113.10</text>
+                <rect class="zone" x="170" y="180" width="148" height="66" rx="4"/>
+                <text class="z" x="182" y="202">AZ-b</text><text class="s" x="182" y="226">EIP 203.0.113.20</text>
+                <path class="fiber" d="M128 70 C150 70 148 113 167 113" marker-end="url(#ar-nlb-f)"/>
+                <path class="site" d="M128 210 H168" marker-end="url(#ar-nlb-s)"/>
+                <text class="lbl2" x="16" y="166">PrivateLink</text>
+                <rect class="box" x="384" y="80" width="170" height="60" rx="4"/>
+                <image href="../../assets/aws-icons/Res_Amazon-EC2_Instance_48.svg" x="392" y="96" width="28" height="28"/><text class="t" x="428" y="106">대상 A</text><text class="s" x="428" y="126">AZ-a · instance</text>
+                <rect class="box" x="384" y="180" width="170" height="60" rx="4"/>
+                <image href="../../assets/aws-icons/Res_Amazon-VPC_Elastic-Network-Interface_48.svg" x="392" y="196" width="28" height="28"/><text class="t" x="428" y="206">대상 B</text><text class="s" x="428" y="226">AZ-b · ip</text>
+                <path class="path" d="M318 113 H382" marker-end="url(#ar-nlb-p)"/>
+                <path class="path" d="M318 213 H382" marker-end="url(#ar-nlb-p)"/>
+                <text class="lbl" x="384" y="40">flow hash · 연결 고정</text>
+                <text class="lbl" x="384" y="58">클라이언트 IP 보존</text>
+              </svg>
+            </div>
+          </figure>
+          <div class="when">
+            <h3>언제 쓰나</h3>
+            <ul>
+              <li>파트너가 방화벽에 등록할 고정 IP · Elastic IP가 필요할 때</li>
+              <li>게임, IoT, VoIP처럼 UDP나 QUIC를 쓰는 서비스</li>
+              <li>AWS PrivateLink 엔드포인트 서비스로 다른 VPC · 계정에 서비스를 내줄 때</li>
+              <li>ALB 앞에 고정 IP를 두거나, HTTP가 아닌 TCP 프로토콜에 TLS 종료가 필요할 때</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="chips kpi" role="list" aria-label="NLB 기본 할당량">
+        <div class="chip" role="listitem"><span class="num">3,000</span><p>NLB당 대상 (교차 영역 분산을 켜면 500)</p></div>
+        <div class="chip" role="listitem"><span class="num">500</span><p>NLB당 가용 영역별 대상 (조정 가능)</p></div>
+        <div class="chip" role="listitem"><span class="num">350<small style="font-size:16px;color:var(--ink-2)">s</small></span><p>TCP 유휴 제한 시간 기본값</p></div>
+        <div class="chip" role="listitem"><span class="num">50</span><p>NLB당 리스너</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="nlb-features" aria-labelledby="nlb-f-h">
+    <div class="wrap">
+      <p class="tag">NLB · Features</p>
+      <h2 id="nlb-f-h">고정 IP, 원본 IP, PrivateLink를 함께 씁니다</h2>
+      <div class="features f-tight">
+        <article class="feature"><p class="ft">Protocols · QUIC</p><h3>TCP · UDP · TLS · QUIC</h3><p>QUIC · TCP_QUIC 리스너는 QUIC v1 트래픽을 복호화 없이 대상에 넘깁니다. Connection ID의 Server ID로 대상을 고정해 모바일 클라이언트의 연결 이전을 유지합니다.</p></article>
+        <article class="feature"><p class="ft">Static IP</p><h3>고정 IP와 Elastic IP</h3><p>NLB 노드는 가용 영역마다 고정 IP를 가집니다. 인터넷 연결 NLB는 서브넷마다 Elastic IP 하나를 붙일 수 있어, 클라이언트 쪽 허용 목록을 고정할 수 있습니다.</p></article>
+        <article class="feature"><p class="ft">Source IP</p><h3>클라이언트 IP 보존</h3><p>기본값은 instance 대상 켜짐, ip 대상의 TCP · TLS 꺼짐입니다. UDP · TCP_UDP · QUIC · TCP_QUIC는 끌 수 없습니다. Transit Gateway를 거치는 대상에는 쓸 수 없으니 Proxy Protocol v2로 IP를 전달합니다.</p></article>
+        <article class="feature"><p class="ft">PrivateLink</p><h3>엔드포인트 서비스의 앞단</h3><p>NLB를 VPC endpoint service로 등록하면 소비자 VPC의 인터페이스 엔드포인트가 NLB로 들어옵니다. PrivateLink 트래픽에 보안 그룹 인바운드 규칙을 적용할지 고를 수 있습니다.</p></article>
+        <article class="feature"><p class="ft">Security groups</p><h3>보안 그룹</h3><p>생성할 때 보안 그룹을 연결해야 이후에도 바꿀 수 있습니다. 대상 보안 그룹에서 NLB 보안 그룹을 출처로 참조하면 데이터와 헬스 체크를 함께 허용합니다.</p></article>
+        <article class="feature"><p class="ft">TLS · ALPN</p><h3>TLS 종료와 ALPN</h3><p>TLS 리스너가 ACM 인증서와 보안 정책으로 TLS를 종료합니다. ALPN 정책은 <code>HTTP1Only</code>, <code>HTTP2Only</code>, <code>HTTP2Optional</code>, <code>HTTP2Preferred</code>, <code>None</code> 중에서 고릅니다.</p></article>
+        <article class="feature"><p class="ft">Weighted TG</p><h3>가중치 대상 그룹</h3><p>NLB 리스너 하나가 여러 대상 그룹에 0~999 가중치로 트래픽을 나눕니다. instance · ip · alb 대상 그룹 모두 쓸 수 있어 블루/그린, 카나리 배포에 맞습니다.</p></article>
+        <article class="feature"><p class="ft">Zonal shift · DNS failover</p><h3>영역 장애 대응</h3><p>ARC zonal shift로 한 가용 영역을 트래픽에서 뺍니다. 영역 헬스 체크에 실패하면 그 영역의 DNS 레코드가 빠지고, <code>ZonalHealthStatus</code> 지표로 확인합니다.</p></article>
+        <article class="feature"><p class="ft">ALB as target</p><h3>ALB를 대상으로 등록</h3><p>alb 대상 그룹에 ALB 하나를 등록해 ALB 앞에 고정 IP와 PrivateLink를 둡니다. 할당량 계산에서 ALB 하나는 대상 50개(교차 영역 분산 시 100개)로 셉니다.</p></article>
+      </div>
+      <p class="rule-note">듀얼 스택 NLB에서는 기본 규칙 외에 리스너 규칙을 추가해 출발지 IP 주소 유형(IPv4 · IPv6)에 따라 다른 대상 그룹으로 보낼 수 있습니다. 규칙마다 forward 액션 하나가 있어야 합니다.</p>
+    </div>
+  </section>
+
+  <!-- ===================== GWLB ===================== -->
+  <section id="gwlb" aria-labelledby="gwlb-h">
+    <div class="wrap">
+      <p class="tag">Gateway Load Balancer · L3</p>
+      <h2 id="gwlb-h">GWLB는 트래픽 경로에 어플라이언스를 끼워 넣습니다</h2>
+      <p class="lede">GWLB는 모든 포트의 IP 패킷을 받아 GENEVE로 감싸 방화벽, IDS/IPS, DPI 같은 가상 어플라이언스 플릿에 나눕니다. 하나의 진입점이자 출구인 투명 게이트웨이로 동작하고, 어플라이언스 수를 수요에 맞춰 늘리고 줄입니다.</p>
+      <div class="type-grid">
+        <div>
+          <ol class="flow-steps">
+            <li><span><b>라우팅으로 유도</b> — 애플리케이션 VPC의 라우팅 테이블(IGW 엣지 라우팅 포함)이 GWLB endpoint를 다음 홉으로 가리킵니다. 엔드포인트와 애플리케이션 서버는 다른 서브넷에 둡니다.</span></li>
+            <li><span><b>PrivateLink</b> — GWLB endpoint가 트래픽을 서비스 공급자 VPC의 GWLB로 보냅니다. GWLB는 어플라이언스와 같은 VPC에 있습니다.</span></li>
+            <li><span><b>GENEVE 캡슐화</b> — GWLB가 흐름 해시로 어플라이언스를 고르고, 원래 패킷을 GENEVE(UDP 6081)로 감싸 보냅니다. 캡슐화는 68 bytes를 더합니다.</span></li>
+            <li><span><b>검사 후 복귀</b> — 어플라이언스가 GENEVE로 돌려보낸 패킷은 GWLB와 엔드포인트를 거쳐 원래 목적지로 갑니다. 응답도 같은 경로로 돌아와야 합니다.</span></li>
+          </ol>
+        </div>
+        <div>
+          <figure class="flow">
+            <div class="arch-scroll">
+              <svg viewBox="0 0 540 290" role="img" aria-labelledby="gwlb-svg-t">
+                <title id="gwlb-svg-t">인터넷 게이트웨이로 들어온 트래픽이 GWLB endpoint로 라우팅되고, 보안 VPC의 GWLB가 GENEVE로 두 어플라이언스에 나눈 뒤 검사를 마친 트래픽이 애플리케이션 서버로 가는 흐름</title>
+                <defs>
+                  <marker id="ar-gwf-f" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" orient="auto"><path class="ah-f" d="M0 0 L10 5 L0 10 z"/></marker>
+                  <marker id="ar-gwf-p" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-p" d="M0 0 L10 5 L0 10 z"/></marker>
+                  <marker id="ar-gwf-s" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-s" d="M0 0 L10 5 L0 10 z"/></marker>
+                </defs>
+                <rect class="zone" x="6" y="6" width="240" height="278" rx="6"/>
+                <image href="../../assets/aws-icons/Virtual-private-cloud-VPC_32.svg" x="6" y="6" width="24" height="24"/><text class="z" x="36" y="23">APPLICATION VPC</text>
+                <rect class="zone" x="270" y="6" width="264" height="278" rx="6"/>
+                <image href="../../assets/aws-icons/Virtual-private-cloud-VPC_32.svg" x="270" y="6" width="24" height="24"/><text class="z" x="300" y="23">SECURITY VPC</text>
+                <rect class="box" x="26" y="40" width="200" height="54" rx="4"/>
+                <image href="../../assets/aws-icons/Res_Amazon-VPC_Internet-Gateway_48.svg" x="34" y="53" width="28" height="28"/><text class="t" x="70" y="63">IGW</text><text class="s" x="70" y="82">엣지 라우팅 테이블</text>
+                <rect class="box" x="26" y="130" width="200" height="54" rx="4"/>
+                <image href="../../assets/aws-icons/Res_Amazon-VPC_Endpoints_48.svg" x="34" y="143" width="28" height="28"/><text class="t" x="70" y="153">GWLB endpoint</text><text class="s" x="70" y="172">라우팅 다음 홉</text>
+                <rect class="box" x="26" y="220" width="200" height="54" rx="4"/>
+                <image href="../../assets/aws-icons/Res_Amazon-EC2_Instance_48.svg" x="34" y="233" width="28" height="28"/><text class="t" x="70" y="243">애플리케이션 서버</text><text class="s" x="70" y="262">ALB · EC2</text>
+                <path class="fiber" d="M126 94 V127" marker-end="url(#ar-gwf-f)"/>
+                <path class="fiber" d="M126 184 V217" marker-end="url(#ar-gwf-f)"/>
+                <text class="lbl2" x="136" y="207">검사 후</text>
+                <rect class="box" x="290" y="130" width="224" height="54" rx="4"/>
+                <image href="../../assets/aws-icons/Res_Elastic-Load-Balancing_Gateway-Load-Balancer_48.svg" x="298" y="143" width="28" height="28"/><text class="t" x="334" y="153">GWLB</text><text class="s" x="334" y="172">listener: 모든 IP 패킷</text>
+                <path class="fiber" d="M226 149 H287" marker-end="url(#ar-gwf-f)"/>
+                <path class="fiber" d="M290 166 H229" marker-end="url(#ar-gwf-f)"/>
+                <text class="lbl2" x="184" y="122">PrivateLink</text>
+                <rect class="box" x="290" y="226" width="104" height="48" rx="4"/>
+                <image href="../../assets/aws-icons/Res_Amazon-EC2_Instance_48.svg" x="298" y="238" width="24" height="24"/><text class="t" x="330" y="247">FW A</text><text class="s" x="330" y="264">target</text>
+                <rect class="box" x="410" y="226" width="104" height="48" rx="4"/>
+                <image href="../../assets/aws-icons/Res_Amazon-EC2_Instance_48.svg" x="418" y="238" width="24" height="24"/><text class="t" x="450" y="247">FW B</text><text class="s" x="450" y="264">target</text>
+                <path class="site" d="M335 184 V224" marker-end="url(#ar-gwf-s)"/>
+                <path class="site" d="M349 226 V186" marker-end="url(#ar-gwf-s)"/>
+                <path class="site" d="M455 184 V224" marker-end="url(#ar-gwf-s)"/>
+                <path class="site" d="M469 226 V186" marker-end="url(#ar-gwf-s)"/>
+                <text class="lbl2" x="290" y="64">GENEVE · UDP 6081</text>
+                <text class="s" x="290" y="84">5-tuple 흐름 고정</text>
+                <text class="s" x="290" y="102">MTU 8,500 bytes</text>
+              </svg>
+            </div>
+          </figure>
+          <div class="when">
+            <h3>언제 쓰나</h3>
+            <ul>
+              <li>인터넷 인바운드 · 아웃바운드 트래픽을 서드파티 방화벽으로 검사할 때</li>
+              <li>Transit Gateway로 VPC 간, 온프레미스 간 트래픽을 중앙에서 검사할 때</li>
+              <li>여러 VPC와 계정이 하나의 어플라이언스 플릿을 공유할 때</li>
+              <li>SNAT 없이 흐름 대칭을 유지하며 어플라이언스를 수평 확장할 때</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="chips kpi" role="list" aria-label="GWLB 주요 수치">
+        <div class="chip" role="listitem"><span class="num">6081</span><p>GENEVE 대상 그룹 프로토콜 · 포트</p></div>
+        <div class="chip" role="listitem"><span class="num">8,568</span><p>8,500 bytes 패킷을 받기 위한 어플라이언스 MTU</p></div>
+        <div class="chip" role="listitem"><span class="num">300</span><p>GWLB당 대상 (조정 불가)</p></div>
+        <div class="chip" role="listitem"><span class="num">1</span><p>GWLB당 리스너</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="gwlb-features" aria-labelledby="gwlb-f-h">
+    <div class="wrap">
+      <p class="tag">GWLB · Features</p>
+      <h2 id="gwlb-f-h">흐름 대칭과 장애 조치가 설계의 핵심입니다</h2>
+      <div class="features f-tight">
+        <article class="feature"><p class="ft">GENEVE</p><h3>GENEVE 캡슐화</h3><p>GENEVE 헤더는 Option Class <code>0x0108</code>의 TLV에 흐름 정보를 담고, 어플라이언스는 이를 풀어 원래 패킷을 처리합니다. 듀얼 스택에서도 IPv4 GENEVE 헤더를 씁니다.</p></article>
+        <article class="feature"><p class="ft">MTU</p><h3>MTU와 단편화</h3><p>GWLB 인터페이스는 8,500 bytes까지 받고 더 큰 패킷은 버립니다. IP 단편화를 지원하지 않고 "fragmentation needed" ICMP도 만들지 않아 PMTUD가 동작하지 않습니다.</p></article>
+        <article class="feature"><p class="ft">GWLB endpoint</p><h3>Gateway Load Balancer endpoint</h3><p>라우팅 테이블의 다음 홉이 되는 VPC 엔드포인트입니다. PrivateLink로 공급자 VPC의 어플라이언스와 소비자 VPC를 연결해, 검사 플릿을 여러 VPC · 계정이 함께 씁니다.</p></article>
+        <article class="feature"><p class="ft">Flow stickiness</p><h3>5 · 3 · 2-tuple 흐름 고정</h3><p>기본은 5-tuple이고, <code>source_ip_dest_ip_proto</code>(3-tuple)나 <code>source_ip_dest_ip</code>(2-tuple)로 바꿀 수 있습니다. 3 · 2-tuple에서는 유휴 제한 시간을 바꿀 수 없습니다.</p></article>
+        <article class="feature"><p class="ft">Target failover</p><h3>대상 장애 시 기존 흐름</h3><p><code>target_failover</code>를 <code>rebalance</code>로 두면 대상이 비정상이 되거나 등록 취소될 때 기존 흐름도 다른 대상으로 옮깁니다. 기본값은 <code>no_rebalance</code>이고 두 속성은 같은 값이어야 합니다.</p></article>
+        <article class="feature"><p class="ft">Idle timeout</p><h3>유휴 제한 시간</h3><p>TCP 흐름은 기본 350초(60~6,000초)이고 UDP는 120초 고정입니다. 350초보다 늘리면 대상 ENI의 연결 추적 제한 시간도 그 이상으로 맞춥니다.</p></article>
+        <article class="feature"><p class="ft">TGW appliance mode</p><h3>Transit Gateway 어플라이언스 모드</h3><p>보안 VPC 어태치먼트에 appliance mode를 켜면 TGW가 흐름 해시로 한 ENI를 골라 왕복 트래픽을 같은 가용 영역으로 보냅니다. 보안 VPC에는 TGW를 하나만 연결합니다.</p></article>
+        <article class="feature"><p class="ft">Route design</p><h3>중앙 검사 라우팅</h3><p>스포크 VPC는 TGW로 기본 경로를 보내고, TGW는 보안 VPC 어태치먼트로 보냅니다. 보안 VPC의 TGW 어태치먼트 서브넷은 GWLB endpoint로, 엔드포인트 서브넷은 다시 TGW로 향합니다.</p></article>
+        <article class="feature"><p class="ft">Partners</p><h3>파트너 어플라이언스</h3><p>ELB 파트너로 등록된 벤더는 어플라이언스를 GWLB와 통합 · 검증했습니다. 다만 어플라이언스 소프트웨어를 고르고 검증할 책임은 사용자에게 있습니다.</p></article>
+      </div>
+      <p class="rule-note">GWLB는 첫 패킷을 처리한 흐름의 응답이 GWLB를 거치지 않는 비대칭 흐름은 허용하지만 권장하지 않습니다. 첫 패킷을 보지 못한 흐름의 응답만 GWLB로 오는 경우는 지원하지 않습니다.</p>
+    </div>
+  </section>
+
+  <!-- ===================== Reference architecture · ALB ===================== -->
+  <section id="arch-alb" aria-labelledby="arch-alb-h">
+    <div class="wrap">
+      <p class="tag">Reference architecture · ALB</p>
+      <h2 id="arch-alb-h">엣지에서 컨테이너 · 인스턴스 · Lambda까지 하나의 ALB로</h2>
+      <p class="lede">CloudFront와 AWS WAF를 거친 요청을 두 AZ에 걸친 internet-facing ALB가 ACM 인증서로 받습니다. 리스너 규칙이 host · path 조건으로 ECS Fargate, EC2, Lambda 대상 그룹에 나누고, 필요하면 Cognito · OIDC로 먼저 인증합니다.</p>
+      <figure class="arch">
+        <div class="arch-scroll">
+          <svg viewBox="0 0 1000 556" role="img" aria-labelledby="arch-alb-title arch-alb-desc">
+            <title id="arch-alb-title">Application Load Balancer 레퍼런스 아키텍처</title>
+            <desc id="arch-alb-desc">사용자의 HTTPS 요청이 AWS WAF web ACL이 연결된 CloudFront를 거쳐 두 가용 영역의 퍼블릭 서브넷에 걸친 internet-facing ALB로 갑니다. ALB는 ACM 인증서로 HTTPS 443 리스너를 운영하고, 리스너 규칙의 path · host 조건에 따라 각 AZ 프라이빗 서브넷의 ECS Fargate 태스크(ip 대상 그룹), Auto Scaling 그룹의 EC2 인스턴스(instance 대상 그룹), VPC 밖의 Lambda 함수(lambda 대상 그룹)로 요청을 보냅니다. ALB는 Amazon Cognito 또는 OIDC IdP로 사용자를 인증하고, 액세스 로그를 S3 버킷에 저장합니다.</desc>
+            <defs>
+              <marker id="ar-ra-alb-p" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-p" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-ra-alb-s" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-s" d="M0 0 L10 5 L0 10 z"/></marker>
+            </defs>
+            <!-- zones -->
+            <rect class="zone" x="8" y="20" width="124" height="526" rx="6"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Internet_48_Light.svg" x="12" y="24" width="22" height="22"/><text class="z" x="40" y="40">INTERNET</text>
+            <rect class="zone" x="146" y="20" width="158" height="526" rx="6"/>
+            <image href="../../assets/aws-icons/AWS-Cloud_32.svg" x="146" y="20" width="24" height="24"/><text class="z" x="176" y="37">AWS EDGE</text>
+            <rect class="zone" x="318" y="20" width="674" height="526" rx="6"/>
+            <image href="../../assets/aws-icons/Region_32.svg" x="318" y="20" width="24" height="24"/><text class="z" x="348" y="37">REGION</text>
+            <rect class="zone" x="332" y="46" width="540" height="430" rx="6"/>
+            <image href="../../assets/aws-icons/Virtual-private-cloud-VPC_32.svg" x="332" y="46" width="22" height="22"/><text class="z" x="360" y="62">VPC</text>
+            <rect class="zone" x="344" y="70" width="516" height="188" rx="6"/>
+            <text class="z" x="352" y="86">AZ A</text>
+            <rect class="zone" x="344" y="278" width="516" height="178" rx="6"/>
+            <text class="z" x="352" y="294">AZ B</text>
+            <rect class="zone" x="356" y="94" width="164" height="156" rx="4"/>
+            <image href="../../assets/aws-icons/Public-subnet_32.svg" x="356" y="94" width="20" height="20"/><text class="z" x="382" y="108">PUBLIC SUBNET</text>
+            <rect class="zone" x="600" y="94" width="250" height="156" rx="4"/>
+            <image href="../../assets/aws-icons/Private-subnet_32.svg" x="600" y="94" width="20" height="20"/><text class="z" x="626" y="108">PRIVATE SUBNET</text>
+            <rect class="zone" x="356" y="302" width="164" height="146" rx="4"/>
+            <image href="../../assets/aws-icons/Public-subnet_32.svg" x="356" y="302" width="20" height="20"/><text class="z" x="382" y="316">PUBLIC SUBNET</text>
+            <rect class="zone" x="600" y="302" width="250" height="146" rx="4"/>
+            <image href="../../assets/aws-icons/Private-subnet_32.svg" x="600" y="302" width="20" height="20"/><text class="z" x="626" y="316">PRIVATE SUBNET</text>
+
+            <!-- client & edge -->
+            <rect class="box" x="16" y="236" width="108" height="64" rx="4"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Users_48_Light.svg" x="22" y="256" width="24" height="24"/><text class="t" x="52" y="264">사용자</text><text class="s" x="52" y="284">HTTPS</text>
+            <rect class="box" x="158" y="236" width="134" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_Amazon-CloudFront_48.svg" x="166" y="254" width="28" height="28"/><text class="t" x="202" y="264">CloudFront</text><text class="s" x="202" y="284">origin: ALB</text>
+            <rect class="box" x="158" y="364" width="134" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_AWS-WAF_48.svg" x="166" y="382" width="28" height="28"/><text class="t" x="202" y="392">AWS WAF</text><text class="s" x="202" y="412">web ACL</text>
+            <path class="assoc" d="M225 300 V364"/>
+            <path class="path" d="M124 268 H155" marker-end="url(#ar-ra-alb-p)"/>
+            <path class="path" d="M292 268 H381" marker-end="url(#ar-ra-alb-p)"/>
+
+            <!-- ALB spanning both AZs -->
+            <rect class="box" x="384" y="222" width="128" height="76" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Elastic-Load-Balancing_Application-Load-Balancer_48.svg" x="392" y="230" width="28" height="28"/><text class="t" x="428" y="243">ALB</text><text class="s" x="428" y="259">HTTPS:443</text>
+            <text class="s" x="394" y="286">ACM 인증서</text>
+
+            <!-- targets -->
+            <rect class="box" x="636" y="120" width="206" height="50" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-Elastic-Container-Service_Task_48.svg" x="644" y="133" width="24" height="24"/><text class="t" x="676" y="141">ECS Fargate task</text><text class="s" x="676" y="158">path /api/* · ip TG</text>
+            <rect class="box" x="636" y="186" width="206" height="50" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-EC2_Instance_48.svg" x="644" y="199" width="24" height="24"/><text class="t" x="676" y="207">EC2 · Auto Scaling</text><text class="s" x="676" y="224">host www.* · instance TG</text>
+            <rect class="box" x="636" y="320" width="206" height="50" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-EC2_Instance_48.svg" x="644" y="333" width="24" height="24"/><text class="t" x="676" y="341">EC2 · Auto Scaling</text><text class="s" x="676" y="358">host www.* · instance TG</text>
+            <rect class="box" x="636" y="384" width="206" height="50" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-Elastic-Container-Service_Task_48.svg" x="644" y="397" width="24" height="24"/><text class="t" x="676" y="405">ECS Fargate task</text><text class="s" x="676" y="422">path /api/* · ip TG</text>
+            <path class="path" d="M512 232 C568 232 576 145 633 145" marker-end="url(#ar-ra-alb-p)"/>
+            <path class="path" d="M512 252 C568 252 576 211 633 211" marker-end="url(#ar-ra-alb-p)"/>
+            <path class="path" d="M512 272 C568 272 576 345 633 345" marker-end="url(#ar-ra-alb-p)"/>
+            <path class="path" d="M512 290 C568 290 576 409 633 409" marker-end="url(#ar-ra-alb-p)"/>
+
+            <!-- outside VPC: S3 logs, Lambda, IdP -->
+            <rect class="box" x="886" y="62" width="98" height="70" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-Simple-Storage-Service_Bucket_48.svg" x="892" y="72" width="24" height="24"/><text class="t" x="922" y="90">S3</text><text class="s" x="894" y="114">access logs</text>
+            <path class="site" d="M498 222 V82 H883" marker-end="url(#ar-ra-alb-s)"/>
+            <rect class="box" x="886" y="300" width="98" height="70" rx="4"/>
+            <image href="../../assets/aws-icons/Res_AWS-Lambda_Lambda-Function_48.svg" x="892" y="310" width="24" height="24"/><text class="t" x="922" y="328">Lambda</text><text class="s" x="894" y="350">path /fn/*</text><text class="s" x="894" y="364">lambda TG</text>
+            <path class="path" d="M506 298 V466 H935 V373" marker-end="url(#ar-ra-alb-p)"/>
+            <rect class="box" x="376" y="486" width="196" height="52" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_Amazon-Cognito_48.svg" x="384" y="500" width="24" height="24"/><text class="t" x="416" y="507">Cognito · OIDC IdP</text><text class="s" x="416" y="525">authenticate 작업</text>
+            <path class="site" d="M490 298 V483" marker-end="url(#ar-ra-alb-s)"/>
+            <text class="s" x="600" y="510">대상은 AZ마다 배치 · Lambda는 VPC 밖에서 호출</text>
+          </svg>
+        </div>
+        <figcaption class="legend">
+          <span><i class="p"></i>요청 경로 (→ 요청 방향, 규칙별 대상 그룹)</span>
+          <span><i class="s"></i>ALB가 보내는 호출 (IdP 인증 · S3 액세스 로그)</span>
+          <span><i class="a"></i>연결 (CloudFront ↔ web ACL)</span>
+        </figcaption>
+        <p class="arch-hint">좁은 화면에서는 다이어그램을 좌우로 밀어서 보세요.</p>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ===================== Reference architecture · NLB ===================== -->
+  <section id="arch-nlb" aria-labelledby="arch-nlb-h">
+    <div class="wrap">
+      <p class="tag">Reference architecture · NLB</p>
+      <h2 id="arch-nlb-h">고정 IP와 PrivateLink로 L4 서비스를 노출</h2>
+      <p class="lede">internet-facing NLB는 AZ마다 Elastic IP를 하나씩 붙여, 온프레미스 방화벽이 고정 IP로 허용 목록을 만들 수 있습니다. 대상은 EC2 인스턴스, IP, ALB 중에서 고르고, 다른 계정에는 internal NLB를 엔드포인트 서비스로 만들어 PrivateLink로 제공합니다.</p>
+      <figure class="arch">
+        <div class="arch-scroll">
+          <svg viewBox="0 0 1000 540" role="img" aria-labelledby="arch-nlb-title arch-nlb-desc">
+            <title id="arch-nlb-title">Network Load Balancer 레퍼런스 아키텍처</title>
+            <desc id="arch-nlb-desc">온프레미스와 인터넷 클라이언트가 AZ마다 Elastic IP를 가진 internet-facing NLB에 TCP, UDP, TLS로 연결하고, NLB는 EC2 instance 대상 그룹, ip 대상 그룹, alb 대상 그룹으로 연결을 보냅니다. 다른 계정의 consumer VPC에 있는 애플리케이션은 interface endpoint를 거쳐 PrivateLink로 provider VPC의 엔드포인트 서비스인 internal NLB에 연결하고, internal NLB는 EC2 대상으로 보냅니다. 연결은 consumer 쪽에서만 시작합니다.</desc>
+            <defs>
+              <marker id="ar-ra-nlb-p" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-p" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-ra-nlb-f" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" orient="auto"><path class="ah-f" d="M0 0 L10 5 L0 10 z"/></marker>
+            </defs>
+            <!-- zones -->
+            <rect class="zone" x="8" y="20" width="320" height="270" rx="6"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Internet_48_Light.svg" x="12" y="24" width="22" height="22"/><text class="z" x="40" y="40">INTERNET · ON-PREMISES</text>
+            <rect class="zone" x="8" y="306" width="320" height="224" rx="6"/>
+            <image href="../../assets/aws-icons/AWS-Account_32.svg" x="8" y="306" width="24" height="24"/><text class="z" x="38" y="323">CONSUMER ACCOUNT</text>
+            <rect class="zone" x="20" y="340" width="298" height="178" rx="6"/>
+            <image href="../../assets/aws-icons/Virtual-private-cloud-VPC_32.svg" x="20" y="340" width="22" height="22"/><text class="z" x="48" y="356">CONSUMER VPC</text>
+            <rect class="zone" x="344" y="20" width="648" height="510" rx="6"/>
+            <image href="../../assets/aws-icons/AWS-Account_32.svg" x="344" y="20" width="24" height="24"/><text class="z" x="374" y="37">PROVIDER ACCOUNT</text>
+            <rect class="zone" x="358" y="48" width="622" height="472" rx="6"/>
+            <image href="../../assets/aws-icons/Virtual-private-cloud-VPC_32.svg" x="358" y="48" width="22" height="22"/><text class="z" x="386" y="64">PROVIDER VPC</text>
+            <rect class="zone" x="372" y="78" width="188" height="178" rx="4"/>
+            <image href="../../assets/aws-icons/Public-subnet_32.svg" x="372" y="78" width="20" height="20"/><text class="z" x="398" y="92">PUBLIC SUBNETS</text>
+            <rect class="zone" x="590" y="78" width="378" height="178" rx="4"/>
+            <image href="../../assets/aws-icons/Private-subnet_32.svg" x="590" y="78" width="20" height="20"/><text class="z" x="616" y="92">PRIVATE SUBNETS</text>
+            <rect class="zone" x="372" y="300" width="596" height="208" rx="4"/>
+            <image href="../../assets/aws-icons/Private-subnet_32.svg" x="372" y="300" width="20" height="20"/><text class="z" x="398" y="314">PRIVATE SUBNETS</text>
+
+            <!-- clients -->
+            <rect class="box" x="24" y="108" width="176" height="64" rx="4"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Office-building_48_Light.svg" x="32" y="126" width="28" height="28"/><text class="t" x="68" y="136">온프레미스</text><text class="s" x="68" y="156">EIP 허용 목록</text>
+            <rect class="box" x="24" y="180" width="176" height="64" rx="4"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Client_48_Light.svg" x="32" y="198" width="28" height="28"/><text class="t" x="68" y="208">클라이언트</text><text class="s" x="68" y="228">인터넷</text>
+            <path class="path" d="M200 140 H383" marker-end="url(#ar-ra-nlb-p)"/>
+            <path class="path" d="M200 212 H383" marker-end="url(#ar-ra-nlb-p)"/>
+            <text class="lbl" x="214" y="132">TLS:443</text>
+            <text class="lbl" x="214" y="204">TCP · UDP</text>
+
+            <!-- internet-facing NLB -->
+            <rect class="box" x="386" y="106" width="160" height="134" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Elastic-Load-Balancing_Network-Load-Balancer_48.svg" x="394" y="116" width="28" height="28"/><text class="t" x="430" y="134">NLB</text><text class="s" x="430" y="150">internet-facing</text>
+            <text class="s" x="396" y="176">TCP · UDP · TLS</text>
+            <image href="../../assets/aws-icons/Res_Amazon-EC2_Elastic-IP-Address_48.svg" x="396" y="188" width="18" height="18"/><text class="s" x="420" y="201">EIP · AZ a</text>
+            <image href="../../assets/aws-icons/Res_Amazon-EC2_Elastic-IP-Address_48.svg" x="396" y="212" width="18" height="18"/><text class="s" x="420" y="225">EIP · AZ b</text>
+
+            <!-- targets -->
+            <rect class="box" x="650" y="100" width="306" height="44" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-EC2_Instance_48.svg" x="658" y="110" width="24" height="24"/><text class="t" x="690" y="118">EC2 · instance TG</text><text class="s" x="690" y="135">TCP · 클라이언트 IP 유지 (기본 켜짐)</text>
+            <rect class="box" x="650" y="152" width="306" height="44" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-VPC_Elastic-Network-Interface_48.svg" x="658" y="162" width="24" height="24"/><text class="t" x="690" y="170">IP 대상 · ip TG</text><text class="s" x="690" y="187">UDP · 클라이언트 IP 항상 유지</text>
+            <rect class="box" x="650" y="204" width="306" height="44" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Elastic-Load-Balancing_Application-Load-Balancer_48.svg" x="658" y="214" width="24" height="24"/><text class="t" x="690" y="222">ALB · alb TG</text><text class="s" x="690" y="239">TCP · 고정 IP 뒤에서 L7 라우팅</text>
+            <path class="path" d="M546 122 H647" marker-end="url(#ar-ra-nlb-p)"/>
+            <path class="path" d="M546 174 H647" marker-end="url(#ar-ra-nlb-p)"/>
+            <path class="path" d="M546 226 H647" marker-end="url(#ar-ra-nlb-p)"/>
+            <text class="s" x="372" y="280">ip TG의 TCP · TLS는 클라이언트 IP 유지가 기본 꺼짐 · 대상은 AZ a · AZ b에 분산</text>
+
+            <!-- PrivateLink -->
+            <rect class="box" x="32" y="396" width="128" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-EC2_Instance_48.svg" x="40" y="414" width="28" height="28"/><text class="t" x="76" y="424">앱</text><text class="s" x="76" y="444">consumer</text>
+            <rect class="box" x="180" y="396" width="134" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-VPC_Endpoints_48.svg" x="188" y="414" width="28" height="28"/><text class="t" x="222" y="424">Endpoint</text><text class="s" x="222" y="444">interface</text>
+            <path class="path" d="M160 428 H177" marker-end="url(#ar-ra-nlb-p)"/>
+            <text class="s" x="32" y="492">AZ마다 엔드포인트 ENI · 사설 IP</text>
+            <path class="fiber" d="M314 428 H382" marker-end="url(#ar-ra-nlb-f)"/>
+            <rect class="box" x="386" y="396" width="176" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Elastic-Load-Balancing_Network-Load-Balancer_48.svg" x="394" y="414" width="28" height="28"/><text class="t" x="430" y="424">Internal NLB</text><text class="s" x="430" y="444">endpoint service</text>
+            <rect class="box" x="650" y="396" width="306" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-EC2_Instance_48.svg" x="658" y="414" width="28" height="28"/><text class="t" x="694" y="424">EC2 · instance TG</text><text class="s" x="694" y="444">TCP 443 · AZ a · AZ b</text>
+            <path class="path" d="M562 428 H647" marker-end="url(#ar-ra-nlb-p)"/>
+            <text class="lbl2" x="386" y="370">PrivateLink · consumer만 연결을 시작</text>
+            <text class="s" x="386" y="484">엔드포인트를 거친 트래픽의 소스 IP는 NLB 사설 IP</text>
+            <text class="s" x="386" y="500">→ 클라이언트 IP · vpce ID는 Proxy Protocol v2 헤더로 전달</text>
+          </svg>
+        </div>
+        <figcaption class="legend">
+          <span><i class="p"></i>연결 경로 (→ 연결 방향)</span>
+          <span><i></i>PrivateLink (consumer → endpoint service, 단방향 시작)</span>
+        </figcaption>
+        <p class="arch-hint">좁은 화면에서는 다이어그램을 좌우로 밀어서 보세요.</p>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ===================== Reference architecture · GWLB ===================== -->
+  <section id="arch-gwlb" aria-labelledby="arch-gwlb-h">
+    <div class="wrap">
+      <p class="tag">Reference architecture · GWLB</p>
+      <h2 id="arch-gwlb-h">인바운드와 이그레스를 한 어플라이언스 플릿에서 검사</h2>
+      <p class="lede">보안 VPC의 GWLB를 엔드포인트 서비스로 두고, 각 VPC의 GWLB endpoint를 라우팅 다음 홉으로 씁니다. 인바운드는 IGW 수신 라우팅이, 스포크 VPC의 아웃바운드는 Transit Gateway가 엔드포인트로 보내고, 어플라이언스를 다녀온 트래픽만 목적지로 갑니다.</p>
+      <figure class="arch">
+        <div class="arch-scroll">
+          <svg viewBox="0 0 1000 540" role="img" aria-labelledby="arch-gwlb-title arch-gwlb-desc">
+            <title id="arch-gwlb-title">Gateway Load Balancer 중앙 검사 레퍼런스 아키텍처</title>
+            <desc id="arch-gwlb-desc">인바운드: 인터넷 사용자의 트래픽이 애플리케이션 VPC의 인터넷 게이트웨이에 도착하면 수신 라우팅 테이블이 애플리케이션 서브넷행 트래픽을 GWLB endpoint로 보냅니다. GWLB endpoint는 PrivateLink로 보안 VPC의 Gateway Load Balancer에 보내고, GWLB는 GENEVE UDP 6081로 Auto Scaling 그룹의 방화벽 어플라이언스에 나눕니다. 검사를 마친 트래픽은 같은 GWLB endpoint로 돌아와 애플리케이션으로 갑니다. 이그레스: 스포크 VPC의 트래픽이 Transit Gateway를 거쳐 appliance mode를 켠 이그레스 VPC 어태치먼트로 들어오고, GWLB endpoint에서 GWLB와 어플라이언스를 다녀온 뒤 NAT gateway와 인터넷 게이트웨이를 거쳐 인터넷으로 나갑니다.</desc>
+            <defs>
+              <marker id="ar-ra-gwlb-f" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" orient="auto"><path class="ah-f" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-ra-gwlb-p" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-p" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-ra-gwlb-s" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-s" d="M0 0 L10 5 L0 10 z"/></marker>
+            </defs>
+            <!-- zones -->
+            <rect class="zone" x="8" y="20" width="112" height="240" rx="6"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Internet_48_Light.svg" x="12" y="24" width="22" height="22"/><text class="z" x="40" y="40">INTERNET</text>
+            <rect class="zone" x="136" y="20" width="384" height="240" rx="6"/>
+            <image href="../../assets/aws-icons/Virtual-private-cloud-VPC_32.svg" x="136" y="20" width="24" height="24"/><text class="z" x="166" y="37">APPLICATION VPC · INGRESS</text>
+            <rect class="zone" x="316" y="48" width="188" height="98" rx="4"/>
+            <image href="../../assets/aws-icons/Public-subnet_32.svg" x="316" y="48" width="20" height="20"/><text class="z" x="342" y="62">GWLBE SUBNET</text>
+            <rect class="zone" x="316" y="154" width="188" height="96" rx="4"/>
+            <image href="../../assets/aws-icons/Public-subnet_32.svg" x="316" y="154" width="20" height="20"/><text class="z" x="342" y="168">APP SUBNET</text>
+            <rect class="zone" x="8" y="280" width="132" height="120" rx="6"/>
+            <image href="../../assets/aws-icons/Virtual-private-cloud-VPC_32.svg" x="8" y="280" width="22" height="22"/><text class="z" x="36" y="296">SPOKE VPC A</text>
+            <rect class="zone" x="8" y="410" width="132" height="120" rx="6"/>
+            <image href="../../assets/aws-icons/Virtual-private-cloud-VPC_32.svg" x="8" y="410" width="22" height="22"/><text class="z" x="36" y="426">SPOKE VPC B</text>
+            <rect class="zone" x="320" y="280" width="364" height="254" rx="6"/>
+            <image href="../../assets/aws-icons/Virtual-private-cloud-VPC_32.svg" x="320" y="280" width="24" height="24"/><text class="z" x="350" y="297">EGRESS VPC</text>
+            <rect class="zone" x="708" y="20" width="284" height="514" rx="6"/>
+            <image href="../../assets/aws-icons/Virtual-private-cloud-VPC_32.svg" x="708" y="20" width="24" height="24"/><text class="z" x="738" y="37">SECURITY VPC · PROVIDER</text>
+
+            <!-- ingress -->
+            <rect class="box" x="16" y="100" width="96" height="64" rx="4"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Users_48_Light.svg" x="22" y="120" width="24" height="24"/><text class="t" x="52" y="128">사용자</text><text class="s" x="52" y="148">HTTPS</text>
+            <rect class="box" x="152" y="100" width="140" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-VPC_Internet-Gateway_48.svg" x="160" y="118" width="28" height="28"/><text class="t" x="196" y="128">IGW</text><text class="s" x="196" y="148">수신 RT</text>
+            <text class="s" x="152" y="196">IGW 라우팅 테이블</text>
+            <text class="s" x="152" y="214">app subnet → vpce</text>
+            <path class="path" d="M112 132 H149" marker-end="url(#ar-ra-gwlb-p)"/>
+            <rect class="box" x="330" y="74" width="160" height="58" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-VPC_Endpoints_48.svg" x="338" y="89" width="28" height="28"/><text class="t" x="374" y="98">GWLB endpoint</text><text class="s" x="374" y="117">AZ마다 1개</text>
+            <path class="fiber" d="M292 118 C310 118 310 103 327 103" marker-end="url(#ar-ra-gwlb-f)"/>
+            <rect class="box" x="330" y="182" width="160" height="58" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-EC2_Instance_48.svg" x="338" y="197" width="28" height="28"/><text class="t" x="374" y="206">애플리케이션</text><text class="s" x="374" y="225">검사 후 도착</text>
+            <path class="fiber" d="M470 132 V179" marker-end="url(#ar-ra-gwlb-f)"/>
+            <path class="fiber" d="M490 92 H610 V212 H719" marker-end="url(#ar-ra-gwlb-f)"/>
+            <path class="fiber" d="M722 228 H596 V112 H493" marker-end="url(#ar-ra-gwlb-f)"/>
+            <text class="lbl2" x="528" y="84">PrivateLink</text>
+
+            <!-- egress -->
+            <rect class="box" x="20" y="330" width="108" height="50" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-EC2_Instance_48.svg" x="26" y="343" width="24" height="24"/><text class="t" x="56" y="351">EC2</text><text class="s" x="56" y="368">0/0 → TGW</text>
+            <rect class="box" x="20" y="460" width="108" height="50" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-EC2_Instance_48.svg" x="26" y="473" width="24" height="24"/><text class="t" x="56" y="481">EC2</text><text class="s" x="56" y="498">0/0 → TGW</text>
+            <rect class="box" x="160" y="316" width="140" height="196" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_AWS-Transit-Gateway_48.svg" x="168" y="326" width="28" height="28"/><text class="t" x="168" y="378">Transit</text><text class="t" x="168" y="396">Gateway</text>
+            <text class="s" x="168" y="420">스포크 0/0 →</text><text class="s" x="168" y="436">이그레스 VPC</text>
+            <path class="path" d="M128 355 H157" marker-end="url(#ar-ra-gwlb-p)"/>
+            <path class="path" d="M128 485 H157" marker-end="url(#ar-ra-gwlb-p)"/>
+            <rect class="box" x="332" y="316" width="148" height="56" rx="4"/>
+            <image href="../../assets/aws-icons/Res_AWS-Transit-Gateway_Attachment_48.svg" x="340" y="330" width="28" height="28"/><text class="t" x="376" y="339">Attachment</text><text class="s" x="376" y="358">appliance mode</text>
+            <path class="path" d="M300 344 H329" marker-end="url(#ar-ra-gwlb-p)"/>
+            <rect class="box" x="500" y="316" width="176" height="56" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-VPC_Endpoints_48.svg" x="508" y="330" width="28" height="28"/><text class="t" x="544" y="339">GWLB endpoint</text><text class="s" x="544" y="358">TGW 서브넷 → vpce</text>
+            <path class="path" d="M480 344 H497" marker-end="url(#ar-ra-gwlb-p)"/>
+            <path class="fiber" d="M676 328 H690 V240 H719" marker-end="url(#ar-ra-gwlb-f)"/>
+            <path class="fiber" d="M722 252 H700 V352 H679" marker-end="url(#ar-ra-gwlb-f)"/>
+            <rect class="box" x="500" y="396" width="176" height="56" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-VPC_NAT-Gateway_48.svg" x="508" y="410" width="28" height="28"/><text class="t" x="544" y="419">NAT gateway</text><text class="s" x="544" y="438">public subnet</text>
+            <path class="fiber" d="M588 372 V393" marker-end="url(#ar-ra-gwlb-f)"/>
+            <rect class="box" x="500" y="472" width="176" height="52" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-VPC_Internet-Gateway_48.svg" x="508" y="484" width="28" height="28"/><text class="t" x="544" y="495">IGW</text><text class="s" x="544" y="513">0/0 → 인터넷</text>
+            <path class="path" d="M588 452 V469" marker-end="url(#ar-ra-gwlb-p)"/>
+            <path class="path" d="M500 498 H419" marker-end="url(#ar-ra-gwlb-p)"/>
+            <text class="s" x="344" y="502">인터넷</text>
+
+            <!-- security vpc -->
+            <rect class="box" x="722" y="190" width="256" height="72" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Elastic-Load-Balancing_Gateway-Load-Balancer_48.svg" x="730" y="212" width="28" height="28"/><text class="t" x="766" y="220">Gateway Load Balancer</text><text class="s" x="766" y="240">endpoint service</text>
+            <text class="s" x="722" y="92">여러 VPC · 계정의 GWLBe가</text>
+            <text class="s" x="722" y="110">하나의 플릿을 공유</text>
+            <rect class="zone" x="722" y="330" width="256" height="190" rx="6"/>
+            <image href="../../assets/aws-icons/Auto-Scaling-group_32.svg" x="722" y="330" width="22" height="22"/><text class="z" x="750" y="346">ASG</text>
+            <rect class="box" x="732" y="400" width="112" height="56" rx="4"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Firewall_48_Light.svg" x="740" y="416" width="24" height="24"/><text class="t" x="770" y="424">방화벽</text><text class="s" x="770" y="442">AZ a</text>
+            <rect class="box" x="856" y="400" width="112" height="56" rx="4"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Firewall_48_Light.svg" x="864" y="416" width="24" height="24"/><text class="t" x="894" y="424">방화벽</text><text class="s" x="894" y="442">AZ b</text>
+            <path class="site" d="M781 262 V397" marker-end="url(#ar-ra-gwlb-s)"/>
+            <path class="site" d="M795 400 V265" marker-end="url(#ar-ra-gwlb-s)"/>
+            <path class="site" d="M905 262 V397" marker-end="url(#ar-ra-gwlb-s)"/>
+            <path class="site" d="M919 400 V265" marker-end="url(#ar-ra-gwlb-s)"/>
+            <text class="lbl2" x="812" y="300">GENEVE</text>
+            <text class="lbl2" x="812" y="316">UDP 6081</text>
+            <text class="s" x="732" y="482">서드파티 어플라이언스</text>
+            <text class="s" x="732" y="500">5-tuple 흐름 고정</text>
+          </svg>
+        </div>
+        <figcaption class="legend">
+          <span><i></i>검사 경로 (GWLB endpoint ↔ GWLB, 갔다가 돌아오는 두 줄)</span>
+          <span><i class="s"></i>GENEVE 캡슐화 (어플라이언스 왕복)</span>
+          <span><i class="p"></i>일반 트래픽 (→ 진행 방향)</span>
+        </figcaption>
+        <p class="arch-hint">좁은 화면에서는 다이어그램을 좌우로 밀어서 보세요.</p>
+      </figure>
+    </div>
+  </section>
+
+  <section id="start" aria-labelledby="start-h">
+    <div class="wrap">
+      <p class="tag">Getting started</p>
+      <h2 id="start-h">구성 순서</h2>
+      <p class="lede">세 유형 모두 같은 순서로 만듭니다. 차이는 리스너 프로토콜과 대상 유형, 그리고 GWLB의 경우 엔드포인트와 라우팅 테이블입니다.</p>
+      <ol class="steps">
+        <li><span class="num">01</span><h3>유형과 서브넷</h3><p>비교표로 유형을 정하고, 가용 영역마다 서브넷을 하나씩 고릅니다. 인터넷 연결 여부와 IP 주소 유형(IPv4 · 듀얼 스택)도 이때 정합니다.</p></li>
+        <li><span class="num">02</span><h3>보안 그룹</h3><p>ALB와 NLB에 보안 그룹을 연결합니다. NLB는 생성할 때 연결해야 나중에 바꿀 수 있습니다. GWLB는 어플라이언스 보안 그룹에서 GENEVE 6081을 허용합니다.</p></li>
+        <li><span class="num">03</span><h3>대상 그룹 · 헬스 체크</h3><p>대상 유형과 프로토콜을 정하고 대상을 등록합니다. 헬스 체크 경로, 등록 취소 지연, 고정 세션 같은 속성을 맞춥니다.</p></li>
+        <li><span class="num">04</span><h3>리스너 · 규칙</h3><p>ALB · NLB는 리스너와 인증서, 규칙을 만듭니다. GWLB는 엔드포인트 서비스와 GWLB endpoint를 만들고 라우팅 테이블에 다음 홉으로 넣습니다.</p></li>
+        <li><span class="num">05</span><h3>DNS · 모니터링</h3><p>Route 53 alias 레코드로 도메인을 연결하고, CloudWatch 지표와 액세스 로그로 대상 상태와 용량 단위 사용량을 확인합니다.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="pricing" aria-labelledby="pricing-h">
+    <div class="wrap">
+      <p class="tag">Pricing</p>
+      <h2 id="pricing-h">비용 항목</h2>
+      <p class="lede">세 유형 모두 로드 밸런서 실행 시간과 용량 단위(LCU · NLCU · GLCU) 사용량으로 과금됩니다. 용량 단위는 시간마다 여러 측정 항목 중 사용량이 가장 큰 항목 하나로 계산합니다.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">Elastic Load Balancing 과금 항목</caption>
+          <thead><tr><th scope="col">과금 항목</th><th scope="col">용량 단위 1개의 기준</th><th scope="col">참고</th></tr></thead>
+          <tbody>
+            <tr><td class="row-h">로드 밸런서 시간</td><td data-k="과금 기준">ALB · NLB · GWLB가 실행된 시간 (1시간 미만도 1시간)</td><td data-k="참고">유형별 단가가 다릅니다</td></tr>
+            <tr><td class="row-h">ALB LCU</td><td data-k="과금 기준">새 연결 25/초 · 활성 연결 3,000/분 · 처리 1 GB/시간 · 규칙 평가 1,000/초</td><td data-k="참고">처리한 규칙 중 처음 10개는 무료. mTLS는 활성 연결 1,500/분, Lambda 대상은 0.4 GB/시간 기준</td></tr>
+            <tr><td class="row-h">NLB NLCU</td><td data-k="과금 기준">TCP 새 연결 800/초 · 활성 100,000/분<br>UDP 새 흐름 400/초 · 활성 50,000/분<br>TLS 새 연결 50/초 · 활성 3,000/분</td><td data-k="참고">처리 바이트는 세 프로토콜 모두 1 GB/시간</td></tr>
+            <tr><td class="row-h">GWLB GLCU</td><td data-k="과금 기준">새 연결 · 흐름 600/초 · 활성 60,000/분 · 처리 1 GB/시간</td><td data-k="참고">GWLB endpoint는 엔드포인트 시간과 처리 GB로 AWS PrivateLink 요금에서 청구됩니다</td></tr>
+            <tr><td class="row-h">용량 예약</td><td data-k="과금 기준">예약한 용량 단위-시간</td><td data-k="참고">Load Balancer Capacity Unit Reservation 사용 시. 예약을 넘는 사용량은 따로 과금됩니다</td></tr>
+            <tr><td class="row-h">관련 요금</td><td data-k="과금 기준">다른 서비스에서 청구</td><td data-k="참고">데이터 전송(Amazon EC2 요금), 로드 밸런서가 쓰는 퍼블릭 IPv4 주소(Amazon VPC 요금)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="lede" style="font-size:14px">요금 단가는 리전과 사용량에 따라 다릅니다. 최신 단가는 <a href="https://aws.amazon.com/elasticloadbalancing/pricing/" target="_blank" rel="noopener">Elastic Load Balancing 요금 페이지</a>에서 확인하세요.</p>
+    </div>
+  </section>
+
+  <section class="cta" id="next" aria-labelledby="cta-h">
+    <div class="wrap">
+      <p class="tag">Next step</p>
+      <h2 id="cta-h">워크로드에 맞는 로드 밸런서 조합을 정해 보세요</h2>
+      <p class="lede">프로토콜, 고정 IP 필요 여부, 인증 방식, 검사 요구 사항을 정리해 오시면 ALB · NLB · GWLB 배치를 함께 검토합니다.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="https://aws.amazon.com/elasticloadbalancing/" target="_blank" rel="noopener">서비스 페이지 열기</a>
+        <a class="btn btn-ghost" href="https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/what-is-load-balancing.html" target="_blank" rel="noopener">사용 설명서 읽기</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a href="../">← AWS 네트워킹 서비스 포트폴리오</a>
+    <span>Elastic Load Balancing 소개 자료. 기능 지원 범위, 할당량, 요금은 리전과 로드 밸런서 유형에 따라 다르니 공식 문서를 확인하세요.</span>
+    <a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html" target="_blank" rel="noopener">ELB 동작 방식 문서</a>
+  </div>
+</footer>
+
+</body>
+</html>

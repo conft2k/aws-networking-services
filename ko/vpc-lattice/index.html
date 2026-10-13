@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>VPC Lattice 소개</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+body{margin:0}img{max-width:100%}[hidden]{display:none!important}
+
+/* Layout: a cross-connect work order. Cool steel paper, navy ink, Amazon orange as the one accent; section tags read like fiber labels. */
+:root{
+  --bg:#EEF1F4; --surface:#FFFFFF; --sunken:#E3E8ED;
+  --ink:#14202E; --ink-2:#44515F; --ink-3:#5A6672;
+  --line:#CDD5DD; --line-2:#B4BFCA;
+  --fiber:#FF9900;          /* Amazon orange — fills only */
+  --fiber-ink:#B35C00;      /* orange-derived, AA on light surfaces */
+  --fiber-soft:#FFF0D9;
+  --on-fiber:#14202E;
+  --trace:#2E7D9A;          /* secondary line color for diagram paths */
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --maxw:1120px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--fiber-ink);outline-offset:3px;border-radius:2px}
+.skip-link{position:absolute;left:16px;top:-60px;background:var(--fiber);color:var(--on-fiber);padding:8px 14px;font-weight:700;z-index:50;text-decoration:none}
+.skip-link:focus{top:12px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.wrap{max-width:var(--maxw);margin:0 auto;padding-inline:24px}
+section{padding-block:88px;border-top:1px solid var(--line)}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.25}
+h2{font-size:clamp(26px,3.4vw,36px);font-weight:700;letter-spacing:-.01em}
+h3{font-size:18px;font-weight:700}
+p{margin:0}
+.lede{color:var(--ink-2);max-width:62ch;margin-top:14px}
+.num{font-family:var(--display);font-variant-numeric:tabular-nums lining-nums}
+.mono{font-family:var(--mono)}
+
+/* fiber label: the section tag */
+.tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-bottom:14px}
+.tag::before{content:"";width:22px;height:8px;background:var(--fiber);border-radius:1px}
+
+/* nav */
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:60px}
+.brand{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.02em;text-decoration:none;text-transform:uppercase}
+.brand span{color:var(--fiber-ink)}
+.navlinks{display:flex;gap:22px;font-size:14px;align-items:center}
+.navlinks a{text-decoration:none;color:var(--ink-2)}
+.navlinks a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;font-weight:700;font-size:15px;text-decoration:none;border-radius:4px;border:1px solid transparent;transition:transform .15s ease,background .15s ease}
+.btn-primary{background:var(--fiber);color:var(--on-fiber)}
+.btn-primary:hover{transform:translateY(-1px)}
+.btn-ghost{border-color:var(--line-2);color:var(--ink)}
+.btn-ghost:hover{background:var(--sunken)}
+.navlinks .btn{min-height:38px;padding:0 14px;font-size:14px;color:var(--on-fiber)}
+
+/* hero */
+.hero{padding-block:72px 64px;border-top:0}
+.hero-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:56px;align-items:center}
+.eyebrow{font-family:var(--mono);font-size:13px;color:var(--fiber-ink);letter-spacing:.04em}
+.hero h1{font-size:clamp(34px,5vw,56px);font-weight:700;letter-spacing:-.02em;margin-top:16px}
+.hero h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--fiber) 62%,var(--fiber) 90%,transparent 90%);padding-inline:2px}
+.hero .lede{font-size:18px}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+
+/* hero visual: port faceplate */
+.faceplate{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px}
+.faceplate-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.ports{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+.port{border:1px solid var(--line);border-radius:4px;padding:14px 14px 12px;background:var(--sunken);display:flex;flex-direction:column;gap:2px}
+.port .num{font-size:40px;font-weight:600;line-height:1}
+.port .num small{font-size:18px;color:var(--ink-2);margin-left:2px}
+.port .optic{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+.port .led{width:8px;height:8px;border-radius:50%;background:var(--fiber);align-self:flex-end;margin-top:-6px;animation:blink 2.4s ease-in-out infinite}
+.port:nth-child(2) .led{animation-delay:.6s}.port:nth-child(3) .led{animation-delay:1.2s}.port:nth-child(4) .led{animation-delay:1.8s}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.faceplate-foot{margin-top:14px;font-size:13px;color:var(--ink-2)}
+
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:56px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.chip{padding:18px 20px;border-left:1px solid var(--line);min-width:0}
+.chip:first-child{border-left:0}
+.chip .num{font-size:34px;font-weight:600;line-height:1.1}
+.chip p{font-size:13.5px;color:var(--ink-2);margin-top:4px}
+
+/* value */
+.split{display:grid;grid-template-columns:1fr 1.4fr;gap:56px}
+.pillars{display:grid;gap:0;border-top:1px solid var(--line-2)}
+.pillar{display:grid;grid-template-columns:120px 1fr;gap:20px;padding-block:22px;border-bottom:1px solid var(--line)}
+.pillar .k{font-family:var(--display);font-size:22px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--fiber-ink)}
+.pillar p{color:var(--ink-2);margin-top:6px}
+
+/* stack (L1/L2/L3) */
+.stack{margin-top:40px;display:grid;gap:10px}
+.layer{display:grid;grid-template-columns:96px 1fr 1.2fr;gap:24px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px 24px}
+.layer .lv{font-family:var(--display);font-size:44px;font-weight:700;line-height:.9}
+.layer .lv small{display:block;font-family:var(--mono);font-size:11px;font-weight:400;color:var(--ink-3);letter-spacing:.06em;margin-top:8px;text-transform:uppercase}
+.layer p{color:var(--ink-2);margin-top:6px;font-size:15px}
+.specs{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+.specs code{font-family:var(--mono);font-size:12.5px;background:var(--sunken);border:1px solid var(--line);padding:3px 8px;border-radius:3px;color:var(--ink)}
+
+/* features */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:40px}
+.feature{background:var(--surface);padding:26px 24px;min-width:0}
+.feature .ft{font-family:var(--mono);font-size:11.5px;color:var(--fiber-ink);letter-spacing:.06em;text-transform:uppercase}
+.feature h3{margin-top:8px}
+.feature p{color:var(--ink-2);font-size:15px;margin-top:8px}
+
+/* table */
+.tbl-wrap{margin-top:36px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:14px 18px;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--sunken)}
+tbody tr:last-child td{border-bottom:0}
+td.row-h{font-weight:700;width:22%}
+td .num{font-size:18px;font-weight:600}
+
+/* architecture */
+.arch{margin-top:36px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px}
+.arch-scroll{overflow-x:auto}
+.arch svg{display:block;width:100%;min-width:860px;height:auto}
+.arch-hint{display:none;font-size:13px;color:var(--ink-3);margin-top:10px}
+svg .box{fill:var(--sunken);stroke:var(--line-2)}
+svg .zone{fill:none;stroke:var(--line-2);stroke-dasharray:4 4}
+svg .t{fill:var(--ink);font-family:var(--sans);font-size:14px;font-weight:700}
+svg .s{fill:var(--ink-3);font-family:var(--mono);font-size:11px}
+svg .z{fill:var(--ink-2);font-family:var(--mono);font-size:11px;letter-spacing:.08em}
+svg .fiber{stroke:var(--fiber);stroke-width:5;fill:none;stroke-linecap:round}
+svg .path{stroke:var(--trace);stroke-width:2;fill:none}
+svg .site{stroke:var(--fiber-ink);stroke-width:2;fill:none;stroke-dasharray:6 5}
+svg .lbl{fill:var(--trace);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .lbl2{fill:var(--fiber-ink);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .dot{fill:var(--fiber)}
+svg .ah-p{fill:var(--trace)}
+svg .ah-f{fill:var(--fiber)}
+svg .ah-s{fill:var(--fiber-ink)}
+.legend i.dir{position:relative;width:26px}
+.legend i.dir::after{content:"";position:absolute;right:-3px;top:-6px;border-left:8px solid var(--trace);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.legend i.f.dir::after{top:-7px;border-left-color:var(--fiber)}
+.legend i.t.dir::after{top:-6.5px;border-left-color:var(--fiber)}
+.legend i.s.dir::after{border-left-color:var(--fiber-ink)}
+.legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--ink-2)}
+.legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--fiber)}
+.legend i.p{border-top:2px solid var(--trace)}
+.legend i.s{border-top:2px dashed var(--fiber-ink)}
+
+/* steps */
+.steps{list-style:none;padding:0;margin:40px 0 0;display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:4px solid var(--fiber)}
+.steps li{padding:20px 18px 0 0;min-width:0}
+.steps .num{font-size:15px;font-weight:600;color:var(--fiber-ink);letter-spacing:.06em}
+.steps h3{font-size:16px;margin-top:6px}
+.steps p{font-size:14px;color:var(--ink-2);margin-top:6px}
+
+/* resiliency */
+.res{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:36px}
+.res-card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:26px}
+.res-card .num{font-size:52px;font-weight:700;line-height:1}
+.res-card .num small{font-size:20px;color:var(--ink-2)}
+.res-card h3{margin-top:10px}
+.res-card p{color:var(--ink-2);font-size:15px;margin-top:6px}
+.res-card.max{border-color:var(--fiber);box-shadow:inset 0 4px 0 var(--fiber)}
+
+/* cta */
+.cta{text-align:center}
+.cta h2{max-width:22ch;margin:0 auto}
+.cta .lede{margin:14px auto 0}
+.cta .cta-row{justify-content:center}
+footer{border-top:1px solid var(--line);padding-block:28px;font-size:13px;color:var(--ink-3)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+
+@media (max-width:1024px){
+  .hero-grid,.split{grid-template-columns:1fr;gap:40px}
+  .features{grid-template-columns:repeat(2,1fr)}
+  .steps{grid-template-columns:repeat(2,1fr);border-top:0;gap:0 24px}
+  .steps li{border-top:4px solid var(--fiber);padding-bottom:24px}
+  .layer{grid-template-columns:80px 1fr}
+  .layer .specs{grid-column:2}
+  .chips{grid-template-columns:repeat(2,1fr)}
+  .chip:nth-child(3){border-left:0}
+  .chip:nth-child(n+3){border-top:1px solid var(--line)}
+}
+@media (max-width:640px){
+  .wrap{padding-inline:18px}
+  section{padding-block:60px}
+  .navlinks a:not(.btn){display:none}
+  .features,.res{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr}
+  .pillar{grid-template-columns:1fr;gap:0}
+  .layer{grid-template-columns:1fr;gap:12px}
+  .layer .specs{grid-column:auto}
+  .cta-row .btn{width:100%}
+  .arch-hint{display:block}
+  table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  table,tbody,tr,td{display:block;width:100%}
+  tr{border-bottom:1px solid var(--line);padding:14px 16px}
+  tbody tr:last-child{border-bottom:0}
+  td{border:0;padding:3px 0}
+  td.row-h{width:100%;font-size:16px;padding-bottom:6px}
+  td[data-k]::before{content:attr(data-k);display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+
+/* ---- service-specific ---- */
+/* hero visual: service network directory */
+.directory{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px;min-width:0}
+.dir-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.dir-head b{color:var(--fiber-ink);font-weight:500}
+.svc-list{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:8px}
+.svc{display:grid;grid-template-columns:10px 1fr auto;gap:12px;align-items:center;background:var(--sunken);border:1px solid var(--line);border-radius:4px;padding:12px 14px;min-width:0}
+.svc .led{width:8px;height:8px;border-radius:50%;background:var(--fiber);animation:blink 2.4s ease-in-out infinite}
+.svc:nth-child(2) .led{animation-delay:.6s}.svc:nth-child(3) .led{animation-delay:1.2s}.svc:nth-child(4) .led{animation-delay:1.8s}
+.svc .name{font-family:var(--mono);font-size:13.5px;font-weight:500;color:var(--ink);overflow-wrap:anywhere}
+.svc .route{display:block;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);margin-top:2px;overflow-wrap:anywhere}
+.svc .proto{font-family:var(--display);font-size:20px;font-weight:600;letter-spacing:.02em;white-space:nowrap}
+.svc.res{background:transparent;border-style:dashed;border-color:var(--line-2)}
+.dir-foot{margin-top:14px;font-size:13px;color:var(--ink-2)}
+
+/* object model tree */
+.tree{margin-top:40px;display:grid;gap:10px}
+.node{display:grid;grid-template-columns:200px 1fr 1fr;gap:24px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px 24px;min-width:0}
+.node .obj{font-family:var(--mono);font-size:13px;color:var(--fiber-ink);letter-spacing:.02em}
+.node .obj b{display:block;font-family:var(--display);font-size:26px;font-weight:700;color:var(--ink);letter-spacing:.01em;line-height:1.1;margin-top:4px;text-transform:uppercase}
+.node p{color:var(--ink-2);font-size:15px;margin-top:6px}
+.node.d1{margin-left:28px}.node.d2{margin-left:56px}.node.d3{margin-left:84px}
+
+/* policy code block */
+.policy{display:grid;grid-template-columns:1fr 1.15fr;gap:40px;margin-top:36px;align-items:start}
+.code{background:var(--sunken);border:1px solid var(--line);border-radius:6px;min-width:0}
+.code-head{display:flex;justify-content:space-between;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.code pre{margin:0;padding:16px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.65;color:var(--ink)}
+.code .k{color:var(--trace)}
+.code .v{color:var(--fiber-ink)}
+.checks{list-style:none;margin:0;padding:0;display:grid;gap:0;border-top:1px solid var(--line-2)}
+.checks li{padding:18px 0;border-bottom:1px solid var(--line);min-width:0}
+.checks h3{font-size:16px}
+.checks p{color:var(--ink-2);font-size:15px;margin-top:4px}
+
+@media (max-width:1024px){
+  .node{grid-template-columns:160px 1fr}
+  .node .specs{grid-column:2}
+  .policy{grid-template-columns:1fr}
+}
+@media (max-width:640px){
+  .node,.node.d1,.node.d2,.node.d3{grid-template-columns:1fr;gap:10px;margin-left:0}
+  .node .specs{grid-column:auto}
+  .node.d1{border-left:4px solid var(--line-2)}.node.d2{border-left:4px solid var(--trace)}.node.d3{border-left:4px solid var(--fiber)}
+}
+
+/* nav: six items need more room than the base 640px breakpoint gives */
+.brand,.navlinks a{white-space:nowrap}
+@media (max-width:900px){.navlinks a:not(.btn){display:none}}
+
+/* nav: keep links on one line, show only CTA below 960px */
+.navlinks a{white-space:nowrap}
+@media (max-width:960px){.navlinks a:not(.btn){display:none}}
+
+/* Korean line breaking: never split a word mid-syllable */
+h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
+</style>
+<link rel="stylesheet" href="../../assets/site.css?v=25">
+<script src="../../assets/site.js?v=25"></script>
+</head>
+<body>
+
+
+<a class="skip-link" href="#main">본문으로 건너뛰기</a>
+
+<nav aria-label="주요 메뉴">
+  <div class="wrap">
+    <a class="brand" href="#top">Amazon <span>VPC Lattice</span></a>
+    <div class="navlinks">
+      <a href="../">서비스 포트폴리오</a>
+      <a href="#model">구성 요소</a>
+      <a href="#features">주요 기능</a>
+      <a href="#auth">접근 제어</a>
+      <a href="#arch">아키텍처</a>
+      <a href="#pricing">비용</a>
+      <a class="btn btn-primary" href="#start">시작하기</a>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+  <header class="hero" id="top">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">Amazon VPC Lattice · 애플리케이션 네트워킹</p>
+          <h1>VPC와 계정이 달라도 <em>서비스 단위</em>로 연결하고 통제하세요</h1>
+          <p class="lede">Amazon VPC Lattice는 여러 VPC와 계정에 흩어진 서비스와 리소스를 하나의 service network로 묶습니다. 라우팅, 인증, 로깅을 서비스마다 정의하고, VPC 사이의 네트워크 연결은 직접 구성하지 않습니다.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="#start">구성 절차 보기</a>
+            <a class="btn btn-ghost" href="#arch">아키텍처 보기</a>
+          </div>
+        </div>
+
+        <div class="directory" aria-label="service network에 연결된 서비스와 리소스 예시">
+          <div class="dir-head"><span>Service network · prod</span><span>auth <b>AWS_IAM</b></span></div>
+          <ul class="svc-list">
+            <li class="svc"><span class="led" aria-hidden="true"></span><span><span class="name">orders</span><span class="route">/api/* → tg-orders (IP · EKS Pods)</span></span><span class="proto">HTTPS</span></li>
+            <li class="svc"><span class="led" aria-hidden="true"></span><span><span class="name">inventory</span><span class="route">weight 90 / 10 → tg-v1, tg-v2</span></span><span class="proto">HTTP</span></li>
+            <li class="svc"><span class="led" aria-hidden="true"></span><span><span class="name">payments</span><span class="route">TLS 종료는 대상에서 → tg-pay (TCP)</span></span><span class="proto">TLS</span></li>
+            <li class="svc res"><span class="led" aria-hidden="true"></span><span><span class="name">rds-primary</span><span class="route">resource configuration → resource gateway</span></span><span class="proto">TCP</span></li>
+          </ul>
+          <p class="dir-foot">서비스는 HTTP · HTTPS · TLS 리스너로, 데이터베이스 같은 TCP 리소스는 resource configuration으로 등록합니다.</p>
+        </div>
+      </div>
+
+      <div class="chips" role="list">
+        <div class="chip" role="listitem"><span class="num">3</span><p>리스너 프로토콜 (HTTP · HTTPS · TLS)</p></div>
+        <div class="chip" role="listitem"><span class="num">4</span><p>대상 그룹 유형 (Instance · IP · Lambda · ALB)</p></div>
+        <div class="chip" role="listitem"><span class="num">SigV4</span><p>IAM 서명 요청 기반 auth policy</p></div>
+        <div class="chip" role="listitem"><span class="num">RAM</span><p>서비스 · service network · 리소스를 계정 간 공유</p></div>
+      </div>
+    </div>
+  </header>
+
+  <section id="why" aria-labelledby="why-h">
+    <div class="wrap split">
+      <div>
+        <p class="tag">Why VPC Lattice</p>
+        <h2 id="why-h">VPC를 잇는 대신 서비스를 잇습니다</h2>
+        <p class="lede">VPC 피어링이나 Transit Gateway로 서비스 간 통신을 열면 CIDR 설계, 라우팅 테이블, 보안 그룹 규칙이 VPC 수만큼 늘어납니다. VPC Lattice는 통신 단위를 서비스로 바꿔, 네트워크 팀과 애플리케이션 팀이 각자 맡은 부분만 관리하게 합니다.</p>
+      </div>
+      <div class="pillars">
+        <div class="pillar"><span class="k">Connect</span><div><h3>겹치는 CIDR도 연결</h3><p>VPC Lattice는 겹치는 CIDR을 지원합니다. 주소 체계를 다시 설계하지 않고 VPC와 계정 사이에서 서비스를 호출합니다.</p></div></div>
+        <div class="pillar"><span class="k">Secure</span><div><h3>요청 단위 인증</h3><p>보안 그룹과 함께 IAM auth policy로 누가 어떤 서비스를 호출할 수 있는지 정합니다. 인증된 요청은 SigV4로 서명합니다.</p></div></div>
+        <div class="pillar"><span class="k">Delegate</span><div><h3>역할 분리</h3><p>네트워크 관리자는 service network와 정책을, 서비스 소유자는 리스너와 대상 그룹을 관리합니다. AWS RAM으로 계정 간에 공유합니다.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="model" aria-labelledby="model-h">
+    <div class="wrap">
+      <p class="tag">Object model</p>
+      <h2 id="model-h">service network 아래로 이어지는 네 단계</h2>
+      <p class="lede">요청은 service network에서 서비스의 리스너로 들어오고, 리스너 규칙이 대상 그룹을 고릅니다. 위에서 아래로 포함 관계를 따릅니다.</p>
+      <div class="tree">
+        <div class="node">
+          <span class="obj">container<b>Service network</b></span>
+          <div><h3>논리적 경계</h3><p>서비스와 resource configuration을 모으는 경계입니다. 클라이언트 VPC는 VPC 연결(association)이나 service network endpoint로 들어옵니다.</p></div>
+          <div class="specs"><code>VPC association</code><code>SN endpoint</code><code>auth policy</code><code>access logs</code></div>
+        </div>
+        <div class="node d1">
+          <span class="obj">unit<b>Service</b></span>
+          <div><h3>독립 배포 단위</h3><p>하나의 기능을 제공하는 애플리케이션입니다. VPC Lattice가 생성한 도메인 이름을 받고, 사용자 지정 도메인도 쓸 수 있습니다.</p></div>
+          <div class="specs"><code>generated FQDN</code><code>custom domain</code><code>auth policy</code></div>
+        </div>
+        <div class="node d2">
+          <span class="obj">entry<b>Listener · Rule</b></span>
+          <div><h3>프로토콜과 포트, 라우팅 규칙</h3><p>리스너는 HTTP · HTTPS · TLS 중 하나와 포트로 요청을 받습니다. 규칙은 우선순위, 조건, 액션으로 구성됩니다.</p></div>
+          <div class="specs"><code>HTTP</code><code>HTTPS</code><code>TLS</code><code>path · header · method</code><code>fixed-response</code></div>
+        </div>
+        <div class="node d3">
+          <span class="obj">backend<b>Target group</b></span>
+          <div><h3>실제 처리하는 대상</h3><p>EC2 인스턴스, IP, Lambda 함수, ALB를 등록합니다. Amazon ECS 작업과 Kubernetes Pod도 대상으로 연결할 수 있고, ECS는 Lattice 대상 그룹으로 blue/green · linear · canary 배포를 합니다.</p></div>
+          <div class="specs"><code>INSTANCE</code><code>IP</code><code>LAMBDA</code><code>ALB</code><code>HTTP/1.1 · HTTP/2 · gRPC</code></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" aria-labelledby="features-h">
+    <div class="wrap">
+      <p class="tag">Features</p>
+      <h2 id="features-h">주요 기능</h2>
+      <div class="features">
+        <article class="feature"><p class="ft">Routing</p><h3>리스너 규칙</h3><p>경로, 헤더, HTTP 메서드로 요청을 나눕니다. 여러 대상 그룹에 0–999 가중치로 보내 카나리 배포를 하거나, fixed-response로 404 · 500을 돌려줍니다.</p></article>
+        <article class="feature"><p class="ft">Authorization</p><h3>Auth policy</h3><p>service network와 서비스에 각각 IAM 정책을 붙입니다. 인증 유형이 AWS_IAM이면 두 정책 모두 명시적으로 허용해야 요청이 통과합니다.</p></article>
+        <article class="feature"><p class="ft">Multi-account</p><h3>AWS RAM 공유</h3><p>서비스, service network, resource configuration을 특정 계정, OU, 조직 전체와 공유합니다. 서비스 디렉터리에서 공유받은 서비스를 확인합니다.</p></article>
+        <article class="feature"><p class="ft">TCP resources</p><h3>Resource configuration</h3><p>Amazon RDS 데이터베이스(ARN), 도메인 이름, 사설 IP, CIDR 범위를 다른 VPC와 계정에 TCP로 공개합니다. resource gateway가 리소스 VPC로 들어가는 입구입니다. 사용자 지정 도메인을 붙이면 소비자 VPC에 프라이빗 호스팅 영역이 자동으로 만들어지고, DNS 해석을 IN_VPC로 두면 사설 도메인 이름도 대상으로 쓸 수 있습니다.</p></article>
+        <article class="feature"><p class="ft">Hybrid access</p><h3>Service network endpoint</h3><p>VPC에 service network 유형의 VPC 엔드포인트를 만들면 Direct Connect나 VPN으로 연결된 온프레미스에서도 서비스와 리소스에 접근합니다. 한 VPC를 여러 service network에 연결할 수도 있습니다.</p></article>
+        <article class="feature"><p class="ft">Observability</p><h3>Access logs</h3><p>service network, 서비스, resource configuration 단위로 접근 로그를 켜고 CloudWatch Logs, Amazon S3, Amazon Data Firehose로 보냅니다.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="compare" aria-labelledby="compare-h">
+    <div class="wrap">
+      <p class="tag">Services vs resources</p>
+      <h2 id="compare-h">서비스와 resource configuration</h2>
+      <p class="lede">HTTP 계열 애플리케이션은 서비스로, 데이터베이스처럼 TCP로 접근하는 리소스는 resource configuration으로 등록합니다.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">VPC Lattice 서비스와 resource configuration 비교</caption>
+          <thead><tr><th scope="col">구분</th><th scope="col">프로토콜</th><th scope="col">대상</th><th scope="col">클라이언트 접근 방식</th><th scope="col">Auth policy</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="row-h">서비스<br><span class="mono" style="font-size:12px;font-weight:400;color:var(--ink-3)">Service</span></td>
+              <td data-k="프로토콜">HTTP · HTTPS · TLS 리스너</td>
+              <td data-k="대상">Instance · IP · Lambda · ALB 대상 그룹</td>
+              <td data-k="클라이언트 접근 방식">VPC association, service network endpoint</td>
+              <td data-k="Auth policy">service network · 서비스 정책 적용</td>
+            </tr>
+            <tr>
+              <td class="row-h">Resource configuration<br><span class="mono" style="font-size:12px;font-weight:400;color:var(--ink-3)">ARN · domain · IP</span></td>
+              <td data-k="프로토콜">TCP</td>
+              <td data-k="대상">RDS 데이터베이스, 도메인 이름, 사설 IP</td>
+              <td data-k="클라이언트 접근 방식">VPC association, service network endpoint, resource endpoint</td>
+              <td data-k="Auth policy">service network 정책은 적용되지 않음</td>
+            </tr>
+            <tr>
+              <td class="row-h">Resource configuration<br><span class="mono" style="font-size:12px;font-weight:400;color:var(--ink-3)">CIDR</span></td>
+              <td data-k="프로토콜">TCP_UDP (UDP는 DNS 질의만)</td>
+              <td data-k="대상">공유할 CIDR 목록 (예: 10.0.0.0/24)</td>
+              <td data-k="클라이언트 접근 방식">tunnel endpoint만 가능, service network에 연결 불가</td>
+              <td data-k="Auth policy">service network 정책은 적용되지 않음</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="auth" aria-labelledby="auth-h">
+    <div class="wrap">
+      <p class="tag">Auth policy</p>
+      <h2 id="auth-h">IAM 정책으로 호출 권한을 정합니다</h2>
+      <p class="lede">인증 유형을 AWS_IAM으로 두면 기본은 모두 거부입니다. 정책이 없으면 모든 요청이 access denied를 받습니다.</p>
+      <div class="policy">
+        <figure class="code" style="margin:0">
+          <div class="code-head"><span>service auth policy</span><span>JSON</span></div>
+<pre><code>{
+  <span class="k">"Version"</span>: <span class="v">"2012-10-17"</span>,
+  <span class="k">"Statement"</span>: [{
+    <span class="k">"Effect"</span>: <span class="v">"Allow"</span>,
+    <span class="k">"Principal"</span>: <span class="v">"*"</span>,
+    <span class="k">"Action"</span>: <span class="v">"vpc-lattice-svcs:Invoke"</span>,
+    <span class="k">"Resource"</span>: <span class="v">"*"</span>,
+    <span class="k">"Condition"</span>: {
+      <span class="k">"StringNotEquals"</span>: {
+        <span class="k">"aws:PrincipalType"</span>: <span class="v">"Anonymous"</span>
+      },
+      <span class="k">"StringEquals"</span>: {
+        <span class="k">"vpc-lattice-svcs:SourceVpc"</span>: <span class="v">"vpc-1a2b3c4d"</span>
+      }
+    }
+  }]
+}</code></pre>
+          <figcaption class="sr-only">지정한 VPC에서 온, SigV4로 서명된 요청만 허용하는 auth policy 예시</figcaption>
+        </figure>
+        <ol class="checks" aria-label="요청 평가 순서">
+          <li><h3>service network 정책 확인</h3><p>auth policy가 켜져 있고 명시적 허용이 없으면 요청을 거부합니다.</p></li>
+          <li><h3>서비스 정책 확인</h3><p>서비스에도 정책이 있으면 같은 방식으로 다시 평가합니다. 공통 규칙은 service network에, 더 좁은 규칙은 서비스에 둡니다.</p></li>
+          <li><h3>호출자 IAM 정책 확인</h3><p>호출하는 역할의 자격 증명 기반 정책도 허용해야 합니다. 어느 정책이든 명시적 거부가 있으면 허용보다 우선합니다.</p></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section id="arch" aria-labelledby="arch-h">
+    <div class="wrap">
+      <p class="tag">Reference architecture</p>
+      <h2 id="arch-h">여러 계정의 서비스와 데이터베이스를 하나의 네트워크로</h2>
+      <p class="lede">클라이언트 VPC는 service network에 연결되고, 온프레미스는 service network endpoint를 거쳐 들어옵니다. 서비스와 데이터베이스는 각 소유 계정에 그대로 두고 AWS RAM으로 공유합니다.</p>
+      <figure class="arch">
+        <div class="arch-scroll">
+          <svg viewBox="0 0 980 460" role="img" aria-labelledby="arch-title arch-desc">
+            <title id="arch-title">VPC Lattice 레퍼런스 아키텍처</title>
+            <desc id="arch-desc">클라이언트 VPC는 VPC association으로, 온프레미스는 Direct Connect 또는 VPN으로 연결된 VPC의 service network endpoint로 service network에 들어갑니다. service network에는 orders와 inventory 서비스, rds-primary resource configuration이 있습니다. 계정 B의 서비스는 IP 대상 그룹의 EKS Pod와 Lambda 대상 그룹으로 요청을 보내고, 계정 C의 resource gateway는 Amazon RDS로 TCP 연결을 전달합니다. 서비스와 리소스는 AWS RAM으로 공유됩니다.</desc>
+            <defs>
+              <marker id="ar-vl-p" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-p" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-vl-f" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><path class="ah-f" d="M0 0 L10 5 L0 10 z"/></marker>
+            </defs>
+            <!-- zones -->
+            <rect class="zone" x="10" y="40" width="230" height="400" rx="6"/>
+            <text class="z" x="24" y="62">CLIENTS</text>
+            <rect class="zone" x="270" y="40" width="320" height="400" rx="6"/>
+            <text class="z" x="284" y="62">SERVICE NETWORK · AWS_IAM</text>
+            <rect class="zone" x="620" y="40" width="350" height="220" rx="6"/>
+            <image href="../../assets/aws-icons/AWS-Account_32.svg" x="620" y="40" width="24" height="24"/>
+            <text class="z" x="652" y="56">ACCOUNT B · 서비스 소유자</text>
+            <rect class="zone" x="620" y="280" width="350" height="160" rx="6"/>
+            <image href="../../assets/aws-icons/AWS-Account_32.svg" x="620" y="280" width="24" height="24"/>
+            <text class="z" x="652" y="296">ACCOUNT C · DB VPC</text>
+
+            <!-- clients -->
+            <rect class="box" x="30" y="96" width="180" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-VPC_Virtual-private-cloud-VPC_48.svg" x="38" y="114" width="28" height="28"/>
+            <text class="t" x="74" y="124">클라이언트 VPC</text><text class="s" x="74" y="144">EC2 · 컨테이너</text>
+            <rect class="box" x="30" y="206" width="180" height="64" rx="4"/>
+            <image href="../../assets/aws-icons/Res_Amazon-VPC_Virtual-private-cloud-VPC_48.svg" x="38" y="224" width="28" height="28"/>
+            <text class="t" x="74" y="234">연결용 VPC</text><text class="s" x="74" y="254">SN endpoint</text>
+            <rect class="box" x="30" y="350" width="180" height="64" rx="4"/>
+            <image class="ic-gen" href="../../assets/aws-icons/Res_Servers_48_Light.svg" x="38" y="368" width="28" height="28"/>
+            <text class="t" x="74" y="378">온프레미스</text><text class="s" x="74" y="398">데이터센터</text>
+            <path class="site" d="M120 350 V270"/>
+            <text class="lbl2" x="128" y="316">DX · VPN</text>
+
+            <!-- entry -->
+            <path class="fiber" d="M210 128 H297" marker-end="url(#ar-vl-f)"/>
+            <text class="lbl2" x="214" y="118">association</text>
+            <path class="fiber" d="M210 238 C255 238 252 200 297 200" marker-end="url(#ar-vl-f)"/>
+            <text class="lbl2" x="214" y="262">endpoint</text>
+
+            <!-- services in SN -->
+            <rect class="box" x="300" y="96" width="260" height="60" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_Amazon-VPC-Lattice_48.svg" x="308" y="112" width="28" height="28"/>
+            <text class="t" x="344" y="122">orders</text><text class="s" x="344" y="142">HTTPS:443 · path 규칙</text>
+            <rect class="box" x="300" y="172" width="260" height="60" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_Amazon-VPC-Lattice_48.svg" x="308" y="188" width="28" height="28"/>
+            <text class="t" x="344" y="198">inventory</text><text class="s" x="344" y="218">HTTP:80 · 가중치 forward</text>
+            <rect class="box" x="300" y="280" width="260" height="60" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_Amazon-VPC-Lattice_48.svg" x="308" y="296" width="28" height="28"/>
+            <text class="t" x="344" y="306">rds-primary</text><text class="s" x="344" y="326">resource configuration · TCP</text>
+            <text class="s" x="300" y="392">auth policy: service network + 서비스</text>
+            <text class="s" x="300" y="412">access logs: CloudWatch · S3 · Firehose</text>
+
+            <!-- account B -->
+            <rect class="box" x="650" y="96" width="290" height="60" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_Amazon-Elastic-Kubernetes-Service_48.svg" x="658" y="112" width="28" height="28"/>
+            <text class="t" x="694" y="122">Target group · IP</text><text class="s" x="694" y="142">EKS Pod · ECS 작업</text>
+            <rect class="box" x="650" y="172" width="290" height="60" rx="4"/>
+            <image href="../../assets/aws-icons/Res_AWS-Lambda_Lambda-Function_48.svg" x="658" y="188" width="28" height="28"/>
+            <text class="t" x="694" y="198">Target group · Lambda</text><text class="s" x="694" y="218">Lambda 함수</text>
+            <path class="path" d="M560 126 H648" marker-end="url(#ar-vl-p)"/>
+            <path class="path" d="M560 202 H648" marker-end="url(#ar-vl-p)"/>
+            <text class="lbl" x="568" y="118">RAM</text>
+            <text class="lbl" x="568" y="194">RAM</text>
+
+            <!-- account C -->
+            <rect class="box" x="640" y="318" width="160" height="60" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_Amazon-VPC-Lattice_48.svg" x="648" y="334" width="28" height="28"/>
+            <text class="t" x="684" y="344">Resource GW</text><text class="s" x="684" y="364">ENI 집합</text>
+            <rect class="box" x="815" y="318" width="145" height="60" rx="4"/>
+            <image href="../../assets/aws-icons/Arch_Amazon-RDS_48.svg" x="823" y="334" width="28" height="28"/>
+            <text class="t" x="859" y="344">Amazon RDS</text><text class="s" x="859" y="364">TCP 5432</text>
+            <path class="path" d="M560 310 C600 310 600 348 638 348" marker-end="url(#ar-vl-p)"/>
+            <text class="lbl" x="568" y="302">RAM</text>
+            <path class="path" d="M800 348 H813" marker-end="url(#ar-vl-p)"/>
+          </svg>
+        </div>
+        <figcaption class="legend">
+          <span><i class="f dir"></i>클라이언트 요청 진입 (association · endpoint)</span>
+          <span><i class="p dir"></i>service network에서 대상으로 요청 전달</span>
+          <span><i class="s"></i>하이브리드 연결 (DX · VPN)</span><span>응답은 같은 경로로 돌아옵니다.</span>
+        </figcaption>
+        <p class="arch-hint">좁은 화면에서는 다이어그램을 좌우로 밀어서 보세요.</p>
+      </figure>
+    </div>
+  </section>
+
+  <section id="start" aria-labelledby="start-h">
+    <div class="wrap">
+      <p class="tag">Getting started</p>
+      <h2 id="start-h">첫 서비스를 연결하는 순서</h2>
+      <ol class="steps">
+        <li><span class="num">STEP 1</span><h3>대상 그룹 생성</h3><p>대상 유형과 프로토콜, 헬스 체크를 정하고 대상을 등록합니다.</p></li>
+        <li><span class="num">STEP 2</span><h3>서비스와 리스너</h3><p>서비스를 만들고 리스너 프로토콜, 포트, 기본 규칙을 설정합니다.</p></li>
+        <li><span class="num">STEP 3</span><h3>Service network 생성</h3><p>인증 유형(NONE 또는 AWS_IAM)과 접근 로그 대상을 정합니다.</p></li>
+        <li><span class="num">STEP 4</span><h3>서비스 연결</h3><p>서비스를 service network에 연결합니다. 다른 계정 서비스는 RAM으로 공유받아 연결합니다.</p></li>
+        <li><span class="num">STEP 5</span><h3>VPC 연결과 정책</h3><p>클라이언트 VPC를 보안 그룹과 함께 연결하고, auth policy를 붙인 뒤 호출을 확인합니다.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="pricing" aria-labelledby="pricing-h">
+    <div class="wrap">
+      <p class="tag">Pricing</p>
+      <h2 id="pricing-h">비용 항목</h2>
+      <p class="lede">서비스는 실행 시간, 처리한 데이터 양, 요청 수로 과금됩니다. resource configuration은 service network에 연결된 시간과 처리한 데이터 양으로 과금됩니다.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">Amazon VPC Lattice 과금 항목</caption>
+          <thead><tr><th scope="col">과금 항목</th><th scope="col">과금 기준</th><th scope="col">참고</th></tr></thead>
+          <tbody>
+            <tr><td class="row-h">서비스 시간</td><td data-k="과금 기준">서비스당 시간 (1시간 미만도 1시간)</td><td data-k="참고">리전별 단가</td></tr>
+            <tr><td class="row-h">서비스 데이터 처리</td><td data-k="과금 기준">서비스가 처리한 GB</td><td data-k="참고">받은 요청과 돌려준 응답을 합산합니다. 가용 영역 간 전송은 이 요금에 포함됩니다</td></tr>
+            <tr><td class="row-h">요청 · 연결</td><td data-k="과금 기준">HTTP · HTTPS 리스너는 요청 수, TLS 리스너는 TCP 연결 수 (시간당 백만 건 단위)</td><td data-k="참고">서비스마다 시간당 첫 300,000건은 과금하지 않습니다</td></tr>
+            <tr><td class="row-h">Resource configuration 시간</td><td data-k="과금 기준">service network에 연결된 리소스당 시간</td><td data-k="참고">리전별 단가</td></tr>
+            <tr><td class="row-h">리소스 데이터 처리</td><td data-k="과금 기준">리소스로 처리한 GB, 리전 단위 월 누적 구간별 단가</td><td data-k="참고">구간: 첫 1 PB, 다음 4 PB, 5 PB 초과</td></tr>
+            <tr><td class="row-h">VPC 연결 · service network endpoint</td><td data-k="과금 기준">과금 없음</td><td data-k="참고">resource endpoint와 tunnel endpoint는 AWS PrivateLink 요금으로 청구됩니다</td></tr>
+            <tr><td class="row-h">관련 요금</td><td data-k="과금 기준">다른 서비스에서 청구</td><td data-k="참고">VPC 밖 IP를 가리키는 도메인 이름 리소스에 필요한 NAT 게이트웨이(Amazon VPC 요금), 접근 로그 대상(CloudWatch Logs · S3 · Firehose 요금)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="lede" style="font-size:14px">요금 단가는 리전과 사용량에 따라 다릅니다. 최신 단가는 <a href="https://aws.amazon.com/vpc/lattice/pricing/" target="_blank" rel="noopener">Amazon VPC Lattice 요금 페이지</a>에서 확인하세요.</p>
+    </div>
+  </section>
+
+  <section class="cta" aria-labelledby="cta-h">
+    <div class="wrap">
+      <p class="tag">Next step</p>
+      <h2 id="cta-h">서비스 간 통신 구조를 VPC Lattice로 다시 그려 보세요</h2>
+      <p class="lede">호출 관계, 계정 구조, 인증 요구 사항을 정리해 오시면 service network 경계와 정책 설계를 함께 검토합니다.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="https://aws.amazon.com/vpc/lattice/" target="_blank" rel="noopener">서비스 페이지 열기</a>
+        <a class="btn btn-ghost" href="https://docs.aws.amazon.com/vpc-lattice/latest/ug/what-is-vpc-lattice.html" target="_blank" rel="noopener">사용 설명서 읽기</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a href="../">← AWS 네트워킹 서비스 포트폴리오</a>
+    <span>Amazon VPC Lattice 소개 자료. 기능 지원 범위, 할당량, 요금은 리전에 따라 다르니 공식 문서를 확인하세요.</span>
+    <a href="https://docs.aws.amazon.com/vpc-lattice/latest/ug/auth-policies.html" target="_blank" rel="noopener">Auth policy 문서</a>
+  </div>
+</footer>
+
+</body>
+</html>
