@@ -47,7 +47,9 @@ html.menu-open .drawer-scrim{opacity:1}
 .drawer .mquick{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 14px;border:1px solid var(--line);border-radius:10px;color:var(--ink);text-decoration:none;font-size:13.5px;font-weight:600;white-space:nowrap}
 .drawer .mquick:hover{border-color:var(--fiber)}
 .drawer .mquick[aria-current="page"]{border-color:var(--fiber);background:var(--fiber-soft);color:var(--on-fiber)}
-.drawer .mgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.drawer .mgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;align-items:start}
+.drawer .mcol{display:flex;flex-direction:column;gap:10px;min-width:0}
+.drawer .mcol:not(:has(.mcard:not([hidden]))){display:none}
 .drawer .mcard{padding:10px 8px 8px;border:1px solid var(--line);border-radius:11px;background:var(--surface)}
 .drawer .mcard[hidden]{display:none}
 .drawer .mg{display:flex;align-items:center;gap:7px;margin:0 6px 6px;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
@@ -62,7 +64,7 @@ html.menu-open .drawer-scrim{opacity:1}
 .drawer .mi[aria-current="page"]{background:color-mix(in srgb,var(--g) 30%,transparent);font-weight:700}
 .drawer .mi img{flex:none;border-radius:4px}
 .drawer .mempty{grid-column:1/-1;margin:8px 4px;color:var(--ink-3);font-size:14px}
-@media (max-width:860px){.drawer .mgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:860px){.drawer .mgrid{grid-template-columns:repeat(2,minmax(0,1fr))}.drawer .mcol{display:contents}.drawer .mgrid{grid-auto-flow:row dense}}
 @media (max-width:640px){.drawer{top:64px;left:8px;width:calc(100vw - 16px);max-height:calc(100vh - 76px);padding:10px}.drawer .mgrid{grid-template-columns:1fr}.drawer .mtop{flex-wrap:wrap}.drawer .msearch{flex:1 0 100%}.drawer .mquick{flex:1;justify-content:center}.drawer .msearch kbd{display:none}}
 nav .wrap > .nav-tools{margin-left:auto}
 @media (max-width:640px){.present-btn{display:none}}
@@ -76,3 +78,7 @@ html.presenting .present-title{display:block;position:fixed;top:14px;left:20px;z
 html.presenting .present-title span{color:var(--fiber-ink)}
 html.presenting main>.slide.slide-on{top:46px}
 .drawer .mquick img{border-radius:4px;flex:none}
+.pricing-btn{display:inline-flex;align-items:center;height:36px;padding:0 14px;border:1px solid var(--fiber);border-radius:4px;color:var(--fiber-ink);font-family:var(--display);font-weight:700;font-size:15px;letter-spacing:.06em;text-transform:uppercase;text-decoration:none;white-space:nowrap;transition:background-color .15s ease}
+.pricing-btn:hover{background:var(--fiber-soft)}
+.pricing-btn:focus-visible{outline:2px solid var(--fiber);outline-offset:2px}
+@media (max-width:640px){.pricing-btn{height:34px;padding:0 10px;font-size:14px}}

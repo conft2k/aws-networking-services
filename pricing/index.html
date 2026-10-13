@@ -162,9 +162,15 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
 .subtabs button[aria-selected="true"]{color:var(--ink);font-weight:700;border-bottom-color:var(--g,var(--fiber))}
 .subtabs button:focus-visible{outline:2px solid var(--fiber);outline-offset:-2px;border-radius:4px}
 .subtabs{overflow:visible}
-.areatabs.tablist{display:grid;grid-template-columns:repeat(3,minmax(0,auto))}
-.areatabs .at{justify-content:flex-start}
-@media (max-width:640px){.areatabs.tablist{grid-template-columns:1fr 1fr;width:100%}.areatabs .at{justify-content:center;padding:9px 6px;font-size:12.5px;white-space:normal;text-align:center}}
+/* compact two rows: area pills in one row, service underline tabs below */
+.areatabs.tablist{display:flex;flex-wrap:wrap;gap:6px;padding:0;background:none;border:0;border-radius:0;width:auto}
+.areatabs .at{padding:7px 13px 7px 11px;border:1px solid var(--line);border-radius:999px;background:var(--surface);font-size:13.5px;font-weight:500;color:var(--ink-2)}
+.areatabs .at:hover{border-color:var(--g);color:var(--ink);background:var(--surface)}
+.areatabs .at[aria-selected="true"]{background:color-mix(in srgb,var(--g) 32%,var(--surface));border-color:var(--g);color:var(--ink);font-weight:700;box-shadow:none}
+.areatabs .at::before{width:8px;height:8px}
+.toolbar .tabgroups{margin-top:8px}
+.subtabs button{padding:9px 12px 8px}
+@media (max-width:640px){.areatabs .at{padding:6px 10px 6px 9px;font-size:12.5px}}
 .srcbadge{display:inline-block;margin-left:6px;padding:1px 7px;border:1px solid var(--line-2);border-radius:3px;font-family:var(--mono);font-size:11px;color:var(--fiber-ink);background:var(--fiber-soft);white-space:nowrap}
 .panel td.t{font-family:var(--mono);font-size:13px}
 .panel td .sub{display:block;color:var(--ink-3);font-size:12px}
@@ -242,8 +248,8 @@ html.presenting #prices .tablist{position:static}
 .panel thead th .corner span:last-child{color:var(--fiber-ink)}
 .panel thead th{vertical-align:bottom}
 </style>
-<link rel="stylesheet" href="../assets/site.css?v=12">
-<script src="../assets/site.js?v=12"></script>
+<link rel="stylesheet" href="../assets/site.css?v=14">
+<script src="../assets/site.js?v=14"></script>
 </head>
 <body>
 

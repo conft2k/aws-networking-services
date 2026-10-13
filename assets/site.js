@@ -96,6 +96,11 @@
     ['Network Security', [['network-firewall', 'Network Firewall'], ['waf', 'AWS WAF'], ['shield', 'AWS Shield'], ['firewall-manager', 'Firewall Manager']]],
     ['Network Observability', [['vpc-flow-logs', 'VPC Flow Logs'], ['reachability-analyzer', 'Reachability Analyzer'], ['network-manager', 'Network Manager'], ['network-flow-monitor', 'Network Flow Monitor']]]
   ];
+  var PRICE_TAB = { 'elastic-load-balancing': 'elb', 'vpc-lattice': 'lattice', 'api-gateway': 'apigw', 'cloudfront': 'cloudfront', 'global-accelerator': 'ga',
+    'transit-gateway': 'tgw', 'cloud-wan': 'cloudwan', 'privatelink': 'privatelink', 'direct-connect': 'dx', 'interconnect': 'interconnect',
+    'site-to-site-vpn': 's2svpn', 'client-vpn': 'clientvpn', 'vpc': 'vpc', 'route-53': 'route53', 'network-firewall': 'nfw', 'waf': 'waf',
+    'shield': 'shield', 'firewall-manager': 'fms', 'vpc-flow-logs': 'flowlogs', 'reachability-analyzer': 'reachability',
+    'network-manager': 'netmgr', 'network-flow-monitor': 'nfm' };
   var drawer, scrim, menuBtn, lastFocus, search, AREA_KEY = ['app', 'edge', 'hybrid', 'fnd', 'sec', 'obs'];
   function siteRoot() {
     try { return new URL('../', SELF || location.href).href; } catch (e) { return '/'; }
@@ -141,8 +146,12 @@
         '<a class="mquick" href="' + home + '"' + (isCur(home) ? ' aria-current="page"' : '') + '><img src="' + base + 'assets/icons/aws.svg" width="18" height="18" alt="" aria-hidden="true">AWS Networking Services</a>' +
         '<a class="mquick" href="' + pricing + '"' + (isCur(pricing) ? ' aria-current="page"' : '') + '><img src="' + base + 'assets/icons/pricing.svg" width="16" height="16" alt="" aria-hidden="true">가격표</a>' +
       '</div>' +
-      '<div class="mgrid" role="navigation" aria-label="서비스 메뉴">' + MENU.map(function (g, gi) {
-        return '<section class="mcard" data-area="' + AREA_KEY[gi] + '"><p class="mg">' + g[0] + '</p>' + g[1].map(function (x) { return item(x[0], x[1]); }).join('') + '</section>';
+      '<div class="mgrid" role="navigation" aria-label="서비스 메뉴">' + [[0, 1, 3], [2], [4, 5]].map(function (col) {
+        // masonry columns: cards keep their natural height, columns are balanced by item count
+        return '<div class="mcol">' + col.map(function (gi) {
+          var g = MENU[gi];
+          return '<section class="mcard" data-area="' + AREA_KEY[gi] + '"><p class="mg">' + g[0] + '</p>' + g[1].map(function (x) { return item(x[0], x[1]); }).join('') + '</section>';
+        }).join('') + '</div>';
       }).join('') + '<p class="mempty" hidden>일치하는 서비스가 없습니다.</p></div>';
     drawer = document.createElement('div');
     drawer.className = 'drawer'; drawer.id = 'site-menu'; drawer.hidden = true; drawer.tabIndex = -1;
@@ -165,6 +174,14 @@
       wrap.insertBefore(left, wrap.firstChild);
       left.appendChild(menuBtn); if (brand) left.appendChild(brand);
       wrap.appendChild(tools);              // theme + presentation stay at the right end of the top bar
+      // PRICING: jumps to this service's tab on the price table (not shown on the price table itself)
+      var slug = (here.slice(base.length).split('/')[0] || '');
+      if (slug !== 'pricing') {
+        var tab = PRICE_TAB[slug], pa = document.createElement('a');
+        pa.className = 'pricing-btn'; pa.href = base + 'pricing/' + (tab ? '#' + tab : '');
+        pa.textContent = 'Pricing'; pa.title = tab ? '이 서비스의 가격표 보기' : '서비스별 가격표 보기';
+        tools.insertBefore(pa, tools.firstChild);
+      }
     }
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && !drawer.hidden) { e.preventDefault(); closeMenu(); return; }
