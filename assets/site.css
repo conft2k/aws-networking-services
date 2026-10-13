@@ -112,3 +112,8 @@ html.presenting main>.slide.slide-on h1,html.presenting main>.slide.slide-on h2,
 /* tighter space between the top bar and the hero on every page */
 .hero{padding-top:32px}
 @media (max-width:640px){.hero{padding-top:24px}}
+/* section anchors: the section's own top padding already gives room, so land its heading ~20px under the bar
+   (heading top = scroll-margin + section padding-top; desktop 88px, mobile 60px, landing groups 56px/44px) */
+main>section[id]{scroll-margin-top:-6px}
+main>section.group[id]{scroll-margin-top:26px}
+@media (max-width:640px){main>section[id]{scroll-margin-top:22px}main>section.group[id]{scroll-margin-top:38px}}
