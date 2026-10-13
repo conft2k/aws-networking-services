@@ -117,3 +117,5 @@ html.presenting main>.slide.slide-on h1,html.presenting main>.slide.slide-on h2,
 main>section[id]{scroll-margin-top:-6px}
 main>section.group[id]{scroll-margin-top:26px}
 @media (max-width:640px){main>section[id]{scroll-margin-top:22px}main>section.group[id]{scroll-margin-top:38px}}
+/* the price tab block now has only 28px top padding, so its anchor needs the normal bar offset */
+main>section#prices{scroll-margin-top:61px}

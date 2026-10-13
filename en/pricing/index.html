@@ -256,9 +256,16 @@ html.presenting #prices .tablist{position:static}
 .panel thead th .corner{display:flex;flex-direction:column;gap:2px;font-family:var(--mono);font-size:11px;white-space:nowrap}
 .panel thead th .corner span:last-child{color:var(--fiber-ink)}
 .panel thead th{vertical-align:bottom}
+/* tighter tab block: less space above the area pills and between the two tab rows */
+#prices{padding-top:28px}
+#prices .toolbar{gap:8px 16px}
+#prices .toolbar .tabgroups{margin-top:2px}
+.areatabs .at{padding:5px 12px 5px 10px;font-size:13px}
+.subtabs button{padding:7px 12px 6px}
+@media (max-width:640px){#prices{padding-top:20px}}
 </style>
-<link rel="stylesheet" href="../../assets/site.css?v=28">
-<script src="../../assets/site.js?v=28"></script>
+<link rel="stylesheet" href="../../assets/site.css?v=29">
+<script src="../../assets/site.js?v=29"></script>
 </head>
 <body>
 
