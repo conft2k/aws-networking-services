@@ -18,6 +18,8 @@
     light: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
     dark: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>',
     present: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M12 16v4M8 20h8"/></svg>',
+    first: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 5l-7 7 7 7M7 5v14"/></svg>',
+    last: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5l7 7-7 7M17 5v14"/></svg>',
     prev: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>',
     next: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>',
     close: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>'
@@ -53,10 +55,10 @@
     progress.style.width = ((cur + 1) / slides.length * 100) + '%';
     var s = slides[cur]; s.scrollTop = 0;
     fit();
-    try { history.replaceState(null, '', '?present=' + (cur + 1) + location.hash); } catch (e) {}
   }
   function enter(start) {
-    if (on) return; on = true;
+    if (on) { show(typeof start === 'number' ? start : 0); return; }
+    on = true;
     root.classList.add('presenting');
     bar.hidden = false;
     show(typeof start === 'number' ? start : 0);   // always start from the first slide
@@ -72,7 +74,7 @@
       var w = x.querySelector(':scope > .wrap'); if (w) w.style.zoom = '';
     });
     if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(function () {});
-    try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) {}
+    if (/[?&]present/.test(location.search)) { try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) {} }
     if (s) s.scrollIntoView({ block: 'start' });
   }
   function init() {
@@ -104,14 +106,17 @@
     bar = document.createElement('div'); bar.className = 'present-bar'; bar.hidden = true;
     bar.setAttribute('role', 'toolbar'); bar.setAttribute('aria-label', '발표 컨트롤');
     progress = document.createElement('i'); progress.className = 'present-progress';
+    var first = btn('', '처음 슬라이드 (Home)', ICONS.first), last = btn('', '마지막 슬라이드 (End)', ICONS.last);
     var prev = btn('', '이전 슬라이드', ICONS.prev), next = btn('', '다음 슬라이드', ICONS.next);
+    first.addEventListener('click', function () { show(0); });
+    last.addEventListener('click', function () { show(slides.length - 1); });
     var close = btn('', '발표 종료 (Esc)', ICONS.close);
     theme2.addEventListener('click', function () { tbtn.click(); });
     counter = document.createElement('span'); counter.className = 'present-count';
     prev.addEventListener('click', function () { show(cur - 1); });
     next.addEventListener('click', function () { show(cur + 1); });
     close.addEventListener('click', exit);
-    [prev, counter, next, theme2, close].forEach(function (x) { bar.appendChild(x); });
+    [first, prev, counter, next, last, theme2, close].forEach(function (x) { bar.appendChild(x); });
     document.body.appendChild(progress); document.body.appendChild(bar);
 
     document.addEventListener('keydown', function (e) {

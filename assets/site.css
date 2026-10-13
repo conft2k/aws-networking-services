@@ -24,3 +24,5 @@ html.presenting .present-progress{display:block;position:fixed;top:0;left:0;heig
 /* official generic icons ship only as _Light (dark glyph); invert them on dark backgrounds */
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ic-gen{filter:invert(1)}}
 :root[data-theme="dark"] .ic-gen{filter:invert(1)}
+/* text right above or below a full-width table uses the table's width instead of the 62ch reading measure */
+.lede:has(+ .tbl-wrap),.tbl-wrap + .lede,.tbl-wrap + p{max-width:none}
