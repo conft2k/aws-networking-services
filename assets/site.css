@@ -85,3 +85,6 @@ html.presenting .present-title{left:24px}
 .lang-btn{padding:0}
 .lang-btn span{font-family:var(--mono);font-size:12.5px;font-weight:700;letter-spacing:.02em}
 .tool-btn[hidden]{display:none}
+/* in-page anchors land below the sticky 61px top bar (otherwise #top etc. hide under it) */
+[id]{scroll-margin-top:72px}
+#top{scroll-margin-top:61px}
