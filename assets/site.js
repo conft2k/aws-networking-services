@@ -29,6 +29,7 @@
   var LABEL = { system: '테마: 시스템 설정', light: '테마: 라이트', dark: '테마: 다크' };
   var ORDER = ['system', 'light', 'dark'];
 
+  function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function btn(cls, label, icon) {
     var b = document.createElement('button');
     b.type = 'button'; b.className = 'tool-btn ' + cls;
@@ -58,12 +59,19 @@
     var s = slides[cur]; s.scrollTop = 0;
     fit();
   }
+  // the slide whose section is on screen; must run BEFORE the page switches to slide mode
+  function currentSlide() {
+    var line = Math.min(innerHeight * 0.35, 260), best = 0;
+    slides.forEach(function (sl, k) { if (sl.getBoundingClientRect().top <= line) best = k; });
+    return best;
+  }
   function enter(start) {
-    if (on) { show(typeof start === 'number' ? start : 0); return; }
+    var at = typeof start === 'number' ? start : currentSlide();
+    if (on) { show(at); return; }
     on = true;
     root.classList.add('presenting');
     bar.hidden = false;
-    show(typeof start === 'number' ? start : 0);   // always start from the first slide
+    show(at);                                       // start from the section the viewer is looking at
     if (root.requestFullscreen && !document.fullscreenElement) root.requestFullscreen().catch(function () {});
   }
   function exit() {
@@ -88,16 +96,17 @@
     ['Network Security', [['network-firewall', 'Network Firewall'], ['waf', 'AWS WAF'], ['shield', 'AWS Shield'], ['firewall-manager', 'Firewall Manager']]],
     ['Network Observability', [['vpc-flow-logs', 'VPC Flow Logs'], ['reachability-analyzer', 'Reachability Analyzer'], ['network-manager', 'Network Manager'], ['network-flow-monitor', 'Network Flow Monitor']]]
   ];
-  var drawer, scrim, menuBtn, lastFocus;
+  var drawer, scrim, menuBtn, lastFocus, search, AREA_KEY = ['app', 'edge', 'hybrid', 'fnd', 'sec', 'obs'];
   function siteRoot() {
     try { return new URL('../', SELF || location.href).href; } catch (e) { return '/'; }
   }
-  function openMenu() {
+  function openMenu(withSearch) {
     lastFocus = document.activeElement;
     drawer.hidden = false; scrim.hidden = false;
     requestAnimationFrame(function () { root.classList.add('menu-open'); });
     menuBtn.setAttribute('aria-expanded', 'true');
-    drawer.focus({ preventScroll: true });
+    search.value = ''; filterMenu('');
+    if (withSearch) search.focus(); else drawer.focus({ preventScroll: true });
   }
   function closeMenu() {
     if (!drawer || drawer.hidden) return;
@@ -106,30 +115,48 @@
     drawer.hidden = true; scrim.hidden = true;
     if (lastFocus && lastFocus.focus) lastFocus.focus();
   }
+  function filterMenu(q) {
+    q = (q || '').trim().toLowerCase();
+    var any = false;
+    drawer.querySelectorAll('.mcard').forEach(function (card) {
+      var vis = 0;
+      card.querySelectorAll('.mi').forEach(function (a) { var ok = !q || a.getAttribute('data-k').indexOf(q) >= 0; a.hidden = !ok; if (ok) vis++; });
+      card.hidden = !vis; if (vis) any = true;
+    });
+    drawer.querySelector('.mempty').hidden = any;
+  }
   function buildMenu(tools) {
     var base = siteRoot(), here = location.href.split('#')[0].split('?')[0];
-    function item(slug, name, icon) {
-      var href = base + (slug ? slug + '/' : '');
-      var cur = here === href || here === href + 'index.html';
-      return '<a class="mi" href="' + href + '"' + (cur ? ' aria-current="page"' : '') + '>' +
-        (icon ? '<img src="' + base + 'assets/icons/' + icon + '.svg" width="18" height="18" alt="" aria-hidden="true">' : '<i class="mi-dot" aria-hidden="true"></i>') +
-        '<span>' + name + '</span></a>';
+    function isCur(href) { return here === href || here === href + 'index.html'; }
+    function item(slug, name) {
+      var href = base + slug + '/';
+      return '<a class="mi" href="' + href + '" data-k="' + (name + ' ' + slug).toLowerCase() + '"' + (isCur(href) ? ' aria-current="page"' : '') + '>' +
+        '<img src="' + base + 'assets/icons/' + slug + '.svg" width="20" height="20" alt="" aria-hidden="true"><span>' + name + '</span></a>';
     }
-    var html = '<div class="drawer-head"><span>AWS Networking Services</span></div><nav class="drawer-body" aria-label="서비스 메뉴">' +
-      item('', 'AWS 네트워킹 서비스 포트폴리오', '') +
-      '<div class="mcols">' + [MENU.slice(0, 3), MENU.slice(3)].map(function (col, ci) {
-        return '<div class="mcol">' + col.map(function (g) {
-          return '<div class="mgrp"><p class="mg">' + g[0] + '</p>' + g[1].map(function (x) { return item(x[0], x[1], x[0]); }).join('') + '</div>';
-        }).join('') + (ci === 1 ? '<div class="mgrp"><p class="mg">Pricing</p>' + item('pricing', '네트워킹 가격표', 'pricing') + '</div>' : '') + '</div>';
-      }).join('') + '</div></nav>';
-    drawer = document.createElement('aside');
+    var home = base, pricing = base + 'pricing/';
+    var html =
+      '<div class="mtop">' +
+        '<label class="msearch"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>' +
+        '<input type="search" placeholder="서비스 검색" aria-label="서비스 검색" autocomplete="off"><kbd>/</kbd></label>' +
+        '<a class="mquick" href="' + home + '"' + (isCur(home) ? ' aria-current="page"' : '') + '><img src="' + base + 'assets/icons/aws.svg" width="18" height="18" alt="" aria-hidden="true">AWS Networking Services</a>' +
+        '<a class="mquick" href="' + pricing + '"' + (isCur(pricing) ? ' aria-current="page"' : '') + '><img src="' + base + 'assets/icons/pricing.svg" width="16" height="16" alt="" aria-hidden="true">가격표</a>' +
+      '</div>' +
+      '<div class="mgrid" role="navigation" aria-label="서비스 메뉴">' + MENU.map(function (g, gi) {
+        return '<section class="mcard" data-area="' + AREA_KEY[gi] + '"><p class="mg">' + g[0] + '</p>' + g[1].map(function (x) { return item(x[0], x[1]); }).join('') + '</section>';
+      }).join('') + '<p class="mempty" hidden>일치하는 서비스가 없습니다.</p></div>';
+    drawer = document.createElement('div');
     drawer.className = 'drawer'; drawer.id = 'site-menu'; drawer.hidden = true; drawer.tabIndex = -1;
-    drawer.setAttribute('aria-label', '사이트 메뉴');
+    drawer.setAttribute('role', 'dialog'); drawer.setAttribute('aria-label', '사이트 메뉴');
     drawer.innerHTML = html;
+    search = drawer.querySelector('.msearch input');
+    search.addEventListener('input', function () { filterMenu(search.value); });
+    search.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { var a = drawer.querySelector('.mi:not([hidden])'); if (a) { e.preventDefault(); location.href = a.href; } }
+    });
     scrim = document.createElement('div'); scrim.className = 'drawer-scrim'; scrim.hidden = true;
     scrim.addEventListener('click', closeMenu);
     document.body.appendChild(scrim); document.body.appendChild(drawer);
-    menuBtn = btn('menu-btn', '메뉴 열기', ICONS.menu);
+    menuBtn = btn('menu-btn', '메뉴 열기 (/)', ICONS.menu);
     menuBtn.setAttribute('aria-controls', 'site-menu'); menuBtn.setAttribute('aria-expanded', 'false');
     menuBtn.addEventListener('click', function () { drawer.hidden ? openMenu() : closeMenu(); });
     var wrap = document.querySelector('nav .wrap'), brand = wrap && wrap.querySelector('.brand');
@@ -140,7 +167,11 @@
       wrap.appendChild(tools);              // theme + presentation stay at the right end of the top bar
     }
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && !drawer.hidden) { e.preventDefault(); closeMenu(); }
+      if (e.key === 'Escape' && !drawer.hidden) { e.preventDefault(); closeMenu(); return; }
+      var tag = (e.target && e.target.tagName) || '';
+      if (/INPUT|TEXTAREA|SELECT/.test(tag) || root.classList.contains('presenting')) return;
+      if ((e.key === 'k' || e.key === 'K') && (e.metaKey || e.ctrlKey)) { e.preventDefault(); drawer.hidden ? openMenu(true) : closeMenu(); }
+      else if (e.key === '/' && drawer.hidden) { e.preventDefault(); openMenu(true); }
     });
     drawer.addEventListener('click', function (e) { if (e.target.closest('a')) closeMenu(); });
   }
@@ -162,7 +193,7 @@
       applyTheme(t);
       [tbtn, theme2].forEach(function (b) { b.innerHTML = ICONS[t]; b.title = LABEL[t]; b.setAttribute('aria-label', LABEL[t]); });
     });
-    var pbtn = btn('present-btn', '발표 모드 (P)', ICONS.present + '<span>발표</span>');
+    var pbtn = btn('present-btn', '발표 모드 (P)', ICONS.present);
     pbtn.addEventListener('click', function () { closeMenu(); enter(); });
     tools.appendChild(tbtn); tools.appendChild(pbtn);
     if (navlinks) navlinks.remove();          // top bar keeps only the menu button and the brand
@@ -172,6 +203,10 @@
     bar = document.createElement('div'); bar.className = 'present-bar'; bar.hidden = true;
     bar.setAttribute('role', 'toolbar'); bar.setAttribute('aria-label', '발표 컨트롤');
     progress = document.createElement('i'); progress.className = 'present-progress';
+    var brandEl = document.querySelector('nav .brand');
+    var tag = document.createElement('div'); tag.className = 'present-title'; tag.setAttribute('aria-hidden', 'true');
+    tag.innerHTML = brandEl ? brandEl.innerHTML : esc(document.title);
+    document.body.appendChild(tag);
     var first = btn('', '처음 슬라이드 (Home)', ICONS.first), last = btn('', '마지막 슬라이드 (End)', ICONS.last);
     var prev = btn('', '이전 슬라이드', ICONS.prev), next = btn('', '다음 슬라이드', ICONS.next);
     first.addEventListener('click', function () { show(0); });
