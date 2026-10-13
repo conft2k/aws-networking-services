@@ -255,6 +255,18 @@ th.colh{color:var(--ink)}
 
 /* Korean line breaking: never split a word mid-syllable */
 h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
+svg .ah-fiber{fill:var(--fiber)}
+svg .ah-trace{fill:var(--trace)}
+svg .ah-site{fill:var(--fiber-ink)}
+svg .ah-usr{fill:var(--ink-3)}
+svg .ah-atk{fill:#C2410C}
+.legend i.dir{position:relative;width:26px}
+.legend i.dir::after{content:"";position:absolute;right:-3px;top:-7px;border-left:8px solid var(--fiber);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.legend i.p.dir::after,.legend i.s.dir::after,.legend i.u.dir::after,.legend i.a.dir::after{top:-6px}
+.legend i.p.dir::after{border-left-color:var(--trace)}
+.legend i.s.dir::after{border-left-color:var(--fiber-ink)}
+.legend i.u.dir::after{border-left-color:var(--ink-3)}
+.legend i.a.dir::after{border-left-color:#C2410C}
 </style>
 <link rel="stylesheet" href="../assets/site.css?v=2">
 <script src="../assets/site.js?v=2"></script>
@@ -403,6 +415,11 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
           <svg viewBox="0 0 980 440" role="img" aria-labelledby="arch-title arch-desc">
             <title id="arch-title">CloudFront 레퍼런스 아키텍처</title>
             <desc id="arch-desc">사용자 요청이 엣지 로케이션에 도착하면 AWS WAF가 검사하고, 캐시 미스는 regional edge cache와 Origin Shield를 거쳐 오리진 리전으로 갑니다. 오리진 그룹의 Primary는 VPC origin으로 연결한 사설 서브넷의 Application Load Balancer이고, Secondary는 Origin Access Control로 보호한 Amazon S3 버킷입니다. Primary가 실패하면 Secondary로 전환합니다. Shield Standard가 엣지 전체에 적용됩니다.</desc>
+            <defs>
+              <marker id="ar-cloudfront-fiber" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><path class="ah-fiber" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-cloudfront-trace" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-trace" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-cloudfront-site" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-site" d="M0 0 L10 5 L0 10 z"/></marker>
+            </defs>
             <!-- zones -->
             <rect class="zone" x="10" y="40" width="150" height="380" rx="6"/>
             <text class="z" x="24" y="62">VIEWERS</text>
@@ -437,22 +454,22 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <image href="../assets/aws-icons/Res_Amazon-Simple-Storage-Service_Bucket_48.svg" x="780" y="312" width="28" height="28"/><text class="t" x="816" y="316">S3 · Secondary</text><text class="s" x="816" y="334">OAC 서명 요청</text><text class="s" x="816" y="350">비공개 버킷</text>
 
             <!-- request path -->
-            <path class="fiber" d="M152 228 H200"/>
-            <path class="fiber" d="M350 228 H380"/>
-            <path class="fiber" d="M530 228 H560"/>
-            <path class="fiber" d="M712 220 C741 220 741 156 770 156"/>
-            <path class="path" d="M275 196 V156"/>
+            <path class="fiber" d="M152 228 H191" marker-end="url(#ar-cloudfront-fiber)"/>
+            <path class="fiber" d="M350 228 H371" marker-end="url(#ar-cloudfront-fiber)"/>
+            <path class="fiber" d="M530 228 H551" marker-end="url(#ar-cloudfront-fiber)"/>
+            <path class="fiber" d="M712 220 C737 220 737 156 761 156" marker-end="url(#ar-cloudfront-fiber)"/>
+            <path class="path" d="M275 196 V158" marker-end="url(#ar-cloudfront-trace)"/>
             <text class="lbl" x="284" y="182">검사</text>
-            <path class="site" d="M712 236 C741 236 741 326 770 326"/>
+            <path class="site" d="M712 236 C741 236 741 326 768 326" marker-end="url(#ar-cloudfront-site)"/>
             <text class="lbl2" x="796" y="250">Failover</text>
             <text class="lbl2" x="796" y="266">지정한 상태 코드</text>
             <text class="lbl" x="200" y="300">캐시 미스일 때만 다음 계층으로</text>
           </svg>
         </div>
         <figcaption class="legend">
-          <span><i></i>요청 경로 (캐시 미스)</span>
-          <span><i class="p"></i>요청 검사</span>
-          <span><i class="s"></i>오리진 장애 시 전환</span>
+          <span><i class="dir"></i>요청 방향 (캐시 미스일 때만 다음 계층)</span>
+          <span><i class="p dir"></i>요청 검사 (엣지 → WAF)</span>
+          <span><i class="s dir"></i>오리진 장애 시 전환 (Primary → Secondary)</span>
         </figcaption>
         <p class="arch-hint">좁은 화면에서는 다이어그램을 좌우로 밀어서 보세요.</p>
       </figure>

@@ -153,6 +153,9 @@ svg .site{stroke:var(--fiber-ink);stroke-width:2;fill:none;stroke-dasharray:6 5}
 svg .lbl{fill:var(--trace);font-family:var(--mono);font-size:11px;font-weight:500}
 svg .lbl2{fill:var(--fiber-ink);font-family:var(--mono);font-size:11px;font-weight:500}
 svg .dot{fill:var(--fiber)}
+svg .ah-f{fill:var(--fiber)}
+svg .ah-p{fill:var(--trace)}
+svg .ah-s{fill:var(--fiber-ink)}
 .legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--ink-2)}
 .legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--fiber)}
 .legend i.p{border-top:2px solid var(--trace)}
@@ -480,6 +483,11 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
           <svg viewBox="0 0 980 470" role="img" aria-labelledby="arch-title arch-desc">
             <title id="arch-title">AWS Firewall Manager 조직 정책 아키텍처</title>
             <desc id="arch-desc">왼쪽은 관리 계정과 security 계정입니다. 관리 계정이 security 계정을 Firewall Manager 기본 관리자로 지정합니다. Firewall Manager는 AWS WAF, 보안 그룹, Network Firewall, DNS Firewall 정책을 Prod OU의 계정 A와 B, Dev OU의 계정 C에 배포합니다. 계정 A는 ALB에 관리 web ACL, VPC에 분산형 Network Firewall 엔드포인트가 있어 규정을 준수합니다. 계정 B는 0.0.0.0/0에 22번 포트를 연 보안 그룹 규칙이 감지되어 자동 수정됩니다. Dev OU의 계정 C는 보고만 모드라 위반만 기록됩니다. 오른쪽의 새 계정 D가 Prod OU에 들어오면 정책이 자동 적용됩니다. 각 계정의 AWS Config 변경 기록을 바탕으로 한 규정 준수 결과는 Security Hub CSPM findings와 SNS 알림으로 모입니다.</desc>
+            <defs>
+              <marker id="ar-fms-f" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" orient="auto"><path class="ah-f" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-fms-p" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-p" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-fms-s" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-s" d="M0 0 L10 5 L0 10 z"/></marker>
+            </defs>
             <!-- zones -->
             <rect class="zone" x="10" y="40" width="250" height="420" rx="6"/>
             <text class="z" x="24" y="62">MANAGEMENT · SECURITY</text>
@@ -513,7 +521,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <text class="t" x="66" y="374">Security Hub CSPM</text>
             <text class="s" x="66" y="394">FMS findings</text>
             <text class="s" x="66" y="412">+ SNS 위반 알림</text>
-            <path class="path" d="M135 136 V166"/>
+            <path class="path" d="M135 136 V164" marker-end="url(#ar-fms-p)"/>
 
             <!-- prod accounts -->
             <rect class="box" x="330" y="80" width="340" height="88" rx="4"/>
@@ -542,7 +550,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <text class="t" x="796" y="122">새 계정 D</text>
             <text class="s" x="796" y="142">Prod OU로 이동</text>
             <text class="s" x="796" y="158">→ 범위 평가 후 자동 적용</text>
-            <path class="path" d="M750 132 H700"/>
+            <path class="path" d="M750 132 H702" marker-end="url(#ar-fms-p)"/>
             <text class="lbl" x="752" y="196">OU 가입</text>
 
             <!-- config -->
@@ -554,14 +562,14 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <path class="path" d="M750 392 H670" stroke-dasharray="3 4"/>
 
             <!-- policy push -->
-            <path class="site" d="M250 200 C285 200 285 124 330 124"/>
-            <path class="fiber" d="M250 236 C285 236 285 230 330 230"/>
-            <path class="site" d="M250 272 C285 272 285 392 330 392"/>
+            <path class="site" d="M250 200 C285 200 285 124 328 124" marker-end="url(#ar-fms-s)"/>
+            <path class="fiber" d="M250 236 C285 236 285 230 327 230" marker-end="url(#ar-fms-f)"/>
+            <path class="site" d="M250 272 C285 272 285 392 328 392" marker-end="url(#ar-fms-s)"/>
             <text class="lbl2" x="256" y="160">배포</text>
             <text class="lbl2" x="258" y="219">자동 수정</text>
 
             <!-- findings back -->
-            <path class="path" d="M330 420 C290 420 285 400 250 400"/>
+            <path class="path" d="M330 420 C290 420 285 400 252 400" marker-end="url(#ar-fms-p)"/>
             <text class="lbl" x="252" y="446">findings</text>
           </svg>
         </div>
@@ -569,6 +577,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
           <span><i class="s"></i>정책 배포</span>
           <span><i></i>자동 수정 적용</span>
           <span><i class="p"></i>계정 이동 · 규정 준수 결과</span>
+          <span>→ 화살표: 정책은 FMS → 계정으로 내려가고, findings는 계정 → Security Hub로 돌아옴</span>
         </figcaption>
         <p class="arch-hint">좁은 화면에서는 다이어그램을 좌우로 밀어서 보세요.</p>
       </figure>

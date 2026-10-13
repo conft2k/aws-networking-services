@@ -153,10 +153,17 @@ svg .site{stroke:var(--fiber-ink);stroke-width:2;fill:none;stroke-dasharray:6 5}
 svg .lbl{fill:var(--trace);font-family:var(--mono);font-size:11px;font-weight:500}
 svg .lbl2{fill:var(--fiber-ink);font-family:var(--mono);font-size:11px;font-weight:500}
 svg .dot{fill:var(--fiber)}
+svg .ah-tr{fill:var(--trace)}
+svg .ah-fi{fill:var(--fiber)}
+svg .ah-fk{fill:var(--fiber-ink)}
 .legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--ink-2)}
 .legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--fiber)}
 .legend i.p{border-top:2px solid var(--trace)}
 .legend i.s{border-top:2px dashed var(--fiber-ink)}
+.legend i.dir{position:relative;width:26px}
+.legend i.dir::after{content:"";position:absolute;right:-3px;top:-7px;border-left:8px solid var(--fiber);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.legend i.p.dir::after{top:-6px;border-left-color:var(--trace)}
+.legend i.s.dir::after{top:-6px;border-left-color:var(--fiber-ink)}
 
 /* steps */
 .steps{list-style:none;padding:0;margin:40px 0 0;display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:4px solid var(--fiber)}
@@ -438,6 +445,10 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
           <svg viewBox="0 0 980 530" role="img" aria-labelledby="arch-title arch-desc">
             <title id="arch-title">Amazon VPC 레퍼런스 아키텍처</title>
             <desc id="arch-desc">서울 리전의 VPC 10.0.0.0/16에 인터넷 게이트웨이가 붙어 있습니다. VPC는 가용 영역 a와 c로 나뉘고, 각 AZ에 퍼블릭, 앱, 데이터 서브넷이 있습니다. 퍼블릭 서브넷에는 NAT 게이트웨이와 ALB 노드가 있고 인터넷 게이트웨이와 연결됩니다. 앱 서브넷은 같은 AZ의 NAT 게이트웨이로 아웃바운드 트래픽을 보내고, 인터페이스 엔드포인트로 AWS 서비스 API에 접근합니다. 데이터 서브넷은 게이트웨이 엔드포인트로 S3에 접근합니다. VPC는 피어링이나 Transit Gateway로 다른 VPC와 온프레미스에 연결됩니다.</desc>
+            <defs>
+              <marker id="ar-vpc-tr" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-tr" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-vpc-fk" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-fk" d="M0 0 L10 5 L0 10 z"/></marker>
+            </defs>
             <rect class="box" x="300" y="10" width="160" height="40" rx="4"/>
             <image class="ic-gen" href="../assets/aws-icons/Res_Internet_48_Light.svg" x="310" y="18" width="24" height="24"/>
             <text class="t" x="394" y="35" text-anchor="middle">Internet</text>
@@ -492,20 +503,21 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <path class="fiber" d="M355 122 C355 150 210 140 210 170"/>
             <path class="fiber" d="M405 122 C405 150 550 140 550 170"/>
 
-            <path class="site" d="M210 280 V240"/>
+            <path class="site" d="M210 280 V242" marker-end="url(#ar-vpc-fk)"/>
             <text class="lbl2" x="220" y="265">0/0 → nat-a</text>
-            <path class="site" d="M550 280 V240"/>
+            <path class="site" d="M550 280 V242" marker-end="url(#ar-vpc-fk)"/>
             <text class="lbl2" x="560" y="265">0/0 → nat-c</text>
 
             <path class="path" d="M730 190 H750"/>
-            <path class="path" d="M690 315 H750"/>
-            <path class="path" d="M690 425 H750"/>
+            <path class="path" d="M690 315 H748" marker-end="url(#ar-vpc-tr)"/>
+            <path class="path" d="M690 425 H748" marker-end="url(#ar-vpc-tr)"/>
           </svg>
         </div>
         <figcaption class="legend">
           <span><i></i>인터넷 경로 (IGW)</span>
-          <span><i class="s"></i>NAT 아웃바운드</span>
-          <span><i class="p"></i>사설 경로 (엔드포인트 · 피어링 · TGW)</span>
+          <span><i class="s dir"></i>NAT 아웃바운드 (앱 → NAT, 나가는 방향만)</span>
+          <span><i class="p dir"></i>엔드포인트로 AWS 서비스 호출 (VPC → 서비스)</span>
+          <span><i class="p"></i>피어링 · TGW (양방향)</span>
         </figcaption>
         <p class="arch-hint">좁은 화면에서는 다이어그램을 좌우로 밀어서 보세요.</p>
       </figure>

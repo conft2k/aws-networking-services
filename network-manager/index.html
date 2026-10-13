@@ -153,10 +153,17 @@ svg .site{stroke:var(--fiber-ink);stroke-width:2;fill:none;stroke-dasharray:6 5}
 svg .lbl{fill:var(--trace);font-family:var(--mono);font-size:11px;font-weight:500}
 svg .lbl2{fill:var(--fiber-ink);font-family:var(--mono);font-size:11px;font-weight:500}
 svg .dot{fill:var(--fiber)}
+svg .ah-tr{fill:var(--trace)}
+svg .ah-fi{fill:var(--fiber)}
+svg .ah-fk{fill:var(--fiber-ink)}
 .legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--ink-2)}
 .legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--fiber)}
 .legend i.p{border-top:2px solid var(--trace)}
 .legend i.s{border-top:2px dashed var(--fiber-ink)}
+.legend i.dir{position:relative;width:26px}
+.legend i.dir::after{content:"";position:absolute;right:-3px;top:-7px;border-left:8px solid var(--fiber);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.legend i.p.dir::after{top:-6px;border-left-color:var(--trace)}
+.legend i.s.dir::after{top:-6px;border-left-color:var(--fiber-ink)}
 
 /* steps */
 .steps{list-style:none;padding:0;margin:40px 0 0;display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:4px solid var(--fiber)}
@@ -433,6 +440,10 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
           <svg viewBox="0 0 980 440" role="img" aria-labelledby="arch-title arch-desc">
             <title id="arch-title">Network Manager 레퍼런스 아키텍처</title>
             <desc id="arch-desc">온프레미스 데이터센터는 Site-to-Site VPN으로 서울 Transit Gateway에, 지사의 SD-WAN 장비는 Connect로 도쿄 Transit Gateway에 연결됩니다. 두 Transit Gateway는 서로 피어링되고 각각 VPC가 붙어 있으며, 도쿄 Transit Gateway는 Cloud WAN 코어 네트워크와도 피어링됩니다. 이 자원 전체가 global network에 등록되어 있고, 토폴로지와 이벤트 데이터는 us-west-2 home region의 Network Manager로 모인 뒤 EventBridge와 CloudWatch Logs로 전달됩니다.</desc>
+            <defs>
+              <marker id="ar-network-manager-tr" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-tr" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-network-manager-fk" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-fk" d="M0 0 L10 5 L0 10 z"/></marker>
+            </defs>
             <rect class="zone" x="10" y="40" width="176" height="380" rx="6"/>
             <image href="../assets/aws-icons/Corporate-data-center_32.svg" x="10" y="40" width="22" height="22"/>
             <text class="z" x="40" y="56">ON-PREMISES</text>
@@ -493,9 +504,9 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <image href="../assets/aws-icons/Res_Amazon-CloudWatch_Logs_48.svg" x="722" y="326" width="28" height="28"/>
             <text class="t" x="758" y="336">CloudWatch Logs · SNS</text><text class="s" x="758" y="356">Logs Insights · 알림</text>
 
-            <path class="site" d="M674 140 H714"/>
-            <path class="path" d="M825 170 V210"/>
-            <path class="path" d="M825 270 V310"/>
+            <path class="site" d="M674 140 H712" marker-end="url(#ar-network-manager-fk)"/>
+            <path class="path" d="M825 170 V208" marker-end="url(#ar-network-manager-tr)"/>
+            <path class="path" d="M825 270 V308" marker-end="url(#ar-network-manager-tr)"/>
             <text class="lbl2" x="834" y="194">events</text>
             <text class="lbl2" x="834" y="294">rule → target</text>
             <text class="lbl2" x="558" y="96">topology · events</text>
@@ -503,8 +514,9 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
         </div>
         <figcaption class="legend">
           <span><i></i>Transit Gateway 피어링</span>
-          <span><i class="p"></i>attachment · 이벤트 전달</span>
-          <span><i class="s"></i>등록 자원의 메타데이터 수집</span>
+          <span><i class="p"></i>attachment (VPN · Connect · VPC)</span>
+          <span><i class="p dir"></i>이벤트 전달</span>
+          <span><i class="s dir"></i>등록 자원의 메타데이터 수집 (→ home region)</span>
         </figcaption>
         <p class="arch-hint">좁은 화면에서는 다이어그램을 좌우로 밀어서 보세요.</p>
       </figure>

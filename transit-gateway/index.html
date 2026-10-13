@@ -153,6 +153,10 @@ svg .site{stroke:var(--fiber-ink);stroke-width:2;fill:none;stroke-dasharray:6 5}
 svg .lbl{fill:var(--trace);font-family:var(--mono);font-size:11px;font-weight:500}
 svg .lbl2{fill:var(--fiber-ink);font-family:var(--mono);font-size:11px;font-weight:500}
 svg .dot{fill:var(--fiber)}
+svg .flow{stroke:var(--fiber-ink);stroke-width:2.5;fill:none;stroke-linecap:round}
+svg .ah-flow{fill:var(--fiber-ink)}
+.legend i.f{border-top:2.5px solid var(--fiber-ink);width:18px;margin-right:0}
+.legend i.f + b{display:inline-block;width:0;height:0;border-left:7px solid var(--fiber-ink);border-top:4px solid transparent;border-bottom:4px solid transparent;vertical-align:middle;margin-right:6px}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) svg .ic-gen{filter:invert(1)}}
 :root[data-theme="dark"] svg .ic-gen{filter:invert(1)}
 .legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--ink-2)}
@@ -478,6 +482,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
           <svg viewBox="0 0 980 440" role="img" aria-labelledby="arch-title arch-desc">
             <title id="arch-title">Transit Gateway 레퍼런스 아키텍처</title>
             <desc id="arch-desc">데이터센터는 Direct Connect로 DX Gateway에, 지사는 Site-to-Site VPN으로 서울 리전의 Transit Gateway에 연결됩니다. Transit Gateway는 prod VPC, dev VPC, 공유 서비스 VPC, appliance mode를 켠 검사 VPC를 연결합니다. 다른 리전의 Transit Gateway와는 inter-Region 피어링으로 연결되고, 그 Transit Gateway에 다른 리전의 VPC가 연결됩니다.</desc>
+            <defs><marker id="ar-tgw-flow" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-flow" d="M0 0 L10 5 L0 10 z"/></marker></defs>
             <rect class="zone" x="10" y="40" width="180" height="380" rx="6"/>
             <image href="../assets/aws-icons/Corporate-data-center_32.svg" x="10" y="40" width="24" height="24"/>
             <text class="z" x="42" y="56">ON-PREMISES</text>
@@ -537,12 +542,17 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <path class="path" d="M482 270 V396 H770 C795 396 775 250 800 250"/>
             <text class="lbl" x="488" y="413">inter-Region peering · AES-256</text>
             <path class="path" d="M880 270 V320"/>
+
+            <path class="flow" d="M545 271 C545 318 560 330 597 330" marker-end="url(#ar-tgw-flow)"/>
+            <path class="flow" d="M600 364 C540 364 512 330 512 273" marker-end="url(#ar-tgw-flow)"/>
+            <text class="lbl2" x="526" y="384">검사 경유</text>
           </svg>
         </div>
         <figcaption class="legend">
           <span><i></i>Direct Connect 회선</span>
           <span><i class="p"></i>attachment · 피어링</span>
           <span><i class="s"></i>VPN (인터넷)</span>
+          <span><i class="f"></i><b></b>검사 경유 트래픽 (VPC 간 · 같은 AZ로 왕복)</span>
         </figcaption>
         <p class="arch-hint">좁은 화면에서는 다이어그램을 좌우로 밀어서 보세요.</p>
       </figure>

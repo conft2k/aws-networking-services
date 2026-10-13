@@ -153,6 +153,14 @@ svg .site{stroke:var(--fiber-ink);stroke-width:2;fill:none;stroke-dasharray:6 5}
 svg .lbl{fill:var(--trace);font-family:var(--mono);font-size:11px;font-weight:500}
 svg .lbl2{fill:var(--fiber-ink);font-family:var(--mono);font-size:11px;font-weight:500}
 svg .dot{fill:var(--fiber)}
+svg .ah-p{fill:var(--trace)}
+svg .ah-f{fill:var(--fiber)}
+svg .ah-s{fill:var(--fiber-ink)}
+.legend i.dir{position:relative;width:26px}
+.legend i.dir::after{content:"";position:absolute;right:-3px;top:-6px;border-left:8px solid var(--trace);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.legend i.f.dir::after{top:-7px;border-left-color:var(--fiber)}
+.legend i.t.dir::after{top:-6.5px;border-left-color:var(--fiber)}
+.legend i.s.dir::after{border-left-color:var(--fiber-ink)}
 .legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--ink-2)}
 .legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--fiber)}
 .legend i.p{border-top:2px solid var(--trace)}
@@ -475,6 +483,10 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
           <svg viewBox="0 0 980 460" role="img" aria-labelledby="arch-title arch-desc">
             <title id="arch-title">VPC Lattice 레퍼런스 아키텍처</title>
             <desc id="arch-desc">클라이언트 VPC는 VPC association으로, 온프레미스는 Direct Connect 또는 VPN으로 연결된 VPC의 service network endpoint로 service network에 들어갑니다. service network에는 orders와 inventory 서비스, rds-primary resource configuration이 있습니다. 계정 B의 서비스는 IP 대상 그룹의 EKS Pod와 Lambda 대상 그룹으로 요청을 보내고, 계정 C의 resource gateway는 Amazon RDS로 TCP 연결을 전달합니다. 서비스와 리소스는 AWS RAM으로 공유됩니다.</desc>
+            <defs>
+              <marker id="ar-vl-p" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-p" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-vl-f" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><path class="ah-f" d="M0 0 L10 5 L0 10 z"/></marker>
+            </defs>
             <!-- zones -->
             <rect class="zone" x="10" y="40" width="230" height="400" rx="6"/>
             <text class="z" x="24" y="62">CLIENTS</text>
@@ -501,9 +513,9 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <text class="lbl2" x="128" y="316">DX · VPN</text>
 
             <!-- entry -->
-            <path class="fiber" d="M210 128 H300"/>
+            <path class="fiber" d="M210 128 H297" marker-end="url(#ar-vl-f)"/>
             <text class="lbl2" x="214" y="118">association</text>
-            <path class="fiber" d="M210 238 C255 238 255 200 300 200"/>
+            <path class="fiber" d="M210 238 C255 238 252 200 297 200" marker-end="url(#ar-vl-f)"/>
             <text class="lbl2" x="214" y="262">endpoint</text>
 
             <!-- services in SN -->
@@ -526,8 +538,8 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <rect class="box" x="650" y="172" width="290" height="60" rx="4"/>
             <image href="../assets/aws-icons/Res_AWS-Lambda_Lambda-Function_48.svg" x="658" y="188" width="28" height="28"/>
             <text class="t" x="694" y="198">Target group · Lambda</text><text class="s" x="694" y="218">Lambda 함수</text>
-            <path class="path" d="M560 126 H650"/>
-            <path class="path" d="M560 202 H650"/>
+            <path class="path" d="M560 126 H648" marker-end="url(#ar-vl-p)"/>
+            <path class="path" d="M560 202 H648" marker-end="url(#ar-vl-p)"/>
             <text class="lbl" x="568" y="118">RAM</text>
             <text class="lbl" x="568" y="194">RAM</text>
 
@@ -538,15 +550,15 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <rect class="box" x="815" y="318" width="145" height="60" rx="4"/>
             <image href="../assets/aws-icons/Arch_Amazon-RDS_48.svg" x="823" y="334" width="28" height="28"/>
             <text class="t" x="859" y="344">Amazon RDS</text><text class="s" x="859" y="364">TCP 5432</text>
-            <path class="path" d="M560 310 C600 310 600 348 640 348"/>
+            <path class="path" d="M560 310 C600 310 600 348 638 348" marker-end="url(#ar-vl-p)"/>
             <text class="lbl" x="568" y="302">RAM</text>
-            <path class="path" d="M800 348 H815"/>
+            <path class="path" d="M800 348 H813" marker-end="url(#ar-vl-p)"/>
           </svg>
         </div>
         <figcaption class="legend">
-          <span><i></i>클라이언트 진입 (association · endpoint)</span>
-          <span><i class="p"></i>service network에서 대상으로</span>
-          <span><i class="s"></i>하이브리드 연결 (DX · VPN)</span>
+          <span><i class="f dir"></i>클라이언트 요청 진입 (association · endpoint)</span>
+          <span><i class="p dir"></i>service network에서 대상으로 요청 전달</span>
+          <span><i class="s"></i>하이브리드 연결 (DX · VPN)</span><span>응답은 같은 경로로 돌아옵니다.</span>
         </figcaption>
         <p class="arch-hint">좁은 화면에서는 다이어그램을 좌우로 밀어서 보세요.</p>
       </figure>

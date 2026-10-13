@@ -153,10 +153,17 @@ svg .site{stroke:var(--fiber-ink);stroke-width:2;fill:none;stroke-dasharray:6 5}
 svg .lbl{fill:var(--trace);font-family:var(--mono);font-size:11px;font-weight:500}
 svg .lbl2{fill:var(--fiber-ink);font-family:var(--mono);font-size:11px;font-weight:500}
 svg .dot{fill:var(--fiber)}
+svg .ah-tr{fill:var(--trace)}
+svg .ah-fi{fill:var(--fiber)}
+svg .ah-fk{fill:var(--fiber-ink)}
 .legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--ink-2)}
 .legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--fiber)}
 .legend i.p{border-top:2px solid var(--trace)}
 .legend i.s{border-top:2px dashed var(--fiber-ink)}
+.legend i.dir{position:relative;width:26px}
+.legend i.dir::after{content:"";position:absolute;right:-3px;top:-7px;border-left:8px solid var(--fiber);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.legend i.p.dir::after{top:-6px;border-left-color:var(--trace)}
+.legend i.s.dir::after{top:-6px;border-left-color:var(--fiber-ink)}
 
 /* steps */
 .steps{list-style:none;padding:0;margin:40px 0 0;display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:4px solid var(--fiber)}
@@ -446,6 +453,11 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
           <svg viewBox="0 0 980 440" role="img" aria-labelledby="arch-title arch-desc">
             <title id="arch-title">VPC Flow Logs 수집과 전송 아키텍처</title>
             <desc id="arch-desc">VPC 안의 EC2 인스턴스 ENI, NAT 게이트웨이 ENI, ECS 태스크 ENI와 VPC 밖의 Transit Gateway에서 흐름 정보가 VPC Flow Logs로 수집됩니다. Flow Logs는 1분 또는 10분 집계 간격으로 레코드를 만들어 CloudWatch Logs, Amazon S3, Amazon Data Firehose로 전달합니다. CloudWatch Logs는 Logs Insights와 알람으로, S3는 Athena로, Firehose는 OpenSearch나 Splunk 같은 도구로 분석합니다.</desc>
+            <defs>
+              <marker id="ar-vpc-flow-logs-tr" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-tr" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-vpc-flow-logs-fi" viewBox="0 0 10 10" refX="3" refY="5" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><path class="ah-fi" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-vpc-flow-logs-fk" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-fk" d="M0 0 L10 5 L0 10 z"/></marker>
+            </defs>
             <!-- zones -->
             <rect class="zone" x="10" y="40" width="260" height="290" rx="6"/>
             <image href="../assets/aws-icons/Virtual-private-cloud-VPC_32.svg" x="10" y="40" width="22" height="22"/>
@@ -475,10 +487,10 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <text class="s" x="376" y="238">집계 1분 · 10분</text>
             <text class="s" x="376" y="256">ACCEPT · REJECT · ALL</text>
 
-            <path class="path" d="M250 112 C300 112 285 196 330 196"/>
-            <path class="path" d="M250 197 C290 197 295 212 330 212"/>
-            <path class="path" d="M250 282 C290 282 295 228 330 228"/>
-            <path class="path" d="M250 382 C305 382 285 252 330 252"/>
+            <path class="path" d="M250 112 C300 112 285 196 328 196" marker-end="url(#ar-vpc-flow-logs-tr)"/>
+            <path class="path" d="M250 197 C290 197 295 212 328 212" marker-end="url(#ar-vpc-flow-logs-tr)"/>
+            <path class="path" d="M250 282 C290 282 295 228 328 228" marker-end="url(#ar-vpc-flow-logs-tr)"/>
+            <path class="path" d="M250 382 C305 382 285 252 328 252" marker-end="url(#ar-vpc-flow-logs-tr)"/>
             <text class="lbl" x="280" y="96">흐름 메타데이터</text>
 
             <!-- destinations -->
@@ -492,9 +504,9 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <image href="../assets/aws-icons/Arch_Amazon-Data-Firehose_48.svg" x="605" y="331" width="28" height="28"/>
             <text class="t" x="642" y="338">Data Firehose</text><text class="s" x="642" y="358">스트리밍 전달</text>
 
-            <path class="fiber" d="M530 200 C565 200 565 115 596 115"/>
-            <path class="fiber" d="M530 230 H596"/>
-            <path class="fiber" d="M530 250 C565 250 565 345 596 345"/>
+            <path class="fiber" d="M530 200 C560 200 560 115 586 115" marker-end="url(#ar-vpc-flow-logs-fi)"/>
+            <path class="fiber" d="M530 230 H586" marker-end="url(#ar-vpc-flow-logs-fi)"/>
+            <path class="fiber" d="M530 250 C560 250 560 345 586 345" marker-end="url(#ar-vpc-flow-logs-fi)"/>
             <text class="lbl2" x="470" y="296">전달</text>
 
             <!-- analysis -->
@@ -507,15 +519,15 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <rect class="box" x="796" y="310" width="160" height="70" rx="4"/>
             <image href="../assets/aws-icons/Arch_Amazon-OpenSearch-Service_48.svg" x="805" y="331" width="28" height="28"/>
             <text class="t" x="842" y="338">OpenSearch</text><text class="s" x="842" y="358">Splunk · HTTP 등</text>
-            <path class="site" d="M776 115 H796"/>
-            <path class="site" d="M776 230 H796"/>
-            <path class="site" d="M776 345 H796"/>
+            <path class="site" d="M776 115 H794" marker-end="url(#ar-vpc-flow-logs-fk)"/>
+            <path class="site" d="M776 230 H794" marker-end="url(#ar-vpc-flow-logs-fk)"/>
+            <path class="site" d="M776 345 H794" marker-end="url(#ar-vpc-flow-logs-fk)"/>
           </svg>
         </div>
         <figcaption class="legend">
-          <span><i class="p"></i>흐름 수집 (out-of-path)</span>
-          <span><i></i>레코드 전달</span>
-          <span><i class="s"></i>분석 도구</span>
+          <span><i class="p dir"></i>흐름 수집 (out-of-path)</span>
+          <span><i class="dir"></i>레코드 전달</span>
+          <span><i class="s dir"></i>분석 도구로 전달</span>
         </figcaption>
         <p class="arch-hint">좁은 화면에서는 다이어그램을 좌우로 밀어서 보세요.</p>
       </figure>

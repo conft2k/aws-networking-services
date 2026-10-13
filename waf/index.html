@@ -276,6 +276,18 @@ svg .lbl3{fill:#C2410C;font-family:var(--mono);font-size:11px;font-weight:500}
 
 /* Korean line breaking: never split a word mid-syllable */
 h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
+svg .ah-fiber{fill:var(--fiber)}
+svg .ah-trace{fill:var(--trace)}
+svg .ah-site{fill:var(--fiber-ink)}
+svg .ah-usr{fill:var(--ink-3)}
+svg .ah-atk{fill:#C2410C}
+.legend i.dir{position:relative;width:26px}
+.legend i.dir::after{content:"";position:absolute;right:-3px;top:-7px;border-left:8px solid var(--fiber);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.legend i.p.dir::after,.legend i.s.dir::after,.legend i.u.dir::after,.legend i.a.dir::after{top:-6px}
+.legend i.p.dir::after{border-left-color:var(--trace)}
+.legend i.s.dir::after{border-left-color:var(--fiber-ink)}
+.legend i.u.dir::after{border-left-color:var(--ink-3)}
+.legend i.a.dir::after{border-left-color:#C2410C}
 </style>
 <link rel="stylesheet" href="../assets/site.css?v=2">
 <script src="../assets/site.js?v=2"></script>
@@ -467,6 +479,13 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
           <svg viewBox="0 0 980 470" role="img" aria-labelledby="arch-title arch-desc">
             <title id="arch-title">AWS WAF 레퍼런스 아키텍처</title>
             <desc id="arch-desc">인터넷의 사용자, 봇, 공격 트래픽이 들어옵니다. 웹 트래픽은 글로벌 범위 web ACL이 연결된 CloudFront 배포에서 Managed Rules, Bot Control, rate-based rule로 검사되고, 차단된 요청은 엣지에서 403을 받습니다. 허용된 요청은 리전의 Application Load Balancer와 애플리케이션으로 갑니다. 모바일 앱의 API 호출은 리전 범위 web ACL이 연결된 API Gateway REST API로 갑니다. 조직 관리 영역에서는 Firewall Manager 관리자 계정이 정책으로 각 계정 web ACL의 첫 규칙 그룹과 마지막 규칙 그룹을 배포하고, web ACL 로그는 Amazon Data Firehose를 거쳐 S3로 모이며 CloudWatch 지표가 함께 수집됩니다.</desc>
+            <defs>
+              <marker id="ar-waf-fiber" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><path class="ah-fiber" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-waf-trace" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-trace" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-waf-site" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-site" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-waf-usr" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-usr" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-waf-atk" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-atk" d="M0 0 L10 5 L0 10 z"/></marker>
+            </defs>
             <!-- zones -->
             <rect class="zone" x="10" y="40" width="210" height="270" rx="6"/>
             <image class="ic-gen" href="../assets/aws-icons/Res_Internet_48_Light.svg" x="18" y="48" width="22" height="22"/>
@@ -502,9 +521,9 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <text class="lbl2" x="294" y="206">default action: Allow</text>
             <text class="lbl3" x="264" y="240">차단 요청</text><text class="lbl3" x="264" y="256">→ 엣지에서 403</text>
 
-            <path class="usr" d="M210 112 H250"/>
-            <path class="atk" d="M210 188 C230 188 230 170 250 170"/>
-            <path class="usr" d="M210 264 C340 264 420 270 535 270"/>
+            <path class="usr" d="M210 112 H246" marker-end="url(#ar-waf-usr)"/>
+            <path class="atk" d="M210 188 C228 188 228 170 246 170" marker-end="url(#ar-waf-atk)"/>
+            <path class="usr" d="M210 264 C340 264 420 270 533 270" marker-end="url(#ar-waf-usr)"/>
 
             <!-- region -->
             <rect class="box" x="535" y="96" width="195" height="64" rx="4"/>
@@ -520,10 +539,10 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <image href="../assets/aws-icons/Arch_AWS-Lambda_48.svg" x="784" y="252" width="28" height="28"/>
             <text class="t" x="820" y="260">Lambda</text><text class="s" x="820" y="280">API 백엔드</text>
 
-            <path class="fiber" d="M478 128 H535"/>
-            <text class="lbl2" x="482" y="120">허용 요청</text>
-            <path class="path" d="M730 128 H774"/>
-            <path class="path" d="M730 266 H774"/>
+            <path class="fiber" d="M478 128 H526" marker-end="url(#ar-waf-fiber)"/>
+            <text class="lbl2" x="482" y="114">허용 요청</text>
+            <path class="path" d="M730 128 H772" marker-end="url(#ar-waf-trace)"/>
+            <path class="path" d="M730 266 H772" marker-end="url(#ar-waf-trace)"/>
             <text class="lbl" x="400" y="258">API 호출</text>
 
             <!-- organization -->
@@ -538,11 +557,11 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <image href="../assets/aws-icons/Arch_Amazon-CloudWatch_48.svg" x="784" y="409" width="24" height="24"/>
             <text class="t" x="816" y="396">S3 · CloudWatch</text><text class="s" x="816" y="416">로그 · 지표 · 대시보드</text>
 
-            <path class="site" d="M350 370 V216"/>
-            <path class="site" d="M475 392 C515 392 510 300 545 296"/>
+            <path class="site" d="M350 370 V218" marker-end="url(#ar-waf-site)"/>
+            <path class="site" d="M475 392 C530 392 560 340 560 298" marker-end="url(#ar-waf-site)"/>
             <text class="lbl2" x="362" y="300">정책 배포</text>
-            <path class="path" d="M645 330 V370" stroke-dasharray="3 4"/>
-            <path class="path" d="M730 405 H774"/>
+            <path class="path" d="M645 330 V368" stroke-dasharray="3 4" marker-end="url(#ar-waf-trace)"/>
+            <path class="path" d="M730 405 H772" marker-end="url(#ar-waf-trace)"/>
             <text class="lbl" x="655" y="352">logs</text>
             <rect x="240" y="336" width="262" height="26" fill="var(--surface)"/>
             <image href="../assets/aws-icons/AWS-Account_32.svg" x="243" y="338" width="22" height="22"/>
@@ -550,11 +569,11 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
           </svg>
         </div>
         <figcaption class="legend">
-          <span><i class="u"></i>클라이언트 요청</span>
-          <span><i class="a"></i>봇 · 공격 요청</span>
-          <span><i></i>검사 통과 트래픽</span>
-          <span><i class="s"></i>Firewall Manager 정책</span>
-          <span><i class="p"></i>리전 내부 · 로그</span>
+          <span><i class="u dir"></i>클라이언트 요청</span>
+          <span><i class="a dir"></i>봇 · 공격 요청 (엣지에서 차단)</span>
+          <span><i class="dir"></i>검사 통과 트래픽</span>
+          <span><i class="s dir"></i>Firewall Manager 정책 배포</span>
+          <span><i class="p dir"></i>리전 내부 요청 · 로그 전달</span>
         </figcaption>
         <p class="arch-hint">좁은 화면에서는 다이어그램을 좌우로 밀어서 보세요.</p>
       </figure>

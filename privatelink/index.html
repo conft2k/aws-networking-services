@@ -153,6 +153,14 @@ svg .site{stroke:var(--fiber-ink);stroke-width:2;fill:none;stroke-dasharray:6 5}
 svg .lbl{fill:var(--trace);font-family:var(--mono);font-size:11px;font-weight:500}
 svg .lbl2{fill:var(--fiber-ink);font-family:var(--mono);font-size:11px;font-weight:500}
 svg .dot{fill:var(--fiber)}
+svg .ah-p{fill:var(--trace)}
+svg .ah-f{fill:var(--fiber)}
+svg .ah-s{fill:var(--fiber-ink)}
+.legend i.dir{position:relative;width:26px}
+.legend i.dir::after{content:"";position:absolute;right:-3px;top:-6px;border-left:8px solid var(--trace);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.legend i.f.dir::after{top:-7px;border-left-color:var(--fiber)}
+.legend i.t.dir::after{top:-6.5px;border-left-color:var(--fiber)}
+.legend i.s.dir::after{border-left-color:var(--fiber-ink)}
 .legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--ink-2)}
 .legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--fiber)}
 .legend i.p{border-top:2px solid var(--trace)}
@@ -447,6 +455,11 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
           <svg viewBox="0 0 980 440" role="img" aria-labelledby="arch-title arch-desc">
             <title id="arch-title">PrivateLink 레퍼런스 아키텍처</title>
             <desc id="arch-desc">서울 리전의 소비자 VPC에 Interface endpoint와 Resource endpoint가 있습니다. 애플리케이션과 온프레미스 데이터센터는 Interface endpoint를 거쳐, 같은 10.0.0.0/16 대역을 쓰는 공급자 VPC의 Network Load Balancer 기반 endpoint service와 서비스 대상에 연결됩니다. Resource endpoint는 다른 VPC의 resource gateway를 거쳐 데이터베이스에 연결됩니다. 다른 리전의 소비자 VPC는 리전 간 PrivateLink로 같은 endpoint service에 연결됩니다.</desc>
+            <defs>
+              <marker id="ar-pl-p" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-p" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-pl-f" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><path class="ah-f" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-pl-s" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-s" d="M0 0 L10 5 L0 10 z"/></marker>
+            </defs>
             <rect class="zone" x="10" y="40" width="150" height="380" rx="6"/>
             <image href="../assets/aws-icons/Corporate-data-center_32.svg" x="10" y="40" width="24" height="24"/>
             <text class="z" x="42" y="56">ON-PREMISES</text>
@@ -495,21 +508,21 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <image href="../assets/aws-icons/Res_Amazon-VPC_Virtual-private-cloud-VPC_48.svg" x="801" y="122" width="24" height="24"/>
             <text class="t" x="831" y="122">소비자 VPC</text><text class="s" x="831" y="142">Interface endpoint</text><text class="s" x="831" y="158">service Region 지정</text>
 
-            <path class="path" d="M148 228 H210"/>
-            <path class="path" d="M320 140 V190"/>
-            <path class="fiber" d="M430 216 C480 216 490 114 536 114"/>
+            <path class="path" d="M148 228 H208" marker-end="url(#ar-pl-p)"/>
+            <path class="path" d="M320 140 V188" marker-end="url(#ar-pl-p)"/>
+            <path class="fiber" d="M430 216 C480 216 486 114 533 114" marker-end="url(#ar-pl-f)"/>
             <text class="lbl2" x="451" y="238">PrivateLink</text>
-            <path class="path" d="M640 144 V196"/>
-            <path class="fiber" d="M430 360 C480 360 490 370 540 370"/>
-            <path class="path" d="M710 370 H740"/>
-            <path class="site" d="M794 134 C770 134 765 114 744 114"/>
+            <path class="path" d="M640 144 V194" marker-end="url(#ar-pl-p)"/>
+            <path class="fiber" d="M430 360 C480 360 486 370 537 370" marker-end="url(#ar-pl-f)"/>
+            <path class="path" d="M710 370 H738" marker-end="url(#ar-pl-p)"/>
+            <path class="site" d="M794 134 C770 134 765 114 746 114" marker-end="url(#ar-pl-s)"/>
             <text class="lbl2" x="794" y="196">cross-Region</text>
           </svg>
         </div>
         <figcaption class="legend">
-          <span><i></i>PrivateLink 연결</span>
-          <span><i class="p"></i>VPC 내부 · 하이브리드 경로</span>
-          <span><i class="s"></i>리전 간 PrivateLink</span>
+          <span><i class="f dir"></i>PrivateLink 연결 (소비자 → 공급자, 단방향)</span>
+          <span><i class="p dir"></i>VPC 내부 · 하이브리드 요청 경로</span>
+          <span><i class="s dir"></i>리전 간 PrivateLink</span><span>화살표는 연결을 시작하는 방향이며, 응답은 같은 연결로 돌아옵니다.</span>
         </figcaption>
         <p class="arch-hint">좁은 화면에서는 다이어그램을 좌우로 밀어서 보세요.</p>
       </figure>

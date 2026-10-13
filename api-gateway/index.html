@@ -153,6 +153,9 @@ svg .site{stroke:var(--fiber-ink);stroke-width:2;fill:none;stroke-dasharray:6 5}
 svg .lbl{fill:var(--trace);font-family:var(--mono);font-size:11px;font-weight:500}
 svg .lbl2{fill:var(--fiber-ink);font-family:var(--mono);font-size:11px;font-weight:500}
 svg .dot{fill:var(--fiber)}
+svg .ah-f{fill:var(--fiber)}
+svg .ah-p{fill:var(--trace)}
+svg .ah-s{fill:var(--fiber-ink)}
 .legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--ink-2)}
 .legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--fiber)}
 .legend i.p{border-top:2px solid var(--trace)}
@@ -452,6 +455,11 @@ Accept: application/json</pre>
           <svg viewBox="0 0 980 440" role="img" aria-labelledby="arch-title arch-desc">
             <title id="arch-title">API Gateway 사설 API 레퍼런스 아키텍처</title>
             <desc id="arch-desc">온프레미스 사내 클라이언트가 Direct Connect로 소비자 VPC에 연결되고, Route 53 Resolver inbound 엔드포인트로 API 이름을 해석합니다. 소비자 VPC의 애플리케이션과 온프레미스 클라이언트는 execute-api 인터페이스 엔드포인트로 사설 REST API를 호출합니다. 사설 REST API는 resource policy로 허용된 VPC 엔드포인트의 요청만 받고, Lambda 함수로 프록시 통합하거나 VPC link를 거쳐 사설 서브넷의 ALB 또는 NLB로 전달합니다.</desc>
+            <defs>
+              <marker id="ar-apigw-f" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" orient="auto"><path class="ah-f" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-apigw-p" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-p" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-apigw-s" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-s" d="M0 0 L10 5 L0 10 z"/></marker>
+            </defs>
             <!-- zones -->
             <rect class="zone" x="10" y="40" width="180" height="380" rx="6"/>
             <image href="../assets/aws-icons/Corporate-data-center_32.svg" x="18" y="48" width="22" height="22"/>
@@ -492,22 +500,23 @@ Accept: application/json</pre>
             <image href="../assets/aws-icons/Arch_Elastic-Load-Balancing_48.svg" x="765" y="318" width="28" height="28"/><text class="t" x="801" y="328">ALB · NLB</text><text class="s" x="801" y="348">사설 서브넷</text>
 
             <!-- links -->
-            <path class="fiber" d="M176 222 H244"/>
+            <path class="fiber" d="M176 222 H241" marker-end="url(#ar-apigw-f)"/>
             <text class="lbl2" x="182" y="212">DX</text>
-            <path class="site" d="M100 254 V332 H244"/>
+            <path class="site" d="M100 254 V332 H242" marker-end="url(#ar-apigw-s)"/>
             <text class="lbl2" x="108" y="300">DNS 질의</text>
-            <path class="path" d="M355 168 V190"/>
-            <path class="path" d="M470 222 H515"/>
+            <path class="path" d="M355 168 V188" marker-end="url(#ar-apigw-p)"/>
+            <path class="path" d="M470 222 H513" marker-end="url(#ar-apigw-p)"/>
             <text class="lbl" x="474" y="212">HTTPS</text>
-            <path class="path" d="M705 210 C730 210 730 144 755 144"/>
-            <path class="path" d="M610 254 V300"/>
-            <path class="path" d="M705 332 H755"/>
+            <path class="path" d="M705 210 C730 210 728 144 753 144" marker-end="url(#ar-apigw-p)"/>
+            <path class="path" d="M610 254 V298" marker-end="url(#ar-apigw-p)"/>
+            <path class="path" d="M705 332 H753" marker-end="url(#ar-apigw-p)"/>
           </svg>
         </div>
         <figcaption class="legend">
-          <span><i></i>Direct Connect</span>
+          <span><i></i>Direct Connect (온프레미스 호출)</span>
           <span><i class="p"></i>API 호출 경로</span>
           <span><i class="s"></i>DNS 질의</span>
+          <span>→ 화살표: 요청 · 질의 방향 (응답은 같은 경로로 반대 방향)</span>
         </figcaption>
         <p class="arch-hint">좁은 화면에서는 다이어그램을 좌우로 밀어서 보세요.</p>
       </figure>

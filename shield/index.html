@@ -259,6 +259,18 @@ svg .lbl3{fill:#C2410C;font-family:var(--mono);font-size:11px;font-weight:500}
 
 /* Korean line breaking: never split a word mid-syllable */
 h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
+svg .ah-fiber{fill:var(--fiber)}
+svg .ah-trace{fill:var(--trace)}
+svg .ah-site{fill:var(--fiber-ink)}
+svg .ah-usr{fill:var(--ink-3)}
+svg .ah-atk{fill:#C2410C}
+.legend i.dir{position:relative;width:26px}
+.legend i.dir::after{content:"";position:absolute;right:-3px;top:-7px;border-left:8px solid var(--fiber);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.legend i.p.dir::after,.legend i.s.dir::after,.legend i.u.dir::after,.legend i.a.dir::after{top:-6px}
+.legend i.p.dir::after{border-left-color:var(--trace)}
+.legend i.s.dir::after{border-left-color:var(--fiber-ink)}
+.legend i.u.dir::after{border-left-color:var(--ink-3)}
+.legend i.a.dir::after{border-left-color:#C2410C}
 </style>
 <link rel="stylesheet" href="../assets/site.css?v=2">
 <script src="../assets/site.js?v=2"></script>
@@ -414,6 +426,12 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
           <svg viewBox="0 0 980 450" role="img" aria-labelledby="arch-title arch-desc">
             <title id="arch-title">AWS Shield Advanced 레퍼런스 아키텍처</title>
             <desc id="arch-desc">사용자와 공격 트래픽이 인터넷에서 들어옵니다. DNS 질의는 Shield Advanced로 보호하는 Route 53 hosted zone이 받습니다. 웹 트래픽은 Shield Advanced와 AWS WAF web ACL이 연결된 CloudFront 배포를 거쳐 리전의 Application Load Balancer 오리진과 EC2로 갑니다. TCP와 UDP 트래픽은 보호된 Global Accelerator standard accelerator를 거쳐 Network Load Balancer와 EC2로 갑니다. 공격 트래픽은 엣지에서 흡수되고 완화됩니다. Shield Advanced 제어 영역에는 Shield Response Team, Route 53 헬스 체크, 보호 그룹, CloudWatch 지표가 있으며 헬스 체크가 진입점의 상태를 감지에 반영합니다.</desc>
+            <defs>
+              <marker id="ar-shield-fiber" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><path class="ah-fiber" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-shield-trace" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-trace" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-shield-usr" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-usr" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-shield-atk" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-atk" d="M0 0 L10 5 L0 10 z"/></marker>
+            </defs>
             <!-- zones -->
             <rect class="zone" x="10" y="150" width="180" height="280" rx="6"/>
             <image class="ic-gen" href="../assets/aws-icons/Res_Internet_48_Light.svg" x="18" y="158" width="22" height="22"/>
@@ -449,11 +467,11 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <image href="../assets/aws-icons/Arch_AWS-Global-Accelerator_48.svg" x="260" y="341" width="28" height="28"/>
             <text class="t" x="296" y="346">Global Accelerator</text><text class="s" x="296" y="366">standard · TCP/UDP</text>
 
-            <path class="usr" d="M186 220 C218 220 218 108 250 108"/>
-            <path class="usr" d="M186 232 H250"/>
-            <path class="usr" d="M186 248 C218 248 218 346 250 346"/>
-            <path class="atk" d="M186 370 C218 370 218 258 250 258"/>
-            <path class="atk" d="M186 378 H250"/>
+            <path class="usr" d="M186 220 C218 220 218 108 248 108" marker-end="url(#ar-shield-usr)"/>
+            <path class="usr" d="M186 232 H248" marker-end="url(#ar-shield-usr)"/>
+            <path class="usr" d="M186 248 C218 248 218 346 248 346" marker-end="url(#ar-shield-usr)"/>
+            <path class="atk" d="M186 370 C218 370 218 258 248 258" marker-end="url(#ar-shield-atk)"/>
+            <path class="atk" d="M186 378 H248" marker-end="url(#ar-shield-atk)"/>
             <text class="lbl3" x="236" y="420">엣지에서 흡수 · 완화</text>
 
             <!-- detection -->
@@ -482,20 +500,20 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <image href="../assets/aws-icons/Arch_Amazon-EC2_48.svg" x="810" y="348" width="28" height="28"/>
             <text class="t" x="846" y="356">EC2</text><text class="s" x="846" y="376">게임 · API 서버</text>
 
-            <path class="fiber" d="M490 232 H560"/>
-            <path class="fiber" d="M490 355 C525 355 525 362 560 362"/>
-            <path class="path" d="M770 242 H800"/>
-            <path class="path" d="M770 362 H800"/>
-            <path class="path" d="M763 134 V160 C763 176 740 176 700 190 L665 210" stroke-dasharray="6 5"/>
+            <path class="fiber" d="M490 232 H551" marker-end="url(#ar-shield-fiber)"/>
+            <path class="fiber" d="M490 355 C521 355 521 362 551 362" marker-end="url(#ar-shield-fiber)"/>
+            <path class="path" d="M770 242 H798" marker-end="url(#ar-shield-trace)"/>
+            <path class="path" d="M770 362 H798" marker-end="url(#ar-shield-trace)"/>
+            <path class="path" d="M763 134 V160 C763 176 740 176 700 190 L667 209" stroke-dasharray="6 5" marker-end="url(#ar-shield-trace)"/>
             <text class="lbl" x="771" y="160">헬스 기반 감지</text>
-            <text class="lbl" x="487" y="222">정상 트래픽</text>
+            <text class="lbl" x="487" y="217">정상 트래픽</text>
           </svg>
         </div>
         <figcaption class="legend">
-          <span><i class="u"></i>인터넷 트래픽</span>
-          <span><i class="a"></i>공격 트래픽</span>
-          <span><i></i>완화 후 정상 트래픽</span>
-          <span><i class="p"></i>리전 내부 · 헬스 체크</span>
+          <span><i class="u dir"></i>인터넷 트래픽</span>
+          <span><i class="a dir"></i>공격 트래픽 (엣지에서 흡수)</span>
+          <span><i class="dir"></i>완화 후 정상 트래픽</span>
+          <span><i class="p dir"></i>리전 내부 요청 · 헬스 체크 점검 방향</span>
         </figcaption>
         <p class="arch-hint">좁은 화면에서는 다이어그램을 좌우로 밀어서 보세요.</p>
       </figure>

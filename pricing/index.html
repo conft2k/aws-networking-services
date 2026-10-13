@@ -1,0 +1,851 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AWS 네트워킹 가격표</title>
+<meta name="description" content="AWS Price List API 기준 Direct Connect, Cloud WAN, Transit Gateway, EC2 데이터 전송, VPN, Global Accelerator, PrivateLink 요금표">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+body{margin:0}img{max-width:100%}[hidden]{display:none!important}
+
+/* Layout: a cross-connect work order. Cool steel paper, navy ink, Amazon orange as the one accent; section tags read like fiber labels. */
+:root{
+  --bg:#EEF1F4; --surface:#FFFFFF; --sunken:#E3E8ED;
+  --ink:#14202E; --ink-2:#44515F; --ink-3:#5A6672;
+  --line:#CDD5DD; --line-2:#B4BFCA;
+  --fiber:#FF9900;          /* Amazon orange — fills only */
+  --fiber-ink:#B35C00;      /* orange-derived, AA on light surfaces */
+  --fiber-soft:#FFF0D9;
+  --on-fiber:#14202E;
+  --trace:#2E7D9A;          /* secondary line color for diagram paths */
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --maxw:1120px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--fiber-ink);outline-offset:3px;border-radius:2px}
+.skip-link{position:absolute;left:16px;top:-60px;background:var(--fiber);color:var(--on-fiber);padding:8px 14px;font-weight:700;z-index:50;text-decoration:none}
+.skip-link:focus{top:12px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.wrap{max-width:var(--maxw);margin:0 auto;padding-inline:24px}
+section{padding-block:88px;border-top:1px solid var(--line)}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.25}
+h2{font-size:clamp(26px,3.4vw,36px);font-weight:700;letter-spacing:-.01em}
+h3{font-size:18px;font-weight:700}
+p{margin:0}
+.lede{color:var(--ink-2);max-width:62ch;margin-top:14px}
+.num{font-family:var(--display);font-variant-numeric:tabular-nums lining-nums}
+.mono{font-family:var(--mono)}
+
+/* fiber label: the section tag */
+.tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-bottom:14px}
+.tag::before{content:"";width:22px;height:8px;background:var(--fiber);border-radius:1px}
+
+/* nav */
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:60px}
+.brand{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.02em;text-decoration:none;text-transform:uppercase}
+.brand span{color:var(--fiber-ink)}
+.navlinks{display:flex;gap:22px;font-size:14px;align-items:center}
+.navlinks a{text-decoration:none;color:var(--ink-2)}
+.navlinks a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;font-weight:700;font-size:15px;text-decoration:none;border-radius:4px;border:1px solid transparent;transition:transform .15s ease,background .15s ease}
+.btn-primary{background:var(--fiber);color:var(--on-fiber)}
+.btn-primary:hover{transform:translateY(-1px)}
+.btn-ghost{border-color:var(--line-2);color:var(--ink)}
+.btn-ghost:hover{background:var(--sunken)}
+.navlinks .btn{min-height:38px;padding:0 14px;font-size:14px;color:var(--on-fiber)}
+
+/* hero */
+.hero{padding-block:64px 48px;border-top:0}
+.hero-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:56px;align-items:center}
+.eyebrow{font-family:var(--mono);font-size:13px;color:var(--fiber-ink);letter-spacing:.04em}
+.hero h1{font-size:clamp(34px,5vw,56px);font-weight:700;letter-spacing:-.02em;margin-top:16px}
+.hero h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--fiber) 62%,var(--fiber) 90%,transparent 90%);padding-inline:2px}
+.hero .lede{font-size:18px}
+
+/* table */
+.tbl-wrap{margin-top:20px;border:1px solid var(--line);border-radius:6px;background:var(--surface);overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:14px 18px;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--sunken)}
+tbody tr:last-child td,tbody tr:last-child th{border-bottom:0}
+
+footer{border-top:1px solid var(--line);padding-block:28px;font-size:13px;color:var(--ink-3)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+
+@media (max-width:1024px){
+  .hero-grid{grid-template-columns:1fr;gap:32px}
+}
+@media (max-width:640px){
+  .wrap{padding-inline:16px}
+  section{padding-block:48px}
+  .navlinks a:not(.btn){display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+
+/* nav: keep links on one line, show only CTA below 960px */
+.navlinks a{white-space:nowrap}
+@media (max-width:960px){.navlinks a:not(.btn){display:none}}
+
+/* Korean line breaking: never split a word mid-syllable */
+h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
+
+/* ---- pricing page ---- */
+.stamp{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px 22px}
+.stamp-head{display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.stamp .big{font-family:var(--display);font-size:40px;font-weight:600;line-height:1.1;margin-top:10px;font-variant-numeric:tabular-nums}
+.stamp .big small{font-size:18px;color:var(--ink-2);margin-left:6px}
+.stamp dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:14px 0 0;font-size:13px}
+.stamp dt{font-family:var(--mono);color:var(--ink-2)}
+.stamp dd{margin:0;font-family:var(--mono);color:var(--ink);text-align:right;white-space:nowrap}
+.stamp-foot{margin-top:12px;font-size:13px;color:var(--ink-2)}
+.facts{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.facts span{font-family:var(--mono);font-size:12.5px;background:var(--surface);border:1px solid var(--line);padding:4px 10px;border-radius:3px;color:var(--ink-2)}
+.facts b{color:var(--ink);font-weight:500}
+
+#prices{padding-block:40px 88px;scroll-margin-top:60px}
+.toolbar{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:center;justify-content:space-between}
+.tablist{display:flex;gap:0;overflow-x:auto;border-bottom:1px solid var(--line-2);scrollbar-width:thin;max-width:100%}
+.tablist button{flex:none;appearance:none;background:transparent;border:0;border-bottom:3px solid transparent;margin-bottom:-1px;padding:12px 16px 10px;font:500 14px/1.2 var(--sans);color:var(--ink-2);cursor:pointer;white-space:nowrap}
+.tablist button:hover{color:var(--ink)}
+.tablist button[aria-selected="true"]{color:var(--ink);font-weight:700;border-bottom-color:var(--fiber)}
+.tablist button:focus-visible{outline-offset:-3px}
+.search{display:flex;align-items:center;gap:8px;margin-top:20px}
+.search label{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.search input,.sel select{height:40px;min-width:0;width:260px;max-width:100%;padding:0 12px;border:1px solid var(--line-2);border-radius:4px;background:var(--surface);color:var(--ink);font:400 15px var(--sans)}
+.search input:focus-visible,.sel select:focus-visible{outline:2px solid var(--fiber-ink);outline-offset:1px}
+.search .count{font-size:13px;color:var(--ink-3)}
+.panel{padding-top:36px;min-width:0}
+.panel-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 20px;align-items:flex-end}
+.panel-head .src{font-family:var(--mono);font-size:12px;color:var(--ink-3)}
+.panel h3{margin-top:44px}
+.panel h3 + .lede{margin-top:6px;font-size:15px}
+.dims{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:24px}
+.dims div{background:var(--surface);padding:16px 18px;min-width:0}
+.dims .k{font-family:var(--mono);font-size:11.5px;color:var(--fiber-ink);letter-spacing:.06em;text-transform:uppercase}
+.dims p{font-size:14.5px;color:var(--ink-2);margin-top:4px}
+.panel table{font-size:14px}
+.panel th,.panel td{padding:9px 14px;white-space:nowrap}
+.panel thead th{font-size:11px;vertical-align:bottom;white-space:normal;min-width:84px}
+.panel thead th.l{min-width:0}
+.panel td.n,.panel thead th.n{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.panel td.n{font-size:13.5px}
+.panel table.mx th,.panel table.mx td{padding:8px 9px}
+.panel table.mx thead th{min-width:0}
+.panel table.mx td.n{font-size:13px}
+.panel td.m{color:var(--ink-2)}
+.panel td.na{color:var(--ink-3)}
+.panel td.hi{background:var(--fiber-soft)}
+.panel tbody th{font-weight:500;background:var(--surface)}
+.panel tbody th .c{display:block;font-family:var(--mono);font-size:11px;color:var(--ink-3);font-weight:400;line-height:1.3}
+.panel tbody tr:hover td,.panel tbody tr:hover th{background:var(--sunken)}
+.panel tr.geo th{background:var(--sunken);font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);padding-block:6px}
+.panel .cap{margin-top:20px;padding:11px 14px;font-size:13px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-bottom:0;border-radius:6px 6px 0 0}
+.panel .cap b{color:var(--ink);font-weight:700}
+.panel .tbl-wrap.has-cap{margin-top:0;border-radius:0 0 6px 6px}
+details.more .cap{margin:0;border:0;border-bottom:1px solid var(--line);border-radius:0}
+/* sticky first column inside the horizontal scroller */
+.tbl-wrap thead th:first-child,.tbl-wrap tbody th{position:sticky;left:0;z-index:1}
+.tbl-wrap thead th:first-child{background:var(--sunken)}
+.tbl-wrap tbody th{box-shadow:1px 0 0 var(--line)}
+.notes{margin:14px 0 0;padding-left:18px;font-size:13.5px;color:var(--ink-2)}
+.notes li{margin-top:4px}
+.notes code,.lede code,.dims code{font-family:var(--mono);font-size:12.5px;background:var(--sunken);border:1px solid var(--line);padding:1px 5px;border-radius:3px;color:var(--ink)}
+.official{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+.sel{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:16px}
+.sel label{font-size:14px;color:var(--ink-2)}
+details.more{margin-top:16px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+details.more>summary{cursor:pointer;padding:12px 16px;font-size:14px;font-weight:500;color:var(--ink)}
+details.more>summary:focus-visible{outline-offset:-2px}
+details.more[open]>summary{border-bottom:1px solid var(--line)}
+details.more .tbl-wrap{margin:0;border:0;border-radius:0}
+details.more .inner{padding:4px 16px 14px;font-size:13.5px;color:var(--ink-2)}
+details.more .inner dt{font-family:var(--mono);font-size:12px;color:var(--ink);margin-top:10px}
+details.more .inner dd{margin:2px 0 0}
+.status{margin-top:28px;padding:22px;border:1px dashed var(--line-2);border-radius:6px;background:var(--surface);color:var(--ink-2)}
+.status b{color:var(--ink)}
+.status code{font-family:var(--mono);font-size:13px}
+.empty-row td{color:var(--ink-3);text-align:center!important}
+@media (max-width:640px){
+  .hero{padding-block:40px 32px}
+  .hero .lede{font-size:16px}
+  .stamp .big{font-size:32px}
+  .search{flex-wrap:wrap}
+  .search input,.sel select{width:100%}
+  .panel th,.panel td{padding:8px 10px}
+  .stamp dl{font-size:12px;gap:4px 10px}
+}
+@media print{.toolbar,.search,.official{display:none}}
+html.presenting #prices .tablist{position:static}
+</style>
+<link rel="stylesheet" href="../assets/site.css?v=2">
+<script src="../assets/site.js?v=2"></script>
+</head>
+<body>
+
+<a class="skip-link" href="#main">본문으로 건너뛰기</a>
+
+<nav aria-label="주요 메뉴">
+  <div class="wrap">
+    <a class="brand" href="../">AWS <span>Networking Pricing</span></a>
+    <div class="navlinks">
+      <a href="../">전체 서비스</a>
+      <a href="#dx">Direct Connect</a>
+      <a href="#tgw">Transit Gateway</a>
+      <a href="#dt">데이터 전송</a>
+      <a class="btn btn-primary" href="#prices">가격표 보기</a>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+  <header class="hero" id="top">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">AWS Price List API · On-Demand · USD</p>
+          <h1>AWS 네트워킹 서비스 <em>가격표</em></h1>
+          <p class="lede">AWS Price List API(bulk)에서 받은 On-Demand 단가를 서비스별로 정리했습니다. 모든 금액은 미국 달러(USD)이며 세금은 포함하지 않습니다. 리전 간 비교와 월 비용 어림셈에 쓰고, 견적은 <a href="https://calculator.aws/" target="_blank" rel="noopener">AWS Pricing Calculator</a>로 확인하세요.</p>
+          <div class="facts">
+            <span>월 요금 = 시간당 × <b>730</b>시간</span>
+            <span>리전 <b id="f-regions">–</b>개 · 상용 리전만</span>
+            <span>China · GovCloud 제외</span>
+          </div>
+        </div>
+        <aside class="stamp" aria-labelledby="stamp-h">
+          <div class="stamp-head"><span id="stamp-h">Price List 게시 시각</span><span>UTC</span></div>
+          <p class="big" id="stamp-date">불러오는 중…</p>
+          <dl id="stamp-offers"></dl>
+          <p class="stamp-foot" id="stamp-foot"></p>
+        </aside>
+      </div>
+    </div>
+  </header>
+
+  <section id="prices" aria-label="서비스별 가격표">
+    <div class="wrap">
+      <div class="toolbar">
+        <div class="tablist" role="tablist" aria-label="서비스">
+          <button role="tab" id="tab-dx" aria-controls="dx" aria-selected="true" tabindex="0">Direct Connect</button>
+          <button role="tab" id="tab-cloudwan" aria-controls="cloudwan" aria-selected="false" tabindex="-1">Cloud WAN</button>
+          <button role="tab" id="tab-tgw" aria-controls="tgw" aria-selected="false" tabindex="-1">Transit Gateway</button>
+          <button role="tab" id="tab-dt" aria-controls="dt" aria-selected="false" tabindex="-1">EC2 데이터 전송</button>
+          <button role="tab" id="tab-vpn" aria-controls="vpn" aria-selected="false" tabindex="-1">VPN</button>
+          <button role="tab" id="tab-ga" aria-controls="ga" aria-selected="false" tabindex="-1">Global Accelerator</button>
+          <button role="tab" id="tab-privatelink" aria-controls="privatelink" aria-selected="false" tabindex="-1">PrivateLink</button>
+        </div>
+      </div>
+      <div class="search">
+        <label for="rq">리전 검색</label>
+        <input id="rq" type="search" placeholder="예: 서울, Tokyo, us-east-1" autocomplete="off">
+        <span class="count" id="rq-count" aria-live="polite"></span>
+      </div>
+
+      <div id="status" class="status" role="status">가격 데이터(<code>data.json</code>)를 불러오는 중입니다…</div>
+
+      <!-- Direct Connect -->
+      <div class="panel" role="tabpanel" id="dx" aria-labelledby="tab-dx">
+        <div class="panel-head"><h2>Direct Connect</h2><span class="src" data-src="AWSDirectConnect"></span></div>
+        <p class="lede">요금은 포트 시간(port-hour)과 데이터 전송(DTO) 두 가지입니다. 포트 시간은 연결이 사용 가능한 상태인 동안 부과되며 일본 로케이션만 단가가 다릅니다. DTO는 AWS 리전에서 Direct Connect 로케이션 방향으로 나가는 트래픽에만 붙고, 들어오는 트래픽은 무료입니다.</p>
+        <div class="dims">
+          <div><span class="k">Port hour</span><p>Dedicated는 AWS가, Hosted는 Direct Connect Partner가 프로비저닝합니다. 부분 시간도 1시간으로 계산합니다.</p></div>
+          <div><span class="k">Data transfer out</span><p>소스 리전과 DX 로케이션이 속한 지역 그룹의 조합으로 GB당 단가가 정해집니다. Private VIF와 Public VIF 단가가 같습니다.</p></div>
+          <div><span class="k">SiteLink</span><p>SiteLink를 켠 VIF는 VIF 시간당 요금과 DX 로케이션 간 GB당 전송 요금이 추가됩니다.</p></div>
+        </div>
+        <div data-render="dx"></div>
+        <div class="official">
+          <a class="btn btn-ghost" href="https://aws.amazon.com/directconnect/pricing/" target="_blank" rel="noopener">공식 요금 페이지</a>
+        </div>
+      </div>
+
+      <!-- Cloud WAN -->
+      <div class="panel" role="tabpanel" id="cloudwan" aria-labelledby="tab-cloudwan" hidden>
+        <div class="panel-head"><h2>Cloud WAN</h2><span class="src" data-src="AWSCloudWAN"></span></div>
+        <p class="lede">Core Network Edge(CNE) 시간당 요금, attachment·peering 시간당 요금, 데이터 처리 GB당 요금으로 구성됩니다. 리전 간·인터넷·Direct Connect 구간의 표준 데이터 전송 요금은 따로 붙습니다.</p>
+        <div class="dims">
+          <div><span class="k">Core Network Edge</span><p>코어 네트워크 정책에 넣은 리전(edge location)마다 시간당 부과합니다.</p></div>
+          <div><span class="k">Attachment · Peering</span><p>VPC, Connect, Site-to-Site VPN, Transit Gateway peering attachment마다 시간당 부과합니다.</p></div>
+          <div><span class="k">Data processing</span><p>VPC·VPN attachment에서 Cloud WAN으로 보내는 트래픽 GB당 부과합니다.</p></div>
+        </div>
+        <div data-render="cloudwan"></div>
+        <div class="official">
+          <a class="btn btn-ghost" href="https://aws.amazon.com/cloud-wan/pricing/" target="_blank" rel="noopener">공식 요금 페이지</a>
+        </div>
+      </div>
+
+      <!-- Transit Gateway -->
+      <div class="panel" role="tabpanel" id="tgw" aria-labelledby="tab-tgw" hidden>
+        <div class="panel-head"><h2>Transit Gateway</h2><span class="src" data-src="AmazonVPC"></span></div>
+        <p class="lede">attachment 시간당 요금과 Transit Gateway로 보내는 트래픽의 데이터 처리 GB당 요금입니다. Transit Gateway 자체에는 요금이 없고, peering attachment를 거치는 리전 간 트래픽에는 EC2 리전 간 전송 요금이 추가됩니다.</p>
+        <div class="dims">
+          <div><span class="k">Attachment hour</span><p>VPC, VPN, Direct Connect gateway, Connect, peering attachment 모두 같은 단가입니다(예외는 각주).</p></div>
+          <div><span class="k">Data processing</span><p>attachment에서 Transit Gateway로 들어오는 트래픽 기준입니다. peering attachment로 들어오는 트래픽은 처리 요금이 없습니다.</p></div>
+          <div><span class="k">Multicast</span><p>multicast 수신 인스턴스가 받는 GB마다 데이터 처리 요금이 부과됩니다.</p></div>
+        </div>
+        <div data-render="tgw"></div>
+        <div class="official">
+          <a class="btn btn-ghost" href="https://aws.amazon.com/transit-gateway/pricing/" target="_blank" rel="noopener">공식 요금 페이지</a>
+        </div>
+      </div>
+
+      <!-- EC2 data transfer -->
+      <div class="panel" role="tabpanel" id="dt" aria-labelledby="tab-dt" hidden>
+        <div class="panel-head"><h2>EC2 데이터 전송</h2><span class="src" data-src="AWSDataTransfer"></span></div>
+        <p class="lede">리전 간 전송은 소스 리전이 GB당 요금을 내고, 받는 쪽 인바운드는 무료입니다. Transit Gateway peering, VPC peering, Cloud WAN의 리전 간 구간도 이 단가를 따릅니다.</p>
+        <div class="dims">
+          <div><span class="k">Inter-Region</span><p>소스 리전 × 목적지 리전 조합별 GB당 단가입니다.</p></div>
+          <div><span class="k">Cross-AZ</span><p>같은 리전의 AZ 간 전송은 보내는 쪽과 받는 쪽에서 각각 GB당 부과합니다.</p></div>
+          <div><span class="k">Public IPv4</span><p>계정의 public IPv4 주소(EIP 포함)는 사용 중이든 유휴 상태든 시간당 부과합니다.</p></div>
+        </div>
+        <div data-render="dt"></div>
+        <div class="official">
+          <a class="btn btn-ghost" href="https://aws.amazon.com/ec2/pricing/on-demand/#Data_Transfer" target="_blank" rel="noopener">공식 요금 페이지 (데이터 전송)</a>
+          <a class="btn btn-ghost" href="https://aws.amazon.com/vpc/pricing/" target="_blank" rel="noopener">공식 요금 페이지 (Public IPv4)</a>
+        </div>
+      </div>
+
+      <!-- VPN -->
+      <div class="panel" role="tabpanel" id="vpn" aria-labelledby="tab-vpn" hidden>
+        <div class="panel-head"><h2>VPN</h2><span class="src" data-src="AmazonVPC"></span></div>
+        <p class="lede">Site-to-Site VPN은 VPN connection 시간당 요금이 기본이고, VPN에서 나가는 트래픽은 EC2 데이터 전송 요금을 따릅니다. Accelerated VPN은 여기에 connection당 Global Accelerator 2개의 고정비와 DT-Premium이 더해집니다.</p>
+        <div class="dims">
+          <div><span class="k">Site-to-Site VPN</span><p>터널 2개짜리 connection 1개 단위입니다. 표준(최대 1.25 Gbps/터널)과 Large(5 Gbps/터널) 단가가 다릅니다.</p></div>
+          <div><span class="k">Accelerated VPN</span><p>VPN connection + Global Accelerator 고정비 × 2 + DT-Premium(GB당). 비가속 VPN에는 Global Accelerator 요금이 없습니다.</p></div>
+          <div><span class="k">Client VPN</span><p>subnet association 시간당 요금과 활성 클라이언트 연결 시간당 요금을 함께 냅니다.</p></div>
+        </div>
+        <div data-render="vpn"></div>
+        <div class="official">
+          <a class="btn btn-ghost" href="https://aws.amazon.com/vpn/pricing/" target="_blank" rel="noopener">공식 요금 페이지</a>
+        </div>
+      </div>
+
+      <!-- Global Accelerator -->
+      <div class="panel" role="tabpanel" id="ga" aria-labelledby="tab-ga" hidden>
+        <div class="panel-head"><h2>Global Accelerator</h2><span class="src" data-src="AWSGlobalAccelerator"></span></div>
+        <p class="lede">accelerator마다 시간당 고정비가 붙고, 트래픽에는 표준 데이터 전송 요금 위에 DT-Premium이 GB당 추가됩니다. DT-Premium은 매시간 트래픽이 더 많은 방향(dominant direction)에만 부과합니다.</p>
+        <div class="dims">
+          <div><span class="k">Fixed fee</span><p>accelerator가 존재하는 매시간(부분 시간 포함) 부과합니다. 리전과 무관합니다.</p></div>
+          <div><span class="k">DT-Premium</span><p>엔드포인트가 있는 리전 그룹과 클라이언트가 접속한 edge location 그룹 조합으로 정해집니다.</p></div>
+        </div>
+        <div data-render="ga"></div>
+        <div class="official">
+          <a class="btn btn-ghost" href="https://aws.amazon.com/global-accelerator/pricing/" target="_blank" rel="noopener">공식 요금 페이지</a>
+        </div>
+      </div>
+
+      <!-- PrivateLink -->
+      <div class="panel" role="tabpanel" id="privatelink" aria-labelledby="tab-privatelink" hidden>
+        <div class="panel-head"><h2>PrivateLink</h2><span class="src" data-src="AmazonVPC"></span></div>
+        <p class="lede">interface endpoint는 endpoint를 배치한 AZ마다 시간당 요금이 붙고, 처리한 데이터는 리전 단위 월 누적량에 따라 계단식으로 GB당 부과합니다. Gateway Load Balancer endpoint는 별도 단가입니다.</p>
+        <div class="dims">
+          <div><span class="k">Interface endpoint</span><p>endpoint × AZ 수만큼 시간당 부과합니다. 3개 AZ에 두면 3배입니다.</p></div>
+          <div><span class="k">Data processing</span><p>리전의 모든 interface endpoint 처리량을 합산해 계단을 적용합니다.</p></div>
+          <div><span class="k">GWLB endpoint</span><p>endpoint 시간당 + 처리 GB당입니다. 뒤의 Gateway Load Balancer 요금은 별도입니다.</p></div>
+        </div>
+        <div data-render="privatelink"></div>
+        <div class="official">
+          <a class="btn btn-ghost" href="https://aws.amazon.com/privatelink/pricing/" target="_blank" rel="noopener">공식 요금 페이지</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a href="../">← 전체 AWS 네트워킹 서비스</a>
+    <span>AWS Price List API 기준 참고용 가격표. 실제 청구 금액은 사용량, 할인, 세금에 따라 다를 수 있습니다.</span>
+    <a href="https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/index.json" target="_blank" rel="noopener">Price List API index</a>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+  var H = 730;
+  var KO = {
+    'ap-northeast-2': '서울', 'ap-northeast-1': '도쿄', 'ap-northeast-3': '오사카', 'ap-east-1': '홍콩', 'ap-east-2': '타이베이',
+    'ap-southeast-1': '싱가포르', 'ap-southeast-3': '자카르타', 'ap-southeast-5': '말레이시아', 'ap-southeast-7': '태국',
+    'ap-south-1': '뭄바이', 'ap-south-2': '하이데라바드', 'ap-southeast-2': '시드니', 'ap-southeast-4': '멜버른',
+    'ap-southeast-6': '뉴질랜드', 'me-central-1': 'UAE', 'me-south-1': '바레인', 'il-central-1': '텔아비브',
+    'af-south-1': '케이프타운', 'eu-central-1': '프랑크푸르트', 'eu-central-2': '취리히', 'eu-west-1': '아일랜드',
+    'eu-west-2': '런던', 'eu-west-3': '파리', 'eu-south-1': '밀라노', 'eu-south-2': '스페인', 'eu-north-1': '스톡홀름',
+    'ca-central-1': '캐나다 중부', 'ca-west-1': '캘거리', 'us-east-1': '버지니아 북부', 'us-east-2': '오하이오',
+    'us-west-1': '캘리포니아 북부', 'us-west-2': '오레곤', 'mx-central-1': '멕시코 중부', 'sa-east-1': '상파울루'
+  };
+  var GEO = { ap: '아시아 태평양', me: '중동', af: '아프리카', eu: '유럽', ca: '캐나다', us: '미국', la: '중남미' };
+  var TABS = ['dx', 'cloudwan', 'tgw', 'dt', 'vpn', 'ga', 'privatelink'];
+  var D, REG = {}, rendered = {};
+
+  /* ---------- formatting ---------- */
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function usd(v) {
+    if (v === null || v === undefined || (Array.isArray(v) && !v.length)) return null;
+    if (Array.isArray(v)) return v.map(usd).join(' / ');
+    var s = v.toFixed(4).replace(/0+$/, '');
+    var dec = (s.split('.')[1] || '');
+    if (dec.length < 2) s = v.toFixed(2);
+    var p = s.split('.');
+    p[0] = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return '$' + p.join('.');
+  }
+  function month(v) {
+    if (v === null || v === undefined || Array.isArray(v)) return null;
+    return '$' + (v * H).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function size(gb) {
+    if (gb >= 1048576) return (gb / 1048576) + ' PB';
+    if (gb >= 1024) return (gb / 1024) + ' TB';
+    return gb + ' GB';
+  }
+  function tierLabel(t, i, all) {
+    if (i === 0) return '첫 ' + size(t[1]);
+    if (t[1] === null) return size(t[0]) + ' 초과';
+    return size(t[0]) + '–' + size(t[1]);
+  }
+  function speed(s) { return s.replace(/(\d+)G$/, '$1 Gbps').replace(/(\d+)M$/, '$1 Mbps'); }
+  function utc(iso) { return iso ? iso.replace('T', ' ').replace(/:\d\dZ$/, '').replace('Z', '') : '–'; }
+
+  /* ---------- table builders ---------- */
+  function cell(v, cls) {
+    if (v === null || v === undefined) return '<td class="n na">—</td>';
+    return '<td class="n' + (cls ? ' ' + cls : '') + '">' + v + '</td>';
+  }
+  function regionTh(code) {
+    var r = REG[code] || { name: code };
+    return '<th scope="row" title="' + esc(r.name) + '">' + esc(KO[code] || r.name) + '<span class="c">' + esc(code) + '</span></th>';
+  }
+  function searchKey(code) { var r = REG[code] || {}; return (code + ' ' + (r.name || '') + ' ' + (KO[code] || '')).toLowerCase(); }
+  function table(o) {
+    // o: {caption, head:[{h, n?}], rows:[{r?:code, th?:html, cells:[html]}], geo?:bool}
+    // the visible caption sits outside the horizontal scroller so it never scrolls off-screen;
+    // the real <caption> stays for assistive technology
+    var h = (o.caption ? '<p class="cap" aria-hidden="true">' + o.caption + '</p>' : '') +
+      '<div class="tbl-wrap' + (o.caption ? ' has-cap' : '') + '"' + (o.label ? ' role="region" tabindex="0" aria-label="' + esc(o.label) + '"' : '') + '><table' + (o.mx ? ' class="mx"' : '') + '>';
+    if (o.caption) h += '<caption class="sr-only">' + o.caption + '</caption>';
+    h += '<thead><tr>' + o.head.map(function (c, i) {
+      return '<th scope="col" class="' + (i && c.n !== false ? 'n' : 'l') + '"' + (c.title ? ' title="' + esc(c.title) + '"' : '') + '>' + c.h + '</th>';
+    }).join('') + '</tr></thead><tbody>';
+    var lastGeo = null, ncol = o.head.length;
+    o.rows.forEach(function (row) {
+      if (row.r && o.geo !== false) {
+        var g = (REG[row.r] || {}).geo;
+        if (g && g !== lastGeo) { h += '<tr class="geo" data-geo="' + g + '"><th scope="rowgroup" colspan="' + ncol + '">' + esc(GEO[g] || g) + '</th></tr>'; lastGeo = g; }
+      }
+      h += '<tr' + (row.r ? ' data-r="' + esc(searchKey(row.r)) + '"' : '') + '>' + (row.th || regionTh(row.r)) + row.cells.join('') + '</tr>';
+    });
+    h += '<tr class="empty-row" hidden><td colspan="' + ncol + '">검색어와 일치하는 리전이 없습니다.</td></tr>';
+    return h + '</tbody></table></div>';
+  }
+  function notes(items) { items = items.filter(Boolean); return items.length ? '<ul class="notes">' + items.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>' : ''; }
+  function sub(title, lede) { return '<h3>' + title + '</h3>' + (lede ? '<p class="lede">' + lede + '</p>' : ''); }
+  function th(text, extra) { return '<th scope="row">' + text + (extra ? '<span class="c">' + extra + '</span>' : '') + '</th>'; }
+
+  /* ---------- Direct Connect ---------- */
+  function renderDX() {
+    var x = D.dx, out = '';
+    function portRows(list) {
+      return list.map(function (p) {
+        return { th: th(speed(p.speed), p.locs + '개 로케이션'), cells: [cell(usd(p.other)), cell(month(p.other), 'm'), cell(usd(p.japan)), cell(month(p.japan), 'm')] };
+      });
+    }
+    var head = [{ h: '포트 속도' }, { h: '시간당<br>일본 제외' }, { h: '월<br>일본 제외' }, { h: '시간당<br>일본' }, { h: '월<br>일본' }];
+    out += sub('Dedicated connection 포트 시간', null);
+    out += table({ caption: '<b>Dedicated connection</b> 포트 시간당 요금. 일본 열이 비어 있으면 일본 로케이션에 해당 속도 상품이 없다는 뜻입니다.', head: head, rows: portRows(x.dedicated), label: 'Dedicated connection 요금' });
+    out += sub('Hosted connection 포트 시간', null);
+    out += table({ caption: '<b>Hosted connection</b> 포트 시간당 요금. 1 Gbps 이상은 일부 Direct Connect Partner만 제공합니다.', head: head, rows: portRows(x.hosted), label: 'Hosted connection 요금' });
+
+    // DTO matrix
+    var g = x.dto.groups;
+    out += sub('데이터 전송(DTO) · 리전 → DX 로케이션', 'GB당 요금입니다. 행은 트래픽이 출발하는 AWS 리전, 열은 트래픽이 나가는 Direct Connect 로케이션의 지역 그룹입니다. 같은 리전의 로케이션(예: 서울 리전 → 한국 로케이션, AP1)이 가장 쌉니다.');
+    out += table({
+      caption: '<b>Data transfer out</b> $/GB. 열 머리글에 마우스를 올리면 그룹에 포함된 지역이 보입니다.',
+      head: [{ h: 'FROM 리전' }].concat(g.map(function (c) { return { h: esc(c.label), title: c.desc }; })),
+      rows: x.dto.rows.map(function (r) { return { r: r.r, cells: r.v.map(function (v) { return cell(usd(v)); }) }; }),
+      label: 'Direct Connect 데이터 전송 매트릭스', mx: true
+    });
+    var mixed = x.dto.mixed.map(function (m) {
+      var vals = Object.keys(m.values).map(function (k) { return usd(+k) + ' (' + m.values[k] + '곳)'; }).join(', ');
+      return '<code>' + esc(m.r) + '</code> → ' + esc(m.g) + ': 그룹 안에서 단가가 갈립니다. 표에는 최빈값을 적었고 실제 값은 ' + vals + '입니다.';
+    });
+    var re = Object.keys(x.dto.reassigned);
+    out += notes([
+      'Price List에는 <code>소스 리전 × DX 로케이션</code> 단위로 단가가 있습니다. 이 표는 각 로케이션을 공식 요금 페이지의 열 구분(US, HI, CA, EU, JP, AP1 …)으로 묶은 결과입니다. 로케이션의 국가는 Price List의 port 상품 속성(<code>country</code>)을 쓰고, 요금 패턴이 다른 그룹과 일치하면 그 그룹으로 옮겼습니다' + (re.length ? '(' + re.map(esc).join(', ') + ')' : '') + '.',
+      '빈 칸(—)은 Price List에 해당 리전 → 로케이션 그룹 SKU가 없다는 뜻입니다.',
+      'Flat-rate VIF(<code>Private/Public Flat Rate</code>)의 DTO는 Price List상 $0.00/GB입니다.'
+    ].concat(mixed));
+    out += '<details class="more"><summary>그룹별 DX 로케이션 목록 보기</summary><div class="inner"><dl>' + g.map(function (c) {
+      return '<dt>' + esc(c.label) + ' · ' + esc(c.desc) + ' (' + c.members.length + ')</dt><dd>' + (c.members.length ? c.members.map(esc).join(' · ') : '없음') + '</dd>';
+    }).join('') + '</dl></div></details>';
+
+    // SiteLink
+    var s = x.sitelink;
+    out += sub('SiteLink', 'SiteLink를 켠 VIF마다 시간당 ' + usd(s.vifHour[0]) + '(월 ' + month(s.vifHour[0]) + ')이고, DX 로케이션 간 전송은 아래 GB당 요금입니다. 행은 트래픽이 들어온 로케이션의 그룹, 열은 나가는 로케이션의 그룹입니다.');
+    out += table({
+      caption: '<b>SiteLink data transfer</b> $/GB (FROM 로케이션 그룹 → TO 로케이션 그룹)',
+      head: [{ h: 'FROM 그룹' }].concat(s.dst.map(function (c) { return { h: esc(c) }; })),
+      rows: s.rows.map(function (r) { return { th: th(esc(r.from)), cells: r.v.map(function (v) { return cell(usd(v)); }) }; }),
+      geo: false, label: 'SiteLink 데이터 전송 매트릭스', mx: true
+    });
+    out += notes([
+      'FROM 그룹은 Price List 속성 <code>sitelinkOriginPopGroup</code> 값 그대로입니다. TO 그룹은 로케이션별 요금 패턴으로 묶었습니다.' + (function () { var miss = s.groups.filter(function (g) { return s.dst.indexOf(g) < 0; }); return miss.length ? ' ' + miss.map(esc).join('·') + '는 목적지로 묶이는 로케이션이 없어 열에서 빠졌습니다.' : ''; })(),
+      s.mixed.length ? '그룹 안에서 단가가 다른 조합: ' + s.mixed.map(function (m) {
+        return esc(m.from) + ' → ' + esc(m.to) + ' (' + Object.keys(m.values).map(function (k) { return usd(+k) + '×' + m.values[k]; }).join(', ') + ')';
+      }).join('; ') + '. 표에는 최빈값을 적었습니다.' : ''
+    ]);
+    out += '<details class="more"><summary>SiteLink TO 그룹별 로케이션 목록 보기</summary><div class="inner"><dl>' + s.dst.map(function (c) {
+      var m = s.members[c] || []; return '<dt>' + esc(c) + ' (' + m.length + ')</dt><dd>' + m.map(esc).join(' · ') + '</dd>';
+    }).join('') + '</dl></div></details>';
+
+    // Flat-rate
+    if (x.flatRate && x.flatRate.length) {
+      var speeds = [], tiers = [];
+      x.flatRate.forEach(function (f) { var k = f.speed + (f.pair ? '-Pair' : ''); if (speeds.indexOf(k) < 0) speeds.push(k); if (tiers.indexOf(f.tier) < 0) tiers.push(f.tier); });
+      tiers.sort();
+      out += sub('Flat-rate 포트', 'Price List에는 DTO가 포함된 정액 포트 상품(<code>FlatRatePortUsage</code>)이 Tier별로 있습니다. Tier 기준과 신청 조건은 Price List에 없으니 공식 문서와 AWS 담당자에게 확인하세요.');
+      out += table({
+        caption: '<b>Flat-rate</b> 포트 시간당 요금 (괄호 안은 월 요금)',
+        head: [{ h: '포트' }].concat(tiers.map(function (t) { return { h: t }; })),
+        rows: speeds.map(function (k) {
+          return { th: th(speed(k.replace('-Pair', '')) + (k.indexOf('Pair') > 0 ? ' × 2 (Pair)' : '')), cells: tiers.map(function (t) {
+            var f = x.flatRate.filter(function (z) { return z.speed + (z.pair ? '-Pair' : '') === k && z.tier === t; })[0];
+            return f ? cell(usd(f.h) + '<br><span style="color:var(--ink-3)">' + month(f.h) + '</span>') : cell(null);
+          }) };
+        }),
+        geo: false, label: 'Flat-rate 포트 요금'
+      });
+    }
+    return out;
+  }
+
+  /* ---------- Cloud WAN ---------- */
+  function renderCW() {
+    var rows = D.cloudwan, hasDx = rows.some(function (r) { return r.dx != null; });
+    var head = [{ h: '리전' }, { h: 'CNE<br>시간당' }, { h: 'CNE<br>월' }, { h: 'VPC att.<br>시간당' }, { h: 'VPC att.<br>월' }, { h: 'Connect<br>시간당' }, { h: 'VPN att.<br>시간당' }, { h: 'TGW peering<br>시간당' }];
+    if (hasDx) head.push({ h: 'DX att.<br>시간당' });
+    head.push({ h: '데이터 처리<br>$/GB' });
+    var out = sub('리전별 요금', null) + table({
+      caption: '<b>Cloud WAN</b> 리전별 요금. att. = attachment',
+      head: head,
+      rows: rows.map(function (r) {
+        var c = [cell(usd(r.cne)), cell(month(r.cne), 'm'), cell(usd(r.vpc)), cell(month(r.vpc), 'm'), cell(usd(r.connect)), cell(usd(r.vpn)), cell(usd(r.peer))];
+        if (hasDx) c.push(cell(usd(r.dx)));
+        c.push(cell(usd(r.gb)));
+        return { r: r.r, cells: c };
+      }), label: 'Cloud WAN 요금'
+    });
+    var se = rows.filter(function (r) { return r.r === 'ap-northeast-2'; })[0];
+    out += notes([
+      se ? '월 예시(서울): CNE 1개 + VPC attachment 3개 = ' + month(se.cne + 3 * se.vpc) + ' + 데이터 처리 GB당 ' + usd(se.gb) + '.' : '',
+      'Cloud WAN을 거치는 리전 간 트래픽, 인터넷·Direct Connect로 나가는 트래픽에는 표준 데이터 전송 요금이 별도로 붙습니다(EC2 데이터 전송 탭 참고).',
+      hasDx ? 'Direct Connect gateway attachment 요금은 Price List에 일부 리전만 게시되어 있습니다(빈 칸 = SKU 없음).' : '',
+      'Cloud WAN은 ' + rows.length + '개 리전에 요금이 게시되어 있습니다. 목록에 없는 리전은 Price List에 SKU가 없습니다.'
+    ]);
+    return out;
+  }
+
+  /* ---------- Transit Gateway ---------- */
+  function renderTGW() {
+    var rows = D.tgw;
+    var out = sub('리전별 요금', null) + table({
+      caption: '<b>Transit Gateway</b> 리전별 요금',
+      head: [{ h: '리전' }, { h: 'Attachment<br>시간당' }, { h: 'Attachment<br>월' }, { h: '데이터 처리<br>$/GB' }, { h: 'Multicast 수신<br>$/GB' }],
+      rows: rows.map(function (r) { return { r: r.r, cells: [cell(usd(r.h)), cell(month(r.h), 'm'), cell(usd(r.gb)), cell(usd(r.mc))] }; }),
+      label: 'Transit Gateway 요금'
+    });
+    var se = rows.filter(function (r) { return r.r === 'ap-northeast-2'; })[0];
+    var ex = (D.notes || []).filter(function (n) { return /^TGW /.test(n); }).map(function (n) {
+      var m = /^TGW (\S+): .*\{'TransitGateway(\w+)': ([\d.]+)\}/.exec(n);
+      return m ? '<code>' + esc(m[1]) + '</code>의 ' + esc(m[2]) + ' attachment는 시간당 ' + usd(+m[3]) + '로 다른 유형과 다릅니다.' : esc(n);
+    });
+    out += notes([
+      se ? '월 예시(서울): VPC attachment 10개 + VPN attachment 2개 = ' + month(12 * se.h) + ', 여기에 처리 GB당 ' + usd(se.gb) + '.' : '',
+      'Site-to-Site VPN attachment는 VPN connection 요금(VPN 탭)이 별도로 붙습니다.'
+    ].concat(ex));
+    return out;
+  }
+
+  /* ---------- EC2 data transfer ---------- */
+  function renderDT() {
+    var x = D.dt, out = '';
+    var opts = x.regions.map(function (c) { return '<option value="' + c + '"' + (c === 'ap-northeast-2' ? ' selected' : '') + '>' + esc((KO[c] || REG[c].name) + ' (' + c + ')') + '</option>'; }).join('');
+    out += sub('리전 간 데이터 전송', '소스 리전을 고르면 모든 목적지 리전으로의 GB당 단가를 보여 줍니다.');
+    out += '<div class="sel"><label for="dt-from">FROM 리전</label><select id="dt-from">' + opts + '</select></div><div id="dt-one"></div>';
+    // full matrix
+    var head = [{ h: 'FROM \\ TO' }].concat(x.regions.map(function (c) { return { h: esc(c), title: (KO[c] || '') + ' ' + REG[c].name }; }));
+    out += '<details class="more"><summary>전체 매트릭스 보기 (' + x.regions.length + ' × ' + x.regions.length + ', $/GB)</summary>' + table({
+      caption: '<b>Inter-Region data transfer out</b> $/GB. 행 = 소스 리전, 열 = 목적지 리전',
+      head: head,
+      rows: x.regions.map(function (f, i) { return { r: f, cells: x.matrix[i].map(function (v, j) { return i === j ? '<td class="n na">·</td>' : cell(usd(v)); }) }; }),
+      label: '리전 간 데이터 전송 전체 매트릭스', mx: true
+    }) + '</details>';
+
+    // intra-region + IPv4
+    var ip = {}; x.ipv4.forEach(function (r) { ip[r.r] = r; });
+    out += sub('같은 리전 안 전송과 Public IPv4', null);
+    out += table({
+      caption: '<b>Cross-AZ</b> 데이터 전송(방향별 $/GB)과 <b>Public IPv4</b> 주소 1개당 요금',
+      head: [{ h: '리전' }, { h: 'Cross-AZ<br>$/GB · 방향별' }, { h: 'IPv4 사용 중<br>시간당' }, { h: 'IPv4 사용 중<br>월' }, { h: 'IPv4 유휴<br>시간당' }, { h: 'IPv4 유휴<br>월' }],
+      rows: x.intra.map(function (r) {
+        var p = ip[r.r] || {};
+        return { r: r.r, cells: [cell(usd(r.regional)), cell(usd(p.inuse)), cell(month(p.inuse), 'm'), cell(usd(p.idle)), cell(month(p.idle), 'm')] };
+      }), label: 'Cross-AZ와 Public IPv4 요금'
+    });
+    out += notes([
+      'Cross-AZ 단가는 Price List의 <code>DataTransfer-Regional-Bytes</code>(regional data transfer)입니다. 보내는 쪽과 받는 쪽이 각각 부과되므로 AZ 간 왕복 1 GB는 실질 2배입니다. 같은 리전 안에서 public IPv4/Elastic IP를 거치는 전송도 같은 단가입니다.',
+      'Price List에는 <code>DataTransfer-xAZ-In/Out-Bytes</code> 사용 유형도 있지만 단가가 $0.00입니다. 실제 cross-AZ 과금은 위의 regional 단가로 이루어집니다.',
+      'Public IPv4는 EC2, Elastic IP, NAT gateway, 로드 밸런서 등 서비스와 무관하게 주소 1개 기준입니다. 계정에 할당만 하고 쓰지 않는 Elastic IP도 같은 단가로 과금됩니다.'
+    ]);
+
+    // internet DTO
+    if (x.internet.length) {
+      var t0 = x.internet[0].t;
+      out += sub('인터넷으로 나가는 데이터 전송', '비교용으로 함께 둡니다. 월 누적량에 따라 계단식으로 적용합니다.');
+      out += table({
+        caption: '<b>Data transfer out to internet</b> $/GB (월 누적 계단)',
+        head: [{ h: '리전' }].concat(t0.map(function (t, i) { return { h: tierLabel(t, i, t0) }; })),
+        rows: x.internet.map(function (r) { return { r: r.r, cells: r.t.map(function (t) { return cell(usd(t[2])); }) }; }),
+        label: '인터넷 데이터 전송 요금'
+      });
+      out += notes(['모든 리전을 합쳐 매월 100 GB까지는 무료입니다(Price List <code>Global-DataTransfer-Out-Bytes</code>, 0–100 GB $0). 표의 첫 계단은 무료 사용량을 넘은 부분부터 적용됩니다.']);
+    }
+    return out;
+  }
+  function renderDTOne() {
+    var x = D.dt, sel = document.getElementById('dt-from'); if (!sel) return;
+    var i = x.regions.indexOf(sel.value);
+    document.getElementById('dt-one').innerHTML = table({
+      caption: '<b>' + esc((KO[sel.value] || REG[sel.value].name)) + '</b>(' + esc(sel.value) + ')에서 나가는 리전 간 전송 $/GB',
+      head: [{ h: 'TO 리전' }, { h: '$/GB' }, { h: '1 TB당' }],
+      rows: x.regions.map(function (t, j) { return i === j ? null : { r: t, cells: [cell(usd(x.matrix[i][j])), cell(x.matrix[i][j] == null ? null : '$' + (x.matrix[i][j] * 1024).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), 'm')] }; }).filter(Boolean),
+      label: '선택한 리전에서 나가는 리전 간 전송 요금'
+    });
+    applyFilter();
+  }
+
+  /* ---------- VPN ---------- */
+  function renderVPN() {
+    var rows = D.vpn, fee = D.ga.fixed, out = '';
+    out += sub('Site-to-Site VPN', null);
+    out += table({
+      caption: '<b>Site-to-Site VPN</b> connection 시간당 요금. Accelerated는 Global Accelerator 고정비 ' + usd(fee) + ' × 2를 더한 값(DT-Premium 제외)입니다.',
+      head: [{ h: '리전' }, { h: 'VPN connection<br>시간당' }, { h: 'VPN connection<br>월' }, { h: 'Accelerated<br>월 고정비' }, { h: 'Large 5 Gbps<br>시간당' }, { h: 'Large 5 Gbps<br>월' }, { h: 'Concentrator<br>시간당' }, { h: 'Concentrator<br>site 시간당' }],
+      rows: rows.map(function (r) {
+        return { r: r.r, cells: [cell(usd(r.std)), cell(month(r.std), 'm'), cell(r.std == null ? null : month(r.std + 2 * fee), 'm'), cell(usd(r.large)), cell(month(r.large), 'm'), cell(usd(r.conc)), cell(usd(r.site))] };
+      }), label: 'Site-to-Site VPN 요금'
+    });
+    out += notes([
+      'VPN에서 온프레미스로 나가는 트래픽은 EC2의 인터넷 데이터 전송 요금(EC2 데이터 전송 탭)을 따릅니다.',
+      'Accelerated VPN = VPN connection + Global Accelerator 2개 고정비 + DT-Premium(Global Accelerator 탭의 매트릭스). Transit Gateway에 붙일 때는 TGW attachment 요금도 더해집니다.',
+      'Large(5 Gbps 터널)와 VPN Concentrator는 Price List의 <code>vpnType</code> 값 그대로입니다. 빈 칸은 해당 리전에 SKU가 없다는 뜻입니다.'
+    ]);
+    out += sub('Client VPN', null);
+    out += table({
+      caption: '<b>Client VPN</b> endpoint association 시간당, client connection 시간당 요금',
+      head: [{ h: '리전' }, { h: 'Association<br>시간당' }, { h: 'Association<br>월' }, { h: 'Connection<br>시간당' }],
+      rows: rows.filter(function (r) { return r.cvEp != null || r.cvConn != null; }).map(function (r) {
+        return { r: r.r, cells: [cell(usd(r.cvEp)), cell(month(r.cvEp), 'm'), cell(usd(r.cvConn))] };
+      }), label: 'Client VPN 요금'
+    });
+    out += notes(['Association은 Client VPN endpoint에 연결한 subnet 1개 기준입니다. 고가용성을 위해 subnet 2개를 연결하면 2배입니다.']);
+    return out;
+  }
+
+  /* ---------- Global Accelerator ---------- */
+  function renderGA() {
+    var x = D.ga, out = '';
+    out += sub('고정비', null);
+    out += table({
+      caption: '<b>Fixed fee</b> accelerator 1개당',
+      head: [{ h: '항목' }, { h: '시간당' }, { h: '월' }],
+      rows: [{ th: th('Accelerator 고정비'), cells: [cell(usd(x.fixed)), cell(month(x.fixed), 'm')] }],
+      geo: false, label: 'Global Accelerator 고정비'
+    });
+    var g = x.groups;
+    out += sub('DT-Premium', 'dominant direction 트래픽 GB당 요금입니다. 행은 엔드포인트가 있는 AWS 리전 그룹, 열은 클라이언트가 접속한 edge location 그룹입니다.');
+    out += table({
+      caption: '<b>DT-Premium</b> $/GB (FROM 리전 그룹 → TO edge location 그룹)',
+      head: [{ h: 'FROM 리전 그룹' }].concat(g.map(function (c) { return { h: esc(c.label), title: c.desc }; })),
+      rows: x.rows.map(function (r) {
+        var gg = g.filter(function (c) { return c.id === r.from; })[0];
+        return { th: th(esc(gg ? gg.label : r.from), esc(r.from)), cells: r.v.map(function (v) { return cell(usd(v)); }) };
+      }),
+      geo: false, label: 'Global Accelerator DT-Premium 매트릭스', mx: true
+    });
+    out += notes([
+      'Price List의 <code>Dominant</code> 상품 중 <code>Out</code>·<code>Internet</code> 클라이언트 값을 실었습니다. In 방향과 AWS 클라이언트 값도 모든 조합에서 같고, non-dominant 방향은 $0입니다.',
+      '열 그룹 범위(공식 요금 페이지 기준): ' + g.map(function (c) { return '<b>' + esc(c.label) + '</b> ' + esc(c.desc); }).join(' · '),
+      'DT-Premium 위에 표준 데이터 전송 요금(EC2 인터넷 DTO)이 별도로 붙습니다.',
+      (function () {
+        var kr = (x.rows.filter(function (r) { return r.from === 'KR'; })[0] || { v: [null] }).v[0];
+        if (kr == null) return '';
+        var dt = 1024 * kr;
+        return '월 예시: accelerator 1개 고정비 ' + month(x.fixed) + ' + 서울 리전 엔드포인트 → 북미 클라이언트 1 TB(1,024 GB) × ' + usd(kr) + ' = $' + (x.fixed * H + dt).toFixed(2) + ' (표준 데이터 전송 요금 별도).';
+      })()
+    ]);
+    return out;
+  }
+
+  /* ---------- PrivateLink ---------- */
+  function renderPL() {
+    var rows = D.privatelink, out = '';
+    var t0 = (rows[0] && rows[0].epGb) || [];
+    out += sub('Interface endpoint', null);
+    out += table({
+      caption: '<b>Interface endpoint</b> AZ당 시간 요금과 데이터 처리 계단($/GB)',
+      head: [{ h: '리전' }, { h: 'Endpoint·AZ<br>시간당' }, { h: 'Endpoint·AZ<br>월' }].concat(t0.map(function (t, i) { return { h: '처리 ' + tierLabel(t, i, t0) }; })).concat([{ h: 'Resource endpoint<br>시간당' }, { h: '원격 리전(제공자)<br>시간당' }]),
+      rows: rows.map(function (r) {
+        var tc = t0.map(function (t, i) { return cell(usd(r.epGb && r.epGb[i] ? r.epGb[i][2] : null)); });
+        return { r: r.r, cells: [cell(usd(r.ep)), cell(month(r.ep), 'm')].concat(tc).concat([cell(usd(r.res)), cell(usd(r.remote))]) };
+      }), label: 'Interface endpoint 요금'
+    });
+    out += notes([
+      '월 예시(서울): interface endpoint 1개를 3개 AZ에 배치 = ' + (function () { var s = rows.filter(function (r) { return r.r === 'ap-northeast-2'; })[0]; return s ? month(3 * s.ep) : '—'; })() + ' + 처리 GB당.',
+      'Resource endpoint(VPC resource 접근용)는 resource 1개당 시간 요금이며, 처리 요금 계단은 interface endpoint와 같습니다.',
+      '원격 리전 요금은 cross-region PrivateLink를 켠 서비스 제공자가 활성 원격 리전마다 내는 시간 요금입니다. 소비자 쪽에는 리전 간 데이터 전송 요금이 붙습니다.'
+    ]);
+    out += sub('Gateway Load Balancer endpoint', null);
+    out += table({
+      caption: '<b>GWLB endpoint</b> 시간 요금과 처리 요금',
+      head: [{ h: '리전' }, { h: 'GWLBE<br>시간당' }, { h: 'GWLBE<br>월' }, { h: '데이터 처리<br>$/GB' }],
+      rows: rows.filter(function (r) { return r.gwlbe != null; }).map(function (r) { return { r: r.r, cells: [cell(usd(r.gwlbe)), cell(month(r.gwlbe), 'm'), cell(usd(r.gwlbeGb))] }; }),
+      label: 'GWLB endpoint 요금'
+    });
+    out += notes(['Gateway Load Balancer 자체(GWLB 시간·GLCU)는 Elastic Load Balancing 요금이며 여기에는 없습니다.']);
+    return out;
+  }
+
+  var RENDER = { dx: renderDX, cloudwan: renderCW, tgw: renderTGW, dt: renderDT, vpn: renderVPN, ga: renderGA, privatelink: renderPL };
+
+  /* ---------- tabs ---------- */
+  function select(id, focus) {
+    if (TABS.indexOf(id) < 0) id = 'dx';
+    TABS.forEach(function (t) {
+      var b = document.getElementById('tab-' + t), p = document.getElementById(t), on = t === id;
+      b.setAttribute('aria-selected', on ? 'true' : 'false'); b.tabIndex = on ? 0 : -1; p.hidden = !on;
+    });
+    if (focus) document.getElementById('tab-' + id).focus();
+    if (D) ensure(id);
+  }
+  function ensure(id) {
+    if (rendered[id]) { applyFilter(); return; }
+    var host = document.querySelector('#' + id + ' [data-render]');
+    try { host.innerHTML = RENDER[id](); }
+    catch (e) { host.innerHTML = '<div class="status"><b>이 표를 그리지 못했습니다.</b> ' + esc(e.message) + '</div>'; }
+    rendered[id] = true;
+    if (id === 'dt') { var s = document.getElementById('dt-from'); if (s) { s.addEventListener('change', renderDTOne); renderDTOne(); } }
+    applyFilter();
+  }
+  var tl = document.querySelector('[role="tablist"]');
+  tl.addEventListener('click', function (e) {
+    var b = e.target.closest('[role="tab"]'); if (!b) return;
+    var id = b.getAttribute('aria-controls');
+    select(id);
+    try { history.replaceState(null, '', '#' + id); } catch (er) { location.hash = id; }
+  });
+  tl.addEventListener('keydown', function (e) {
+    var i = TABS.indexOf(document.activeElement.getAttribute('aria-controls')), n = null;
+    if (i < 0) return;
+    if (e.key === 'ArrowRight') n = (i + 1) % TABS.length;
+    else if (e.key === 'ArrowLeft') n = (i - 1 + TABS.length) % TABS.length;
+    else if (e.key === 'Home') n = 0;
+    else if (e.key === 'End') n = TABS.length - 1;
+    if (n === null) return;
+    e.preventDefault(); e.stopPropagation();          // keep presentation-mode keys from also firing
+    select(TABS[n], true);
+    try { history.replaceState(null, '', '#' + TABS[n]); } catch (er) {}
+  });
+  function fromHash() { var h = location.hash.replace('#', ''); if (TABS.indexOf(h) >= 0) { select(h); return true; } return false; }
+  addEventListener('hashchange', function () {
+    if (fromHash()) { var p = document.getElementById('prices'); if (p && !document.documentElement.classList.contains('presenting')) p.scrollIntoView({ block: 'start' }); }
+  });
+  // nav links (#dx, #tgw, #dt) select the tab
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a[href^="#"]'); if (!a) return;
+    var id = a.getAttribute('href').slice(1);
+    if (TABS.indexOf(id) >= 0) { e.preventDefault(); select(id); try { history.pushState(null, '', '#' + id); } catch (er) {} document.getElementById('prices').scrollIntoView({ block: 'start' }); }
+  }, true);
+
+  /* ---------- region filter ---------- */
+  var q = document.getElementById('rq'), qc = document.getElementById('rq-count');
+  function applyFilter() {
+    var v = (q.value || '').trim().toLowerCase();
+    var panel = document.querySelector('.panel:not([hidden])'); if (!panel) return;
+    var shown = 0, total = 0;
+    panel.querySelectorAll('tbody').forEach(function (tb) {
+      var any = false, rows = tb.querySelectorAll('tr[data-r]');
+      if (!rows.length) return;
+      rows.forEach(function (tr) { var ok = !v || tr.getAttribute('data-r').indexOf(v) >= 0; tr.hidden = !ok; if (ok) any = true; });
+      tb.querySelectorAll('tr.geo').forEach(function (g) {
+        var n = g.nextElementSibling, vis = false;
+        while (n && !n.classList.contains('geo') && !n.classList.contains('empty-row')) { if (!n.hidden) vis = true; n = n.nextElementSibling; }
+        g.hidden = !vis;
+      });
+      var em = tb.querySelector('.empty-row'); if (em) em.hidden = any;
+      if (tb.closest('#dt-one') || !tb.closest('details')) { total++; if (any) shown++; }
+    });
+    qc.textContent = v ? (shown ? '일치하는 리전만 표시 중' : '일치하는 리전 없음') : '';
+  }
+  q.addEventListener('input', applyFilter);
+
+  /* ---------- load ---------- */
+  if (fromHash()) {
+    // a tab hash would otherwise scroll to the bare panel; show the tab bar instead
+    var go = function () { if (!document.documentElement.classList.contains('presenting')) document.getElementById('prices').scrollIntoView({ block: 'start' }); };
+    requestAnimationFrame(go); addEventListener('load', go, { once: true });
+  } else select('dx');
+  var st = document.getElementById('status');
+  fetch('data.json', { cache: 'no-cache' }).then(function (r) {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  }).then(function (d) {
+    D = d;
+    d.regions.forEach(function (r) { REG[r.code] = r; });
+    document.getElementById('f-regions').textContent = d.regions.length;
+    document.getElementById('stamp-date').innerHTML = esc(utc(d.indexPublicationDate).slice(0, 10)) + '<small>' + esc(utc(d.indexPublicationDate).slice(11)) + '</small>';
+    var OFF = { AWSDirectConnect: 'Direct Connect', AWSCloudWAN: 'Cloud WAN', AmazonVPC: 'VPC (TGW·VPN·PrivateLink·IPv4)', AWSDataTransfer: 'Data Transfer', AWSGlobalAccelerator: 'Global Accelerator' };
+    document.getElementById('stamp-offers').innerHTML = Object.keys(OFF).map(function (k) {
+      var s = d.sources[k]; return s ? '<dt>' + esc(OFF[k]) + '</dt><dd>' + esc(utc(s.publicationDate)) + '</dd>' : '';
+    }).join('');
+    document.getElementById('stamp-foot').innerHTML = '큰 날짜는 Price List index 게시 시각, 목록은 서비스(offer)별 현재 버전의 게시 시각입니다. data.json 생성: ' + esc(utc(d.generatedAt)) + ' UTC.';
+    document.querySelectorAll('[data-src]').forEach(function (el) {
+      var s = d.sources[el.getAttribute('data-src')];
+      if (s) el.innerHTML = 'Price List <a href="' + esc(s.source) + '" target="_blank" rel="noopener">' + esc(el.getAttribute('data-src')) + '</a> · ' + esc(utc(s.publicationDate)) + ' UTC';
+    });
+    st.hidden = true;
+    var cur = TABS.filter(function (t) { return !document.getElementById(t).hidden; })[0] || 'dx';
+    ensure(cur);
+  }).catch(function (e) {
+    st.innerHTML = '<b>가격 데이터를 불러오지 못했습니다.</b> <code>data.json</code>을 같은 폴더에서 HTTP로 제공해야 합니다(파일을 직접 열면 브라우저가 막습니다). 저장소 루트에서 <code>python3 -m http.server</code>를 실행한 뒤 <code>http://localhost:8000/pricing/</code>로 열어 보세요. (' + esc(e.message) + ')';
+    document.getElementById('stamp-date').textContent = '데이터 없음';
+  });
+})();
+</script>
+</body>
+</html>

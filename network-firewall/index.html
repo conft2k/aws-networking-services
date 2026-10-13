@@ -153,6 +153,8 @@ svg .site{stroke:var(--fiber-ink);stroke-width:2;fill:none;stroke-dasharray:6 5}
 svg .lbl{fill:var(--trace);font-family:var(--mono);font-size:11px;font-weight:500}
 svg .lbl2{fill:var(--fiber-ink);font-family:var(--mono);font-size:11px;font-weight:500}
 svg .dot{fill:var(--fiber)}
+svg .ah-f{fill:var(--fiber)}
+svg .ah-p{fill:var(--trace)}
 .legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--ink-2)}
 .legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--fiber)}
 .legend i.p{border-top:2px solid var(--trace)}
@@ -433,6 +435,10 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
           <svg viewBox="0 0 980 440" role="img" aria-labelledby="arch-title arch-desc">
             <title id="arch-title">Transit Gateway 연결형 Network Firewall 아키텍처</title>
             <desc id="arch-desc">스포크 VPC A와 B, 그리고 Direct Connect 또는 VPN으로 연결된 온프레미스가 Transit Gateway에 연결됩니다. 스포크 라우팅 테이블은 기본 경로를 Network Firewall attachment로 보냅니다. 방화벽은 appliance mode가 켜진 상태로 트래픽을 검사하고, 방화벽 라우팅 테이블을 통해 다른 스포크 VPC나 NAT 게이트웨이와 인터넷 게이트웨이가 있는 이그레스 VPC로 보냅니다.</desc>
+            <defs>
+              <marker id="ar-nfw-f" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" orient="auto"><path class="ah-f" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-nfw-p" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-p" d="M0 0 L10 5 L0 10 z"/></marker>
+            </defs>
             <!-- zones -->
             <rect class="zone" x="10" y="40" width="220" height="380" rx="6"/>
             <text class="z" x="24" y="62">SPOKES</text>
@@ -470,7 +476,8 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <image href="../assets/aws-icons/Res_AWS-Network-Firewall_Endpoints_48.svg" x="620" y="111" width="28" height="28"/>
             <text class="t" x="656" y="120">Network Firewall attachment</text>
             <text class="s" x="656" y="142">appliance mode 항상 켜짐 · AZ별 엔드포인트</text>
-            <path class="fiber" d="M542 196 C578 196 576 125 610 125"/>
+            <path class="fiber" d="M542 196 C578 196 576 118 604 118" marker-end="url(#ar-nfw-f)"/>
+            <path class="path" d="M610 146 C584 146 576 214 544 214" marker-end="url(#ar-nfw-p)"/>
             <text class="lbl2" x="546" y="150">검사</text>
             <text class="s" x="610" y="196">Suricata 규칙 · TLS 검사 · 도메인 목록</text>
 
@@ -481,15 +488,16 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <rect class="box" x="790" y="300" width="150" height="64" rx="4"/>
             <image href="../assets/aws-icons/Res_Amazon-VPC_Internet-Gateway_48.svg" x="800" y="318" width="28" height="28"/>
             <text class="t" x="836" y="328">IGW</text><text class="s" x="836" y="348">인터넷</text>
-            <path class="path" d="M542 244 C578 244 576 332 610 332"/>
-            <path class="path" d="M760 332 H790"/>
+            <path class="path" d="M542 244 C578 244 576 332 608 332" marker-end="url(#ar-nfw-p)"/>
+            <path class="path" d="M760 332 H788" marker-end="url(#ar-nfw-p)"/>
             <text class="lbl" x="490" y="300">검사 후</text>
           </svg>
         </div>
         <figcaption class="legend">
-          <span><i></i>방화벽 검사 경로</span>
+          <span><i></i>방화벽 검사 경로 (TGW → 방화벽)</span>
           <span><i class="p"></i>TGW attachment 트래픽</span>
           <span><i class="s"></i>하이브리드 연결 (DX · VPN)</span>
+          <span>→ 화살표: 트래픽 방향 (검사 후 TGW 복귀 · 이그레스 아웃바운드)</span>
         </figcaption>
         <p class="arch-hint">좁은 화면에서는 다이어그램을 좌우로 밀어서 보세요.</p>
       </figure>

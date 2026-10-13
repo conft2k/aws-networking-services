@@ -153,6 +153,14 @@ svg .site{stroke:var(--fiber-ink);stroke-width:2;fill:none;stroke-dasharray:6 5}
 svg .lbl{fill:var(--trace);font-family:var(--mono);font-size:11px;font-weight:500}
 svg .lbl2{fill:var(--fiber-ink);font-family:var(--mono);font-size:11px;font-weight:500}
 svg .dot{fill:var(--fiber)}
+svg .ah-p{fill:var(--trace)}
+svg .ah-f{fill:var(--fiber)}
+svg .ah-s{fill:var(--fiber-ink)}
+.legend i.dir{position:relative;width:26px}
+.legend i.dir::after{content:"";position:absolute;right:-3px;top:-6px;border-left:8px solid var(--trace);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.legend i.f.dir::after{top:-7px;border-left-color:var(--fiber)}
+.legend i.t.dir::after{top:-6.5px;border-left-color:var(--fiber)}
+.legend i.s.dir::after{border-left-color:var(--fiber-ink)}
 .legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--ink-2)}
 .legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--fiber)}
 .legend i.p{border-top:2px solid var(--trace)}
@@ -458,6 +466,10 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
           <svg viewBox="0 0 980 430" role="img" aria-labelledby="arch-title arch-desc">
             <title id="arch-title">Client VPN 레퍼런스 아키텍처</title>
             <desc id="arch-desc">재택 사용자와 출장 사용자의 노트북이 인터넷을 거쳐 Client VPN 엔드포인트에 TLS 터널로 접속합니다. 엔드포인트는 SAML IdP 또는 Active Directory로 사용자를 인증하고 연결 로그를 CloudWatch Logs로 보냅니다. 엔드포인트는 Transit Gateway에 연결되어 VPC A, VPC B, 그리고 Transit Gateway의 Direct Connect나 Site-to-Site VPN 어태치먼트를 거쳐 온프레미스로 트래픽을 보냅니다.</desc>
+            <defs>
+              <marker id="ar-cv-t" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" orient="auto"><path class="ah-f" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-cv-s" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-s" d="M0 0 L10 5 L0 10 z"/></marker>
+            </defs>
             <rect class="zone" x="10" y="40" width="190" height="370" rx="6"/>
             <text class="z" x="24" y="62">REMOTE USERS</text>
             <rect class="zone" x="230" y="40" width="740" height="370" rx="6"/>
@@ -496,13 +508,13 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <image href="../assets/aws-icons/Res_AWS-Transit-Gateway_Attachment_48.svg" x="793" y="300" width="28" height="28"/>
             <text class="t" x="829" y="310">온프레미스 경로</text><text class="s" x="829" y="330">DX · VPN 어태치먼트</text>
 
-            <path class="tls" d="M190 142 C240 142 230 204 280 204"/>
-            <path class="tls" d="M190 282 C240 282 230 222 280 222"/>
+            <path class="tls" d="M190 142 C240 142 230 204 278 204" marker-end="url(#ar-cv-t)"/>
+            <path class="tls" d="M190 282 C240 282 230 222 278 222" marker-end="url(#ar-cv-t)"/>
             <text class="lbl2" x="204" y="184">TLS</text>
             <text class="lbl2" x="204" y="246">UDP</text><text class="lbl2" x="204" y="260">443</text>
 
-            <path class="site" d="M380 180 V136"/>
-            <path class="site" d="M380 244 V300"/>
+            <path class="site" d="M380 180 V138" marker-end="url(#ar-cv-s)"/>
+            <path class="site" d="M380 244 V298" marker-end="url(#ar-cv-s)"/>
 
             <path class="path" d="M480 212 H560"/>
             <text class="lbl" x="486" y="204">원본 IP 유지</text>
@@ -513,8 +525,8 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
           </svg>
         </div>
         <figcaption class="legend">
-          <span><i class="t"></i>클라이언트 TLS 터널</span>
-          <span><i class="s"></i>인증 · 로그</span>
+          <span><i class="t dir"></i>클라이언트 TLS 터널 (사용자가 엔드포인트로 연결)</span>
+          <span><i class="s dir"></i>인증 요청 · 연결 로그 전달</span>
           <span><i class="p"></i>어태치먼트 · 라우팅</span>
         </figcaption>
         <p class="arch-hint">좁은 화면에서는 다이어그램을 좌우로 밀어서 보세요.</p>

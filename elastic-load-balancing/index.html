@@ -153,6 +153,9 @@ svg .site{stroke:var(--fiber-ink);stroke-width:2;fill:none;stroke-dasharray:6 5}
 svg .lbl{fill:var(--trace);font-family:var(--mono);font-size:11px;font-weight:500}
 svg .lbl2{fill:var(--fiber-ink);font-family:var(--mono);font-size:11px;font-weight:500}
 svg .dot{fill:var(--fiber)}
+svg .ah-f{fill:var(--fiber)}
+svg .ah-p{fill:var(--trace)}
+svg .ah-s{fill:var(--fiber-ink)}
 .legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--ink-2)}
 .legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--fiber)}
 .legend i.p{border-top:2px solid var(--trace)}
@@ -422,6 +425,11 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <div class="arch-scroll">
               <svg viewBox="0 0 560 280" role="img" aria-labelledby="alb-svg-t">
                 <title id="alb-svg-t">클라이언트가 ALB HTTPS 리스너로 접속하고, ALB가 경로 규칙에 따라 instance, ip, lambda 대상 그룹으로 요청을 나누는 흐름</title>
+                <defs>
+                  <marker id="ar-alb-f" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" orient="auto"><path class="ah-f" d="M0 0 L10 5 L0 10 z"/></marker>
+                  <marker id="ar-alb-p" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-p" d="M0 0 L10 5 L0 10 z"/></marker>
+                  <marker id="ar-alb-s" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-s" d="M0 0 L10 5 L0 10 z"/></marker>
+                </defs>
                 <rect class="zone" x="140" y="6" width="414" height="268" rx="6"/>
                 <image href="../assets/aws-icons/Virtual-private-cloud-VPC_32.svg" x="140" y="6" width="24" height="24"/><text class="z" x="170" y="23">VPC</text>
                 <rect class="box" x="4" y="108" width="118" height="64" rx="4"/>
@@ -431,16 +439,16 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
                 <text class="s" x="172" y="150">1  host · path</text>
                 <text class="s" x="172" y="168">2  header · method</text>
                 <text class="s" x="172" y="186">*  default</text>
-                <path class="fiber" d="M122 140 H160"/>
+                <path class="fiber" d="M122 140 H157" marker-end="url(#ar-alb-f)"/>
                 <rect class="box" x="392" y="30" width="150" height="56" rx="4"/>
                 <image href="../assets/aws-icons/Res_Amazon-EC2_Instance_48.svg" x="400" y="44" width="28" height="28"/><text class="t" x="436" y="54">tg-web</text><text class="s" x="436" y="73">instance</text>
                 <rect class="box" x="392" y="112" width="150" height="56" rx="4"/>
                 <image href="../assets/aws-icons/Res_Amazon-Elastic-Container-Service_Task_48.svg" x="400" y="126" width="28" height="28"/><text class="t" x="436" y="136">tg-api</text><text class="s" x="436" y="155">ip · 컨테이너</text>
                 <rect class="box" x="392" y="194" width="150" height="56" rx="4"/>
                 <image href="../assets/aws-icons/Res_AWS-Lambda_Lambda-Function_48.svg" x="400" y="208" width="28" height="28"/><text class="t" x="436" y="218">tg-fn</text><text class="s" x="436" y="237">lambda</text>
-                <path class="path" d="M316 120 C354 120 352 58 392 58"/>
-                <path class="path" d="M316 140 H392"/>
-                <path class="path" d="M316 160 C354 160 352 222 392 222"/>
+                <path class="path" d="M316 120 C354 120 352 58 390 58" marker-end="url(#ar-alb-p)"/>
+                <path class="path" d="M316 140 H390" marker-end="url(#ar-alb-p)"/>
+                <path class="path" d="M316 160 C354 160 352 222 390 222" marker-end="url(#ar-alb-p)"/>
                 <text class="lbl" x="326" y="80">/*</text>
                 <text class="lbl" x="330" y="133">/api/*</text>
                 <text class="lbl" x="322" y="214">/fn/*</text>
@@ -543,6 +551,11 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <div class="arch-scroll">
               <svg viewBox="0 0 560 280" role="img" aria-labelledby="nlb-svg-t">
                 <title id="nlb-svg-t">클라이언트와 PrivateLink 엔드포인트가 NLB의 가용 영역별 IP로 접속하고, NLB가 흐름을 각 영역의 대상에 고정해 전달하는 흐름</title>
+                <defs>
+                  <marker id="ar-nlb-f" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" orient="auto"><path class="ah-f" d="M0 0 L10 5 L0 10 z"/></marker>
+                  <marker id="ar-nlb-p" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-p" d="M0 0 L10 5 L0 10 z"/></marker>
+                  <marker id="ar-nlb-s" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-s" d="M0 0 L10 5 L0 10 z"/></marker>
+                </defs>
                 <rect class="box" x="4" y="40" width="124" height="60" rx="4"/>
                 <image class="ic-gen" href="../assets/aws-icons/Res_Client_48_Light.svg" x="12" y="58" width="24" height="24"/><text class="t" x="42" y="66">클라이언트</text><text class="s" x="42" y="86">TCP · UDP</text>
                 <rect class="box" x="4" y="180" width="124" height="60" rx="4"/>
@@ -553,15 +566,15 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
                 <text class="z" x="182" y="102">AZ-a</text><text class="s" x="182" y="126">EIP 203.0.113.10</text>
                 <rect class="zone" x="170" y="180" width="148" height="66" rx="4"/>
                 <text class="z" x="182" y="202">AZ-b</text><text class="s" x="182" y="226">EIP 203.0.113.20</text>
-                <path class="fiber" d="M128 70 C150 70 150 113 170 113"/>
-                <path class="site" d="M128 210 H170"/>
+                <path class="fiber" d="M128 70 C150 70 148 113 167 113" marker-end="url(#ar-nlb-f)"/>
+                <path class="site" d="M128 210 H168" marker-end="url(#ar-nlb-s)"/>
                 <text class="lbl2" x="16" y="166">PrivateLink</text>
                 <rect class="box" x="384" y="80" width="170" height="60" rx="4"/>
                 <image href="../assets/aws-icons/Res_Amazon-EC2_Instance_48.svg" x="392" y="96" width="28" height="28"/><text class="t" x="428" y="106">대상 A</text><text class="s" x="428" y="126">AZ-a · instance</text>
                 <rect class="box" x="384" y="180" width="170" height="60" rx="4"/>
                 <image href="../assets/aws-icons/Res_Amazon-VPC_Elastic-Network-Interface_48.svg" x="392" y="196" width="28" height="28"/><text class="t" x="428" y="206">대상 B</text><text class="s" x="428" y="226">AZ-b · ip</text>
-                <path class="path" d="M318 113 H384"/>
-                <path class="path" d="M318 213 H384"/>
+                <path class="path" d="M318 113 H382" marker-end="url(#ar-nlb-p)"/>
+                <path class="path" d="M318 213 H382" marker-end="url(#ar-nlb-p)"/>
                 <text class="lbl" x="384" y="40">flow hash · 연결 고정</text>
                 <text class="lbl" x="384" y="58">클라이언트 IP 보존</text>
               </svg>
@@ -626,6 +639,11 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <div class="arch-scroll">
               <svg viewBox="0 0 540 290" role="img" aria-labelledby="gwlb-svg-t">
                 <title id="gwlb-svg-t">인터넷 게이트웨이로 들어온 트래픽이 GWLB endpoint로 라우팅되고, 보안 VPC의 GWLB가 GENEVE로 두 어플라이언스에 나눈 뒤 검사를 마친 트래픽이 애플리케이션 서버로 가는 흐름</title>
+                <defs>
+                  <marker id="ar-gwf-f" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" orient="auto"><path class="ah-f" d="M0 0 L10 5 L0 10 z"/></marker>
+                  <marker id="ar-gwf-p" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-p" d="M0 0 L10 5 L0 10 z"/></marker>
+                  <marker id="ar-gwf-s" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-s" d="M0 0 L10 5 L0 10 z"/></marker>
+                </defs>
                 <rect class="zone" x="6" y="6" width="240" height="278" rx="6"/>
                 <image href="../assets/aws-icons/Virtual-private-cloud-VPC_32.svg" x="6" y="6" width="24" height="24"/><text class="z" x="36" y="23">APPLICATION VPC</text>
                 <rect class="zone" x="270" y="6" width="264" height="278" rx="6"/>
@@ -636,19 +654,22 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
                 <image href="../assets/aws-icons/Res_Amazon-VPC_Endpoints_48.svg" x="34" y="143" width="28" height="28"/><text class="t" x="70" y="153">GWLB endpoint</text><text class="s" x="70" y="172">라우팅 다음 홉</text>
                 <rect class="box" x="26" y="220" width="200" height="54" rx="4"/>
                 <image href="../assets/aws-icons/Res_Amazon-EC2_Instance_48.svg" x="34" y="233" width="28" height="28"/><text class="t" x="70" y="243">애플리케이션 서버</text><text class="s" x="70" y="262">ALB · EC2</text>
-                <path class="fiber" d="M126 94 V130"/>
-                <path class="fiber" d="M126 184 V220"/>
+                <path class="fiber" d="M126 94 V127" marker-end="url(#ar-gwf-f)"/>
+                <path class="fiber" d="M126 184 V217" marker-end="url(#ar-gwf-f)"/>
                 <text class="lbl2" x="136" y="207">검사 후</text>
                 <rect class="box" x="290" y="130" width="224" height="54" rx="4"/>
                 <image href="../assets/aws-icons/Res_Elastic-Load-Balancing_Gateway-Load-Balancer_48.svg" x="298" y="143" width="28" height="28"/><text class="t" x="334" y="153">GWLB</text><text class="s" x="334" y="172">listener: 모든 IP 패킷</text>
-                <path class="fiber" d="M226 157 H290"/>
+                <path class="fiber" d="M226 149 H287" marker-end="url(#ar-gwf-f)"/>
+                <path class="fiber" d="M290 166 H229" marker-end="url(#ar-gwf-f)"/>
                 <text class="lbl2" x="184" y="122">PrivateLink</text>
                 <rect class="box" x="290" y="226" width="104" height="48" rx="4"/>
                 <image href="../assets/aws-icons/Res_Amazon-EC2_Instance_48.svg" x="298" y="238" width="24" height="24"/><text class="t" x="330" y="247">FW A</text><text class="s" x="330" y="264">target</text>
                 <rect class="box" x="410" y="226" width="104" height="48" rx="4"/>
                 <image href="../assets/aws-icons/Res_Amazon-EC2_Instance_48.svg" x="418" y="238" width="24" height="24"/><text class="t" x="450" y="247">FW B</text><text class="s" x="450" y="264">target</text>
-                <path class="site" d="M342 184 V226"/>
-                <path class="site" d="M462 184 V226"/>
+                <path class="site" d="M335 184 V224" marker-end="url(#ar-gwf-s)"/>
+                <path class="site" d="M349 226 V186" marker-end="url(#ar-gwf-s)"/>
+                <path class="site" d="M455 184 V224" marker-end="url(#ar-gwf-s)"/>
+                <path class="site" d="M469 226 V186" marker-end="url(#ar-gwf-s)"/>
                 <text class="lbl2" x="290" y="64">GENEVE · UDP 6081</text>
                 <text class="s" x="290" y="84">5-tuple 흐름 고정</text>
                 <text class="s" x="290" y="102">MTU 8,500 bytes</text>
@@ -704,6 +725,11 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
           <svg viewBox="0 0 980 440" role="img" aria-labelledby="arch-title arch-desc">
             <title id="arch-title">Gateway Load Balancer와 Application Load Balancer 조합 아키텍처</title>
             <desc id="arch-desc">인터넷 클라이언트의 트래픽이 애플리케이션 VPC의 인터넷 게이트웨이로 들어와 GWLB endpoint로 라우팅됩니다. GWLB endpoint는 보안 VPC의 Gateway Load Balancer로 트래픽을 보내고, GWLB는 GENEVE UDP 6081로 두 어플라이언스에 분산합니다. 검사 후 트래픽은 GWLB endpoint를 거쳐 ALB로 가고, ALB는 EC2 인스턴스 대상 그룹과 Lambda 대상 그룹으로 요청을 나눕니다.</desc>
+            <defs>
+                  <marker id="ar-elb-f" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" orient="auto"><path class="ah-f" d="M0 0 L10 5 L0 10 z"/></marker>
+                  <marker id="ar-elb-p" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-p" d="M0 0 L10 5 L0 10 z"/></marker>
+                  <marker id="ar-elb-s" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-s" d="M0 0 L10 5 L0 10 z"/></marker>
+                </defs>
             <!-- zones -->
             <rect class="zone" x="10" y="40" width="130" height="380" rx="6"/>
             <image class="ic-gen" href="../assets/aws-icons/Res_Internet_48_Light.svg" x="14" y="44" width="22" height="22"/><text class="z" x="42" y="60">INTERNET</text>
@@ -717,15 +743,15 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <image class="ic-gen" href="../assets/aws-icons/Res_Client_48_Light.svg" x="24" y="210" width="24" height="24"/><text class="t" x="52" y="218">클라이언트</text><text class="s" x="52" y="238">HTTPS</text>
             <rect class="box" x="190" y="190" width="118" height="64" rx="4"/>
             <image href="../assets/aws-icons/Res_Amazon-VPC_Internet-Gateway_48.svg" x="198" y="208" width="28" height="28"/><text class="t" x="234" y="218">IGW</text><text class="s" x="234" y="238">엣지 라우팅</text>
-            <path class="path" d="M134 222 H190"/>
+            <path class="path" d="M134 222 H188" marker-end="url(#ar-elb-p)"/>
 
             <!-- gwlbe & alb -->
             <rect class="box" x="330" y="80" width="156" height="64" rx="4"/>
             <image href="../assets/aws-icons/Res_Amazon-VPC_Endpoints_48.svg" x="338" y="98" width="28" height="28"/><text class="t" x="374" y="108">GWLB endpoint</text><text class="s" x="374" y="128">라우팅 다음 홉</text>
             <rect class="box" x="330" y="200" width="156" height="64" rx="4"/>
             <image href="../assets/aws-icons/Res_Elastic-Load-Balancing_Application-Load-Balancer_48.svg" x="338" y="218" width="28" height="28"/><text class="t" x="374" y="228">ALB</text><text class="s" x="374" y="248">HTTPS:443</text>
-            <path class="fiber" d="M308 206 C322 206 316 112 330 112"/>
-            <path class="fiber" d="M408 144 V200"/>
+            <path class="fiber" d="M308 206 C320 206 314 112 327 112" marker-end="url(#ar-elb-f)"/>
+            <path class="fiber" d="M408 144 V197" marker-end="url(#ar-elb-f)"/>
             <text class="lbl2" x="414" y="178">검사 후</text>
 
             <!-- targets -->
@@ -733,21 +759,24 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <image href="../assets/aws-icons/Res_Amazon-EC2_Instance_48.svg" x="516" y="138" width="28" height="28"/><text class="t" x="552" y="148">EC2</text><text class="s" x="552" y="168">instance TG</text>
             <rect class="box" x="508" y="280" width="124" height="64" rx="4"/>
             <image href="../assets/aws-icons/Res_AWS-Lambda_Lambda-Function_48.svg" x="516" y="298" width="28" height="28"/><text class="t" x="552" y="308">Lambda</text><text class="s" x="552" y="328">lambda TG</text>
-            <path class="path" d="M486 222 C498 222 496 152 508 152"/>
-            <path class="path" d="M486 242 C498 242 496 312 508 312"/>
+            <path class="path" d="M486 222 C498 222 494 152 506 152" marker-end="url(#ar-elb-p)"/>
+            <path class="path" d="M486 242 C498 242 494 312 506 312" marker-end="url(#ar-elb-p)"/>
             <text class="s" x="190" y="396">ALB 서브넷 → 0.0.0.0/0 경로도 GWLB endpoint를 거칩니다</text>
 
             <!-- security vpc -->
             <rect class="box" x="700" y="80" width="240" height="64" rx="4"/>
             <image href="../assets/aws-icons/Res_Elastic-Load-Balancing_Gateway-Load-Balancer_48.svg" x="708" y="98" width="28" height="28"/><text class="t" x="744" y="108">Gateway Load Balancer</text><text class="s" x="744" y="128">listener: 모든 IP 패킷</text>
-            <path class="fiber" d="M486 112 H700"/>
-            <text class="lbl2" x="560" y="102">PrivateLink</text>
+            <path class="fiber" d="M486 97 H697" marker-end="url(#ar-elb-f)"/>
+            <path class="fiber" d="M700 113 H489" marker-end="url(#ar-elb-f)"/>
+            <text class="lbl2" x="560" y="86">PrivateLink</text>
             <rect class="box" x="696" y="240" width="128" height="64" rx="4"/>
             <image href="../assets/aws-icons/Res_Amazon-EC2_Instance_48.svg" x="702" y="260" width="24" height="24"/><text class="t" x="732" y="268">어플라이언스</text><text class="s" x="732" y="288">target A</text>
             <rect class="box" x="834" y="240" width="128" height="64" rx="4"/>
             <image href="../assets/aws-icons/Res_Amazon-EC2_Instance_48.svg" x="840" y="260" width="24" height="24"/><text class="t" x="870" y="268">어플라이언스</text><text class="s" x="870" y="288">target B</text>
-            <path class="site" d="M760 144 V240"/>
-            <path class="site" d="M898 144 V240"/>
+            <path class="site" d="M752 144 V238" marker-end="url(#ar-elb-s)"/>
+            <path class="site" d="M768 240 V146" marker-end="url(#ar-elb-s)"/>
+            <path class="site" d="M890 144 V238" marker-end="url(#ar-elb-s)"/>
+            <path class="site" d="M906 240 V146" marker-end="url(#ar-elb-s)"/>
             <text class="lbl2" x="700" y="340">GENEVE · UDP 6081</text>
             <text class="s" x="700" y="360">5-tuple 흐름 고정 · MTU 8500</text>
           </svg>
@@ -756,6 +785,7 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
           <span><i></i>검사 경로 (GWLB endpoint)</span>
           <span><i class="p"></i>애플리케이션 트래픽</span>
           <span><i class="s"></i>GENEVE 캡슐화</span>
+          <span>→ 화살표: 요청 방향 (왕복 두 줄은 어플라이언스로 갔다가 돌아오는 경로)</span>
         </figcaption>
         <p class="arch-hint">좁은 화면에서는 다이어그램을 좌우로 밀어서 보세요.</p>
       </figure>

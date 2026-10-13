@@ -253,6 +253,18 @@ svg .usr{stroke:var(--ink-3);stroke-width:2;fill:none;stroke-dasharray:3 4}
 
 /* Korean line breaking: never split a word mid-syllable */
 h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
+svg .ah-fiber{fill:var(--fiber)}
+svg .ah-trace{fill:var(--trace)}
+svg .ah-site{fill:var(--fiber-ink)}
+svg .ah-usr{fill:var(--ink-3)}
+svg .ah-atk{fill:#C2410C}
+.legend i.dir{position:relative;width:26px}
+.legend i.dir::after{content:"";position:absolute;right:-3px;top:-7px;border-left:8px solid var(--fiber);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.legend i.p.dir::after,.legend i.s.dir::after,.legend i.u.dir::after,.legend i.a.dir::after{top:-6px}
+.legend i.p.dir::after{border-left-color:var(--trace)}
+.legend i.s.dir::after{border-left-color:var(--fiber-ink)}
+.legend i.u.dir::after{border-left-color:var(--ink-3)}
+.legend i.a.dir::after{border-left-color:#C2410C}
 </style>
 <link rel="stylesheet" href="../assets/site.css?v=2">
 <script src="../assets/site.js?v=2"></script>
@@ -418,6 +430,11 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
           <svg viewBox="0 0 980 430" role="img" aria-labelledby="arch-title arch-desc">
             <title id="arch-title">Global Accelerator 레퍼런스 아키텍처</title>
             <desc id="arch-desc">서울 사용자와 미국 사용자가 같은 두 개의 고정 애니캐스트 IP로 접속합니다. 각 사용자는 가까운 엣지 로케이션으로 들어오고, 엣지에서 AWS 글로벌 네트워크를 거쳐 서울 리전 엔드포인트 그룹(트래픽 다이얼 100%, ALB와 EC2)과 오레곤 리전 엔드포인트 그룹(트래픽 다이얼 30%, NLB)으로 전달됩니다. 오레곤 그룹이 받지 않는 나머지 70%는 서울 그룹으로 넘어갑니다.</desc>
+            <defs>
+              <marker id="ar-global-accelerator-fiber" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><path class="ah-fiber" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-global-accelerator-trace" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-trace" d="M0 0 L10 5 L0 10 z"/></marker>
+              <marker id="ar-global-accelerator-usr" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path class="ah-usr" d="M0 0 L10 5 L0 10 z"/></marker>
+            </defs>
             <rect class="zone" x="10" y="40" width="180" height="370" rx="6"/>
             <text class="z" x="24" y="62">USERS</text>
             <rect class="zone" x="220" y="40" width="250" height="370" rx="6"/>
@@ -438,17 +455,17 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <text class="lbl2" x="250" y="222">같은 고정 IP 2개</text>
             <text class="lbl2" x="250" y="240">192.0.2.10 · 198.51.100.7</text>
 
-            <path class="usr" d="M170 132 H250"/>
-            <path class="usr" d="M170 322 H250"/>
+            <path class="usr" d="M170 132 H248" marker-end="url(#ar-global-accelerator-usr)"/>
+            <path class="usr" d="M170 322 H248" marker-end="url(#ar-global-accelerator-usr)"/>
 
             <rect class="box" x="540" y="90" width="190" height="84" rx="4"/>
             <image href="../assets/aws-icons/Arch_AWS-Global-Accelerator_48.svg" x="550" y="118" width="28" height="28"/><text class="t" x="586" y="118">ap-northeast-2</text><text class="s" x="586" y="138">endpoint group</text><text class="lbl2" x="586" y="160">traffic dial 100%</text>
             <rect class="box" x="540" y="280" width="190" height="84" rx="4"/>
             <image href="../assets/aws-icons/Arch_AWS-Global-Accelerator_48.svg" x="550" y="308" width="28" height="28"/><text class="t" x="586" y="308">us-west-2</text><text class="s" x="586" y="328">endpoint group</text><text class="lbl2" x="586" y="350">traffic dial 30%</text>
 
-            <path class="bb" d="M440 132 H540"/>
-            <path class="bb" d="M440 322 H540"/>
-            <path class="path" d="M440 304 C490 304 490 154 540 154" stroke-dasharray="6 5"/>
+            <path class="bb" d="M440 132 H531" marker-end="url(#ar-global-accelerator-fiber)"/>
+            <path class="bb" d="M440 322 H531" marker-end="url(#ar-global-accelerator-fiber)"/>
+            <path class="path" d="M440 304 C490 304 490 154 538 154" stroke-dasharray="6 5" marker-end="url(#ar-global-accelerator-trace)"/>
             <text class="lbl" x="548" y="262">다이얼 밖 70%는 다른 리전으로</text>
             <text class="lbl" x="250" y="196">엣지부터 AWS 글로벌 네트워크</text>
 
@@ -459,16 +476,17 @@ h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
             <rect class="box" x="790" y="298" width="160" height="48" rx="4"/>
             <image href="../assets/aws-icons/Res_Elastic-Load-Balancing_Network-Load-Balancer_48.svg" x="800" y="310" width="24" height="24"/><text class="t" x="834" y="320">NLB</text><text class="s" x="834" y="337">weight 128</text>
 
-            <path class="path" d="M730 122 C760 122 760 104 790 104"/>
-            <path class="path" d="M730 142 C760 142 760 164 790 164"/>
-            <path class="path" d="M730 322 H790"/>
+            <path class="path" d="M730 122 C760 122 760 104 788 104" marker-end="url(#ar-global-accelerator-trace)"/>
+            <path class="path" d="M730 142 C760 142 760 164 788 164" marker-end="url(#ar-global-accelerator-trace)"/>
+            <path class="path" d="M730 322 H788" marker-end="url(#ar-global-accelerator-trace)"/>
             <text class="lbl" x="560" y="232">헬스 체크로 정상 엔드포인트만 선택</text>
           </svg>
         </div>
         <figcaption class="legend">
-          <span><i class="u"></i>공용 인터넷 (짧은 구간)</span>
-          <span><i></i>AWS 글로벌 네트워크</span>
-          <span><i class="p"></i>엔드포인트 배분</span>
+          <span><i class="u dir"></i>공용 인터넷 (사용자 → 가까운 엣지, 짧은 구간)</span>
+          <span><i class="dir"></i>AWS 글로벌 네트워크 (엣지 → 엔드포인트 그룹)</span>
+          <span><i class="p dir"></i>엔드포인트 배분 · 점선은 다이얼 밖 트래픽</span>
+          <span>응답은 같은 경로로 돌아옵니다.</span>
         </figcaption>
         <p class="arch-hint">좁은 화면에서는 다이어그램을 좌우로 밀어서 보세요.</p>
       </figure>
