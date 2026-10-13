@@ -1,0 +1,23 @@
+/* Shared: nav tools (theme switch, presentation entry) and presentation mode. Uses each page's tokens. */
+.nav-tools{display:flex;align-items:center;gap:6px}
+.tool-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:36px;min-width:36px;padding:0 8px;border:1px solid var(--line);border-radius:4px;background:transparent;color:var(--ink-2);font:500 13px/1 var(--sans);cursor:pointer;transition:border-color .15s ease,color .15s ease}
+.tool-btn:hover{border-color:var(--fiber);color:var(--ink)}
+.tool-btn:focus-visible{outline:2px solid var(--fiber);outline-offset:2px}
+.tool-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.brand{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+nav .navlinks{min-width:0}
+@media (max-width:1100px){.present-btn span{display:none}}
+@media (max-width:640px){.present-btn,nav .navlinks .btn-primary{display:none}.tool-btn{height:34px;min-width:34px;padding:0 6px}.brand{font-size:19px}}
+
+/* presentation mode */
+.present-bar,.present-progress{display:none}
+html.presenting,html.presenting body{overflow:hidden;height:100%}
+html.presenting nav,html.presenting footer,html.presenting .skip-link{display:none!important}
+html.presenting main>.slide{display:none}
+html.presenting main>.slide.slide-on{display:flex;flex-direction:column;position:fixed;inset:0 0 64px 0;margin:0;padding:24px 0;border:0;background:var(--bg);overflow:auto}
+html.presenting main>.slide.slide-on>.wrap{flex:none;margin-block:auto}
+html.presenting .present-bar:not([hidden]){display:flex;position:fixed;left:50%;bottom:12px;transform:translateX(-50%);z-index:50;align-items:center;gap:6px;padding:6px;border:1px solid var(--line);border-radius:6px;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(8px)}
+.present-count{font-family:var(--mono);font-size:12.5px;color:var(--ink-2);min-width:64px;text-align:center}
+html.presenting .present-progress{display:block;position:fixed;top:0;left:0;height:4px;background:var(--fiber);z-index:50;transition:width .25s ease}
+@media (prefers-reduced-motion:reduce){html.presenting .present-progress{transition:none}}
+@media print{.nav-tools,.present-bar,.present-progress{display:none!important}}
