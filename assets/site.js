@@ -182,10 +182,9 @@
     var home = lb, pricing = lb + 'pricing/';
     var html =
       '<div class="mtop">' +
+        '<a class="mquick mhome" href="' + home + '"' + (isCur(home) ? ' aria-current="page"' : '') + '><img src="' + base + 'assets/icons/aws.svg" width="20" height="20" alt="" aria-hidden="true">AWS Networking Services</a>' +
         '<label class="msearch"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>' +
         '<input type="search" placeholder="' + T.search + '" aria-label="' + T.search + '" autocomplete="off"><kbd>/</kbd></label>' +
-        '<a class="mquick" href="' + home + '"' + (isCur(home) ? ' aria-current="page"' : '') + '><img src="' + base + 'assets/icons/aws.svg" width="18" height="18" alt="" aria-hidden="true">AWS Networking Services</a>' +
-        '<a class="mquick" href="' + pricing + '"' + (isCur(pricing) ? ' aria-current="page"' : '') + '><img src="' + base + 'assets/icons/pricing.svg" width="16" height="16" alt="" aria-hidden="true">' + T.pricing + '</a>' +
       '</div>' +
       '<div class="mgrid" role="navigation" aria-label="' + T.menu + '">' + [[0, 1, 3], [2], [4, 5]].map(function (col) {
         // masonry columns: cards keep their natural height, columns are balanced by item count

@@ -88,3 +88,17 @@ html.presenting .present-title{left:24px}
 /* in-page anchors land below the sticky 61px top bar (otherwise #top etc. hide under it) */
 [id]{scroll-margin-top:72px}
 #top{scroll-margin-top:61px}
+/* hero: text column starts at the top even when the visual on the right is taller */
+.hero-grid{align-items:start}
+/* menu top row: borderless home link on the left, search on the right */
+.drawer .mhome{border:0;background:none;padding:0 6px 0 2px;font-size:14.5px;font-weight:700}
+.drawer .mhome:hover{border:0;color:var(--fiber-ink)}
+.drawer .mhome[aria-current="page"]{background:none;color:var(--ink)}
+@media (max-width:640px){.drawer .mhome{flex:1 0 100%;height:34px;justify-content:flex-start}}
+/* menu panel hugs its content: columns as wide as their longest item */
+.drawer{width:max-content;max-width:calc(100vw - 32px)}
+.drawer .mgrid{grid-template-columns:repeat(3,max-content)}
+.drawer .mcard{min-width:200px}
+.drawer .mi{padding-right:14px}
+@media (max-width:860px){.drawer{width:min(620px,calc(100vw - 32px))}.drawer .mgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.drawer{width:calc(100vw - 16px)}.drawer .mgrid{grid-template-columns:1fr}}
