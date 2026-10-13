@@ -81,12 +81,12 @@
   }
   /* ---------- site menu (drawer) ---------- */
   var MENU = [
-    ['Application Networking', [['elastic-load-balancing', 'Elastic Load Balancing'], ['vpc-lattice', 'Amazon VPC Lattice'], ['api-gateway', 'Amazon API Gateway']]],
-    ['Edge Networking', [['cloudfront', 'Amazon CloudFront'], ['global-accelerator', 'AWS Global Accelerator']]],
-    ['Hybrid Networking', [['transit-gateway', 'AWS Transit Gateway'], ['cloud-wan', 'AWS Cloud WAN'], ['privatelink', 'AWS PrivateLink'], ['direct-connect', 'AWS Direct Connect'], ['interconnect', 'AWS Interconnect'], ['site-to-site-vpn', 'AWS Site-to-Site VPN'], ['client-vpn', 'AWS Client VPN']]],
-    ['Foundation', [['vpc', 'Amazon VPC'], ['route-53', 'Amazon Route 53']]],
-    ['Network Security', [['network-firewall', 'AWS Network Firewall'], ['waf', 'AWS WAF'], ['shield', 'AWS Shield'], ['firewall-manager', 'AWS Firewall Manager']]],
-    ['Network Observability', [['vpc-flow-logs', 'Amazon VPC Flow Logs'], ['reachability-analyzer', 'VPC Reachability Analyzer'], ['network-manager', 'AWS Network Manager'], ['network-flow-monitor', 'CloudWatch Network Flow Monitor']]]
+    ['Application Networking', [['elastic-load-balancing', 'Elastic Load Balancing'], ['vpc-lattice', 'VPC Lattice'], ['api-gateway', 'API Gateway']]],
+    ['Edge Networking', [['cloudfront', 'CloudFront'], ['global-accelerator', 'Global Accelerator']]],
+    ['Hybrid Networking', [['transit-gateway', 'Transit Gateway'], ['cloud-wan', 'Cloud WAN'], ['privatelink', 'PrivateLink'], ['direct-connect', 'Direct Connect'], ['interconnect', 'Interconnect'], ['site-to-site-vpn', 'Site-to-Site VPN'], ['client-vpn', 'Client VPN']]],
+    ['Foundation', [['vpc', 'Amazon VPC'], ['route-53', 'Route 53']]],
+    ['Network Security', [['network-firewall', 'Network Firewall'], ['waf', 'AWS WAF'], ['shield', 'AWS Shield'], ['firewall-manager', 'Firewall Manager']]],
+    ['Network Observability', [['vpc-flow-logs', 'VPC Flow Logs'], ['reachability-analyzer', 'Reachability Analyzer'], ['network-manager', 'Network Manager'], ['network-flow-monitor', 'Network Flow Monitor']]]
   ];
   var drawer, scrim, menuBtn, lastFocus;
   function siteRoot() {
@@ -97,8 +97,7 @@
     drawer.hidden = false; scrim.hidden = false;
     requestAnimationFrame(function () { root.classList.add('menu-open'); });
     menuBtn.setAttribute('aria-expanded', 'true');
-    var cur = drawer.querySelector('[aria-current="page"]') || drawer.querySelector('a');
-    if (cur) cur.focus();
+    drawer.focus({ preventScroll: true });
   }
   function closeMenu() {
     if (!drawer || drawer.hidden) return;
@@ -113,21 +112,20 @@
       var href = base + (slug ? slug + '/' : '');
       var cur = here === href || here === href + 'index.html';
       return '<a class="mi" href="' + href + '"' + (cur ? ' aria-current="page"' : '') + '>' +
-        (icon ? '<img src="' + base + 'assets/icons/' + icon + '.svg" width="22" height="22" alt="" aria-hidden="true">' : '<i class="mi-dot" aria-hidden="true"></i>') +
+        (icon ? '<img src="' + base + 'assets/icons/' + icon + '.svg" width="18" height="18" alt="" aria-hidden="true">' : '<i class="mi-dot" aria-hidden="true"></i>') +
         '<span>' + name + '</span></a>';
     }
     var html = '<div class="drawer-head"><span>AWS Networking Services</span></div><nav class="drawer-body" aria-label="서비스 메뉴">' +
       item('', 'AWS 네트워킹 서비스 포트폴리오', '') +
-      MENU.map(function (g) {
-        return '<p class="mg">' + g[0] + '</p>' + g[1].map(function (x) { return item(x[0], x[1], x[0]); }).join('');
-      }).join('') +
-      '<p class="mg">Pricing</p>' + item('pricing', 'AWS 네트워킹 가격표', '') + '</nav>';
+      '<div class="mcols">' + [MENU.slice(0, 3), MENU.slice(3)].map(function (col, ci) {
+        return '<div class="mcol">' + col.map(function (g) {
+          return '<div class="mgrp"><p class="mg">' + g[0] + '</p>' + g[1].map(function (x) { return item(x[0], x[1], x[0]); }).join('') + '</div>';
+        }).join('') + (ci === 1 ? '<div class="mgrp"><p class="mg">Pricing</p>' + item('pricing', '네트워킹 가격표', 'pricing') + '</div>' : '') + '</div>';
+      }).join('') + '</div></nav>';
     drawer = document.createElement('aside');
-    drawer.className = 'drawer'; drawer.id = 'site-menu'; drawer.hidden = true;
+    drawer.className = 'drawer'; drawer.id = 'site-menu'; drawer.hidden = true; drawer.tabIndex = -1;
     drawer.setAttribute('aria-label', '사이트 메뉴');
     drawer.innerHTML = html;
-    var foot = document.createElement('div'); foot.className = 'drawer-foot'; foot.appendChild(tools);
-    drawer.appendChild(foot);
     scrim = document.createElement('div'); scrim.className = 'drawer-scrim'; scrim.hidden = true;
     scrim.addEventListener('click', closeMenu);
     document.body.appendChild(scrim); document.body.appendChild(drawer);
@@ -139,6 +137,7 @@
       var left = document.createElement('div'); left.className = 'nav-left';
       wrap.insertBefore(left, wrap.firstChild);
       left.appendChild(menuBtn); if (brand) left.appendChild(brand);
+      wrap.appendChild(tools);              // theme + presentation stay at the right end of the top bar
     }
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && !drawer.hidden) { e.preventDefault(); closeMenu(); }
@@ -155,15 +154,15 @@
     // nav tools
     var navlinks = document.querySelector('nav .navlinks');
     var tools = document.createElement('div'); tools.className = 'nav-tools';
-    var tbtn = btn('theme-btn', LABEL[readTheme()], ICONS[readTheme()] + '<span>' + LABEL[readTheme()] + '</span>');
+    var tbtn = btn('theme-btn', LABEL[readTheme()], ICONS[readTheme()]);
     var theme2 = btn('', LABEL[readTheme()], ICONS[readTheme()]);
     tbtn.addEventListener('click', function () {
       var t = ORDER[(ORDER.indexOf(readTheme()) + 1) % ORDER.length];
       try { localStorage.setItem(KEY, t); } catch (e) {}
       applyTheme(t);
-      [tbtn, theme2].forEach(function (b) { b.innerHTML = ICONS[t] + (b === tbtn ? '<span>' + LABEL[t] + '</span>' : ''); b.title = LABEL[t]; b.setAttribute('aria-label', LABEL[t]); });
+      [tbtn, theme2].forEach(function (b) { b.innerHTML = ICONS[t]; b.title = LABEL[t]; b.setAttribute('aria-label', LABEL[t]); });
     });
-    var pbtn = btn('present-btn', '발표 모드 (P)', ICONS.present + '<span>발표 모드</span>');
+    var pbtn = btn('present-btn', '발표 모드 (P)', ICONS.present + '<span>발표</span>');
     pbtn.addEventListener('click', function () { closeMenu(); enter(); });
     tools.appendChild(tbtn); tools.appendChild(pbtn);
     if (navlinks) navlinks.remove();          // top bar keeps only the menu button and the brand

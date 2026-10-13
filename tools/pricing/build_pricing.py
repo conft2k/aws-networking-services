@@ -4,9 +4,17 @@
 Source: AWS Price List bulk API (public, no auth)
   https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/index.json
 
-Offers used: AWSDirectConnect, AWSCloudWAN, AmazonVPC (incl. VPC Lattice), AWSDataTransfer, AWSGlobalAccelerator, AWSELB.
+Offers used: AWSDirectConnect, AWSCloudWAN, AmazonVPC (incl. VPC Lattice, IPAM, Traffic Mirroring,
+Reachability Analyzer, Network Access Analyzer, Encryption Controls), AWSDataTransfer, AWSGlobalAccelerator,
+AWSELB, AmazonApiGateway, AmazonCloudFront, CloudFrontPlans, AWSInterconnect, AmazonRoute53,
+AWSNetworkFirewall, awswaf, AWSShield, AWSFMS, AmazonCloudWatch (vended logs, Network Flow Monitor,
+Network Synthetic Monitor, custom metrics).
 Per-region offer files are downloaded into a cache directory outside the repo, filtered
 by productFamily / usagetype / attributes, and reduced to On-Demand USD prices.
+
+NAT gateway prices live in the AmazonEC2 offer (~9 GB of region files), so they are taken from the
+JSON that the official VPC pricing page loads (b0.p.awsstatic.com .../ec2/USD/current/natgateway.json)
+and marked as source "pricing page" in data.json.
 
 Usage (stdlib only):
   python3 -I tools/pricing/build_pricing.py [--cache DIR] [--refresh] [--out pricing/data.json]
@@ -24,7 +32,12 @@ BASE = 'https://pricing.us-east-1.amazonaws.com'
 DEFAULT_CACHE = '/tmp/claude-1000/-home-ec2-user-mydev/efa2e064-b184-4982-b7ba-c281fe24d394/scratchpad/pricecache'
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(os.path.dirname(HERE))
-OFFERS = ['AWSDirectConnect', 'AWSCloudWAN', 'AmazonVPC', 'AWSDataTransfer', 'AWSGlobalAccelerator', 'AWSELB']
+OFFERS = ['AWSDirectConnect', 'AWSCloudWAN', 'AmazonVPC', 'AWSDataTransfer', 'AWSGlobalAccelerator', 'AWSELB',
+          'AmazonApiGateway', 'AmazonCloudFront', 'CloudFrontPlans', 'AWSInterconnect', 'AmazonRoute53',
+          'AWSNetworkFirewall', 'awswaf', 'AWSShield', 'AWSFMS', 'AmazonCloudWatch']
+# offers whose global / edge SKUs are published in the pseudo region file "aws-other"
+GLOBAL_FILE = {'AmazonCloudFront', 'CloudFrontPlans', 'AmazonRoute53', 'awswaf', 'AWSShield', 'AWSFMS', 'AmazonCloudWatch'}
+PAGE_BASE = 'https://b0.p.awsstatic.com/pricing/2.0/meteredUnitMaps'
 
 # Commercial AWS Region codes look like "ap-northeast-2". Local Zones / Wavelength Zones
 # ("us-east-1-scl-1") and pseudo regions ("aws-other") do not match.
@@ -76,6 +89,8 @@ def wanted_region_file(offer, code):
         # DTO to a DX location is published in the file of the location's home Region / Local Zone,
         # and SiteLink data transfer lives in aws-other, so every DX file is needed (~95 MB).
         # Source Regions are filtered to commercial Regions later.
+        return True
+    if code == 'aws-other' and offer in GLOBAL_FILE:
         return True
     return bool(REGION_RE.match(code)) and not EXCLUDED_RE.match(code)
 
@@ -590,6 +605,462 @@ def build_lattice(files):
     return rows, free
 
 
+# ---------------------------------------------------------------- shared helpers for the newer offers
+def prefix_of(doc):
+    """Most common usage type prefix of a region file (e.g. APN2, USE1, EU, Global)."""
+    c = collections.Counter(p['attributes'].get('usagetype', '').split('-', 1)[0]
+                            for p in doc['products'].values() if '-' in p['attributes'].get('usagetype', ''))
+    return c.most_common(1)[0][0] if c else ''
+
+
+def ukey(u, pfx):
+    for p in (pfx, 'Global'):
+        if p and u.startswith(p + '-'):
+            return u[len(p) + 1:]
+    return u
+
+
+def tiers_x(doc, sku, mult=1):
+    """Tiers with the unit price scaled (e.g. x1e6 for $ per million requests)."""
+    return [[d['begin'], d['end'], round(d['usd'] * mult, 6)] for d in ondemand(doc, sku)]
+
+
+def one_x(doc, sku, mult):
+    dims = ondemand(doc, sku)
+    return round(dims[0]['usd'] * mult, 6) if dims else None
+
+
+def paid(tl):
+    """First non-zero unit price of a tier list (skips free tiers)."""
+    for t in tl or []:
+        if t[2]:
+            return t[2]
+    return None
+
+
+# ---------------------------------------------------------------- API Gateway
+def build_apigw(files):
+    rows, sizes = [], set()
+    for code, path in files.items():
+        doc = load(path)
+        pfx, r, cache = prefix_of(doc), {}, {}
+        for sku, fam, a in products(doc):
+            k = ukey(a.get('usagetype', ''), pfx)
+            if k == 'ApiGatewayRequest':
+                r['rest'] = tiers_x(doc, sku, 1e6)
+            elif k == 'ApiGatewayHttpRequest':
+                r['http'] = tiers_x(doc, sku, 1e6)
+            elif k == 'ApiGatewayMessage':
+                r['wsMsg'] = tiers_x(doc, sku, 1e6)
+            elif k == 'ApiGatewayMinute':
+                r['wsMin'] = one_x(doc, sku, 1e6)
+            elif k.startswith('ApiGatewayCacheUsage:'):
+                cache[a['cacheMemorySizeGb']] = one(doc, sku)
+                sizes.add(a['cacheMemorySizeGb'])
+            elif k == 'APIGateway-Portal-Months':
+                r['portal'] = one(doc, sku)
+            elif k == 'APIGateway-Portal-Product-Months':
+                r['portalProduct'] = one(doc, sku)
+        if r:
+            r['cache'] = cache
+            rows.append(dict(r=code, **r))
+    order = sorted(sizes, key=float)
+    for x in rows:
+        x['cache'] = [x['cache'].get(s) for s in order]
+    return {'rows': rows, 'cacheSizes': order}
+
+
+# ---------------------------------------------------------------- CloudFront (+ flat-rate plans)
+CF_EDGE = {'United States': 'US', 'Canada': 'CA', 'Europe': 'EU', 'Japan': 'JP', 'Asia Pacific': 'AP',
+           'Australia': 'AU', 'India': 'IN', 'South America': 'SA', 'South Africa': 'ZA', 'Middle East': 'ME'}
+CF_ORDER = ['US', 'CA', 'EU', 'ZA', 'ME', 'SA', 'JP', 'AU', 'AP', 'IN']
+
+
+def build_cloudfront(files, plans_path):
+    edge = collections.defaultdict(dict)
+    shield_rows, misc, free = [], {}, {}
+    for code, path in files.items():
+        doc = load(path)
+        for sku, fam, a in products(doc):
+            u = a.get('usagetype', '')
+            if code == 'aws-other':
+                loc = a.get('fromLocation') if a.get('transferType') else a.get('location')
+                g = CF_EDGE.get(loc)
+                t = a.get('transferType')
+                if g and t == 'CloudFront Outbound':
+                    edge[g]['dto'] = tiers(doc, sku)
+                elif g and t == 'CloudFront to Origin':
+                    edge[g]['origin'] = one(doc, sku)
+                elif g and a.get('requestType') == 'CloudFront-Request-Tier1':
+                    edge[g]['http'] = one_x(doc, sku, 1e4)
+                elif g and a.get('requestType') == 'CloudFront-Request-Tier2':
+                    edge[g]['https'] = one_x(doc, sku, 1e4)
+                elif g and u.endswith('Requests-HTTPS-Proxy-FLE'):
+                    edge[g]['fle'] = one_x(doc, sku, 1e4)
+                elif u == 'Global-DataTransfer-Out-Bytes':
+                    free['dtoGb'] = (tiers(doc, sku) or [[0, None, 0]])[0][1]
+                elif u == 'Global-Requests-Tier1':
+                    free['req'] = (tiers(doc, sku) or [[0, None, 0]])[0][1]
+                elif u == 'Executions-CloudFrontFunctions':
+                    misc['fnM'] = round(paid(tiers_x(doc, sku, 1e6)) or 0, 6)
+                    free['fn'] = tiers(doc, sku)[0][1]
+                elif u == 'KeyValueStore-EdgeReads':
+                    misc['kvsReadM'] = round(paid(tiers_x(doc, sku, 1e6)) or 0, 6)
+                    free['kvs'] = tiers(doc, sku)[0][1]
+                elif u == 'KeyValueStore-APIOperations':
+                    misc['kvsApi'] = one(doc, sku)
+                elif u == 'Invalidations':
+                    misc['inval'] = paid(tiers(doc, sku))
+                    free['inval'] = tiers(doc, sku)[0][1]
+                elif u == 'RealTimeLog-KinesisDataStream':
+                    misc['rtlogM'] = one_x(doc, sku, 1e6)
+                elif u == 'StaticIP-IPv4':
+                    misc['staticV4'] = one(doc, sku)
+                elif u == 'StaticIP-IPv6':
+                    misc['staticV6'] = one(doc, sku)
+                elif u.endswith('SSL-Cert-Custom'):
+                    misc['cert'] = one(doc, sku)
+            if a.get('requestType') == 'CloudFront-Request-Origin-Shield' and a.get('locationType') == 'AWS Region':
+                shield_rows.append({'r': code, 'req': one_x(doc, sku, 1e4)})
+            elif u.endswith('Lambda-Edge-Request'):
+                misc['lambdaReqM'] = one_x(doc, sku, 1e6)
+            elif u.endswith('Lambda-Edge-GB-Second'):
+                misc['lambdaGbS'] = one(doc, sku)
+    groups = [g for g in CF_ORDER if g in edge] + sorted(set(edge) - set(CF_ORDER))
+    inv = {v: k for k, v in CF_EDGE.items()}
+    t0 = next((edge[g]['dto'] for g in groups if edge[g].get('dto')), [])
+    out = {'groups': [{'id': g, 'loc': inv.get(g, g)} for g in groups],
+           'dtoTiers': [[t[0], t[1]] for t in t0],
+           'edge': [dict(id=g, **edge[g]) for g in groups],
+           'originShield': shield_rows, 'misc': misc, 'free': free, 'plans': build_cf_plans(plans_path)}
+    return out
+
+
+def build_cf_plans(path):
+    if not path:
+        return []
+    doc = load(path)
+    plans = []
+    for lst in doc['terms'].get('FlatRate', {}).values():
+        for p in lst:
+            q = {f['featureCode']: float(f['usageQuota']['value']) for f in p.get('features', [])}
+            plans.append({'code': p['planCode'], 'usd': float(p['subscriptionPrice']['pricePerUnit']['USD']),
+                          'req': q.get('Requests'), 'gb': q.get('DataTransfer'), 's3Gb': q.get('S3Storage'),
+                          'overage': sorted({f.get('overagePolicy') for f in p.get('features', [])} - {None})})
+    plans.sort(key=lambda x: (x['usd'], x['code']))
+    return plans
+
+
+# ---------------------------------------------------------------- Interconnect (multicloud / last mile)
+def build_interconnect(files):
+    price = collections.defaultdict(lambda: collections.defaultdict(set))   # kind -> (bw,tier) -> {usd}
+    homes = collections.defaultdict(set)                                     # kind/provider -> home regions
+    pairs = collections.defaultdict(dict)                                    # region -> {"GCP|us-east-1": tier}
+    metros = collections.defaultdict(dict)                                   # region -> {"NYC": tier}
+    partner_regions, dto = {}, set()
+    for code, path in files.items():
+        doc = load(path)
+        for sku, fam, a in products(doc):
+            u = a.get('usagetype', '')
+            if 'MgdConUsage' in u:
+                kind = 'mc' if a.get('partnerCloudServiceProvider') else 'lm'
+                who = a.get('partnerCloudServiceProvider') or a.get('partnerMetro')
+                price[kind][(a['interconnectBandwidth'], a['interconnectTier'])].add(one(doc, sku))
+                homes[who].add(code)
+            elif 'DataXfer' in u:
+                dto.add(one(doc, sku))
+                if a.get('trafficDirection') != 'Out':
+                    continue
+                if a.get('partnerCloudServiceProvider'):
+                    k = a['partnerCloudServiceProvider'] + '|' + a['toregionname']
+                    partner_regions[k] = a.get('interconnectRegionName')
+                    pairs[code][k] = a['interconnectTier']
+                elif a.get('partnerMetro'):
+                    metros[code][a['partnerMetro']] = a['interconnectTier']
+
+    def bw_key(s):
+        m = re.match(r'(\d+)([MG])', s)
+        return (1 if m.group(2) == 'G' else 0, int(m.group(1)))
+
+    def table(kind):
+        bws = sorted({k[0] for k in price[kind]}, key=bw_key)
+        tl = sorted({k[1] for k in price[kind]})
+        rows, odd = [], []
+        for b in bws:
+            vals = []
+            for t in tl:
+                s = price[kind].get((b, t))
+                if not s:
+                    vals.append(None)
+                    continue
+                nz = sorted(x for x in s if x)
+                vals.append(nz[-1] if nz else 0.0)
+                if len(s) > 1:
+                    odd.append('%s %s: %s' % (b, t, sorted(s)))
+            rows.append({'bw': b, 'v': vals})
+        return {'tiers': tl, 'rows': rows, 'differs': odd}
+
+    prov_order = sorted(partner_regions, key=lambda k: (k.split('|')[0], k.split('|')[1]))
+    return {'mc': dict(table('mc'), partners=[{'k': k, 'name': partner_regions[k]} for k in prov_order],
+                       pairs=[{'r': r, 't': [pairs[r].get(k) for k in prov_order]} for r in pairs]),
+            'lm': dict(table('lm'), metros=sorted({m for v in metros.values() for m in v}),
+                       pairs=[{'r': r, 't': metros[r]} for r in metros]),
+            'homes': {k: sorted(v) for k, v in homes.items()}, 'dtoValues': sorted(dto)}
+
+
+# ---------------------------------------------------------------- Route 53
+R53_Q = [('DNS-Queries', 'std'), ('LBR-Queries', 'lbr'), ('Geo-Queries', 'geo'), ('Geo-Proximity-Queries', 'geoprox'),
+         ('Cidr-Queries', 'ip')]
+
+
+def build_route53(files):
+    g, rows = {}, []
+    for code, path in files.items():
+        doc = load(path)
+        pfx, r = prefix_of(doc), {}
+        for sku, fam, a in products(doc):
+            u = a.get('usagetype', '')
+            if code == 'aws-other':
+                k = ukey(u, 'Global')
+                if k == 'HostedZone':
+                    g['zone'] = tiers(doc, sku)
+                elif k == 'RRSets':
+                    g['records'] = one(doc, sku)
+                elif k == 'Cidr-Blocks':
+                    g['cidr'] = tiers(doc, sku)
+                elif k == 'Traffic-Flow-Policy-Records':
+                    g['flow'] = one(doc, sku)
+                elif k.startswith('Health-Check-'):
+                    g[{'Health-Check-AWS': 'hcAws', 'Health-Check-Non-AWS': 'hcExt', 'Health-Check-Option-AWS': 'hcOptAws',
+                       'Health-Check-Option-Non-AWS': 'hcOptExt'}[k]] = tiers(doc, sku)
+                elif k.startswith('GlobalResolver-'):
+                    key = k.replace('GlobalResolver-', '')
+                    g.setdefault('gr', {})[key] = tiers_x(doc, sku, 1e6) if key == 'Queries' else one(doc, sku)
+                else:
+                    for uk, q in R53_Q:
+                        if k == uk:
+                            g.setdefault('q', {})[q] = tiers_x(doc, sku, 1e6)
+                        elif k == 'Intra-AWS-' + uk:
+                            g.setdefault('qAlias', {})[q] = one(doc, sku)
+                continue
+            k = ukey(u, pfx)
+            key = {'ResolverNetworkInterface': 'eni', 'ResolverNetworkInterface-SecurityEnabled': 'eniDoh',
+                   'DNS-FirewallDomainName': 'fwDomain', 'AdvancedDNS-ThreatProtectionsVPCAssociationHours': 'fwAdv',
+                   'DNS-ProfileBasePackage': 'profBase', 'DNS-ProfileAssociationCount': 'profAssoc',
+                   'Resolver:Outpost-Hours': 'outpost'}.get(k)
+            if key:
+                r[key] = one(doc, sku)
+            elif k == 'DNS-Queries':
+                r['q'] = tiers_x(doc, sku, 1e6)
+            elif k == 'DNS-FirewallQueries':
+                r['fwQ'] = tiers_x(doc, sku, 1e6)
+        if r:
+            rows.append(dict(r=code, **r))
+    return {'global': g, 'rows': rows}
+
+
+# ---------------------------------------------------------------- Network Firewall
+def build_nfw(files):
+    rows = []
+    for code, path in files.items():
+        doc = load(path)
+        pfx, r = prefix_of(doc), {}
+        for sku, fam, a in products(doc):
+            k = ukey(a.get('usagetype', ''), pfx)
+            key = {'Endpoint-Hour': 'ep', 'Traffic-GB-Processed': 'gb', 'Secondary-Endpoint-Hour': 'sec',
+                   'Advanced-Inspection-Endpoint-Hour': 'adv', 'Advanced-Inspection-Traffic-GB-Processed': 'advGb',
+                   'Advanced-Threat-Protection-Traffic-GB-Processed': 'atp',
+                   'Traffic-Bytes-Processed-Transit-Gateway': 'tgwGb'}.get(k)
+            if key:
+                r[key] = one(doc, sku)
+        if r:
+            rows.append(dict(r=code, **r))
+    return rows
+
+
+# ---------------------------------------------------------------- WAF
+WAF_ONE = {'WebACLV2': 'acl', 'RuleV2': 'rule', 'AMR-BotControl': 'bot', 'AMR-ATP': 'fraud', 'AMR-AntiDDoS': 'ddos'}
+WAF_M = {'RequestV2-Tier0': 'req', 'AMR-AntiDDoS-Request': 'ddosReq', 'ChallengeServed': 'challenge',
+         'RequestV2-32KB': 'b32', 'RequestV2-48KB': 'b48', 'RequestV2-64KB': 'b64'}
+WAF_T = {'AMR-BotControl-Request': 'botReq', 'AMR-BotControl-Targeted-Request': 'botTReq',
+         'AMR-FraudControl-Request': 'fraudReq'}
+
+
+def build_waf(files):
+    rows, glob_row = [], None
+    for code, path in files.items():
+        doc = load(path)
+        pfx, r = prefix_of(doc), {'wcu': {}}
+        for sku, fam, a in products(doc):
+            k = ukey(a.get('usagetype', ''), pfx)
+            if code == 'aws-other' and not a.get('usagetype', '').startswith('Global-'):
+                continue                      # legacy WAF Classic (global) SKUs
+            if k in WAF_ONE:
+                r[WAF_ONE[k]] = one(doc, sku)
+            elif k in WAF_M:
+                r[WAF_M[k]] = one_x(doc, sku, 1e6)
+            elif k in WAF_T:
+                r[WAF_T[k]] = tiers_x(doc, sku, 1e6)
+            elif k == 'CaptchaAttempted':
+                r['captcha'] = one_x(doc, sku, 1e4)
+            elif re.match(r'RequestV2-Tier\d-(\d+)WCU$', k):
+                r['wcu'][re.match(r'RequestV2-Tier\d-(\d+)WCU$', k).group(1)] = one_x(doc, sku, 1e6)
+            elif k == 'ShieldProtected-Capped-RequestV2-Count':
+                r['shieldFreeReq'] = (tiers(doc, sku) or [[0, None, 0]])[0][1]
+        if len(r) > 1:
+            if code == 'aws-other':
+                glob_row = r
+            else:
+                rows.append(dict(r=code, **r))
+    return {'global': glob_row, 'rows': rows}
+
+
+# ---------------------------------------------------------------- Shield
+def build_shield(files):
+    g, rows = {}, []
+    for code, path in files.items():
+        doc = load(path)
+        r = {}
+        for sku, fam, a in products(doc):
+            u = a.get('usagetype', '')
+            if u == 'Shield-Monthly-Fee':
+                g['monthly'] = ondemand(doc, sku)[0]['usd'] if ondemand(doc, sku) else None
+            elif u == 'Global-DataTransfer-Shield-Bytes':
+                g[{'CloudFront': 'cf', 'GlobalAccelerator': 'ga'}.get(a.get('resourceType'), a.get('resourceType'))] = tiers(doc, sku)
+            elif u.endswith('DataTransfer-Shield-Bytes') and a.get('fromRegionCode') == code:
+                r[{'LoadBalancing': 'elb', 'ShieldProtectionEIP': 'eip'}.get(a.get('resourceType'), a.get('resourceType'))] = tiers(doc, sku)
+        if r:
+            rows.append(dict(r=code, **r))
+    return {'global': g, 'rows': rows}
+
+
+# ---------------------------------------------------------------- Firewall Manager
+FMS_TYPES = [('Policy-WAF', 'WAFv2', 'waf'), ('Policy-WAF', 'WAF', 'wafClassic'), ('Policy-Shield', 'Shield', 'shield'),
+             ('Policy-Security-Group', 'Common', 'sg'), ('Policy-Security-Group', 'Content-Audit', 'sgContent'),
+             ('Policy-Security-Group', 'Usage-Audit', 'sgUsage'), ('Policy-Network-Acl-Common', 'Network-Acl-Common', 'nacl'),
+             ('Policy-Network-Firewall', 'Network-Firewall', 'nfw'),
+             ('Policy-Import-Network-Firewall', 'Import-Network-Firewall', 'nfwImport'),
+             ('Policy-DNS-Firewall', 'DNS-Firewall', 'dnsfw'), ('Policy-PaloAlto', 'PaloAlto', 'paloalto'),
+             ('Policy-Fortinet', 'Fortinet', 'fortinet')]
+
+
+def build_fms(files):
+    rows, glob_row = [], None
+    for code, path in files.items():
+        doc = load(path)
+        pfx, r = ('Global' if code == 'aws-other' else prefix_of(doc)), {}
+        for sku, fam, a in products(doc):
+            k, op = ukey(a.get('usagetype', ''), pfx), a.get('operation', '')
+            if code == 'aws-other' and k == 'Policy' and a.get('awsresource') == 'AmazonCloudFront':
+                r['cloudfront'] = one(doc, sku)
+            for uk, o, key in FMS_TYPES:
+                if k == uk and op == o:
+                    r[key] = one(doc, sku)
+        if r:
+            if code == 'aws-other':
+                glob_row = r
+            else:
+                rows.append(dict(r=code, **r))
+    return {'types': [t[2] for t in FMS_TYPES], 'global': glob_row, 'rows': rows}
+
+
+# ---------------------------------------------------------------- VPC extras (AmazonVPC offer)
+def build_vpc_extra(files):
+    rows = []
+    for code, path in files.items():
+        doc = load(path)
+        pfx, r = prefix_of(doc), {}
+        for sku, fam, a in products(doc):
+            if a.get('locationType') not in (None, 'AWS Region'):
+                continue
+            k = ukey(a.get('usagetype', ''), pfx)
+            key = {'VPCEncryptionControls-hours': 'enc', 'ENI-Mirror': 'mirror', 'IPAddressManager-IP-Hours': 'ipam',
+                   'PublicIPv4:ContiguousBlock': 'v4block', 'Analysis-Runs': 'ra', 'NetworkInterface-Assessment': 'naa',
+                   'RouteServer-EndpointHours': 'rs'}.get(k)
+            if key:
+                r[key] = one(doc, sku)
+        if r:
+            rows.append(dict(r=code, **r))
+    return rows
+
+
+def fetch_page_json(cache, path, refresh):
+    """JSON behind an official pricing page (gzip-encoded on the wire)."""
+    import gzip
+    local = os.path.join(cache, 'page', path.replace('/', '_') + '.json')
+    url = '%s/%s/USD/current/%s.json' % (PAGE_BASE, path.split('/')[0], path.split('/')[1])
+    if refresh or not os.path.exists(local):
+        os.makedirs(os.path.dirname(local), exist_ok=True)
+        req = urllib.request.Request(url, headers={'Accept-Encoding': 'gzip'})
+        with urllib.request.urlopen(req, timeout=120) as r:
+            b = r.read()
+        if b[:2] == b'\x1f\x8b':
+            b = gzip.decompress(b)
+        with open(local, 'wb') as f:
+            f.write(b)
+    return load(local), url
+
+
+def build_nat(cache, refresh, names):
+    d, url = fetch_page_json(cache, 'ec2/natgateway', refresh)
+    def norm(n):
+        return re.sub(r'^EU \(', 'Europe (', n or '')
+    by_name = {norm(v): k for k, v in names.items()}
+    keys = {'Hourly charge for NAT Gateways': 'h', 'Charge for per GB data processed by NatGateways': 'gb',
+            'g03zZA9QDqyDCHNtHqaCJlNdgpbSIHIuGsuW2ty2QrY': 'rh', 'yl8H9iVT1u9HhTJORoUA1t4vWdL_N7bGgcdBDCSbBTI': 'rgb',
+            'Per hour and per Gbps charge for NAT Gateways with provisioned bandwidth': 'pbw',
+            'Charge for per GB data processed by NAT Gateways with provisioned bandwidth': 'pbwGb'}
+    rows, unmatched = [], []
+    for name, v in d['regions'].items():
+        code = by_name.get(norm(name))
+        if not code:
+            unmatched.append(name)
+            continue
+        r = {keys[k]: round(float(x['price']), 6) for k, x in v.items() if k in keys}
+        if r:
+            rows.append(dict(r=code, **r))
+    meta = {'publicationDate': d['manifest'].get('hawkFilePublicationDate'), 'source': url, 'kind': 'page',
+            'page': 'https://aws.amazon.com/vpc/pricing/'}
+    return rows, meta, sorted(unmatched)
+
+
+# ---------------------------------------------------------------- CloudWatch (vended logs / flow monitor / metrics)
+def build_cloudwatch(files):
+    rows, g = [], {}
+    for code, path in files.items():
+        doc = load(path)
+        pfx, r = prefix_of(doc), {}
+        for sku, fam, a in products(doc):
+            u = a.get('usagetype', '')
+            if code == 'aws-other' or u.startswith('Global-'):
+                k = ukey(u, 'Global')
+                if k == 'CW:NFM-ResourceHours':
+                    g['nfmFreeHours'] = (tiers(doc, sku) or [[0, None, 0]])[0][1]
+                elif k == 'CW:MetricMonitorUsage':
+                    g['metricFree'] = (tiers(doc, sku) or [[0, None, 0]])[0][1]
+                continue
+            k = ukey(u, pfx)
+            if k == 'VendedLog-Bytes':
+                r['cw'] = tiers(doc, sku)
+            elif k == 'VendedLogIA-Bytes':
+                r['ia'] = tiers(doc, sku)
+            elif k == 'S3-Egress-Bytes':
+                r['s3'] = tiers(doc, sku)
+            elif k == 'FH-Egress-Bytes':
+                r['fh'] = tiers(doc, sku)
+            elif k == 'S3-Egress-InputBytes':
+                r['parquet'] = one(doc, sku)
+            elif k == 'CW:NFM-ResourceHours':
+                r['nfm'] = one(doc, sku)
+            elif k == 'CWNMHybrid-Paid':
+                r['nm'] = one(doc, sku)
+            elif k == 'CW:MetricMonitorUsage':
+                r['metric'] = tiers(doc, sku)
+        if r:
+            rows.append(dict(r=code, **r))
+    return {'global': g, 'rows': rows}
+
+
 # ---------------------------------------------------------------- main
 def main():
     ap = argparse.ArgumentParser()
@@ -614,6 +1085,18 @@ def main():
     ga = build_ga(files['AWSGlobalAccelerator']['aws-other'])
     elb, elb_other = build_elb(files['AWSELB'], names)
     lattice, lattice_free = build_lattice(files['AmazonVPC'])
+    apigw = build_apigw(files['AmazonApiGateway'])
+    cf = build_cloudfront(files['AmazonCloudFront'], files['CloudFrontPlans'].get('aws-other'))
+    ic = build_interconnect(files['AWSInterconnect'])
+    r53 = build_route53(files['AmazonRoute53'])
+    nfw = build_nfw(files['AWSNetworkFirewall'])
+    waf = build_waf(files['awswaf'])
+    shield = build_shield(files['AWSShield'])
+    fms = build_fms(files['AWSFMS'])
+    vpcx = build_vpc_extra(files['AmazonVPC'])
+    cwatch = build_cloudwatch(files['AmazonCloudWatch'])
+    nat, nat_meta, nat_unmatched = build_nat(args.cache, args.refresh, names)
+    meta['NATGatewayPage'] = nat_meta
 
     dt_regions = [c for c in order if c in inter]
     matrix = [[inter[f].get(t) if f != t else None for t in dt_regions] for f in dt_regions]
@@ -638,6 +1121,18 @@ def main():
         'privatelink': by_order(pl),
         'elb': {'rows': by_order(elb), 'skipped': elb_other},
         'lattice': {'rows': by_order(lattice), 'freePerHour': lattice_free},
+        'apigw': dict(apigw, rows=by_order(apigw['rows'])),
+        'cloudfront': dict(cf, originShield=by_order(cf['originShield'])),
+        'interconnect': {'mc': dict(ic['mc'], pairs=by_order(ic['mc']['pairs'])),
+                         'lm': dict(ic['lm'], pairs=by_order(ic['lm']['pairs'])),
+                         'homes': ic['homes'], 'dtoValues': ic['dtoValues']},
+        'route53': dict(r53, rows=by_order(r53['rows'])),
+        'nfw': by_order(nfw),
+        'waf': dict(waf, rows=by_order(waf['rows'])),
+        'shield': dict(shield, rows=by_order(shield['rows'])),
+        'fms': dict(fms, rows=by_order(fms['rows'])),
+        'vpc': {'nat': by_order(nat), 'extra': by_order(vpcx)},
+        'cloudwatch': dict(cwatch, rows=by_order(cwatch['rows'])),
         'notes': notes,
     }
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
@@ -652,7 +1147,13 @@ def main():
     print('notes:', notes[:20])
     print('elb regions=%d skipped usage types: %s' % (len(elb), elb_other))
     print('lattice regions=%d free/hour: %s' % (len(lattice), lattice_free))
-    other_cw = sorted({o for x in cw for o in x.get('_other', [])})
+    print('nat rows=%d unmatched page regions: %s' % (len(nat), nat_unmatched))
+    print('interconnect price differences:', ic['mc']['differs'], ic['lm']['differs'], 'dto values', ic['dtoValues'])
+    for k in ('apigw', 'cloudfront', 'route53', 'nfw', 'waf', 'shield', 'fms', 'vpc', 'cloudwatch'):
+        v = data[k]
+        n = len(v) if isinstance(v, list) else len(v.get('rows', v.get('nat', [])))
+        print('%s rows=%d' % (k, n))
+    other_cw = sorted({o for x in data['cloudwan'] for o in x.get('_other', [])})
     if other_cw:
         print('cloudwan unmapped usage types:', other_cw)
     return 0
