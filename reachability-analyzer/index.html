@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Reachability Analyzer 소개</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+body{margin:0}img{max-width:100%}[hidden]{display:none!important}
+
+/* Layout: a cross-connect work order. Cool steel paper, navy ink, Amazon orange as the one accent; section tags read like fiber labels. */
+:root{
+  --bg:#EEF1F4; --surface:#FFFFFF; --sunken:#E3E8ED;
+  --ink:#14202E; --ink-2:#44515F; --ink-3:#5A6672;
+  --line:#CDD5DD; --line-2:#B4BFCA;
+  --fiber:#FF9900;          /* Amazon orange — fills only */
+  --fiber-ink:#B35C00;      /* orange-derived, AA on light surfaces */
+  --fiber-soft:#FFF0D9;
+  --on-fiber:#14202E;
+  --trace:#2E7D9A;          /* secondary line color for diagram paths */
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --maxw:1120px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F151C; --surface:#16202A; --sunken:#1B2632;
+  --ink:#E6ECF1; --ink-2:#A9B5C1; --ink-3:#93A0AD;
+  --line:#26333F; --line-2:#344452;
+  --fiber:#FF9900; --fiber-ink:#FF9900; --fiber-soft:#2B2010; --on-fiber:#14202E; --trace:#5DB3D1;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--fiber-ink);outline-offset:3px;border-radius:2px}
+.skip-link{position:absolute;left:16px;top:-60px;background:var(--fiber);color:var(--on-fiber);padding:8px 14px;font-weight:700;z-index:50;text-decoration:none}
+.skip-link:focus{top:12px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.wrap{max-width:var(--maxw);margin:0 auto;padding-inline:24px}
+section{padding-block:88px;border-top:1px solid var(--line)}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.25}
+h2{font-size:clamp(26px,3.4vw,36px);font-weight:700;letter-spacing:-.01em}
+h3{font-size:18px;font-weight:700}
+p{margin:0}
+.lede{color:var(--ink-2);max-width:62ch;margin-top:14px}
+.num{font-family:var(--display);font-variant-numeric:tabular-nums lining-nums}
+.mono{font-family:var(--mono)}
+
+/* fiber label: the section tag */
+.tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-bottom:14px}
+.tag::before{content:"";width:22px;height:8px;background:var(--fiber);border-radius:1px}
+
+/* nav */
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:60px}
+.brand{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.02em;text-decoration:none;text-transform:uppercase}
+.brand span{color:var(--fiber-ink)}
+.navlinks{display:flex;gap:22px;font-size:14px;align-items:center}
+.navlinks a{text-decoration:none;color:var(--ink-2)}
+.navlinks a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;font-weight:700;font-size:15px;text-decoration:none;border-radius:4px;border:1px solid transparent;transition:transform .15s ease,background .15s ease}
+.btn-primary{background:var(--fiber);color:var(--on-fiber)}
+.btn-primary:hover{transform:translateY(-1px)}
+.btn-ghost{border-color:var(--line-2);color:var(--ink)}
+.btn-ghost:hover{background:var(--sunken)}
+.navlinks .btn{min-height:38px;padding:0 14px;font-size:14px;color:var(--on-fiber)}
+
+/* hero */
+.hero{padding-block:72px 64px;border-top:0}
+.hero-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:56px;align-items:center}
+.eyebrow{font-family:var(--mono);font-size:13px;color:var(--fiber-ink);letter-spacing:.04em}
+.hero h1{font-size:clamp(34px,5vw,56px);font-weight:700;letter-spacing:-.02em;margin-top:16px}
+.hero h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--fiber) 62%,var(--fiber) 90%,transparent 90%);padding-inline:2px}
+.hero .lede{font-size:18px}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+
+/* hero visual: port faceplate */
+.faceplate{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px}
+.faceplate-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.ports{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+.port{border:1px solid var(--line);border-radius:4px;padding:14px 14px 12px;background:var(--sunken);display:flex;flex-direction:column;gap:2px}
+.port .num{font-size:40px;font-weight:600;line-height:1}
+.port .num small{font-size:18px;color:var(--ink-2);margin-left:2px}
+.port .optic{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+.port .led{width:8px;height:8px;border-radius:50%;background:var(--fiber);align-self:flex-end;margin-top:-6px;animation:blink 2.4s ease-in-out infinite}
+.port:nth-child(2) .led{animation-delay:.6s}.port:nth-child(3) .led{animation-delay:1.2s}.port:nth-child(4) .led{animation-delay:1.8s}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.faceplate-foot{margin-top:14px;font-size:13px;color:var(--ink-2)}
+
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:56px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.chip{padding:18px 20px;border-left:1px solid var(--line);min-width:0}
+.chip:first-child{border-left:0}
+.chip .num{font-size:34px;font-weight:600;line-height:1.1}
+.chip p{font-size:13.5px;color:var(--ink-2);margin-top:4px}
+
+/* value */
+.split{display:grid;grid-template-columns:1fr 1.4fr;gap:56px}
+.pillars{display:grid;gap:0;border-top:1px solid var(--line-2)}
+.pillar{display:grid;grid-template-columns:120px 1fr;gap:20px;padding-block:22px;border-bottom:1px solid var(--line)}
+.pillar .k{font-family:var(--display);font-size:22px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--fiber-ink)}
+.pillar p{color:var(--ink-2);margin-top:6px}
+
+/* stack (L1/L2/L3) */
+.stack{margin-top:40px;display:grid;gap:10px}
+.layer{display:grid;grid-template-columns:96px 1fr 1.2fr;gap:24px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px 24px}
+.layer .lv{font-family:var(--display);font-size:44px;font-weight:700;line-height:.9}
+.layer .lv small{display:block;font-family:var(--mono);font-size:11px;font-weight:400;color:var(--ink-3);letter-spacing:.06em;margin-top:8px;text-transform:uppercase}
+.layer p{color:var(--ink-2);margin-top:6px;font-size:15px}
+.specs{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+.specs code{font-family:var(--mono);font-size:12.5px;background:var(--sunken);border:1px solid var(--line);padding:3px 8px;border-radius:3px;color:var(--ink)}
+
+/* features */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:40px}
+.feature{background:var(--surface);padding:26px 24px;min-width:0}
+.feature .ft{font-family:var(--mono);font-size:11.5px;color:var(--fiber-ink);letter-spacing:.06em;text-transform:uppercase}
+.feature h3{margin-top:8px}
+.feature p{color:var(--ink-2);font-size:15px;margin-top:8px}
+
+/* table */
+.tbl-wrap{margin-top:36px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:14px 18px;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--sunken)}
+tbody tr:last-child td{border-bottom:0}
+td.row-h{font-weight:700;width:22%}
+td .num{font-size:18px;font-weight:600}
+
+/* architecture */
+.arch{margin-top:36px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px}
+.arch-scroll{overflow-x:auto}
+.arch svg{display:block;width:100%;min-width:860px;height:auto}
+.arch-hint{display:none;font-size:13px;color:var(--ink-3);margin-top:10px}
+svg .box{fill:var(--sunken);stroke:var(--line-2)}
+svg .zone{fill:none;stroke:var(--line-2);stroke-dasharray:4 4}
+svg .t{fill:var(--ink);font-family:var(--sans);font-size:14px;font-weight:700}
+svg .s{fill:var(--ink-3);font-family:var(--mono);font-size:11px}
+svg .z{fill:var(--ink-2);font-family:var(--mono);font-size:11px;letter-spacing:.08em}
+svg .fiber{stroke:var(--fiber);stroke-width:5;fill:none;stroke-linecap:round}
+svg .path{stroke:var(--trace);stroke-width:2;fill:none}
+svg .site{stroke:var(--fiber-ink);stroke-width:2;fill:none;stroke-dasharray:6 5}
+svg .lbl{fill:var(--trace);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .lbl2{fill:var(--fiber-ink);font-family:var(--mono);font-size:11px;font-weight:500}
+svg .dot{fill:var(--fiber)}
+.legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--ink-2)}
+.legend i{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--fiber)}
+.legend i.p{border-top:2px solid var(--trace)}
+.legend i.s{border-top:2px dashed var(--fiber-ink)}
+
+/* steps */
+.steps{list-style:none;padding:0;margin:40px 0 0;display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:4px solid var(--fiber)}
+.steps li{padding:20px 18px 0 0;min-width:0}
+.steps .num{font-size:15px;font-weight:600;color:var(--fiber-ink);letter-spacing:.06em}
+.steps h3{font-size:16px;margin-top:6px}
+.steps p{font-size:14px;color:var(--ink-2);margin-top:6px}
+
+/* resiliency */
+.res{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:36px}
+.res-card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:26px}
+.res-card .num{font-size:52px;font-weight:700;line-height:1}
+.res-card .num small{font-size:20px;color:var(--ink-2)}
+.res-card h3{margin-top:10px}
+.res-card p{color:var(--ink-2);font-size:15px;margin-top:6px}
+.res-card.max{border-color:var(--fiber);box-shadow:inset 0 4px 0 var(--fiber)}
+
+/* cta */
+.cta{text-align:center}
+.cta h2{max-width:22ch;margin:0 auto}
+.cta .lede{margin:14px auto 0}
+.cta .cta-row{justify-content:center}
+footer{border-top:1px solid var(--line);padding-block:28px;font-size:13px;color:var(--ink-3)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+
+@media (max-width:1024px){
+  .hero-grid,.split{grid-template-columns:1fr;gap:40px}
+  .features{grid-template-columns:repeat(2,1fr)}
+  .steps{grid-template-columns:repeat(2,1fr);border-top:0;gap:0 24px}
+  .steps li{border-top:4px solid var(--fiber);padding-bottom:24px}
+  .layer{grid-template-columns:80px 1fr}
+  .layer .specs{grid-column:2}
+  .chips{grid-template-columns:repeat(2,1fr)}
+  .chip:nth-child(3){border-left:0}
+  .chip:nth-child(n+3){border-top:1px solid var(--line)}
+}
+@media (max-width:640px){
+  .wrap{padding-inline:18px}
+  section{padding-block:60px}
+  .navlinks a:not(.btn){display:none}
+  .features,.res{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr}
+  .pillar{grid-template-columns:1fr;gap:0}
+  .layer{grid-template-columns:1fr;gap:12px}
+  .layer .specs{grid-column:auto}
+  .cta-row .btn{width:100%}
+  .arch-hint{display:block}
+  table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  table,tbody,tr,td{display:block;width:100%}
+  tr{border-bottom:1px solid var(--line);padding:14px 16px}
+  tbody tr:last-child{border-bottom:0}
+  td{border:0;padding:3px 0}
+  td.row-h{width:100%;font-size:16px;padding-bottom:6px}
+  td[data-k]::before{content:attr(data-k);display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+
+/* ---- service-specific ---- */
+/* hero visual: hop-by-hop trace */
+.trace{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px;min-width:0}
+.trace-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.hops{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:0}
+.hop{position:relative;display:grid;grid-template-columns:34px 1fr auto;gap:12px;align-items:center;background:var(--sunken);border:1px solid var(--line);border-radius:4px;padding:10px 14px;min-width:0}
+.hop + .hop{margin-top:14px}
+.hop + .hop::before{content:"";position:absolute;left:30px;top:-15px;width:2px;height:14px;background:var(--trace)}
+.hop .hn{font-family:var(--display);font-size:18px;font-weight:600;color:var(--ink-3)}
+.hop .hr{font-weight:700;font-size:14.5px;line-height:1.3;min-width:0}
+.hop .hd{display:block;font-family:var(--mono);font-size:11.5px;font-weight:400;color:var(--ink-3);margin-top:2px;overflow-wrap:anywhere}
+.hop .st{font-family:var(--mono);font-size:11.5px;border:1px solid var(--line-2);padding:2px 7px;border-radius:3px;color:var(--ink-2);background:var(--surface);white-space:nowrap}
+.hop.block{border-color:var(--fiber);box-shadow:inset 4px 0 0 var(--fiber)}
+.hop.block .st{background:var(--fiber);border-color:var(--fiber);color:var(--on-fiber);font-weight:500}
+.hop.skip{opacity:.55;border-style:dashed}
+.hop.skip + .hop.skip::before,.hop.block + .hop.skip::before{background:var(--line-2)}
+.trace-foot{margin-top:14px;font-size:13px;color:var(--ink-2)}
+.trace-foot code{font-family:var(--mono);font-size:12px;color:var(--fiber-ink)}
+
+/* analysis result block */
+.policy{display:grid;grid-template-columns:1.35fr 1fr;gap:40px;margin-top:36px;align-items:start}
+.code{background:var(--sunken);border:1px solid var(--line);border-radius:6px;min-width:0;margin:0}
+.code-head{display:flex;justify-content:space-between;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.code pre{margin:0;padding:16px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.75;color:var(--ink)}
+.code .a{color:var(--fiber-ink);font-weight:500}
+.code .k{color:var(--trace)}
+.code .c{color:var(--ink-3)}
+.checks{list-style:none;margin:0;padding:0;display:grid;gap:0;border-top:1px solid var(--line-2)}
+.checks li{padding:18px 0;border-bottom:1px solid var(--line);min-width:0}
+.checks h3{font-size:16px}
+.checks h3 code{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--fiber-ink)}
+.checks p{color:var(--ink-2);font-size:15px;margin-top:4px}
+
+@media (max-width:1024px){
+  .policy{grid-template-columns:1fr}
+}
+
+/* nav: keep links on one line, show only CTA below 960px */
+.brand,.navlinks a{white-space:nowrap}
+@media (max-width:960px){.navlinks a:not(.btn){display:none}}
+
+/* Korean line breaking: never split a word mid-syllable */
+h1,h2,h3,p,li,td,th,figcaption{word-break:keep-all;overflow-wrap:break-word}
+</style>
+</head>
+<body>
+
+<a class="skip-link" href="#main">본문으로 건너뛰기</a>
+
+<nav aria-label="주요 메뉴">
+  <div class="wrap">
+    <a class="brand" href="#top">Reachability <span>Analyzer</span></a>
+    <div class="navlinks">
+      <a href="../">전체 서비스</a>
+      <a href="#how">분석 방식</a>
+      <a href="#features">주요 기능</a>
+      <a href="#compare">Network Access Analyzer</a>
+      <a href="#arch">아키텍처</a>
+      <a href="#pricing">비용</a>
+      <a class="btn btn-primary" href="#start">시작하기</a>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+  <header class="hero" id="top">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">VPC Reachability Analyzer · 정적 구성 분석 · 연결성 진단</p>
+          <h1>패킷 없이 <em>경로가 막힌 곳</em>을 찾아내세요</h1>
+          <p class="lede">Reachability Analyzer는 출발지와 목적지 사이의 네트워크 구성을 모델로 만들어 도달 가능 여부를 판정합니다. 트래픽을 보내지 않고, 도달하면 hop-by-hop 경로를, 막히면 차단한 구성요소와 이유를 보여줍니다.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="#how">분석 방식 보기</a>
+            <a class="btn btn-ghost" href="#compare">Network Access Analyzer와 비교</a>
+          </div>
+        </div>
+
+        <div class="trace" aria-label="출발지에서 목적지까지 구성요소별 분석 결과 예시">
+          <div class="trace-head"><span>Path · TCP 443</span><span>Not reachable</span></div>
+          <ol class="hops">
+            <li class="hop"><span class="hn">01</span><span class="hr">EC2 instance · app-a<span class="hd">source · 10.1.1.20</span></span><span class="st">eni · sg out</span></li>
+            <li class="hop"><span class="hn">02</span><span class="hr">Subnet route table<span class="hd">10.2.0.0/16 → tgw-attach</span></span><span class="st">route</span></li>
+            <li class="hop"><span class="hn">03</span><span class="hr">Transit Gateway route table<span class="hd">propagated · vpc-b attachment</span></span><span class="st">tgw-rtb</span></li>
+            <li class="hop"><span class="hn">04</span><span class="hr">Network ACL · subnet-b<span class="hd">rule 100 allow 443</span></span><span class="st">nacl</span></li>
+            <li class="hop block"><span class="hn">05</span><span class="hr">Security group · sg-db<span class="hd">inbound 443 from 10.1.0.0/16 없음</span></span><span class="st">blocked</span></li>
+            <li class="hop skip"><span class="hn">06</span><span class="hr">EC2 instance · api-b<span class="hd">destination · 10.2.3.40</span></span><span class="st">—</span></li>
+          </ol>
+          <p class="trace-foot">차단 지점에는 <code>ENI_SG_RULES_MISMATCH</code> 같은 explanation code가 붙습니다.</p>
+        </div>
+      </div>
+
+      <div class="chips" role="list">
+        <div class="chip" role="listitem"><span class="num">0 packets</span><p>데이터 플레인을 건드리지 않는 정적 분석</p></div>
+        <div class="chip" role="listitem"><span class="num">9</span><p>출발지 · 목적지 리소스 유형 (+ 목적지 IP 주소)</p></div>
+        <div class="chip" role="listitem"><span class="num">120 days</span><p>분석 결과 보관 후 자동 삭제</p></div>
+        <div class="chip" role="listitem"><span class="num">Org</span><p>AWS Organizations 교차 계정 분석, 추가 요금 없음</p></div>
+      </div>
+    </div>
+  </header>
+
+  <section id="why" aria-labelledby="why-h">
+    <div class="wrap split">
+      <div>
+        <p class="tag">Why Reachability Analyzer</p>
+        <h2 id="why-h">"왜 안 붙지?"에 구성 근거로 답합니다</h2>
+        <p class="lede">연결 문제는 라우팅 테이블, 보안 그룹, NACL, 로드 밸런서, TGW 라우팅이 겹친 곳에서 생깁니다. 콘솔을 하나씩 열어 보는 대신 경로 하나를 정의하고 분석을 실행합니다.</p>
+      </div>
+      <div class="pillars">
+        <div class="pillar"><span class="k">Static</span><div><h3>패킷을 보내지 않는 진단</h3><p>구성만으로 판정하므로 아직 워크로드가 없는 환경이나 운영 중인 환경 모두 영향 없이 검사합니다. 반대로 일시적인 장애나 패킷 손실은 대상이 아닙니다.</p></div></div>
+        <div class="pillar"><span class="k">Explain</span><div><h3>막힌 구성요소와 이유</h3><p>도달하지 않으면 차단한 구성요소 또는 조합과 explanation code를 돌려줍니다. 도달하면 지나가는 구성요소를 순서대로 보여줍니다.</p></div></div>
+        <div class="pillar"><span class="k">Verify</span><div><h3>변경 전후 검증</h3><p>API로 분석을 실행할 수 있어 배포 파이프라인에서 의도한 경로가 열리고 닫혔는지 확인하는 단계로 씁니다.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how" aria-labelledby="how-h">
+    <div class="wrap">
+      <p class="tag">How analysis works</p>
+      <h2 id="how-h">경로를 정의하고, 구성 모델로 판정합니다</h2>
+      <p class="lede">경로(path)는 출발지, 목적지, 프로토콜, 목적지 포트로 이루어집니다. 분석(analysis)을 실행하면 결과에 도달 여부, 정방향 · 반환 경로 구성요소, 차단 이유가 담깁니다. 아래는 결과를 줄인 예시입니다.</p>
+      <div class="policy">
+        <figure class="code">
+          <div class="code-head"><span>describe-network-insights-analyses</span><span>요약 예시</span></div>
+<pre><code><span class="c"># 경로 정의: 인스턴스 A → 인스턴스 B, TCP 443</span>
+aws ec2 create-network-insights-path \
+  --source i-0a1b2c3d4e5f60001 --destination i-0a1b2c3d4e5f60002 \
+  --protocol tcp --destination-port 443
+
+<span class="c"># 분석 실행 후 결과</span>
+{
+  <span class="k">"Status"</span>: "succeeded",
+  <span class="k">"NetworkPathFound"</span>: <span class="a">false</span>,
+  <span class="k">"Explanations"</span>: [{
+    <span class="k">"ExplanationCode"</span>: <span class="a">"ENI_SG_RULES_MISMATCH"</span>,
+    <span class="k">"Direction"</span>: "ingress",
+    <span class="k">"NetworkInterface"</span>: { "Id": "eni-0f..." },
+    <span class="k">"SecurityGroups"</span>: [{ "Id": "sg-0db..." }]
+  }]
+}</code></pre>
+          <figcaption class="sr-only">경로를 만들고 분석한 결과가 보안 그룹 인바운드 규칙 불일치로 도달 불가인 예시</figcaption>
+        </figure>
+        <ol class="checks" aria-label="분석 동작 방식">
+          <li><h3>최단 경로를 보여줌 <code>reachable</code></h3><p>도달 가능한 경로가 여럿이면 가장 짧은 경로를 표시합니다. 특정 중간 구성요소를 포함하거나 제외해 다시 분석하면 다른 경로를 확인할 수 있습니다.</p></li>
+          <li><h3>차단 이유를 코드로 <code>not reachable</code></h3><p><span class="mono">CANNOT_ROUTE</span>, <span class="mono">ENI_SG_RULES_MISMATCH</span>, <span class="mono">FIREWALL_RULES_RESTRICTION</span>처럼 원인 유형을 코드로 알려줍니다. 막는 구성요소가 더 있을 수 있으니 고친 뒤 다시 분석합니다.</p></li>
+          <li><h3>패킷 헤더 변환 반영</h3><p>IGW와 NAT 게이트웨이의 주소 변환처럼 중간 구성요소가 헤더를 바꾸면, 출발지를 떠난 헤더와 목적지에 도착한 헤더를 각각 보여줍니다.</p></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" aria-labelledby="features-h">
+    <div class="wrap">
+      <p class="tag">Features</p>
+      <h2 id="features-h">주요 기능</h2>
+      <div class="features">
+        <article class="feature"><p class="ft">Endpoints</p><h3>출발지 · 목적지 유형</h3><p>EC2 인스턴스, 네트워크 인터페이스, IGW, Transit Gateway와 attachment, Virtual private gateway, VPC 엔드포인트와 엔드포인트 서비스, VPC peering을 지정합니다. 목적지로는 IP 주소도 됩니다.</p></article>
+        <article class="feature"><p class="ft">Evaluated</p><h3>평가하는 구성요소</h3><p>라우팅 테이블, 보안 그룹, NACL, prefix list, 로드 밸런서와 대상 그룹, NAT 게이트웨이, TGW 라우팅 테이블, VPN 연결, gateway endpoint를 경로 위에서 함께 평가합니다.</p></article>
+        <article class="feature"><p class="ft">Network Firewall</p><h3>방화벽 규칙까지</h3><p>Network Firewall의 stateless · stateful 5-tuple 규칙을 평가합니다. 도메인 목록, Suricata 규칙 옵션 같은 미지원 규칙을 만나면 경로 상세에 안내 메시지를 남깁니다.</p></article>
+        <article class="feature"><p class="ft">Filters</p><h3>중간 구성요소 지정 · 제외</h3><p>로드 밸런서, NAT 게이트웨이, Network Firewall, Transit Gateway, peering을 반드시 지나거나 피하도록 분석을 좁혀 원하는 경로를 검증합니다.</p></article>
+        <article class="feature"><p class="ft">Cross-account</p><h3>조직 단위 교차 계정 분석</h3><p>Organizations trusted access를 켜면 관리 계정이나 delegated administrator 계정에서 다른 멤버 계정의 리소스를 출발지 · 목적지로 지정합니다.</p></article>
+        <article class="feature"><p class="ft">Automation</p><h3>API · CLI로 반복 검증</h3><p><span class="mono">CreateNetworkInsightsPath</span>와 <span class="mono">StartNetworkInsightsAnalysis</span>로 경로를 저장해 두고, 변경할 때마다 같은 경로를 다시 분석합니다.</p></article>
+      </div>
+      <p class="lede" style="font-size:14px">분석은 IPv4만 대상으로 합니다. 같은 리전 안에서, 같은 VPC이거나 peering 또는 Transit Gateway로 연결된 VPC 사이 경로를 분석합니다. TGW Connect attachment와 TGW policy table, 대상 상태(health), BYOIP 광고 상태는 고려하지 않습니다.</p>
+    </div>
+  </section>
+
+  <section id="compare" aria-labelledby="compare-h">
+    <div class="wrap">
+      <p class="tag">Reachability vs Network Access</p>
+      <h2 id="compare-h">한 경로를 진단할지, 전체 접근을 감사할지</h2>
+      <p class="lede">두 도구 모두 automated reasoning 기반의 정적 분석입니다. Reachability Analyzer는 "A에서 B로 갈 수 있나"를 묻고, Network Access Analyzer는 Network Access Scope로 정의한 "있어서는 안 되는 경로"를 찾습니다.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">Reachability Analyzer와 Network Access Analyzer 비교</caption>
+          <thead><tr><th scope="col">항목</th><th scope="col">Reachability Analyzer</th><th scope="col">Network Access Analyzer</th></tr></thead>
+          <tbody>
+            <tr><td class="row-h">질문</td><td data-k="Reachability Analyzer">특정 출발지에서 특정 목적지로 도달하는가</td><td data-k="Network Access Analyzer">정의한 조건에 맞는 경로가 네트워크 어디에든 있는가</td></tr>
+            <tr><td class="row-h">입력</td><td data-k="Reachability Analyzer">경로: 출발지, 목적지, 프로토콜, 포트</td><td data-k="Network Access Analyzer">Network Access Scope: 일치시킬 경로와 제외할 경로. Amazon-created scope로 시작해 복사 · 수정 가능</td></tr>
+            <tr><td class="row-h">결과</td><td data-k="Reachability Analyzer">도달 여부, hop-by-hop 경로, explanation code</td><td data-k="Network Access Analyzer">findings: scope에 일치한 대표 경로 집합</td></tr>
+            <tr><td class="row-h">Network Firewall 규칙</td><td data-k="Reachability Analyzer">5-tuple 규칙 평가</td><td data-k="Network Access Analyzer">규칙은 평가하지 않음. 방화벽이 차단하는 경로도 finding에 나올 수 있음</td></tr>
+            <tr><td class="row-h">계정 범위</td><td data-k="Reachability Analyzer">Organizations 교차 계정 지원</td><td data-k="Network Access Analyzer">분석 대상 계정 · 리전 안의 경로만 보고</td></tr>
+            <tr><td class="row-h">대표 사용</td><td data-k="Reachability Analyzer">연결 장애 진단, 변경 후 경로 확인</td><td data-k="Network Access Analyzer">인터넷 노출 점검, 환경 간 분리 확인, 방화벽 경유 의무 같은 컴플라이언스 감사</td></tr>
+            <tr><td class="row-h">과금</td><td data-k="Reachability Analyzer">분석 1회당</td><td data-k="Network Access Analyzer">분석한 네트워크 인터페이스 수</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="arch" aria-labelledby="arch-h">
+    <div class="wrap">
+      <p class="tag">Reference architecture</p>
+      <h2 id="arch-h">조직 안의 여러 계정을 가로지르는 경로 분석</h2>
+      <p class="lede">delegated administrator 계정에서 계정 A의 인스턴스를 출발지로, 계정 B의 인스턴스를 목적지로 지정합니다. 분석은 네트워크 계정의 Transit Gateway 라우팅까지 따라가고, 계정 B 보안 그룹에서 막힌 지점을 보고합니다. VPC 구성은 <a href="../vpc/">VPC</a>, 허브 라우팅은 <a href="../transit-gateway/">Transit Gateway</a> 페이지를 참고하세요.</p>
+      <figure class="arch">
+        <div class="arch-scroll">
+          <svg viewBox="0 0 980 440" role="img" aria-labelledby="arch-title arch-desc">
+            <title id="arch-title">Organizations 교차 계정 Reachability Analyzer 분석</title>
+            <desc id="arch-desc">delegated administrator 계정의 Reachability Analyzer가 trusted access로 계정 A, 네트워크 계정, 계정 B의 구성을 조회합니다. 분석 경로는 계정 A의 EC2 인스턴스에서 서브넷 라우팅 테이블, Transit Gateway 라우팅 테이블, 계정 B의 네트워크 ACL을 거쳐 보안 그룹에서 차단되고, 목적지 인스턴스에는 도달하지 못합니다. 결과로 ENI_SG_RULES_MISMATCH explanation code가 반환됩니다.</desc>
+            <!-- trusted access -->
+            <path class="site" d="M120 100 V30 H830 V60 M365 30 V60 M578 30 V60"/>
+            <text class="lbl2" x="150" y="22">trusted access · 구성 조회</text>
+
+            <!-- zones -->
+            <rect class="zone" x="10" y="60" width="230" height="360" rx="6"/>
+            <text class="z" x="24" y="82">DELEGATED ADMIN</text>
+            <rect class="zone" x="260" y="60" width="210" height="360" rx="6"/>
+            <text class="z" x="274" y="82">ACCOUNT A · VPC A</text>
+            <rect class="zone" x="490" y="60" width="175" height="360" rx="6"/>
+            <text class="z" x="504" y="82">NETWORK ACCOUNT</text>
+            <rect class="zone" x="685" y="60" width="285" height="360" rx="6"/>
+            <text class="z" x="699" y="82">ACCOUNT B · VPC B</text>
+
+            <!-- analyzer -->
+            <rect class="box" x="30" y="100" width="190" height="84" rx="4"/>
+            <text class="t" x="44" y="130">Reachability Analyzer</text>
+            <text class="s" x="44" y="150">path: i-app-a → i-api-b</text>
+            <text class="s" x="44" y="168">TCP 443</text>
+            <path class="path" d="M125 184 V250"/>
+            <rect class="box" x="30" y="250" width="190" height="104" rx="4"/>
+            <text class="t" x="44" y="278">분석 결과</text>
+            <text class="s" x="44" y="300">NetworkPathFound: false</text>
+            <text class="s" x="44" y="318">ENI_SG_RULES_MISMATCH</text>
+            <text class="s" x="44" y="336">sg-db · ingress</text>
+
+            <!-- account A -->
+            <rect class="box" x="280" y="100" width="170" height="64" rx="4"/>
+            <text class="t" x="294" y="128">EC2 app-a</text><text class="s" x="294" y="148">source · 10.1.1.20</text>
+            <rect class="box" x="280" y="210" width="170" height="64" rx="4"/>
+            <text class="t" x="294" y="238">Subnet RT</text><text class="s" x="294" y="258">10.2.0.0/16 → tgw</text>
+            <path class="fiber" d="M365 164 V210"/>
+
+            <!-- tgw -->
+            <rect class="box" x="508" y="190" width="140" height="84" rx="4"/>
+            <text class="t" x="522" y="220">Transit Gateway</text>
+            <text class="s" x="522" y="240">tgw-rtb</text>
+            <text class="s" x="522" y="258">vpc-b 전파 경로</text>
+            <path class="fiber" d="M450 242 C480 242 480 232 508 232"/>
+
+            <!-- account B -->
+            <rect class="box" x="705" y="100" width="245" height="56" rx="4"/>
+            <text class="t" x="719" y="125">Network ACL</text><text class="s" x="719" y="143">rule 100 allow 443</text>
+            <rect class="box" x="705" y="190" width="245" height="56" rx="4"/>
+            <text class="t" x="719" y="215">Security group sg-db</text><text class="s" x="719" y="233">443 from 10.1.0.0/16 없음</text>
+            <rect class="box" x="705" y="310" width="245" height="64" rx="4"/>
+            <text class="t" x="719" y="338">EC2 api-b</text><text class="s" x="719" y="358">destination · 10.2.3.40</text>
+            <path class="fiber" d="M648 220 C680 220 676 128 705 128"/>
+            <path class="fiber" d="M828 156 V190"/>
+            <path class="path" d="M828 246 V310" style="stroke-dasharray:4 4;stroke:var(--line-2)"/>
+            <path d="M820 270 L836 286 M836 270 L820 286" style="stroke:var(--fiber-ink);stroke-width:3;stroke-linecap:round"/>
+            <text class="lbl2" x="846" y="283">blocked</text>
+          </svg>
+        </div>
+        <figcaption class="legend">
+          <span><i></i>분석한 정방향 경로</span>
+          <span><i class="p"></i>분석 결과 반환</span>
+          <span><i class="s"></i>trusted access로 구성 조회</span>
+        </figcaption>
+        <p class="arch-hint">좁은 화면에서는 다이어그램을 좌우로 밀어서 보세요.</p>
+      </figure>
+      <p class="lede" style="font-size:14px">관리 계정은 조직 내 모든 계정의 리소스를, delegated administrator 계정은 관리 계정을 제외한 멤버 계정과 명시적으로 공유받은 관리 계정 리소스를 분석합니다. 실제 트래픽 흐름은 <a href="../vpc-flow-logs/">VPC Flow Logs</a>로, 글로벌 토폴로지와 경로 모니터링은 <a href="../network-manager/">Network Manager</a>로 보완합니다.</p>
+    </div>
+  </section>
+
+  <section id="start" aria-labelledby="start-h">
+    <div class="wrap">
+      <p class="tag">Getting started</p>
+      <h2 id="start-h">시작하기</h2>
+      <ol class="steps">
+        <li><span class="num">STEP 1</span><h3>경로 정의</h3><p>출발지와 목적지 리소스, 프로토콜(TCP · UDP), 목적지 포트를 지정합니다. 필요하면 출발지 · 목적지 주소와 포트 범위 필터를 더합니다.</p></li>
+        <li><span class="num">STEP 2</span><h3>분석 실행</h3><p>경로를 저장하고 분석을 시작합니다. 특정 중간 구성요소를 지나야 하거나 피해야 하면 이때 지정합니다.</p></li>
+        <li><span class="num">STEP 3</span><h3>결과 읽기</h3><p>도달하면 hop-by-hop 경로를, 막히면 explanation code와 차단 구성요소를 확인합니다.</p></li>
+        <li><span class="num">STEP 4</span><h3>수정 후 재분석</h3><p>라우팅이나 보안 그룹을 고친 뒤 같은 경로를 다시 분석합니다. 차단 요소가 더 있으면 이어서 나타납니다.</p></li>
+        <li><span class="num">STEP 5</span><h3>확장과 자동화</h3><p>교차 계정이 필요하면 trusted access와 delegated administrator를 설정하고, 주요 경로는 변경 파이프라인에서 API로 재검증합니다.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="pricing" aria-labelledby="pricing-h">
+    <div class="wrap">
+      <p class="tag">Pricing</p>
+      <h2 id="pricing-h">비용 항목</h2>
+      <p class="lede">상시 요금은 없고, 분석을 실행할 때만 과금됩니다. 단가는 Amazon VPC 요금 페이지의 Network Analysis 탭에 있습니다.</p>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="sr-only">Reachability Analyzer와 Network Access Analyzer 과금 항목</caption>
+          <thead><tr><th scope="col">과금 항목</th><th scope="col">과금 기준</th><th scope="col">참고</th></tr></thead>
+          <tbody>
+            <tr><td class="row-h">Reachability Analyzer</td><td data-k="과금 기준">출발지 · 목적지 간 분석 1회당</td><td data-k="참고">사용량 유형 <span class="mono">Analysis-Runs</span>. 같은 경로를 다시 분석하면 다시 과금됩니다</td></tr>
+            <tr><td class="row-h">교차 계정 분석</td><td data-k="과금 기준">추가 요금 없음</td><td data-k="참고">Organizations trusted access 기반 분석도 분석 1회당 요금만 적용됩니다</td></tr>
+            <tr><td class="row-h">Network Access Analyzer</td><td data-k="과금 기준">분석에 포함된 네트워크 인터페이스 수</td><td data-k="참고">사용량 유형 <span class="mono">NetworkInterface-Assessment</span>. scope 범위가 넓을수록 대상 ENI가 늘어납니다</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="lede" style="font-size:14px">요금 단가는 리전에 따라 다릅니다. 최신 단가는 <a href="https://aws.amazon.com/vpc/pricing/" target="_blank" rel="noopener">Amazon VPC 요금 페이지</a>의 Network Analysis 탭에서 확인하세요.</p>
+    </div>
+  </section>
+
+  <section class="cta" aria-labelledby="cta-h">
+    <div class="wrap">
+      <p class="tag">Next step</p>
+      <h2 id="cta-h">자주 묻는 연결 경로부터 저장해 두세요</h2>
+      <p class="lede">장애 때마다 확인하는 경로, 변경 후 반드시 열려 있어야 하는 경로, 절대 열리면 안 되는 경로를 정리해 오시면 Reachability Analyzer와 Network Access Analyzer 구성을 함께 설계합니다.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="https://docs.aws.amazon.com/vpc/latest/reachability/what-is-reachability-analyzer.html" target="_blank" rel="noopener">Reachability Analyzer 문서</a>
+        <a class="btn btn-ghost" href="https://docs.aws.amazon.com/vpc/latest/network-access-analyzer/what-is-network-access-analyzer.html" target="_blank" rel="noopener">Network Access Analyzer 문서</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a href="../">← 전체 AWS 네트워킹 서비스</a>
+    <span>VPC Reachability Analyzer 소개 자료. 지원 리소스와 제약, 요금은 바뀔 수 있으니 공식 문서를 확인하세요.</span>
+    <a href="https://docs.aws.amazon.com/vpc/latest/reachability/explanation-codes.html" target="_blank" rel="noopener">Explanation code 목록</a>
+  </div>
+</footer>
+
+</body>
+</html>
